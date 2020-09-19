@@ -1,0 +1,43 @@
+.fill {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  background-color: rgba(#555, 0.75);
+  justify-content: center;
+  align-items: center;
+}
+
+.active {
+  transition: opacity 0.2s;
+}
+
+.enterFrom,
+.leaveTo {
+  opacity: 0;
+}
+
+/* https://www.w3schools.com/howto/howto_css_loader.asp */
+
+.loader {
+  border: 16px solid #777;
+  border-radius: 50%;
+  border-top: 16px solid #aaa;
+  border-bottom: 16px solid #aaa;
+  width: 120px;
+  height: 120px;
+  animation: spin 1s linear infinite;
+  margin: auto;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,23 @@
+// .root {
+// }
+
+.enterActive,
+.leaveActive {
+  transition: opacity 0.2s, height 0.2s;
+  overflow-y: hidden;
+}
+
+.enterFrom {
+  opacity: 0;
+}
+
+// .enterTo {
+// }
+
+// .leaveFrom {
+// }
+
+.leaveTo {
+  height: 0;
+  opacity: 0;
+}

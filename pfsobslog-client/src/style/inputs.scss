@@ -1,0 +1,26 @@
+button {
+  border-radius: 6px;
+  border: solid 1px rgba(#777, 0.75);
+  background: linear-gradient(to bottom, #eee 0%, #ddd 100%);
+
+  &:active {
+    background: linear-gradient(to top, darken(#eee, 25%) 0%, darken(#ddd, 25%) 100%);
+  }
+
+  margin: 2px;
+  box-shadow: 0 0 6px rgba(black, 0.5);
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 8px #077;
+  }
+
+  &.small {
+    box-shadow: 0 0 4px rgba(black, 0.25);
+    padding: 0 4px;
+  }
+}
+
+label {
+  user-select: none;
+}

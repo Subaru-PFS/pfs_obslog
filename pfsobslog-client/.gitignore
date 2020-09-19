@@ -1,0 +1,6 @@
+node_modules
+.DS_Store
+dist
+*.local
+/src/api-client/*
+!/src/api-client/*.ts

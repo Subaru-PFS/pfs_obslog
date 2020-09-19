@@ -1,0 +1,208 @@
+.header {
+  position: sticky;
+  top: 0;
+  padding: 4px;
+  background-color: #eee;
+  box-shadow: 0 0 8px rgba(black, 0.5);
+  margin-bottom: 8px;
+  z-index: 0; // なぜかSafariに必要
+
+  display: flex;
+  align-items: flex-end;
+
+  & > * {
+    margin: 0 0.25em;
+  }
+
+  input[type="text"] {
+    box-sizing: border-box;
+  }
+}
+
+.visitSet {
+  box-sizing: border-box;
+  border-style: solid;
+  border-color: #aaa;
+  border-width: 0 0 1px 0;
+  padding: 1em;
+  margin: 0;
+}
+
+.spsVisitSet {
+}
+
+.mcsVisitSet {
+  background-color: #eff;
+}
+
+@mixin round-element {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  margin: 4px;
+  margin-left: 0;
+  border-radius: 6px;
+  // border: 1px solid #aaa;
+  box-shadow: 0 0 2px rgba(black, 0.5);
+}
+
+.visitGroup,
+.exposureGroup {
+  box-sizing: border-box;
+  padding-left: 2em;
+}
+
+.visit {
+  padding-left: 2em;
+  @include round-element();
+  display: block;
+}
+
+.badge {
+  @include round-element;
+  dt,
+  dd {
+    display: inline;
+    margin: 0;
+    padding: 0;
+  }
+  dt {
+    font-size: x-small;
+    margin-right: 0.5em;
+  }
+}
+
+@mixin color-theme($color) {
+  background-color: $color;
+  color: darken($color, 50%);
+}
+
+.status-complete {
+  @include color-theme(lightgreen);
+}
+
+.type-arcs {
+  @include color-theme(#fcc);
+}
+
+.type-defocusedArcs {
+  @include color-theme(lightpink);
+}
+
+.type-darks {
+  @include color-theme(#ccc);
+}
+
+.type-biases {
+  @include color-theme(lightblue);
+}
+
+.type-ditheredFlats {
+  @include color-theme(#fca);
+}
+
+.type-ditheredArcs {
+  @include color-theme(peachpuff);
+}
+
+.type-flats {
+  @include color-theme(cornsilk);
+}
+
+.exp-type-bias {
+  @include color-theme(lightblue);
+}
+
+.exp-type-flat {
+  @include color-theme(cornsilk);
+}
+
+.exp-type-arc {
+  @include color-theme(#fcc);
+}
+
+.mcs-visit {
+  @include color-theme(#dee);
+}
+
+.error {
+  @include color-theme(#faa);
+}
+
+.code {
+  background-color: darkslategray;
+  color: greenyellow;
+}
+
+hr {
+  margin: 0;
+  padding: 0;
+  border-style: none;
+}
+
+.note {
+  @include round-element();
+  margin: 0 0.25em;
+}
+
+.by {
+  margin: 0.5em;
+  font-size: x-small;
+  color: #777;
+}
+
+.mcsExposureList {
+  table {
+    border-collapse: collapse;
+  }
+  th {
+    font-size: x-small;
+    color: #777;
+  }
+  td {
+    font-family: monospace;
+    text-align: right;
+    font-size: small;
+  }
+  td,
+  th {
+    padding: 0 0.5em;
+    border: solid 1px #ccc;
+    border-width: 0 0 1px 0;
+  }
+  label {
+    display: inline-block;
+    font-size: x-small;
+    margin-right: 1em;
+  }
+}
+
+.spsExposureList {
+  table {
+    border-collapse: collapse;
+  }
+  th {
+    font-size: x-small;
+    color: #777;
+  }
+  td {
+    font-family: monospace;
+    text-align: right;
+    font-size: small;
+  }
+  td,
+  th {
+    padding: 0 0.5em;
+    border: solid 1px #ccc;
+    border-width: 0 0 1px 0;
+  }
+  label {
+    display: inline-block;
+    font-size: x-small;
+    margin-right: 1em;
+  }
+}
+
+.columns {
+  @include round-element();
+}

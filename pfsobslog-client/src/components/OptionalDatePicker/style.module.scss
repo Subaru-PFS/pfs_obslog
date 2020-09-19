@@ -1,0 +1,11 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  label {
+    display: flex;
+    align-items: flex-end;
+  }
+  span {
+    margin-right: 0.25em;
+  }
+}

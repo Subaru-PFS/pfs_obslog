@@ -1,0 +1,31 @@
+html,
+body {
+  height: 100%;
+}
+
+* {
+  font-family: sans-serif;
+}
+
+body {
+  margin: 0;
+  background-color: #eee;
+}
+
+.note {
+  color: brown;
+  font-size: small;
+}
+
+code {
+  font-family: monospace;
+}
+
+code.json {
+  background-color: #033;
+  color: cyan;
+  display: block;
+  white-space: pre;
+  border-radius: 6px;
+  padding: 4px;
+}
