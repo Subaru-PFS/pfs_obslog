@@ -67,7 +67,9 @@ export const AccordionList = defineComponent({
 
 
 function nextFrame(fn: Parameters<typeof requestAnimationFrame>[0]) {
-  requestAnimationFrame(fn)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(fn)
+  })
 }
 
 const castArg = <T1, T2, T3>(f: (arg1: T2) => T3) => {
