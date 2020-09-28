@@ -11,7 +11,6 @@ export const SpsExposureListComponent = defineComponent({
   setup($p) {
     return () => {
       const { exposures } = $p.visit.sps_visit!
-      const { refresh } = inject($control)!
 
       const addSpsExposureNote = async (e: SpsExposure) => {
         alert("Not implemented")

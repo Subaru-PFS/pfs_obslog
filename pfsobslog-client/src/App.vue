@@ -1,7 +1,9 @@
 <template>
   <router-view v-slot="{ Component }">
-    <transition :name="effectName" mode="out-in">
-      <component :is="Component" />
+    <transition :name="effectName">
+      <keep-alive>
+        <component class="fixed" :is="Component" />
+      </keep-alive>
     </transition>
   </router-view>
 </template>
@@ -19,6 +21,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@mixin active-base {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s;
@@ -37,7 +45,8 @@ export default {
 }
 .slideLeft-enter-active,
 .slideLeft-leave-active {
-  transition: transform 0.2s;
+  transition: transform 0.2s ease-out;
+  @include active-base();
 }
 
 .slideRight-enter-from {
@@ -48,6 +57,7 @@ export default {
 }
 .slideRight-enter-active,
 .slideRight-leave-active {
-  transition: transform 0.2s;
+  transition: transform 0.2s ease-out;
+  @include active-base();
 }
 </style>

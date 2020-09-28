@@ -62,7 +62,7 @@ export const Header = defineComponent({
         </div>
         <button onClick={() => $.page = 0} disabled={$.page <= 0}>⏪</button>
         <button onClick={() => --$.page} disabled={$.page <= 0}>◀️</button>
-        <input type="text" readonly v-model={$.page} size={2} style={{ textAlign: 'center' }} />
+        <input type="text" readonly value={$.page} size={2} style={{ textAlign: 'center' }} />
         <button onClick={() => ++$.page}>▶️</button>
         &nbsp;
         <button onClick={refresh}>🔄</button>

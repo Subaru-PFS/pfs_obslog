@@ -1,11 +1,20 @@
-import { createJsxPlugin } from "vite-jsx/plugin"
+import { ServerConfig, UserConfig } from "vite/dist/node/config"
+// @ts-ignore
+import proxy from "koa-http2-proxy"
 
-export default {
-  plugins: [createJsxPlugin()],
-  proxy: {
-    '/api': {
-      target: 'http://localhost:8000',
-      changeOrigin: true,
-    }
-  }
+const serverConfig: ServerConfig = {
+  configureServer: ({ app }) => {
+    app.use(proxy(
+      '/api',
+      {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        ws: true,
+      }
+    ))
+  },
 }
+
+const userConfig: UserConfig = {}
+
+export default { ...serverConfig, ...userConfig }

@@ -1,4 +1,5 @@
-import { defineComponent, InjectionKey, PropType, provide, reactive, watchEffect } from "vue"
+import { defineComponent, InjectionKey, onMounted, onUnmounted, PropType, provide, reactive, watchEffect } from "vue"
+import { EventWatcher } from "./EventWatcher"
 import { Header } from "./Header"
 import style from './style.module.scss'
 import { VisitSetComponent } from "./VisitSetComponent"
@@ -57,6 +58,7 @@ export default defineComponent({
     }
 
     watchEffect(refresh)
+    useEventWatcher().addListener(refresh)
     provide($control, { refresh })
 
     return () => (
@@ -67,6 +69,14 @@ export default defineComponent({
     )
   }
 })
+
+
+function useEventWatcher() {
+  const eventWatcher = new EventWatcher('./api/event')
+  onMounted(() => eventWatcher.connect())
+  onUnmounted(() => eventWatcher.disconnect())
+  return eventWatcher
+}
 
 
 const VisitSetListComponent = defineComponent({

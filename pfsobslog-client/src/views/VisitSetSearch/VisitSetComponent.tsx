@@ -9,6 +9,7 @@ import { SpsSequence, VisitSet, VisitSetNote } from "/src/api-client/api"
 import Accordion from "/src/components/Accordion"
 import { openDialog } from "/src/components/Dialog"
 import { $g } from "/src/store"
+import { vModel } from "/src/utils/vModel"
 
 
 export const VisitSetComponent = defineComponent({
@@ -125,8 +126,7 @@ const AddNoteComponent = defineComponent({
         Note for {$p.ss.name} (#{$p.ss.id})
         <hr />
         <form onSubmit={submit}>
-          <input type="text" v-model={$.value} ref={inputElement} size={60} />
-          {/* <textarea cols={80} rows={12} v-model={$.value} ref={inputElement} /> */}
+          <input type="text" {...vModel($.value, _ => $.value = _)} ref={inputElement} size={60} />
           <div class="end-h">
             <input type="submit" value="Save" />
           </div>

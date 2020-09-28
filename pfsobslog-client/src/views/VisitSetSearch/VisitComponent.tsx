@@ -7,6 +7,7 @@ import style from './style.module.scss'
 import { api } from '/src/api'
 import { Visit, VisitNote } from "/src/api-client/api"
 import Accordion from "/src/components/Accordion"
+import { go } from "/src/router"
 import { $g } from "/src/store"
 
 export const VisitComponent = defineComponent({
@@ -18,13 +19,10 @@ export const VisitComponent = defineComponent({
       opened: false,
     })
 
-    const { refresh } = inject($control)!
-
     const addNote = async () => {
       const body = prompt(`Note for #${$p.visit.id} ?`)
       if (body !== null) {
         await api.createVisitNote($p.visit.id, { body })
-        await refresh()
       }
     }
 
@@ -48,6 +46,7 @@ export const VisitComponent = defineComponent({
           <Note note={n} />
         ))}
         <button onClick={addNote}>🖌 Add Note</button>
+        <button onClick={() => go(`/visits/${$p.visit.id}`, 'slideLeft')}>🔎</button>
         <hr />
         <Accordion opened={$.opened}>
           {() => (
@@ -68,12 +67,9 @@ const Note = defineComponent({
     note: { type: Object as PropType<VisitNote>, required: true },
   },
   setup($p) {
-    const { refresh } = inject($control)!
-
     const deleteNote = async () => {
       if (confirm(`Are you sure to delete this note?:\n${$p.note.body}`)) {
         await api.deleteVisitNote(-1, $p.note.id)
-        await refresh()
       }
     }
 

@@ -1,11 +1,9 @@
-import logging
-
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 
-from .routers import devel, obsdata, session
+from .routers import devel, obsdata, session, websocket
 from .utils import logging as mylogging
 
 app = FastAPI()
@@ -13,12 +11,14 @@ app = FastAPI()
 app.include_router(session.router)
 app.include_router(obsdata.router)
 app.include_router(devel.router)
-app.mount("/_assets/", StaticFiles(directory="./dist/_assets"), name="static")
+app.include_router(websocket.router)
 
+if False:
+    app.mount("/_assets/", StaticFiles(directory="./dist/_assets"), name="static")
 
-@app.get("/")
-async def index():
-    return FileResponse('./dist/index.html')
+    @app.get("/")
+    async def index():
+        return FileResponse('./dist/index.html')
 
 
 def use_route_names_as_operation_ids(app: FastAPI) -> None:
@@ -35,3 +35,4 @@ def use_route_names_as_operation_ids(app: FastAPI) -> None:
 
 use_route_names_as_operation_ids(app)
 mylogging.setup()
+mylogging.logger.info('server up')

@@ -1,5 +1,6 @@
-import { defineComponent, PropType, reactive, watch, watchEffect } from "vue";
+import { defineComponent, PropType, reactive, watch, watchEffect } from "vue"
 import style from './style.module.scss'
+import { vModel, vModelCheckbox } from "/src/utils/vModel"
 
 export default defineComponent({
   props: {
@@ -7,7 +8,7 @@ export default defineComponent({
     onChange: { type: Function as PropType<(value?: string) => void> },
     value: { type: String },
   },
-  setup(props, { slots }) {
+  setup(props, { slots, emit }) {
     const $ = reactive({
       date: undefined as undefined | string,
       enabled: props.value !== undefined,
@@ -23,10 +24,11 @@ export default defineComponent({
     return () => (
       <div class={style.root}>
         <label>
-          <input type="checkbox" checked={$.enabled} onChange={(e: any) => $.enabled = e.target.checked} />
+          <input type="checkbox" {...vModelCheckbox($.enabled, _ => $.enabled = _)} />
           <span>{(props.label && props.label) ?? slots.default?.()}</span>
         </label>
-        <input type="date" v-model={$.date} disabled={!$.enabled} />
+        <input type="date" {...vModel($.date, _ => $.date = _)} disabled={!$.enabled}
+        />
       </div >
     )
   }

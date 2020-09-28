@@ -2,9 +2,11 @@ import { computed, defineComponent, onMounted, reactive, ref } from "vue"
 import Center from '/src/components/Center'
 import { go } from "/src/router"
 import { login } from "/src/session"
+import { vModel } from "/src/utils/vModel"
+
 
 export default defineComponent({
-  setup() {
+  setup($p, { emit }) {
     const $ = reactive({
       email: '',
       password: '',
@@ -16,6 +18,8 @@ export default defineComponent({
       e.preventDefault()
       try {
         await login($.email, $.password)
+        $.email = ''
+        $.password = ''
         go('/', 'slideLeft')
       }
       catch (e) {
@@ -32,13 +36,13 @@ export default defineComponent({
     return () => (
       <Center>{() => (
         <>
-          <h1>PFS Obslog</h1>
+          <h1>PFS obslog</h1>
           <form onSubmit={submit}>
             <dl>
               <dt>E-Mail:</dt>
-              <dd><input type="text" v-model={$.email} name="email" ref={emailInput} size={30} /></dd>
+              <dd><input type="text" {...vModel($.email, _ => $.email = _)} name="email" ref={emailInput} size={30} /></dd>
               <dt>Password:</dt>
-              <dd><input type="password" v-model={$.password} name="password" disabled={true} size={30} /></dd>
+              <dd><input type="password" {...vModel($.password, _ => $.password = _)} name="password" disabled={true} size={30} /></dd>
             </dl>
             <div class="end-h">
               <input type="submit" value="Login" disabled={!ready.value} />

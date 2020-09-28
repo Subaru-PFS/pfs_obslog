@@ -6,6 +6,7 @@ import { api } from '/src/api'
 import { McsExposure, McsExposureNote } from "/src/api-client/api"
 import { openDialog } from '/src/components/Dialog'
 import { $g } from '/src/store'
+import { vModel } from '/src/utils/vModel'
 
 export const McsExposureListComponent = defineComponent({
   props: {
@@ -29,7 +30,7 @@ export const McsExposureListComponent = defineComponent({
         mcs_cover_temperature: true,
         mcs_m1_temperature: true,
         taken_at: true,
-      } as { [key: string]: boolean} ,
+      } as { [key: string]: boolean },
     })
     const { refresh } = inject($control)!
     return () => (
@@ -65,7 +66,6 @@ export const McsExposureListComponent = defineComponent({
                   </div>
                   <div class="end-h">
                     <button onClick={() => alert('Look exposure:\n Not implemented yet.')}>👀</button>
-                    <button onClick={() => alert('Detailed:\n Not implemented yet.')}>🔎</button>
                     <button title="🖌 Add Note" onClick={() => addMcsExposureNote(e, refresh)}>🖌</button>
                   </div>
                 </td>
@@ -96,8 +96,7 @@ const AddMcsExposureNoteComponent = defineComponent({
         Note for #{$p.e.frame_id}
         <hr />
         <form onSubmit={submit}>
-          <input type="text" v-model={$.value} ref={inputElement} size={60} />
-
+          <input type="text" {...vModel($.value, _ => $.value = _)} ref={inputElement} size={60} />
           <div class="end-h">
             <input type="submit" value="Save" />
           </div>
@@ -112,7 +111,6 @@ async function addMcsExposureNote(e: McsExposure, refresh: () => void) {
   const body = await openDialog<string | undefined>(AddMcsExposureNoteComponent, { props: { e }, throwOnClose: false })
   if (body !== undefined) {
     await api.createMcsExposureNote(e.frame_id, { body })
-    refresh()
   }
 }
 const mcs_exposure_keys = [
@@ -145,11 +143,9 @@ const McsExposureNote = defineComponent({
     note: { type: Object as PropType<McsExposureNote>, required: true }
   },
   setup($p) {
-    const { refresh } = inject($control)!
     const deleteNote = async () => {
       if (confirm(`Are you sure to delete this note?:\n${$p.note.body}`)) {
         await api.deleteMcsExposureNote(-1, $p.note.id)
-        await refresh()
       }
     }
     return () => {

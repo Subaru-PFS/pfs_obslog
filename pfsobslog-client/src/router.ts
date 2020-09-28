@@ -3,7 +3,8 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router"
 import { refreshSession } from "./session"
 import { $g } from "./store"
 import Login from './views/Login'
-import Main from "./views/VisitSetSearch"
+import VisitSetSearch from "./views/VisitSetSearch"
+import VisitDetail from "./views/VisitDetail"
 import Devel from './views/Devel'
 
 const routerHistory = createWebHashHistory()
@@ -11,7 +12,7 @@ const routerHistory = createWebHashHistory()
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    component: Main,
+    component: VisitSetSearch,
   },
   {
     name: 'login',
@@ -19,9 +20,14 @@ const routes: RouteRecordRaw[] = [
     component: Login,
   },
   {
+    path: '/visits/:id',
+    component: VisitDetail,
+    props: route => ({ id: Number(route.params.id) }),
+  },
+  {
     path: '/devel',
     component: Devel,
-  }
+  },
 ]
 
 export const router = createRouter({
