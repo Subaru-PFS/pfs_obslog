@@ -1,0 +1,38 @@
+@import "/src/styles/theme.scss";
+
+$gutterWidth: 8px;
+
+@mixin gutter {
+  background-color: $near-background;
+  transition: box-shadow 0.1s, background-color 0.1s;
+
+  &:hover,
+  &:active {
+    box-shadow: 0 0 8px $accent;
+    background-color: $accent;
+  }
+}
+
+.horizontal {
+  &-panes {
+    display: grid;
+  }
+
+  &-gutter {
+    cursor: ew-resize;
+    width: $gutterWidth;
+    @include gutter();
+  }
+}
+
+.vertical {
+  &-panes {
+    display: grid;
+  }
+
+  &-gutter {
+    cursor: ns-resize;
+    height: $gutterWidth;
+    @include gutter();
+  }
+}

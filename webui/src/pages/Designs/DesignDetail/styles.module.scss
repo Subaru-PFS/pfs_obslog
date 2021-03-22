@@ -1,0 +1,53 @@
+@mixin shadow() {
+  box-shadow: 0 0 4px black;
+}
+
+.legend {
+  // margin: 0;
+  // border-radius: 8px;
+  // border: 1px solid #999;
+
+  &-entries {
+    display: flex;
+
+    div {
+      margin: 2px 4px;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      @include shadow();
+    }
+  }
+}
+
+.matrix {
+  border-collapse: collapse;
+  border-radius: 8px;
+
+  td,
+  th {
+    padding: 0 4px;
+  }
+}
+
+table.matrix-columnar {
+  @extend .matrix;
+
+  th {
+    text-align: right;
+  }
+}
+
+.detailTable {
+  font-size: x-small;
+  summary: {
+    margin-left: -1em;
+  }
+  details {
+    margin-left: 1em;
+  }
+  td,
+  th {
+    white-space: nowrap;
+  }
+}

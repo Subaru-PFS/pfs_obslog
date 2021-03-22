@@ -1,0 +1,79 @@
+@import '/src/styles/theme.scss';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.selected {
+  &:hover {
+    background-color: $hover-background-color;
+  }
+
+  &.selected {
+    background-color: $selected-background;
+  }
+
+  &:active {
+    background-color: $selected-active-background;
+  }
+}
+
+.info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1em;
+}
+
+.filename {
+  font-family: monospace;
+  font-weight: bold;
+}
+
+.scrollable {
+  flex-grow: 1;
+  height: 0;
+  overflow: auto;
+}
+
+table.cards {
+  table-layout: fixed;
+  border-collapse: collapse;
+  width: 100%;
+
+  font-family: monospace;
+
+  thead {
+    th {
+      position: sticky;
+      top: 0;
+
+      &:nth-child(1) {
+        width: 12ch;
+      }
+
+      input {
+        width: 100%;
+      }
+    }
+  }
+
+  th {
+    background-color: $hover-background-color;
+  }
+
+  td,
+  th {
+    text-align: left;
+    font-family: monospace;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .comment {
+    color: $comment-color;
+  }
+}

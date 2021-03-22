@@ -1,0 +1,64 @@
+@import '/src/styles/theme.scss';
+
+.root {
+  padding: 1em;
+  overflow: auto;
+}
+
+.examples {
+  display: block;
+
+  dt {
+    font-weight: bold;
+  }
+
+  dd {
+    margin-bottom: 2em;
+  }
+
+  pre {
+    border-radius: 8px;
+    padding: 8px;
+    background-color: $sql-background-color;
+    color: $sql-text-color;
+    box-shadow: 0 0 4px $sql-color;
+    cursor: pointer;
+  }
+}
+
+.VirtualTable {
+  border-radius: 8px;
+  box-shadow: $medium-shadow;
+  overflow: hidden;
+  border-collapse: collapse;
+
+  td,
+  th {
+    padding: 0.25em 1em;
+  }
+
+  th {
+    background-color: $header-background-color;
+  }
+
+  tr:not(:last-child) {
+
+    td,
+    th {
+      border: 1px $ruled-line-color solid;
+      border-width: 1px 0;
+    }
+  }
+
+  tbody {
+
+    td:nth-child(1),
+    td:nth-child(2) {
+      font-family: monospace;
+    }
+
+    td:nth-child(3) {
+      white-space: pre-wrap;
+    }
+  }
+}

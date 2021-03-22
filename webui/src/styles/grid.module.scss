@@ -1,0 +1,14 @@
+@import '/src/styles/theme.scss';
+
+.header>* {
+  background-color: $header-background-color;
+  text-align: center;
+  font-weight: bold;
+  padding: 0.2em;
+  padding-top: 0.5em;
+}
+
+.data>* {
+  text-align: center;
+  padding: 0.2em 1em;
+}

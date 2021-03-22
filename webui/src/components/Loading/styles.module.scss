@@ -1,0 +1,78 @@
+@import "/src/styles/theme.scss";
+
+$loading-delay: 0.2s;
+$loaindg-fadein-speed: 0.2s;
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 100;
+  }
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba($block-background-color, 0.25);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  animation: fadeIn $loaindg-fadein-speed ease $loading-delay;
+  animation-fill-mode: both;
+}
+
+.loader,
+.loader:after {
+  border-radius: 50%;
+  width: 10em;
+  height: 10em;
+}
+
+.loader {
+  margin: 60px auto;
+  font-size: 10px;
+  position: relative;
+  $color1: rgba(black, 0.25);
+  $color2: rgba(white, 0.25);
+  border-top: 1.1em solid $color1;
+  border-right: 1.1em solid $color1;
+  border-bottom: 1.1em solid $color1;
+  border-left: 1.1em solid $color2;
+  animation: load8 0.5s infinite linear;
+}
+
+@keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+.block {
+  &-wrapper {
+    position: relative;
+  }
+
+  &-loading {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba($block-background-color, 0.25);
+    animation: fadeIn $loaindg-fadein-speed ease $loading-delay;
+    animation-fill-mode: both;
+  }
+}

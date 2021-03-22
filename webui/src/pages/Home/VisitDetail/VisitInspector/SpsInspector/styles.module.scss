@@ -1,0 +1,39 @@
+@import '/src/styles/theme.scss';
+
+.spsInspector {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.summary {
+  display: grid;
+  margin-bottom: 1em;
+}
+
+.exposures {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 1em;
+  height: 0;
+  flex-grow: 1;
+  overflow: auto;
+
+  li {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.exposure {
+  &-table {
+    display: grid;
+  }
+
+  border-radius: 8px;
+  box-shadow: $medium-shadow;
+  padding: 8px;
+  margin: 8px;
+}

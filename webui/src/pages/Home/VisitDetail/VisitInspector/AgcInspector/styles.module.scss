@@ -1,0 +1,44 @@
+@import '/src/styles/theme.scss';
+
+.summary {
+  display: grid;
+}
+
+.exposures {
+  flex-grow: 1;
+  overflow: auto;
+
+  &>ul {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 1em;
+  }
+
+  li {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.exposure {
+  border-radius: 8px;
+  box-shadow: $medium-shadow;
+  padding: 8px;
+  margin: 8px;
+}
+
+.cameras {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.camera {
+  text-align: center;
+}
+
+.pageList {
+  background-color: $background-color;
+  height: 100%;
+}

@@ -1,0 +1,83 @@
+@import "/src/styles/theme.scss";
+
+.list {
+  background-color: #777;
+  width: 24em;
+}
+
+@mixin bump($baseColor) {
+  $top: lighten($baseColor, 15%);
+  $bottom: darken($baseColor, 15%);
+  background: linear-gradient(to bottom, $top, $bottom);
+}
+
+.entryGroup {
+  margin: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: $medium-shadow;
+}
+
+.entry {
+  transition: transform 0.4s;
+  width: 100%;
+  overflow-x: hidden;
+
+  @include bump(#eee);
+
+  &-selected {
+    &,
+    &:hover {
+      @include bump(#0ff);
+    }
+  }
+
+  &-hover {
+    &,
+    &:hover {
+      @include bump(#cac);
+    }
+  }
+
+  &-selected-hover {
+    &,
+    &:hover {
+      @include bump(#aff);
+    }
+  }
+
+  &-id {
+    font-family: monospace;
+    font-size: x-small;
+    white-space: nowrap;
+  }
+
+  &-name {
+    color: #007;
+    font-weight: bold;
+    white-space: nowrap;
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  &-buttons {
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    button {
+      margin: 0 2px;
+    }
+  }
+
+  &-info {
+    padding: 4px;
+    width: 0;
+    flex-grow: 1;
+  }
+
+  &-date {
+    font-size: x-small;
+    font-family: monospace;
+  }
+}

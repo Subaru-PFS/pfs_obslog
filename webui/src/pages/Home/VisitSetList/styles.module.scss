@@ -1,0 +1,357 @@
+@import '/src/styles/theme.scss';
+
+.VisitSetList {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: $distant-background;
+}
+
+.SearchBox {
+  background-color: $background-color;
+  padding-top: 4px;
+
+  box-shadow: $medium-shadow;
+  z-index: 1;
+}
+
+.SearchCondition {
+  display: flex;
+  align-items: center;
+
+  &-exposureType {
+    margin-right: 0.5em;
+
+    select {
+      margin: 2px 0;
+    }
+  }
+
+  margin: 4px;
+
+  @keyframes shake {
+
+    10%,
+    90% {
+      transform: translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+      transform: translate3d(2px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+      transform: translate3d(-4px, 0, 0);
+    }
+
+    40%,
+    60% {
+      transform: translate3d(4px, 0, 0);
+    }
+  }
+
+  &.shaking {
+    animation: shake 0.4s ease-out;
+  }
+}
+
+.DatePicker {
+  display: flex;
+  align-items: center;
+
+  &>input {
+    width: 10ch;
+    border-style: none;
+    background-color: transparent;
+    text-align: center;
+  }
+
+  box-shadow: $small-shadow;
+  border-radius: 8px;
+  background-color: $input-background;
+  padding: 0 4px;
+  margin-left: 0.25em;
+
+  &-clear {
+    cursor: default;
+    height: 100%;
+    color: $hint-text-color;
+    padding: 0 2px;
+    display: block;
+    border-radius: 4px;
+
+    &:hover {
+      color: $text-color;
+      background-color: $hover-background-color;
+    }
+
+    &:active {
+      color: $active-text-color;
+      background-color: $active-background-color;
+    }
+  }
+}
+
+.SearchResult {
+  flex-grow: 1;
+  height: 0;
+
+  &-scroll {
+    height: 100%;
+    overflow-y: scroll;
+  }
+
+  @mixin loadMore() {
+    display: flex;
+    margin: 0 12px;
+
+    button {
+      margin: 0;
+    }
+  }
+
+  $borderRadius: 12px;
+
+  &-loadMoreNews {
+    @include loadMore();
+
+    button:nth-child(1) {
+      border-radius: 0 0 0 $borderRadius;
+    }
+
+    button:nth-child(2) {
+      flex-grow: 1;
+      border-radius: 0;
+      margin: 0 4px;
+    }
+
+    button:nth-child(3) {
+      border-radius: 0 0 $borderRadius 0;
+    }
+  }
+
+  &-loadMoreOlder {
+    @include loadMore();
+
+    button:nth-child(1) {
+      border-radius: $borderRadius 0 0 0;
+    }
+
+    button:nth-child(2) {
+      flex-grow: 1;
+      border-radius: 0;
+      margin: 0 4px;
+    }
+
+    button:nth-child(3) {
+      border-radius: 0 $borderRadius 0 0;
+    }
+  }
+}
+
+.VisitGroup {
+  border-radius: 8px;
+  margin: 24px 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba($shadow-color, 0.5);
+  background-color: $background-color;
+  transition: box-shadow 0.2s;
+
+  cursor: default;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(rgba($shadow-color, 0.5), 0.75);
+  }
+}
+
+.IicSequence {
+  display: block;
+
+  table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+
+    td {
+      text-align: center;
+    }
+  }
+
+  code.command {
+    display: block;
+    background-color: $code-background-color;
+    padding: 0 4px;
+    font-family: monospace;
+    color: $code-text-color;
+  }
+
+  &-comment {
+    color: darken($color: brown, $amount: 25);
+    margin: 4px;
+    padding: 2px;
+    border-radius: 4px;
+    background-color: floralwhite;
+    box-shadow: 0 0 4px rgba(brown, 0.5);
+  }
+}
+
+.title {
+  font-size: medium;
+  padding: 0.5em 1em;
+  margin: 0;
+  background: linear-gradient(0, rgba(0, 0, 0, 0.125) 0%, rgba(0, 0, 0, 0) 100%);
+  background-color: $header-background-color;
+}
+
+.selected {
+  .title {
+    background-color: $selected-background;
+  }
+}
+
+.VisitTable {
+  display: block;
+
+  table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+
+    thead {
+      th {
+        padding: 0 4px;
+        position: sticky;
+        top: 0;
+      }
+    }
+
+    td {
+      border: solid 1px $ruled-line-color;
+      white-space: nowrap;
+      padding: 0 4px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+
+  tbody {
+    cursor: default;
+
+    tr {
+      &:hover {
+        background-color: $hover-background-color;
+      }
+
+      &:active {
+        background-color: $selected-active-background;
+      }
+    }
+
+    tr.selected {
+      background-color: $selected-background;
+
+      &:hover {
+        background-color: $selected-hover-background;
+      }
+    }
+  }
+}
+
+.Paginator {
+  display: flex;
+
+  &-range {
+    padding: 0 0.5ch;
+    min-width: 8ch;
+    display: flex;
+    flex-flow: column;
+    text-align: center;
+
+    div:nth-child(1) {
+      border: solid 1px $hint-text-color;
+      border-width: 0 0 1px 0;
+    }
+  }
+
+  &-autoRefresh {
+    position: static;
+  }
+
+  // &-refreshing {
+  //   animation: rotating 0.1s linear infinite;
+  // }
+}
+
+ul.Columns {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  box-shadow: $small-shadow;
+  border-radius: 0 8px 0 0;
+  padding: 0 4px;
+
+  li {
+    display: flex;
+    align-items: center;
+    margin: 4px;
+
+    label {
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="checkbox"] {
+      margin: 0;
+      margin-right: 2px;
+    }
+  }
+}
+
+.Note {
+  display: block;
+
+  &-body {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+
+  &-user {
+    margin: 0 4px;
+    color: $hint-text-color;
+  }
+}
+
+.SearchTextBox {
+  display: flex;
+
+  input {
+    flex-grow: 1;
+    border-radius: 8px;
+    border-style: none;
+    box-sizing: border-box;
+    margin: 1px 4px;
+    padding: 4px 8px;
+    box-shadow: 0 0 4px inset rgba($shadow-color, 0.5);
+
+    &.sql {
+      color: $sql-text-color;
+      font-family: monospace;
+      box-shadow: 0 0 4px inset rgba($sql-color, 1);
+    }
+  }
+
+  form {
+    display: flex;
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+  }
+}

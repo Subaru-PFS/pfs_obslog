@@ -1,0 +1,15 @@
+/.venv
+/*.egg-info
+/.vscode
+/tmp
+/.pytest_cache
+/attachments
+/.coverage
+/htmlcov
+__pycache__
+*.egg-info
+.DS_Store
+/pfsDesign
+/snapshot
+/logs
+/.coverage.*
