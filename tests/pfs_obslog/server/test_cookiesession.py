@@ -89,7 +89,7 @@ def test_sssion_expiration_2(client):
 
 
 @app.get('/peek')
-def show_session(*, session: CookieSession = Depends()):
+def peek_session(*, session: CookieSession = Depends()):
     return session.peek()
 
 

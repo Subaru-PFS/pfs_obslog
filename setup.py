@@ -13,6 +13,7 @@ setup(
         'uvicorn',
         'pycryptodome',
         'ldap3',
+        'psycopg2-binary',
         'opdb@git+https://github.com/Subaru-PFS/spt_operational_database.git@3a1e403ed464d59edf43994ee4ded37a1fa0da1b',
     ],
     extras_require={

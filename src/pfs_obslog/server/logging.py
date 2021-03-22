@@ -18,9 +18,10 @@ def reset_loggers(*, level=logging.INFO, out=sys.stderr):
 
 
 _color_map = {
-    'SELECT': 'cyan',
-    'INSERT': 'yellow',
+    'SELECT': 'blue',
+    'INSERT': 'green',
     'UPDATE': 'yellow',
+    'DELETE': 'red',
     'BEGIN': 'magenta',
     'ROLLBACK': 'magenta',
     'COMMIT': 'magenta',
