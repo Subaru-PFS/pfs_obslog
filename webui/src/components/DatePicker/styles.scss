@@ -1,0 +1,6 @@
+@import '/src/styles/theme.scss';
+
+$link: $accent;
+$dp-dropdown-shadow: 0 8px 16px rgba($shadow-color, 0.5);
+$dp-border-radius-small: 8px;
+@import "/node_modules/vanillajs-datepicker/sass/datepicker.scss";

@@ -1,0 +1,52 @@
+@import '/src/styles/theme.scss';
+
+.Tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.TabBar {
+  display: flex;
+  list-style: none;
+  padding: 0 8px;
+  margin: 12px 0 0 0;
+
+  li {
+    padding: 0;
+    margin: 0;
+
+    .title {
+      border-radius: 8px 8px 0 0;
+      background-color: $background-color;
+      font-weight: bold;
+      padding: 4px 12px;
+      margin: 0 4px;
+      border-style: none;
+      box-shadow: 0 0 4px rgba($shadow-color, 0.75);
+      cursor: pointer;
+
+      &:hover {
+        background-color: $hover-background-color;
+      }
+
+      &.selected {
+        background-color: $selected-background;
+      }
+
+      &:active {
+        background-color: $selected-active-background;
+      }
+    }
+  }
+}
+
+.tabContents {
+  display: block;
+  flex-grow: 1;
+}
+
+.gutter {
+  // position: relative;
+  height: 4px;
+  background-color: $ruled-line-color;
+}

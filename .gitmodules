@@ -1,0 +1,12 @@
+[submodule "spt_operational_database"]
+	path = spt_operational_database
+	url = git@github.com:Subaru-PFS/spt_operational_database.git
+[submodule "external/spt_operational_database"]
+	path = external/spt_operational_database
+	url = git@github.com:Subaru-PFS/spt_operational_database.git
+[submodule "external/datamodel"]
+	path = external/datamodel
+	url = git@github.com:Subaru-PFS/datamodel.git
+[submodule "external/pfs_utils"]
+	path = external/pfs_utils
+	url = git@github.com:Subaru-PFS/pfs_utils.git

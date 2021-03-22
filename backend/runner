@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd $(dirname $0)
+
+export PFS_OBSLOG_ENV=${PFS_OBSLOG_ENV:-"production"}
+export PYTHONPATH=$PWD/src/pfs_obslog/pythonpath:$PYTHONPATH \
+export PATH=$PWD/.venv/bin:$PATH
+
+$@

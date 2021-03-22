@@ -1,0 +1,15 @@
+[Unit]
+Description=pfs-obslog
+
+[Service]
+Environment=BIND_ADDRESS=0.0.0.0:5000
+ExecStart=/usr/bin/bash $PWD/runner bash ./entrypoint.bash
+ExecStop=/bin/kill \$MAINPID
+Type=simple
+Restart=always
+StandardOutput=append:$PWD/logs/stdout.log
+StandardError=append:$PWD/logs/stderr.log
+USER=michitaro
+
+[Install]
+WantedBy=default.target

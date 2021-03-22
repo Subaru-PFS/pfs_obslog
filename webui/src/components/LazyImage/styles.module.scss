@@ -1,0 +1,27 @@
+@import "/src/styles/theme.scss";
+
+@keyframes fadeIn {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: $distant-background;
+  padding: 2px;
+  transition: background-color 0.2s;
+  img {
+    opacity: 0;
+    transition: opacity 0.2s;
+    &.ready {
+      opacity: 1;
+    }
+  }
+}

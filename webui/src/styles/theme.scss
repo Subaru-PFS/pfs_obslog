@@ -1,0 +1,54 @@
+@use "sass:color";
+
+$theme: #0ff;
+$sql-color: #00f;
+$code-color: #0f0;
+
+// text & background colors
+$text-color: black;
+$background-color: #eee;
+$active-background-color: #ccc;
+$active-text-color: white;
+$hover-background-color: #ddd;
+$disabled-text-color: #aaa;
+$hint-text-color: #777;
+$header-background-color: #ddd;
+$input-background: white;
+$link-color: #555;
+$comment-color: #577;
+
+$selected-background: color.change($theme, $lightness: +75%, $saturation: 25%);
+$selected-active-background: color.adjust($selected-background, $lightness: -15%);
+$selected-hover-background: color.adjust($selected-background, $lightness: -5%);
+
+// loading
+$block-background-color: black;
+
+$accent: color.change($theme, $lightness: +50%, $saturation: 30%);
+
+// depth background
+$near-background: #ccc;
+$distant-background: #aaa;
+
+// ruled line
+$ruled-line-color: #ccc;
+
+// shadow
+$shadow-color: black;
+$small-shadow: 0 0 4px rgba($shadow-color, 0.5);
+$medium-shadow: 0 0 8px rgba($shadow-color, 0.5);
+
+@mixin rounded-text-input {
+  border-radius: 8px;
+  border-style: none;
+  box-shadow: 0 0 4px rgba($shadow-color, 0.25);
+  padding: 4px;
+}
+
+// sql
+$sql-text-color: color.adjust($sql-color, $lightness: -25%);
+$sql-background-color: rgba($sql-color, 0.05);
+
+// code
+$code-text-color: color.adjust($code-color, $lightness: -40%, $saturation: -25%);
+$code-background-color: rgba(color.adjust($code-color, $lightness: -75%), 0.05);

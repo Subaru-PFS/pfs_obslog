@@ -1,0 +1,63 @@
+@import "./styles/theme.scss";
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-size: small;
+}
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background-color: $background-color;
+}
+
+#root {
+  height: 100%;
+}
+
+summary {
+  cursor: pointer;
+  user-select: none;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="search"] {
+  @include rounded-text-input;
+}
+
+button {
+  border-radius: 8px;
+  border-style: none;
+  box-shadow: $small-shadow;
+  padding: 4px;
+  margin: 1px 2px;
+  background-color: $background-color;
+  color: $text-color;
+
+  &:hover {
+    background-color: $hover-background-color;
+  }
+
+  &:disabled {
+    color: $disabled-text-color;
+    background-color: $background-color;
+  }
+
+  &:active {
+    background-color: $active-background-color;
+    color: $active-text-color;
+
+    &:disabled {
+      background-color: $background-color;
+      color: $disabled-text-color;
+    }
+  }
+}
+
+a {
+  color: $link-color;
+}

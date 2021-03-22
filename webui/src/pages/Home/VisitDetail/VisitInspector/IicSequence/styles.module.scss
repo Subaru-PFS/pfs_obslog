@@ -1,0 +1,23 @@
+@import '/src/styles/theme.scss';
+
+.summary {
+  display: grid;
+}
+
+.command {
+  display: block;
+  background-color: $code-background-color;
+  padding: 0 4px;
+  font-family: monospace;
+  color: $code-text-color;
+  margin: 1em 0;
+}
+
+.comment {
+  color: darken($color: brown, $amount: 25);
+  margin: 1em 0.5em;
+  padding: 2px;
+  border-radius: 4px;
+  background-color: floralwhite;
+  box-shadow: 0 0 4px rgba(brown, 0.5);
+}

@@ -1,0 +1,14 @@
+@mixin fill-parent {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.baseCanvas {
+  @include fill-parent();
+}
+
+.focusCanvas {
+  cursor: none;
+  @include fill-parent();
+}

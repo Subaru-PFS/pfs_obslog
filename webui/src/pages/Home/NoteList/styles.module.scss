@@ -1,0 +1,36 @@
+@import '/src/styles/theme.scss';
+
+.Notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+
+    &>*:nth-child(1) {
+      flex-grow: 1;
+    }
+
+    form {
+      display: flex;
+
+      input[type="text"] {
+        flex-grow: 1;
+      }
+    }
+  }
+}
+
+.body {
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  text-align: left;
+}
+
+.user {
+  color: $hint-text-color;
+  padding: 4px;
+}

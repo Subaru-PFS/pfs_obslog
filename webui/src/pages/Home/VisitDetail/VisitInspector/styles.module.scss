@@ -1,0 +1,58 @@
+@import "/src/styles/theme.scss";
+
+.VisitInspector {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.summary {
+  display: grid;
+}
+
+
+.settings {
+  dl {
+    display: flex;
+    align-items: baseline;
+
+    &,
+    dt,
+    dd {
+      padding: 0;
+      margin: 0;
+    }
+
+    dt {
+      font-weight: bold;
+
+      &::after {
+        content: ':';
+      }
+    }
+
+    dd {
+      margin-right: 1em;
+
+      label {
+        margin-right: 0.5em;
+      }
+    }
+  }
+
+  box-shadow: $medium-shadow;
+}
+
+.selected {
+  &:hover {
+    background-color: $hover-background-color;
+  }
+
+  &.selected {
+    background-color: $selected-background;
+  }
+
+  &:active {
+    background-color: $selected-active-background;
+  }
+}
