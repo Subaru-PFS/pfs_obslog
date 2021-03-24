@@ -29,6 +29,11 @@ setup-test-db:
 clean:
 	rm -rf .venv
 
+.PHONY: schemaspy
+
+schemaspy:
+	bash ./schemaspy/run.bash
+
 .venv:
 	$(python) -m venv $@
 	.venv/bin/python -m venv .venv
