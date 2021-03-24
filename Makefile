@@ -17,6 +17,7 @@ test:
 			--cov=pfs_obslog \
 			--cov-report=html \
 			--cov-branch tests
+	open ./htmlcov/index.html
 
 setup:
 	$(MAKE) -B .venv
@@ -33,9 +34,13 @@ clean:
 
 schemaspy:
 	bash ./schemaspy/run.bash
+	open ./schemaspy/html/index.html
 
 .venv:
 	$(python) -m venv $@
 	.venv/bin/python -m venv .venv
 	.venv/bin/pip install -e .
 	.venv/bin/pip install -e ."[dev]"
+
+deploy:
+	bash ./deploy.bash

@@ -10,11 +10,15 @@ setup(
     python_requires='>=3.9',
     install_requires=[
         'fastapi>=0.63',
+        'aiofiles',
         'uvicorn',
         'pycryptodome',
         'ldap3',
         'psycopg2-binary',
         'opdb@git+https://github.com/Subaru-PFS/spt_operational_database.git@3a1e403ed464d59edf43994ee4ded37a1fa0da1b',
+        'gunicorn',
+        'uvloop',
+        'httptools',
     ],
     extras_require={
         'dev': [

@@ -14,4 +14,4 @@ if os.environ.get('PFS_OBSLOG_ENV') == 'test':
             return TEST_USER
 else:
     # .userauth_secret is not in GitHub because of security reasons
-    from .userauth_secret import authorize
+    from .userauth_secret import authorize  # pragma: no cover

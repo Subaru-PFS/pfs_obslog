@@ -40,6 +40,21 @@ def test_session(client: TestClient):
     assert client.get('/show').json() == {'q': 42}
 
 
+@app.get('/double_activate')
+def double_activate(*, session: Session = Depends()):
+    with session.activate():
+        session['a'] = 'A'
+    with session.activate():
+        session['b'] = 'B'
+    return session
+
+
+def test_double_activate(client: TestClient):
+    res = client.get('/double_activate')
+    assert res.status_code == 200
+    assert res.json() == {'a': 'A', 'b': 'B'}
+
+
 def test_token_session(client: TestClient):
     res = client.get('/setitem?q=42', headers={HEADER_NAME: ''})
     assert client.get('/show', headers={HEADER_NAME: res.headers[HEADER_NAME]}).json() == {'q': 42}

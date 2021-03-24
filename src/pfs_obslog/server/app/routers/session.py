@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from opdb import models
 from fastapi import Depends
 
-from pfs_obslog.server.app.context import Context
+from pfs_obslog.server.app.context import Context, NoLoginContext
 
 router = APIRouter()
 
@@ -18,7 +18,7 @@ class SessionCreateRequest(BaseModel):
 @router.post('/api/session')
 def session_create(
     params: SessionCreateRequest,
-    ctx: Context = Depends(),
+    ctx: NoLoginContext = Depends(),
 ):
     if account_name := userauth.authorize(params.username, params.password):
         with ctx.session.activate() as session:
@@ -35,4 +35,11 @@ def session_create(
 def session_show(
     ctx: Context = Depends(),
 ):
-    return ctx.current_user
+    pass
+
+
+@router.delete('/api/session')
+def session_destroy(
+    ctx: Context = Depends(),
+):
+    ctx.session.clear()

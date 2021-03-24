@@ -38,7 +38,7 @@ class Session:
             self._raw_session.clear()
 
 
-def _get_db():
+def _get_db():  # pragma: no cover
     db = DBSession()
     try:
         yield db
@@ -82,7 +82,7 @@ test_db = _TestDB()
 get_db = test_db.get_db if os.environ.get('PFS_OBSLOG_ENV') else _get_db
 
 
-class Context:
+class NoLoginContext:
     def __init__(
         self,
         db: DBSessionType = Depends(get_db),
@@ -94,6 +94,16 @@ class Context:
     @property
     def current_user(self):
         if account_name := self.session.peek().account_name:
-            if user := self.db.query(models.obslog_user).filter_by(account_name=account_name).one_or_none():
+            if user := self.db.query(models.obslog_user).filter_by(account_name=account_name).one_or_none():  # pragma: no branch
                 return user
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED)
+        raise HTTPException(status.HTTP_403_FORBIDDEN)
+
+
+class Context(NoLoginContext):
+    def __init__(
+        self,
+        db: DBSessionType = Depends(get_db),
+        session: Session = Depends(),
+    ):
+        super().__init__(db=db, session=session)
+        self.current_user
