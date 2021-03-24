@@ -1,12 +1,17 @@
-import warnings
+import os
 from pathlib import Path
+from typing import Optional
 
 HERE = Path(__file__).parent
 
-if (HERE / 'userauth_secret.py').exists():  # pragma: no cover
-    from .userauth_secret import authorize
-else:  # pragma: no cover
-    warnings.warn(f'No userauth module presents. No user can log in.')
+TEST_USER = 'test'
+TEST_PASSWORD = 'password'
 
-    def authorize(username: str, password: str) -> bool:
-        return False
+if os.environ.get('PFS_OBSLOG_ENV') == 'test':
+
+    def authorize(username: str, password: str) -> Optional[str]:
+        if username == TEST_USER and password == TEST_PASSWORD:
+            return TEST_USER
+else:
+    # .userauth_secret is not in GitHub because of security reasons
+    from .userauth_secret import authorize

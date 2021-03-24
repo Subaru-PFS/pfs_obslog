@@ -1,15 +1,9 @@
-from pfs_obslog.server.userauth import authorize
-import json
 import pytest
-from pathlib import Path
-
-
-HERE = Path(__file__).parent
-CREDFILE = HERE / 'secrets' / 'account.json'
+from pfs_obslog.server.userauth_secret import authorize
 
 
 @ pytest.mark.slow
-@ pytest.mark.skipif(not CREDFILE.exists(), reason='credentails are not provbided')
+@ pytest.mark.run_if_credentails_are_provided
 def test_authorize(credentials):
     assert not authorize(
         credentials['username'],
@@ -23,9 +17,3 @@ def test_authorize(credentials):
         credentials['username'],
         credentials['password'],
     )
-
-
-@ pytest.fixture
-def credentials():
-    with open(CREDFILE) as f:
-        return json.load(f)

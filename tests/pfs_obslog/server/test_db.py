@@ -1,8 +1,6 @@
-import pytest
 from opdb.models import obslog_user
-from sqlalchemy.sql.expression import update
+from sqlalchemy import delete
 from sqlalchemy.orm import Session
-from sqlalchemy import select, delete
 
 
 def test_db_crud(test_db: Session):
@@ -12,12 +10,12 @@ def test_db_crud(test_db: Session):
     test_db.commit()
 
     # R
-    assert test_db.execute(select(obslog_user)).first()[0].account_name == 'hello'
+    assert test_db.query(obslog_user).order_by(obslog_user.id.desc()).limit(1).one_or_none().account_name == 'hello'
 
     # U
     user1.account_name = 'world'  # type: ignore
     test_db.commit()
-    assert test_db.execute(select(obslog_user)).first()[0].account_name == 'world'
+    assert test_db.query(obslog_user).order_by(obslog_user.id.desc()).limit(1).one_or_none().account_name == 'world'
 
     # D
     test_db.execute(delete(obslog_user))
