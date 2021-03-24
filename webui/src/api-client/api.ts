@@ -37,6 +37,31 @@ export interface HTTPValidationError {
 /**
  * 
  * @export
+ * @interface PfsVisit
+ */
+export interface PfsVisit {
+    /**
+     * 
+     * @type {number}
+     * @memberof PfsVisit
+     */
+    id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PfsVisit
+     */
+    description: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PfsVisit
+     */
+    issued_at: string;
+}
+/**
+ * 
+ * @export
  * @interface SessionCreateRequest
  */
 export interface SessionCreateRequest {
@@ -103,6 +128,41 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Pfs Visit Index
+         * @param {number} [offset] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        pfsVisitIndex: async (offset?: number, options: any = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/pfs_visits`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
 
 
     
@@ -233,6 +293,17 @@ export const DefaultApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Pfs Visit Index
+         * @param {number} [offset] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async pfsVisitIndex(offset?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PfsVisit>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.pfsVisitIndex(offset, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Session Create
          * @param {SessionCreateRequest} sessionCreateRequest 
          * @param {*} [options] Override http request option.
@@ -283,6 +354,16 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
+         * @summary Pfs Visit Index
+         * @param {number} [offset] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        pfsVisitIndex(offset?: number, options?: any): AxiosPromise<Array<PfsVisit>> {
+            return localVarFp.pfsVisitIndex(offset, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Session Create
          * @param {SessionCreateRequest} sessionCreateRequest 
          * @param {*} [options] Override http request option.
@@ -328,6 +409,18 @@ export class DefaultApi extends BaseAPI {
      */
     public index(options?: any) {
         return DefaultApiFp(this.configuration).index(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Pfs Visit Index
+     * @param {number} [offset] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public pfsVisitIndex(offset?: number, options?: any) {
+        return DefaultApiFp(this.configuration).pfsVisitIndex(offset, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

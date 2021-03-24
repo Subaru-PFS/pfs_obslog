@@ -1,6 +1,7 @@
 import { defineComponent } from "@vue/runtime-core"
-import { api } from "../api"
-import { router } from "../router"
+import { api } from "~/api"
+import { router } from "~/router"
+import PfsVisitList from "./PfsVisitList"
 
 export default defineComponent({
   setup() {
@@ -12,7 +13,7 @@ export default defineComponent({
 
     return () => (
       <>
-        <div>HOME</div>
+        <PfsVisitList />
         <form onSubmit={logout}><input type="submit" value="Logout" /></form>
       </>
     )

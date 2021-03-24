@@ -5,7 +5,6 @@ export default defineComponent({
   setup() {
     return () => (
       <div>
-        <div>PFS-OBSLOG</div>
         <div class="router-view">
           <RouterView />
         </div>
