@@ -1,5 +1,6 @@
 from fastapi import APIRouter, status
 from fastapi.exceptions import HTTPException
+from sqlalchemy.sql.functions import current_user
 from pfs_obslog.server import userauth
 from pydantic import BaseModel
 from opdb import models
@@ -31,11 +32,23 @@ def session_create(
     raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
-@router.get('/api/session')
+class CurrentUser(BaseModel):
+    id: int
+    account_name: str
+
+    class Config:
+        orm_mode = True
+
+
+class Session(BaseModel):
+    current_user: CurrentUser
+
+
+@router.get('/api/session', response_model=Session)
 def session_show(
     ctx: Context = Depends(),
 ):
-    pass
+    return Session(current_user=ctx.current_user)
 
 
 @router.delete('/api/session')

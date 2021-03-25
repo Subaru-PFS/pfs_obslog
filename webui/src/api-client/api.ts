@@ -24,6 +24,25 @@ import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } fr
 /**
  * 
  * @export
+ * @interface CurrentUser
+ */
+export interface CurrentUser {
+    /**
+     * 
+     * @type {number}
+     * @memberof CurrentUser
+     */
+    id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CurrentUser
+     */
+    account_name: string;
+}
+/**
+ * 
+ * @export
  * @interface HTTPValidationError
  */
 export interface HTTPValidationError {
@@ -37,27 +56,125 @@ export interface HTTPValidationError {
 /**
  * 
  * @export
- * @interface PfsVisit
+ * @interface McsExposure
  */
-export interface PfsVisit {
+export interface McsExposure {
     /**
      * 
      * @type {number}
-     * @memberof PfsVisit
+     * @memberof McsExposure
      */
-    id: number;
+    frame_id: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposure
+     */
+    exptime?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposure
+     */
+    altitude?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposure
+     */
+    azimuth?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposure
+     */
+    insrot?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposure
+     */
+    adc_pa?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposure
+     */
+    dome_temperature?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposure
+     */
+    dome_pressure?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposure
+     */
+    dome_humidity?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposure
+     */
+    outside_temperature?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposure
+     */
+    outside_pressure?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposure
+     */
+    outside_humidity?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposure
+     */
+    mcs_cover_temperature?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposure
+     */
+    mcs_m1_temperature?: number;
     /**
      * 
      * @type {string}
-     * @memberof PfsVisit
+     * @memberof McsExposure
      */
-    description: string;
+    taken_at: string;
+}
+/**
+ * 
+ * @export
+ * @interface McsVisit
+ */
+export interface McsVisit {
     /**
      * 
-     * @type {string}
-     * @memberof PfsVisit
+     * @type {Array<McsExposure>}
+     * @memberof McsVisit
      */
-    issued_at: string;
+    exposures: Array<McsExposure>;
+}
+/**
+ * 
+ * @export
+ * @interface Session
+ */
+export interface Session {
+    /**
+     * 
+     * @type {CurrentUser}
+     * @memberof Session
+     */
+    current_user: CurrentUser;
 }
 /**
  * 
@@ -102,6 +219,99 @@ export interface ValidationError {
      * @memberof ValidationError
      */
     type: string;
+}
+/**
+ * 
+ * @export
+ * @interface Visit
+ */
+export interface Visit {
+    /**
+     * 
+     * @type {number}
+     * @memberof Visit
+     */
+    id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Visit
+     */
+    description: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Visit
+     */
+    issued_at: string;
+}
+/**
+ * 
+ * @export
+ * @interface VisitDetail
+ */
+export interface VisitDetail {
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitDetail
+     */
+    id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VisitDetail
+     */
+    description: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VisitDetail
+     */
+    issued_at: string;
+    /**
+     * 
+     * @type {Array<VisitNote>}
+     * @memberof VisitDetail
+     */
+    notes: Array<VisitNote>;
+    /**
+     * 
+     * @type {McsVisit}
+     * @memberof VisitDetail
+     */
+    mcs_visit?: McsVisit;
+}
+/**
+ * 
+ * @export
+ * @interface VisitNote
+ */
+export interface VisitNote {
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitNote
+     */
+    id: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitNote
+     */
+    user_id: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitNote
+     */
+    pfs_visit_id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VisitNote
+     */
+    body: string;
 }
 
 /**
@@ -163,6 +373,40 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             if (offset !== undefined) {
                 localVarQueryParameter['offset'] = offset;
             }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Pfs Visit Show
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        pfsVisitShow: async (id: number, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('pfsVisitShow', 'id', id)
+            const localVarPath = `/api/pfs_visits/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
 
     
@@ -298,8 +542,19 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async pfsVisitIndex(offset?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PfsVisit>>> {
+        async pfsVisitIndex(offset?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Visit>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.pfsVisitIndex(offset, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Pfs Visit Show
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async pfsVisitShow(id: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitDetail>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.pfsVisitShow(id, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -329,7 +584,7 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async sessionShow(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+        async sessionShow(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Session>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.sessionShow(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -359,8 +614,18 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        pfsVisitIndex(offset?: number, options?: any): AxiosPromise<Array<PfsVisit>> {
+        pfsVisitIndex(offset?: number, options?: any): AxiosPromise<Array<Visit>> {
             return localVarFp.pfsVisitIndex(offset, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Pfs Visit Show
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        pfsVisitShow(id: number, options?: any): AxiosPromise<VisitDetail> {
+            return localVarFp.pfsVisitShow(id, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -387,7 +652,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        sessionShow(options?: any): AxiosPromise<any> {
+        sessionShow(options?: any): AxiosPromise<Session> {
             return localVarFp.sessionShow(options).then((request) => request(axios, basePath));
         },
     };
@@ -421,6 +686,18 @@ export class DefaultApi extends BaseAPI {
      */
     public pfsVisitIndex(offset?: number, options?: any) {
         return DefaultApiFp(this.configuration).pfsVisitIndex(offset, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Pfs Visit Show
+     * @param {number} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public pfsVisitShow(id: number, options?: any) {
+        return DefaultApiFp(this.configuration).pfsVisitShow(id, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
