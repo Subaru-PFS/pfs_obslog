@@ -45,3 +45,7 @@ export function apiThrowsError(...errors: number[]) {
 }
 
 export const api = apiThrowsError(StatusCodes.UNPROCESSABLE_ENTITY)
+
+export function isAxiosError(error: any): error is AxiosError {
+  return !!error.isAxiosError
+}

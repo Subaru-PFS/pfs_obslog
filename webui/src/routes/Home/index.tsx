@@ -1,6 +1,8 @@
 import { defineComponent, reactive } from "@vue/runtime-core"
-import { api } from "~/api"
+import FlexScroll from "~/components/FlexScroll"
+import { $g } from "~/global"
 import { router } from "~/router"
+import { sessionLogout } from "~/session"
 import VisitInspector from "./VisitInspector"
 import VisitList from "./VisitList"
 
@@ -12,7 +14,7 @@ export default defineComponent({
 
     const logout = async (e: Event) => {
       e.preventDefault()
-      await api.sessionDestroy()
+      await sessionLogout()
       router.push('/login')
     }
 
@@ -22,6 +24,7 @@ export default defineComponent({
       return (
         <div class="fill-height" style={{ display: 'flex', flexDirection: 'column' }}>
           {/* menu */}
+          <pre>{JSON.stringify($g)}</pre>
           <div style={{ display: 'flex' }}>
             🔍 <input type="text" style={{ flexGrow: 1 }} />
             <button onClick={logout}>👋 Logout</button>
@@ -31,11 +34,9 @@ export default defineComponent({
             {/* visit-list */}
             <VisitList onChange={e => $.selected_ids = e} />
             {/* inspector */}
-            <div style={{ flexGrow: 1, position: 'relative' }}>
-              <div style={{ position: 'absolute', width: '100%', height: '100%', overflow: 'auto' }}>
-                {inspectors}
-              </div>
-            </div>
+            <FlexScroll>
+              {inspectors}
+            </FlexScroll>
           </div>
         </div>
       )

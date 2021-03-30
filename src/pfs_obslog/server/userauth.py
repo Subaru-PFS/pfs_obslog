@@ -2,12 +2,14 @@ import os
 from pathlib import Path
 from typing import Optional
 
+from pfs_obslog.server.env import PFS_OBSLOG_ENV
+
 HERE = Path(__file__).parent
 
 TEST_USER = 'test'
 TEST_PASSWORD = 'password'
 
-if os.environ.get('PFS_OBSLOG_ENV') == 'test':
+if PFS_OBSLOG_ENV == 'test':
 
     def authorize(username: str, password: str) -> Optional[str]:
         if username == TEST_USER and password == TEST_PASSWORD:

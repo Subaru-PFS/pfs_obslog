@@ -1,22 +1,77 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends
 from opdb import models as M
-from sqlalchemy.orm import selectinload
 from pfs_obslog.server.app.context import Context
-from pfs_obslog.server.app.routers.schema import Visit, VisitDetail
+from pfs_obslog.server.schema import McsVisit, SpsSequence, SpsVisit, Visit, VisitNote, VisitSet
+from pfs_obslog.server.orm import orm_getter_dict, static_check_init_args
 
 router = APIRouter()
 
 
-@router.get('/api/pfs_visits', response_model=list[Visit])
+@static_check_init_args
+class VisitListEntry(Visit):
+    sps_present: bool
+    mcs_present: bool
+    visit_set_id: Optional[int]
+
+    class Config:
+        orm_mode = True
+
+        class getter_dict(orm_getter_dict):
+            def _row_to_obj(self, row):
+                return VisitListEntry(
+                    id=row.pfs_visit.pfs_visit_id,
+                    description=row.pfs_visit.pfs_visit_description,
+                    issued_at=row.pfs_visit.issued_at,
+                    sps_present=row.sps_present,
+                    mcs_present=row.mcs_present,
+                    visit_set_id=row.visit_set_id,
+                )
+
+
+@router.get('/api/pfs_visits', response_model=list[VisitListEntry])
 def pfs_visit_index(
     offset: int = 0,
     ctx: Context = Depends(),
 ):
-    q = ctx.db.query(M.pfs_visit)\
-        .order_by(M.pfs_visit.pfs_visit_id.desc()).offset(offset).limit(100)\
-        .options(selectinload(M.pfs_visit.sps_visit))
-    # breakpoint()
+    q = ctx.db.query(
+        M.pfs_visit,
+        M.pfs_visit.mcs_exposure.any().label('sps_present'),
+        M.pfs_visit.sps_visit.has().label('mcs_present'),
+        M.pfs_visit.pfs_design_id,
+        M.visit_set.visit_set_id,
+    )\
+        .select_from(M.pfs_visit)\
+        .outerjoin(M.sps_visit)\
+        .outerjoin(M.visit_set)\
+        .order_by(M.pfs_visit.pfs_visit_id.desc())\
+        .limit(100)\
+        .offset(offset)
     return list(q)
+
+
+@static_check_init_args
+class VisitDetail(Visit):
+    notes: list[VisitNote]
+    sps: Optional[SpsVisit]
+    mcs: Optional[McsVisit]
+    visit_set: Optional[VisitSet]
+
+    class Config:
+        orm_mode = True
+
+        class getter_dict(orm_getter_dict):
+            def _row_to_obj(self, row: M.pfs_visit):
+                return VisitDetail(
+                    id=row.pfs_visit_id,
+                    description=row.pfs_visit_description,
+                    issued_at=row.issued_at,
+                    notes=row.obslog_notes,
+                    sps=row.sps_visit,
+                    mcs=None if len(row.mcs_exposure) == 0 else McsVisit(exposures=row.mcs_exposure),
+                    visit_set=row.sps_visit.visit_set,
+                )
 
 
 @ router.get('/api/pfs_visits/{id}', response_model=VisitDetail)

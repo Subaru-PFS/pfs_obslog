@@ -1,9 +1,22 @@
 import { reactive } from "@vue/reactivity"
+import { int } from "./types"
 
-const $g = reactive({
-  session: {
-    account_name: null as null | string,
-  }
+
+type User = {
+  id: int
+  account_name: string
+}
+
+export type Session = {
+  user: User
+}
+
+type $Global = {
+  session: null | Session,
+}
+
+const $g = reactive<$Global>({
+  session: null,
 })
 
 export { $g }

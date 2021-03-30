@@ -1,13 +1,17 @@
-import os
 import contextlib
-from typing import Generator, Optional
+from typing import Optional
 
 from fastapi import Depends, HTTPException, status
 from opdb import models
-from pfs_obslog.server.db import Session as DBSession
+from pfs_obslog.server.db import get_db
 from pfs_obslog.server.httpsession import TokenOrCookieSession
 from pydantic import BaseModel
 from sqlalchemy.orm import Session as DBSessionType
+
+
+def _get_db():
+    with get_db() as db:
+        yield db
 
 
 class SessionType(BaseModel):
@@ -38,54 +42,10 @@ class Session:
             self._raw_session.clear()
 
 
-def _get_db():  # pragma: no cover
-    db = DBSession()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-class _TestDB:
-    def __init__(self):
-        self._db = None
-
-    @contextlib.contextmanager
-    def begin_nested(self):
-        self._db = DBSession()
-        try:
-            with self.lifecycle(self._db):
-                yield
-        finally:
-            self._db = None
-
-    def get_db(self) -> Generator[DBSessionType, None, None]:
-        if self._db is None:
-            with self.lifecycle(DBSession()) as db:
-                yield db
-        else:
-            yield self._db
-
-    @contextlib.contextmanager
-    def lifecycle(self, db):
-        db.begin_nested()
-        try:
-            yield db
-        finally:
-            db.rollback()
-            db.close()
-
-
-test_db = _TestDB()
-
-
-get_db = test_db.get_db if os.environ.get('PFS_OBSLOG_ENV') else _get_db
-
-
 class NoLoginContext:
     def __init__(
         self,
-        db: DBSessionType = Depends(get_db),
+        db: DBSessionType = Depends(_get_db),
         session: Session = Depends(),
     ):
         self.db = db
@@ -102,7 +62,7 @@ class NoLoginContext:
 class Context(NoLoginContext):
     def __init__(
         self,
-        db: DBSessionType = Depends(get_db),
+        db: DBSessionType = Depends(_get_db),
         session: Session = Depends(),
     ):
         super().__init__(db=db, session=session)

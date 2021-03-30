@@ -2,21 +2,11 @@ from datetime import datetime
 from typing import Optional
 
 from opdb import models as M
-from pfs_obslog.server.app.context import Context
-from pfs_obslog.server.orm import orm_getter_dict
+from pfs_obslog.server.orm import orm_getter_dict, static_check_init_args
 from pydantic import BaseModel
 
 
-class VisitNote(BaseModel):
-    id: int
-    user_id: int
-    pfs_visit_id: int
-    body: str
-
-    class Config:
-        orm_mode = True
-
-
+@static_check_init_args
 class SpsExposure(BaseModel):
     camera_id: int
     exptime: float
@@ -36,6 +26,7 @@ class SpsExposure(BaseModel):
                 )
 
 
+@static_check_init_args
 class SpsVisit(BaseModel):
     exp_type: str
     exposures: list[SpsExposure]
@@ -51,6 +42,7 @@ class SpsVisit(BaseModel):
                 )
 
 
+@static_check_init_args
 class McsExposure(BaseModel):
     frame_id: int
     exptime: Optional[float]
@@ -67,7 +59,7 @@ class McsExposure(BaseModel):
     mcs_cover_temperature: Optional[float]
     mcs_m1_temperature: Optional[float]
     taken_at: datetime
-    # notes: List[McsExposureNote]
+    # notes: list[McsExposureNote]
 
     class Config:
         orm_mode = True
@@ -76,32 +68,45 @@ class McsExposure(BaseModel):
             def _row_to_obj(self, row: M.mcs_exposure):
                 return McsExposure(
                     frame_id=row.mcs_frame_id,
-                    exptime=row.mcs_exptime,
-                    altitude=row.altitude,
-                    azimuth=row.azimuth,
-                    insrot=row.insrot,
-                    adc_pa=row.adc_pa,
-                    dome_temperature=row.dome_temperature,
-                    dome_pressure=row.dome_pressure,
-                    dome_humidity=row.dome_humidity,
-                    outside_temperature=row.outside_temperature,
-                    outside_pressure=row.outside_pressure,
-                    outside_humidity=row.outside_humidity,
-                    mcs_cover_temperature=row.mcs_cover_temperature,
-                    mcs_m1_temperature=row.mcs_m1_temperature,
+                    exptime=row.mcs_exptime,  # type: ignore
+                    altitude=row.altitude,  # type: ignore
+                    azimuth=row.azimuth,  # type: ignore
+                    insrot=row.insrot,  # type: ignore
+                    adc_pa=row.adc_pa,  # type: ignore
+                    dome_temperature=row.dome_temperature,  # type: ignore
+                    dome_pressure=row.dome_pressure,  # type: ignore
+                    dome_humidity=row.dome_humidity,  # type: ignore
+                    outside_temperature=row.outside_temperature,  # type: ignore
+                    outside_pressure=row.outside_pressure,  # type: ignore
+                    outside_humidity=row.outside_humidity,  # type: ignore
+                    mcs_cover_temperature=row.mcs_cover_temperature,  # type: ignore
+                    mcs_m1_temperature=row.mcs_m1_temperature,  # type: ignore
                     taken_at=row.taken_at,
                     # notes=[VisitSetNote.from_row(n) for n in row.obslog_notes],  # type: ignore
                 )
 
 
+@static_check_init_args
 class McsVisit(BaseModel):
     exposures: list[McsExposure]
 
 
+@static_check_init_args
+class VisitNote(BaseModel):
+    id: int
+    user_id: int
+    pfs_visit_id: int
+    body: str
+
+    class Config:
+        orm_mode = True
+
+
+@static_check_init_args
 class Visit(BaseModel):
     id: int
-    description: str
-    issued_at: datetime
+    description: Optional[str]
+    issued_at: Optional[datetime]
 
     class Config:
         orm_mode = True
@@ -115,21 +120,31 @@ class Visit(BaseModel):
                 )
 
 
-class VisitDetail(Visit):
-    notes: list[VisitNote]
-    sps_visit: Optional[SpsVisit]
-    mcs_visit: Optional[McsVisit]
+@static_check_init_args
+class SpsSequence(BaseModel):
+    sequence_type: Optional[str]
+    name: Optional[str]
+    comments: Optional[str]
+    cmd_str: Optional[str]
+    status: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+
+@static_check_init_args
+class VisitSet(BaseModel):
+    id: int
+    visit_id: int
+    sps_sequence: SpsSequence
 
     class Config:
         orm_mode = True
 
         class getter_dict(orm_getter_dict):
-            def _row_to_obj(self, row: M.pfs_visit):
-                return VisitDetail(
-                    id=row.pfs_visit_id,
-                    description=row.pfs_visit_description,
-                    issued_at=row.issued_at,
-                    notes=row.obslog_notes,
-                    sps_visit=row.sps_visit,
-                    mvs_visit=None if len(row.mcs_exposure) == 0 else McsVisit(exposures=row.mcs_exposure),
+            def _row_to_obj(self, row: M.visit_set):
+                return VisitSet(
+                    id=row.visit_set_id,
+                    visit_id=row.pfs_visit_id,
+                    sps_sequence=row.sps_sequence,
                 )

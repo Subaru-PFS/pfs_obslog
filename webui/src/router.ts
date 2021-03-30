@@ -1,7 +1,6 @@
-import { StatusCodes } from "http-status-codes"
 import { createRouter, createWebHashHistory } from "vue-router"
-import { apiThrowsError } from "./api"
 import { $g } from "./global"
+import { sessionReload } from "./session"
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -16,12 +15,10 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  if ($g.session.account_name === null && !to.meta.noLogin) {
-    try {
-      await apiThrowsError(StatusCodes.FORBIDDEN).sessionShow()
+  if ($g.session === null && !to.meta.noLogin) {
+    if (await sessionReload()) {
       next()
-    }
-    catch {
+    } else {
       next('/login')
     }
   }

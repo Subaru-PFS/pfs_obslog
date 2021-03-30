@@ -3,20 +3,20 @@ from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 
-def test_db_crud(test_db: Session):
+def test_db_crud(db: Session):
     # C
     user1 = obslog_user(account_name='hello')
-    test_db.add(user1)
-    test_db.commit()
+    db.add(user1)
+    db.commit()
 
     # R
-    assert test_db.query(obslog_user).order_by(obslog_user.id.desc()).limit(1).one_or_none().account_name == 'hello'
+    assert db.query(obslog_user).order_by(obslog_user.id.desc()).limit(1).one_or_none().account_name == 'hello'
 
     # U
     user1.account_name = 'world'  # type: ignore
-    test_db.commit()
-    assert test_db.query(obslog_user).order_by(obslog_user.id.desc()).limit(1).one_or_none().account_name == 'world'
+    db.commit()
+    assert db.query(obslog_user).order_by(obslog_user.id.desc()).limit(1).one_or_none().account_name == 'world'
 
     # D
-    test_db.execute(delete(obslog_user))
-    test_db.commit()
+    db.execute(delete(obslog_user))
+    db.commit()

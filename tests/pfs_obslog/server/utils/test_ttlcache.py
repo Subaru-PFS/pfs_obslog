@@ -1,4 +1,4 @@
-from pfs_obslog.utils.ttlcache import TtlCache
+from pfs_obslog.server.utils.ttlcache import TtlCache
 import pytest
 import time_machine
 

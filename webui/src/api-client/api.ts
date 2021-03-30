@@ -198,6 +198,93 @@ export interface SessionCreateRequest {
 /**
  * 
  * @export
+ * @interface SpsExposure
+ */
+export interface SpsExposure {
+    /**
+     * 
+     * @type {number}
+     * @memberof SpsExposure
+     */
+    camera_id: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SpsExposure
+     */
+    exptime: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsExposure
+     */
+    exp_start: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsExposure
+     */
+    exp_end: string;
+}
+/**
+ * 
+ * @export
+ * @interface SpsSequence
+ */
+export interface SpsSequence {
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequence
+     */
+    sequence_type?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequence
+     */
+    name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequence
+     */
+    comments?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequence
+     */
+    cmd_str?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequence
+     */
+    status?: string;
+}
+/**
+ * 
+ * @export
+ * @interface SpsVisit
+ */
+export interface SpsVisit {
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsVisit
+     */
+    exp_type: string;
+    /**
+     * 
+     * @type {Array<SpsExposure>}
+     * @memberof SpsVisit
+     */
+    exposures: Array<SpsExposure>;
+}
+/**
+ * 
+ * @export
  * @interface ValidationError
  */
 export interface ValidationError {
@@ -223,31 +310,6 @@ export interface ValidationError {
 /**
  * 
  * @export
- * @interface Visit
- */
-export interface Visit {
-    /**
-     * 
-     * @type {number}
-     * @memberof Visit
-     */
-    id: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Visit
-     */
-    description: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Visit
-     */
-    issued_at: string;
-}
-/**
- * 
- * @export
  * @interface VisitDetail
  */
 export interface VisitDetail {
@@ -262,13 +324,13 @@ export interface VisitDetail {
      * @type {string}
      * @memberof VisitDetail
      */
-    description: string;
+    description?: string;
     /**
      * 
      * @type {string}
      * @memberof VisitDetail
      */
-    issued_at: string;
+    issued_at?: string;
     /**
      * 
      * @type {Array<VisitNote>}
@@ -277,10 +339,65 @@ export interface VisitDetail {
     notes: Array<VisitNote>;
     /**
      * 
+     * @type {SpsVisit}
+     * @memberof VisitDetail
+     */
+    sps?: SpsVisit;
+    /**
+     * 
      * @type {McsVisit}
      * @memberof VisitDetail
      */
-    mcs_visit?: McsVisit;
+    mcs?: McsVisit;
+    /**
+     * 
+     * @type {SpsSequence}
+     * @memberof VisitDetail
+     */
+    sps_sequence?: SpsSequence;
+}
+/**
+ * 
+ * @export
+ * @interface VisitListEntry
+ */
+export interface VisitListEntry {
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitListEntry
+     */
+    id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VisitListEntry
+     */
+    description?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VisitListEntry
+     */
+    issued_at?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof VisitListEntry
+     */
+    sps_present: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof VisitListEntry
+     */
+    mcs_present: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitListEntry
+     */
+    visit_set_id?: number;
 }
 /**
  * 
@@ -542,7 +659,7 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async pfsVisitIndex(offset?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Visit>>> {
+        async pfsVisitIndex(offset?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<VisitListEntry>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.pfsVisitIndex(offset, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -564,7 +681,7 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async sessionCreate(sessionCreateRequest: SessionCreateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+        async sessionCreate(sessionCreateRequest: SessionCreateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Session>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.sessionCreate(sessionCreateRequest, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -614,7 +731,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        pfsVisitIndex(offset?: number, options?: any): AxiosPromise<Array<Visit>> {
+        pfsVisitIndex(offset?: number, options?: any): AxiosPromise<Array<VisitListEntry>> {
             return localVarFp.pfsVisitIndex(offset, options).then((request) => request(axios, basePath));
         },
         /**
@@ -634,7 +751,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        sessionCreate(sessionCreateRequest: SessionCreateRequest, options?: any): AxiosPromise<any> {
+        sessionCreate(sessionCreateRequest: SessionCreateRequest, options?: any): AxiosPromise<Session> {
             return localVarFp.sessionCreate(sessionCreateRequest, options).then((request) => request(axios, basePath));
         },
         /**

@@ -19,13 +19,16 @@ test:
 			--cov-branch tests
 	open ./htmlcov/index.html
 
+dev-server:
+	PFS_OBSLOG_ENV=development bash ./start.bash
+
 setup:
 	$(MAKE) -B .venv
 
 setup-test-db:
 	$(postgres_home)/bin/dropdb --user=postgres opdb_test || true
 	$(postgres_home)/bin/createdb --user=postgres opdb_test
-	$(postgres_home)/bin/psql --user=postgres --dbname=opdb_test < ./db/opdb-schema.sql
+	PFS_OBSLOG_ENV=test ./.venv/bin/python -m tests.db.setup
 
 clean:
 	rm -rf .venv

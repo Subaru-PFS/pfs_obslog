@@ -3,13 +3,13 @@ import { api } from "~/api"
 import { VisitDetail } from "~/api-client"
 
 export default defineComponent({
-  setup($p) {
+  setup($$) {
     const $ = reactive({
       m: null as null | VisitDetail,
     })
 
     const refresh = async () => {
-      $.m = (await api.pfsVisitShow($p.id)).data
+      $.m = (await api.pfsVisitShow($$.id)).data
     }
 
     onMounted(async () => {
@@ -19,7 +19,7 @@ export default defineComponent({
     const render = () => {
       return (
         <div>
-          id={$p.id}
+          id={$$.id}
           <pre>{JSON.stringify($.m, null, 2)}</pre>
           <hr />
         </div>

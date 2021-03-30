@@ -1,6 +1,6 @@
 import { defineComponent, onMounted, reactive } from "@vue/runtime-core"
-import { api } from "../api"
 import { ref } from "vue"
+import { sessionLogin } from "~/session"
 import { router } from "../router"
 
 
@@ -11,20 +11,16 @@ export default defineComponent({
       password: '',
     })
 
-    const onSubmit = async (e: Event) => {
-      e.preventDefault()
+    const onSubmit = async (ev: Event) => {
+      ev.preventDefault()
       const { username, password } = $
-      try {
-        await api.sessionCreate({ username, password })
+      if (await sessionLogin(username, password)) {
         router.push('/')
-      } catch {
+      }
+      else {
         alert('Incorrect Username or Password')
       }
     }
-
-    onMounted(() => {
-      usernameEl.value!.focus()
-    })
 
     const usernameEl = ref<HTMLInputElement | null>(null)
 

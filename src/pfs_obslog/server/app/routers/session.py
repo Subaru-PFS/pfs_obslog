@@ -16,22 +16,6 @@ class SessionCreateRequest(BaseModel):
     password: str
 
 
-@router.post('/api/session')
-def session_create(
-    params: SessionCreateRequest,
-    ctx: NoLoginContext = Depends(),
-):
-    if account_name := userauth.authorize(params.username, params.password):
-        with ctx.session.activate() as session:
-            session.account_name = account_name
-        if ctx.db.query(models.obslog_user).filter_by(account_name=account_name).one_or_none() is None:
-            user = models.obslog_user(account_name=account_name)
-            ctx.db.add(user)
-            ctx.db.commit()
-        return
-    raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY)
-
-
 class CurrentUser(BaseModel):
     id: int
     account_name: str
@@ -42,6 +26,23 @@ class CurrentUser(BaseModel):
 
 class Session(BaseModel):
     current_user: CurrentUser
+
+
+@router.post('/api/session', response_model=Session)
+def session_create(
+    params: SessionCreateRequest,
+    ctx: NoLoginContext = Depends(),
+):
+    if account_name := userauth.authorize(params.username, params.password):
+        with ctx.session.activate() as session:
+            session.account_name = account_name
+        user = ctx.db.query(models.obslog_user).filter_by(account_name=account_name).one_or_none()
+        if user is None:
+            user = models.obslog_user(account_name=account_name)
+            ctx.db.add(user)
+            ctx.db.commit()
+        return Session(current_user=user)
+    raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
 @router.get('/api/session', response_model=Session)

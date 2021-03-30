@@ -1,11 +1,10 @@
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
+from pfs_obslog.server.logging import reset_loggers
 
 from .routers.pfs_visits import router as pfs_visits_router
 from .routers.session import router as session_router
 from .staticassets import setup_static_assets
-from pfs_obslog.server.logging import reset_loggers
-
 
 app = FastAPI()
 app.include_router(session_router)

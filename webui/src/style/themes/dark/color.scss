@@ -1,0 +1,57 @@
+body,
+input,
+textarea,
+button,
+select {
+  background-color: #222;
+}
+
+* {
+  color: #ccc;
+}
+
+input,
+button,
+textarea,
+select {
+  box-shadow: 0 0 2px white;
+  border-style: none;
+}
+
+button,
+input[type="submit"] {
+  border-radius: 4px;
+}
+
+*:focus {
+  outline: none;
+  box-shadow: 0 0 8px cyan;
+}
+
+hr {
+  $color: gray;
+  border-style: none;
+  border-top-style: solid;
+  border-top-color: $color;
+}
+
+.visit_list {
+  .entry {
+    cursor: default;
+  }
+  .selected {
+    outline: solid;
+    &.sps {
+      background-color: green;
+    }
+    &.mcs {
+      background-color: blue;
+    }
+  }
+  .sps {
+    background-color: darkgreen;
+  }
+  .mcs {
+    background-color: darkblue;
+  }
+}
