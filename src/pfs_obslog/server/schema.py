@@ -136,7 +136,6 @@ class SpsSequence(BaseModel):
 class VisitSet(BaseModel):
     id: int
     visit_id: int
-    sps_sequence: SpsSequence
 
     class Config:
         orm_mode = True
@@ -146,5 +145,4 @@ class VisitSet(BaseModel):
                 return VisitSet(
                     id=row.visit_set_id,
                     visit_id=row.pfs_visit_id,
-                    sps_sequence=row.sps_sequence,
                 )

@@ -31,7 +31,7 @@ class VisitListEntry(Visit):
 
 
 @pytest.mark.focus
-def test_pfs_visit_index(db: Session):
+def test_visit_list(db: Session):
     q = db.query(
         M.pfs_visit,
         M.pfs_visit.mcs_exposure.any().label('sps_present'),

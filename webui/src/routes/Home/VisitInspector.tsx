@@ -9,7 +9,7 @@ export default defineComponent({
     })
 
     const refresh = async () => {
-      $.m = (await api.pfsVisitShow($$.id)).data
+      $.m = (await api.visitDetail($$.id)).data
     }
 
     onMounted(async () => {

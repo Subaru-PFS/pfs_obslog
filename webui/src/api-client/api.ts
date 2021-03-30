@@ -351,10 +351,23 @@ export interface VisitDetail {
     mcs?: McsVisit;
     /**
      * 
-     * @type {SpsSequence}
+     * @type {VisitSet}
      * @memberof VisitDetail
      */
-    sps_sequence?: SpsSequence;
+    visit_set?: VisitSet;
+}
+/**
+ * 
+ * @export
+ * @interface VisitList
+ */
+export interface VisitList {
+    /**
+     * 
+     * @type {Array<VisitListEntry>}
+     * @memberof VisitList
+     */
+    visits: Array<VisitListEntry>;
 }
 /**
  * 
@@ -430,6 +443,31 @@ export interface VisitNote {
      */
     body: string;
 }
+/**
+ * 
+ * @export
+ * @interface VisitSet
+ */
+export interface VisitSet {
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitSet
+     */
+    id: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitSet
+     */
+    visit_id: number;
+    /**
+     * 
+     * @type {SpsSequence}
+     * @memberof VisitSet
+     */
+    sps_sequence: SpsSequence;
+}
 
 /**
  * DefaultApi - axios parameter creator
@@ -445,75 +483,6 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         index: async (options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Pfs Visit Index
-         * @param {number} [offset] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        pfsVisitIndex: async (offset?: number, options: any = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/pfs_visits`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (offset !== undefined) {
-                localVarQueryParameter['offset'] = offset;
-            }
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Pfs Visit Show
-         * @param {number} id 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        pfsVisitShow: async (id: number, options: any = {}): Promise<RequestArgs> => {
-            // verify required parameter 'id' is not null or undefined
-            assertParamExists('pfsVisitShow', 'id', id)
-            const localVarPath = `/api/pfs_visits/{id}`
-                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -632,6 +601,75 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @summary Visit Detail
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitDetail: async (id: number, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('visitDetail', 'id', id)
+            const localVarPath = `/api/visits/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Visit List
+         * @param {number} [offset] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitList: async (offset?: number, options: any = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/visists`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -650,28 +688,6 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          */
         async index(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.index(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * 
-         * @summary Pfs Visit Index
-         * @param {number} [offset] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async pfsVisitIndex(offset?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<VisitListEntry>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.pfsVisitIndex(offset, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * 
-         * @summary Pfs Visit Show
-         * @param {number} id 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async pfsVisitShow(id: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitDetail>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.pfsVisitShow(id, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -705,6 +721,28 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.sessionShow(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
+        /**
+         * 
+         * @summary Visit Detail
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async visitDetail(id: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitDetail>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.visitDetail(id, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Visit List
+         * @param {number} [offset] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async visitList(offset?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.visitList(offset, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
     }
 };
 
@@ -723,26 +761,6 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          */
         index(options?: any): AxiosPromise<any> {
             return localVarFp.index(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Pfs Visit Index
-         * @param {number} [offset] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        pfsVisitIndex(offset?: number, options?: any): AxiosPromise<Array<VisitListEntry>> {
-            return localVarFp.pfsVisitIndex(offset, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Pfs Visit Show
-         * @param {number} id 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        pfsVisitShow(id: number, options?: any): AxiosPromise<VisitDetail> {
-            return localVarFp.pfsVisitShow(id, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -772,6 +790,26 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
         sessionShow(options?: any): AxiosPromise<Session> {
             return localVarFp.sessionShow(options).then((request) => request(axios, basePath));
         },
+        /**
+         * 
+         * @summary Visit Detail
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitDetail(id: number, options?: any): AxiosPromise<VisitDetail> {
+            return localVarFp.visitDetail(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Visit List
+         * @param {number} [offset] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitList(offset?: number, options?: any): AxiosPromise<VisitList> {
+            return localVarFp.visitList(offset, options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -791,30 +829,6 @@ export class DefaultApi extends BaseAPI {
      */
     public index(options?: any) {
         return DefaultApiFp(this.configuration).index(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Pfs Visit Index
-     * @param {number} [offset] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DefaultApi
-     */
-    public pfsVisitIndex(offset?: number, options?: any) {
-        return DefaultApiFp(this.configuration).pfsVisitIndex(offset, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Pfs Visit Show
-     * @param {number} id 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DefaultApi
-     */
-    public pfsVisitShow(id: number, options?: any) {
-        return DefaultApiFp(this.configuration).pfsVisitShow(id, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -849,6 +863,30 @@ export class DefaultApi extends BaseAPI {
      */
     public sessionShow(options?: any) {
         return DefaultApiFp(this.configuration).sessionShow(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Visit Detail
+     * @param {number} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public visitDetail(id: number, options?: any) {
+        return DefaultApiFp(this.configuration).visitDetail(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Visit List
+     * @param {number} [offset] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public visitList(offset?: number, options?: any) {
+        return DefaultApiFp(this.configuration).visitList(offset, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

@@ -1,10 +1,12 @@
-from typing import Optional
+from typing import Any, Optional, cast
 
 from fastapi import APIRouter, Depends
 from opdb import models as M
+from pydantic.main import BaseModel
 from pfs_obslog.server.app.context import Context
 from pfs_obslog.server.schema import McsVisit, SpsSequence, SpsVisit, Visit, VisitNote, VisitSet
 from pfs_obslog.server.orm import orm_getter_dict, static_check_init_args
+from sqlalchemy.orm import selectinload
 
 router = APIRouter()
 
@@ -30,8 +32,22 @@ class VisitListEntry(Visit):
                 )
 
 
-@router.get('/api/pfs_visits', response_model=list[VisitListEntry])
-def pfs_visit_index(
+@static_check_init_args
+class VisitSetDetail(VisitSet):
+    sps_sequence: SpsSequence
+
+    class Config:
+        orm_mode = True
+
+
+@static_check_init_args
+class VisitList(BaseModel):
+    visits: list[VisitListEntry]
+    visit_sets: list[VisitSetDetail]
+
+
+@router.get('/api/visists', response_model=VisitList)
+def visit_list(
     offset: int = 0,
     ctx: Context = Depends(),
 ):
@@ -48,7 +64,18 @@ def pfs_visit_index(
         .order_by(M.pfs_visit.pfs_visit_id.desc())\
         .limit(100)\
         .offset(offset)
-    return list(q)
+
+    visits = [VisitListEntry.from_orm(row) for row in q]
+
+    q2 = ctx.db.query(M.visit_set)\
+        .filter(M.visit_set.pfs_visit_id.in_(v.id for v in visits))\
+        .options(selectinload('sps_sequence'))
+    visit_sets = [VisitSetDetail.from_orm(row) for row in q2]
+
+    return VisitList(
+        visits=visits,
+        visit_sets=visit_sets,
+    )
 
 
 @static_check_init_args
@@ -74,8 +101,8 @@ class VisitDetail(Visit):
                 )
 
 
-@ router.get('/api/pfs_visits/{id}', response_model=VisitDetail)
-def pfs_visit_show(
+@ router.get('/api/visits/{id}', response_model=VisitDetail)
+def visit_detail(
     id: int,
     ctx: Context = Depends(),
 ):

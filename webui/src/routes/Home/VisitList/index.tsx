@@ -13,7 +13,8 @@ export default defineComponent({
     })
 
     watchEffect(async () => {
-      $.members = (await api.pfsVisitIndex($.offset)).data
+      const { visits, } = (await api.visitList($.offset)).data
+      $.members = visits
     })
 
     watchEffect(() => {
