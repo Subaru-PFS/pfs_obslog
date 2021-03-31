@@ -24,7 +24,6 @@ export default defineComponent({
       return (
         <div class="fill-height" style={{ display: 'flex', flexDirection: 'column' }}>
           {/* menu */}
-          <pre>{JSON.stringify($g)}</pre>
           <div style={{ display: 'flex' }}>
             🔍 <input type="text" style={{ flexGrow: 1 }} />
             <button onClick={logout}>👋 Logout</button>

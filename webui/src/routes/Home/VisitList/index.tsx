@@ -34,17 +34,34 @@ export default defineComponent({
       }
     }
 
+    let mouseState: 'up' | 'down' = 'up'
+
+    const onMousedown = (e: MouseEvent) => {
+      mouseState = 'down'
+      document.addEventListener('mouseup', () => mouseState = 'up', { once: true })
+    }
+
     const render = () => {
       const entries = $.members.map(m =>
-        <Entry
-          m={m}
-          onSelect={id => $.selectedIds = [id]}
-          selected={$.selectedIds.includes(m.id)} />
+        <div onMouseenter={e => {
+          if (mouseState == 'down') {
+            $.selectedIds = [m.id]
+          }
+        }}
+          onMousedown={() => $.selectedIds = [m.id]}
+          onClick={() => $.selectedIds = [m.id]}
+        >
+          <Entry
+            m={m}
+            selected={$.selectedIds.includes(m.id)} />
+        </div>
       )
       return (<>
         <div
+          onMousedown={onMousedown}
           class="visit_list" style={{ display: 'flex', flexDirection: 'column' }}
-          tabindex={0} onKeydown={onKeydown}
+          tabindex={0}
+          onKeydown={onKeydown}
         >
           <input type="text" v-model={$.offset} />
           <button onClick={() => $.offset -= 100} disabled={$.offset == 0}>🔼</button>

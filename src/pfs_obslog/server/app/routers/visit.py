@@ -39,6 +39,14 @@ class VisitSetDetail(VisitSet):
     class Config:
         orm_mode = True
 
+        class getter_dict(orm_getter_dict):
+            def _row_to_obj(self, row: M.visit_set):
+                return VisitSetDetail(
+                    id=row.visit_set_id,
+                    visit_id=row.pfs_visit_id,
+                    sps_sequence=row.sps_sequence,
+                )
+
 
 @static_check_init_args
 class VisitList(BaseModel):
@@ -83,7 +91,7 @@ class VisitDetail(Visit):
     notes: list[VisitNote]
     sps: Optional[SpsVisit]
     mcs: Optional[McsVisit]
-    visit_set: Optional[VisitSet]
+    visit_set: Optional[VisitSetDetail]
 
     class Config:
         orm_mode = True
@@ -97,7 +105,7 @@ class VisitDetail(Visit):
                     notes=row.obslog_notes,
                     sps=row.sps_visit,
                     mcs=None if len(row.mcs_exposure) == 0 else McsVisit(exposures=row.mcs_exposure),
-                    visit_set=row.sps_visit.visit_set,
+                    visit_set=row.sps_visit.visit_set if row.sps_visit else None,
                 )
 
 

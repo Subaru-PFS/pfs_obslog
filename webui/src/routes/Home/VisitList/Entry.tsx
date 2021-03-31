@@ -1,25 +1,8 @@
 import { defineComponent, PropType, ref, watchEffect } from "vue"
 import { VisitListEntry } from "~/api-client"
-import { int } from "~/types"
 
 export default defineComponent({
   setup($$) {
-    const render = () => {
-      const classes = {
-        entry: true,
-        selected: $$.selected,
-        sps: $$.m.sps_present,
-        mcs: $$.m.mcs_present,
-      }
-      return <>
-        <div ref={el} class={classes} onClick={e => $$.onSelect($$.m.id)} style={{ userSelect: 'none' }}>
-          {$$.m.id} / {$$.m.visit_set_id}
-          <div>
-            {$$.m.description}
-          </div>
-        </div>
-      </>
-    }
 
     const el = ref<null | HTMLDivElement>(null)
 
@@ -32,15 +15,30 @@ export default defineComponent({
       }
     })
 
+    const render = () => {
+      const classes = {
+        selected: $$.selected,
+        sps: $$.m.sps_present,
+        mcs: $$.m.mcs_present,
+      }
+      return <>
+        <div
+          ref={el} class={{ entry: true, ...classes }}
+          style={{ userSelect: 'none' }}
+        >
+          {$$.m.id} / {$$.m.visit_set_id}
+          <div>
+            {$$.m.description}
+          </div>
+        </div>
+      </>
+    }
+
     return render
   },
   props: {
     m: {
       type: Object as PropType<VisitListEntry>,
-      required: true,
-    },
-    onSelect: {
-      type: Function as PropType<(id: int) => void>,
       required: true,
     },
     selected: {
