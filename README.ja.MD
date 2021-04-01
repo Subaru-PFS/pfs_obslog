@@ -80,6 +80,8 @@ PFSの観測中、またはエンジニアリング中にopDBの内容を確認�
 * pfs_visit has one visit_set (visit_set.pfs_visit_id が primary keyなので！)
 * visit_set has one sps_sequence
 * -> pfs_visit has one sps_sequence
+* visit_setに紐づかないpfs_visitは8500件以上。
+* １つのvisit_setに最大で350
 
 ### リスト構造
 * VisitSet

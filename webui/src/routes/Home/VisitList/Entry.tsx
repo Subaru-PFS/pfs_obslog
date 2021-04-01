@@ -8,7 +8,7 @@ export default defineComponent({
 
     watchEffect(() => {
       if ($$.selected) {
-        el.value!.scrollIntoView({
+        el.value?.scrollIntoView({
           behavior: 'smooth',
           block: 'nearest',
         })
@@ -24,12 +24,11 @@ export default defineComponent({
       return <>
         <div
           ref={el} class={{ entry: true, ...classes }}
-          style={{ userSelect: 'none' }}
+          style={{ userSelect: 'none', paddingLeft: '2em', width: '400px' }}
         >
-          {$$.m.id} / {$$.m.visit_set_id}
-          <div>
-            {$$.m.description}
-          </div>
+          <div style={{ whiteSpace: 'pre' }}>
+            {$$.m.id} [{$$.m.description}]
+            </div>
         </div>
       </>
     }

@@ -26,7 +26,9 @@ class orm_getter_dict(GetterDict):
 # # Argument missing for parameter "id"
 # X()
 if TYPE_CHECKING:  # pragma: no cover
-    static_check_init_args = dataclasses.dataclass
+    _static_check_init_args = dataclasses.dataclass
 else:
-    def static_check_init_args(cls):
+    def _static_check_init_args(cls):
         return cls
+
+static_check_init_args = _static_check_init_args

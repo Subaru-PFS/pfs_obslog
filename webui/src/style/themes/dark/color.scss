@@ -21,6 +21,16 @@ select {
 button,
 input[type="submit"] {
   border-radius: 4px;
+  background-color: #222;
+  &:hover {
+    background-color: #333;
+  }
+  &:active {
+    background-color: #555;
+  }
+  &:disabled {
+    opacity: 0.5;
+  }
 }
 
 *:focus {

@@ -1,4 +1,4 @@
-from typing import Any, Optional, cast
+from typing import Optional
 
 from fastapi import APIRouter, Depends
 from opdb import models as M
@@ -70,7 +70,7 @@ def visit_list(
         .outerjoin(M.sps_visit)\
         .outerjoin(M.visit_set)\
         .order_by(M.pfs_visit.pfs_visit_id.desc())\
-        .limit(100)\
+        .limit(10)\
         .offset(offset)
 
     visits = [VisitListEntry.from_orm(row) for row in q]
