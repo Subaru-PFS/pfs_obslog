@@ -48,7 +48,7 @@ export class Spinner {
           <SpinnerComponent show={this.$.showSpinner} />
           {this.$.count > 0 &&
             <Teleport to="body">
-              <div class="fill-height"></div>
+              <div style={{ height: '100%' }}></div>
             </Teleport>
           }
         </>

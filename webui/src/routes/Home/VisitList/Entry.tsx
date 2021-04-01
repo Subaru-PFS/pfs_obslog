@@ -24,9 +24,9 @@ export default defineComponent({
       return <>
         <div
           ref={el} class={{ entry: true, ...classes }}
-          style={{ userSelect: 'none', paddingLeft: '2em', width: '400px' }}
+          style={{ userSelect: 'none', paddingLeft: '1em' }}
         >
-          <div style={{ whiteSpace: 'pre' }}>
+          <div>
             {$$.m.id} [{$$.m.description}]
             </div>
         </div>

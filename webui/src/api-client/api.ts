@@ -351,10 +351,10 @@ export interface VisitDetail {
     mcs?: McsVisit;
     /**
      * 
-     * @type {VisitSet}
+     * @type {VisitSetDetail}
      * @memberof VisitDetail
      */
-    visit_set?: VisitSet;
+    visit_set?: VisitSetDetail;
 }
 /**
  * 
@@ -368,6 +368,12 @@ export interface VisitList {
      * @memberof VisitList
      */
     visits: Array<VisitListEntry>;
+    /**
+     * 
+     * @type {Array<VisitSetDetail>}
+     * @memberof VisitList
+     */
+    visit_sets: Array<VisitSetDetail>;
 }
 /**
  * 
@@ -446,25 +452,25 @@ export interface VisitNote {
 /**
  * 
  * @export
- * @interface VisitSet
+ * @interface VisitSetDetail
  */
-export interface VisitSet {
+export interface VisitSetDetail {
     /**
      * 
      * @type {number}
-     * @memberof VisitSet
+     * @memberof VisitSetDetail
      */
     id: number;
     /**
      * 
      * @type {number}
-     * @memberof VisitSet
+     * @memberof VisitSetDetail
      */
     visit_id: number;
     /**
      * 
      * @type {SpsSequence}
-     * @memberof VisitSet
+     * @memberof VisitSetDetail
      */
     sps_sequence: SpsSequence;
 }
@@ -639,10 +645,11 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          * 
          * @summary Visit List
          * @param {number} [offset] 
+         * @param {number} [limit] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        visitList: async (offset?: number, options: any = {}): Promise<RequestArgs> => {
+        visitList: async (offset?: number, limit?: number, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/visists`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -657,6 +664,10 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
             if (offset !== undefined) {
                 localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
             }
 
 
@@ -736,11 +747,12 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * 
          * @summary Visit List
          * @param {number} [offset] 
+         * @param {number} [limit] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async visitList(offset?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitList>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.visitList(offset, options);
+        async visitList(offset?: number, limit?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.visitList(offset, limit, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -804,11 +816,12 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * 
          * @summary Visit List
          * @param {number} [offset] 
+         * @param {number} [limit] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        visitList(offset?: number, options?: any): AxiosPromise<VisitList> {
-            return localVarFp.visitList(offset, options).then((request) => request(axios, basePath));
+        visitList(offset?: number, limit?: number, options?: any): AxiosPromise<VisitList> {
+            return localVarFp.visitList(offset, limit, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -881,12 +894,13 @@ export class DefaultApi extends BaseAPI {
      * 
      * @summary Visit List
      * @param {number} [offset] 
+     * @param {number} [limit] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    public visitList(offset?: number, options?: any) {
-        return DefaultApiFp(this.configuration).visitList(offset, options).then((request) => request(this.axios, this.basePath));
+    public visitList(offset?: number, limit?: number, options?: any) {
+        return DefaultApiFp(this.configuration).visitList(offset, limit, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

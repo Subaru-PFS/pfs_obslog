@@ -57,6 +57,7 @@ class VisitList(BaseModel):
 @router.get('/api/visists', response_model=VisitList)
 def visit_list(
     offset: int = 0,
+    limit: int = 50,
     ctx: Context = Depends(),
 ):
     q = ctx.db.query(
@@ -70,7 +71,7 @@ def visit_list(
         .outerjoin(M.sps_visit)\
         .outerjoin(M.visit_set)\
         .order_by(M.pfs_visit.pfs_visit_id.desc())\
-        .limit(10)\
+        .limit(limit)\
         .offset(offset)
 
     visits = [VisitListEntry.from_orm(row) for row in q]

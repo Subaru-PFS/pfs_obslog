@@ -12,10 +12,11 @@ export default defineComponent({
       selectedIds: [] as number[],
       members: [] as VisitListEntry[],
       offset: 0,
+      limit: 20,
     })
 
     watchEffect(async () => {
-      const { visits, } = (await api.visitList($.offset)).data
+      const { visits, } = (await api.visitList($.offset, $.limit)).data
       $.members = visits
     })
 
@@ -49,14 +50,20 @@ export default defineComponent({
         <div
           tabindex={0}
           onMousedown={onMousedown}
-          class="visit_list" style={{ display: 'flex', flexDirection: 'column' }}
+          class="visit_list"
+          style={{ display: 'flex', flexDirection: 'column', userSelect: 'none' }}
           onKeydown={onKeydown}
         >
-          <input type="text" v-model={$.offset} />
-          <button onClick={() => $.offset -= 100} disabled={$.offset == 0}>🔼</button>
-          <FlexScroll>
-            {
-              groups.map(g =>
+          <input type="text" v-model={$.offset} style={{ display: 'block' }} />
+          <input type="text" v-model={$.limit} style={{ display: 'block' }} />
+          {/* <button onClick={() => $.offset -= 100} disabled={$.offset == 0}>🔼</button> */}
+          <div
+          // style={{ flexGrow: 1, position: 'relative' }}
+          >
+            <div
+            //  style={{ position: 'absolute', width: '100%', height: '50%', overflow: 'auto' }}
+            >
+              {groups.map(g =>
                 <div>
                   <div class="visit-set">
                     <div>{g.visit_set_id}</div>
@@ -71,18 +78,17 @@ export default defineComponent({
                           onMousedown={() => $.selectedIds = [m.id]}
                           onClick={() => $.selectedIds = [m.id]}
                         >
-                          <Entry
-                            m={m}
-                            selected={$.selectedIds.includes(m.id)} />
+                          <Entry m={m} selected={$.selectedIds.includes(m.id)} />
                         </div>
                       )
                     }
                   </div>
                 </div>
               )
-            }
-          </FlexScroll>
-          <button onClick={() => $.offset += 100}>🔽</button>
+              }
+            </div>
+          </div>
+          {/* <button onClick={() => $.offset += 100}>🔽</button> */}
         </div>
       </>)
     }

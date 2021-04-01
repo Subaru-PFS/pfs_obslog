@@ -22,7 +22,7 @@ export default defineComponent({
       const inspectors = $.selected_ids.map(id => <VisitInspector key={id} id={id} />)
 
       return (
-        <div class="fill-height" style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           {/* menu */}
           <div style={{ display: 'flex' }}>
             🔍 <input type="text" style={{ flexGrow: 1 }} />
