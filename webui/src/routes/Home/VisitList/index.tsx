@@ -1,120 +1,164 @@
-import { defineComponent, PropType, reactive, watchEffect } from "vue"
-import { api } from "~/api"
+import { defineComponent, ref } from "vue"
 import { VisitListEntry } from "~/api-client"
-import FlexScroll from "~/components/FlexScroll"
-import Entry from "./Entry"
-
+import { MI } from "~/components/MaterialIcon"
+import { useVisitList } from "../useVisitList"
+import VisitEntry from "./VisitEntry"
+import VisitGroup from "./VisitGroup"
 
 
 export default defineComponent({
-  setup($$) {
-    const $ = reactive({
-      selectedIds: [] as number[],
-      members: [] as VisitListEntry[],
-      offset: 0,
-      limit: 20,
-    })
+  props: {
+    selectedId: {
+      type: Number,
+    },
+  },
+  setup($$, { emit }) {
+    const dragSelect = useDragSelect()
+    const visitList = useVisitList()
+    const listEl = ref<HTMLDivElement | null>(null)
+    const listEndEl = ref<null | HTMLDivElement>(null)
 
-    watchEffect(async () => {
-      const { visits, } = (await api.visitList($.offset, $.limit)).data
-      $.members = visits
-    })
+    const setSelectedId = (id: number | null) => {
+      emit('update:selectedId', id)
+    }
 
-    watchEffect(() => {
-      $$.onChange($.selectedIds)
-    })
-
-    const onKeydown = (e: KeyboardEvent) => {
-      const index = $.members.findIndex(m => $.selectedIds.includes(m.id))
+    const onKeydown = async (e: KeyboardEvent) => {
+      const index = Math.max(0, visitList.$.visits.findIndex(m => m.id === $$.selectedId))
       switch (e.key) {
         case 'ArrowUp':
-          $.selectedIds = [$.members[Math.max(index - 1, 0)].id]
+          e.preventDefault()
+          if (index == 0 && visitList.q.start > 0) {
+            await loadPrevsMore()
+          }
+          const index2 = Math.max(0, visitList.$.visits.findIndex(m => m.id === $$.selectedId))
+          setSelectedId(visitList.$.visits[Math.max(index2 - 1, 0)].id)
           break
         case 'ArrowDown':
-          $.selectedIds = [$.members[Math.min(index + 1, $.members.length - 1)].id]
+          e.preventDefault()
+          if (index + 1 >= visitList.$.visits.length) {
+            await visitList.loadMore()
+          }
+          setSelectedId(visitList.$.visits[Math.min(index + 1, visitList.$.visits.length - 1)].id)
           break
       }
     }
 
-    let mouseState: 'up' | 'down' = 'up'
-
-    const onMousedown = (e: MouseEvent) => {
-      mouseState = 'down'
-      document.addEventListener('mouseup', () => mouseState = 'up', { once: true })
+    const loadPrevsMore = async () => {
+      const h0 = listEndEl.value!.offsetTop
+      await visitList.loadPrevsMore()
+      const h1 = listEndEl.value!.offsetTop
+      listEl.value!.scrollTop += h1 - h0
     }
 
     const render = () => {
-      const groups = groupVisits($.members)
-
       return (<>
         <div
-          tabindex={0}
-          onMousedown={onMousedown}
-          class="visit_list"
-          style={{ display: 'flex', flexDirection: 'column', userSelect: 'none' }}
-          onKeydown={onKeydown}
+          class="visitList"
+          style={{ display: 'flex', flexDirection: 'column' }}
         >
-          <input type="text" v-model={$.offset} style={{ display: 'block' }} />
-          <input type="text" v-model={$.limit} style={{ display: 'block' }} />
-          {/* <button onClick={() => $.offset -= 100} disabled={$.offset == 0}>🔼</button> */}
+          {/* navigations */}
+          <div style={{ display: 'flex' }}>
+            <button onClick={async e => { await visitList.firstPage(); listEl.value?.scrollTo(0, 0) }} disabled={visitList.q.start == 0}> {MI('first_page')} </button>
+            <button onClick={async e => { await visitList.prevPage(); listEl.value?.scrollTo(0, listEl.value?.scrollHeight) }} disabled={visitList.q.start == 0}> {MI('navigate_before')} </button>
+            <input
+              style={{ textAlign: 'center', flexGrow: 1 }} type="text" readonly={true}
+              value={`${visitList.q.start}-${visitList.q.end} / ${visitList.$.count}`}
+            />
+            <button onClick={async e => { await visitList.nextPage(); listEl.value?.scrollTo(0, 0) }}> {MI('navigate_next')}
+            </button>
+          </div>
+          {/* main list */}
           <div
-          // style={{ flexGrow: 1, position: 'relative' }}
+            tabindex={0}
+            onMousedown={dragSelect.mousedownStart}
+            onKeydown={onKeydown}
+            style={{
+              cursor: 'default',
+              flexGrow: 1,
+              height: 0, // https://github.com/philipwalton/flexbugs/issues/197
+              width: '15em',
+              overflowY: 'auto'
+            }}
+            // @ts-ignore
+            onSelectstart={e => e.preventDefault()}
+            ref={listEl}
           >
-            <div
-            //  style={{ position: 'absolute', width: '100%', height: '50%', overflow: 'auto' }}
-            >
-              {groups.map(g =>
-                <div>
-                  <div class="visit-set">
-                    <div>{g.visit_set_id}</div>
-                    {
-                      g.visits.map(m =>
-                        <div
-                          onMouseenter={e => {
-                            if (mouseState == 'down') {
-                              $.selectedIds = [m.id]
-                            }
-                          }}
-                          onMousedown={() => $.selectedIds = [m.id]}
-                          onClick={() => $.selectedIds = [m.id]}
-                        >
-                          <Entry m={m} selected={$.selectedIds.includes(m.id)} />
-                        </div>
-                      )
-                    }
-                  </div>
-                </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <button onClick={loadPrevsMore} disabled={visitList.q.start == 0}>{MI('expand_less')}</button>
+            </div>
+            {groupVisits(visitList.$.visits).map(g =>
+              dragSelect.element(
+                () => setSelectedId(g.visits[0].id),
+                <VisitGroup visitSet={g.visit_set_id ? visitList.$.visitSets[g.visit_set_id] : undefined}>
+                  {g.visits.map(m =>
+                    dragSelect.element(
+                      () => setSelectedId(m.id),
+                      <VisitEntry m={m} selected={m.id === $$.selectedId} />
+                    )
+                  )}
+                </VisitGroup>
               )
-              }
+            )}
+            <div ref={listEndEl}></div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <button onClick={e => visitList.loadMore()}>{MI('expand_more')}</button>
             </div>
           </div>
-          {/* <button onClick={() => $.offset += 100}>🔽</button> */}
         </div>
       </>)
     }
 
     return render
   },
-  props: {
-    onChange: {
-      type: Function as PropType<(selected_ids: number[]) => void>,
-      required: true,
-    }
-  },
 })
 
 
-function groupVisits(vs: VisitListEntry[]) {
-  class VisitGroup {
-    constructor(readonly visit_set_id?: number, readonly visits: VisitListEntry[] = []) {
-    }
+function useDragSelect() {
+  let mouseState: 'up' | 'down' = 'up'
+  let mouseDevice = false
+  const mousedownStart = (e: MouseEvent) => {
+    mouseDevice = true
+    e.stopPropagation()
+    mouseState = 'down'
+    document.addEventListener('mouseup', () => mouseState = 'up', { once: true })
   }
-  const gs: VisitGroup[] = []
-  let g: VisitGroup | null = null
+  const element = (onSelect: () => void, slot: JSX.Element) => {
+    return (
+      <div
+        onMouseenter={e => {
+          if (mouseState == 'down') {
+            e.stopPropagation()
+            onSelect()
+          }
+        }}
+        onMousedown={e => {
+          mousedownStart(e)
+          onSelect()
+        }}
+        onClick={e => {
+          mouseDevice || onSelect()
+        }}
+      >
+        {slot}
+      </div>
+    )
+  }
+  return { mousedownStart, element }
+}
+
+
+function groupVisits(vs: VisitListEntry[]) {
+  class Group {
+    constructor(
+      readonly visit_set_id?: number,
+      readonly visits: VisitListEntry[] = []) { }
+  }
+  const gs: Group[] = []
+  let g: Group | null = null
   for (const m of vs) {
     if (!(g && g.visit_set_id === m.visit_set_id)) {
       g && gs.push(g)
-      g = new VisitGroup(m.visit_set_id)
+      g = new Group(m.visit_set_id)
     }
     g.visits.push(m)
   }

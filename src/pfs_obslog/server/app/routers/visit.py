@@ -1,13 +1,18 @@
+from logging import getLogger
 from typing import Optional
 
 from fastapi import APIRouter, Depends
 from opdb import models as M
-from pydantic.main import BaseModel
 from pfs_obslog.server.app.context import Context
-from pfs_obslog.server.schema import McsVisit, SpsSequence, SpsVisit, Visit, VisitNote, VisitSet
 from pfs_obslog.server.orm import orm_getter_dict, static_check_init_args
+from pfs_obslog.server.schema import (McsVisit, ObslogUser, SpsSequence, SpsVisit, Visit,
+                                      VisitNote, VisitSet, VisitSetNote)
+from pfs_obslog.server.visitquery import visit_query
+from pydantic.main import BaseModel
 from sqlalchemy.orm import selectinload
 
+
+logger = getLogger(__name__)
 router = APIRouter()
 
 
@@ -52,12 +57,14 @@ class VisitSetDetail(VisitSet):
 class VisitList(BaseModel):
     visits: list[VisitListEntry]
     visit_sets: list[VisitSetDetail]
+    count: int
 
 
-@router.get('/api/visists', response_model=VisitList)
+@router.get('/api/visits', response_model=VisitList)
 def visit_list(
     offset: int = 0,
     limit: int = 50,
+    filter: Optional[str] = None,
     ctx: Context = Depends(),
 ):
     q = ctx.db.query(
@@ -70,6 +77,15 @@ def visit_list(
         .select_from(M.pfs_visit)\
         .outerjoin(M.sps_visit)\
         .outerjoin(M.visit_set)\
+
+    if filter:
+        vq = visit_query(filter)
+        if vq.pfs_visit_ids is not None:
+            q = q.filter(M.pfs_visit.pfs_visit_id.in_(vq.pfs_visit_ids))
+
+    count = q.count()
+
+    q = q\
         .order_by(M.pfs_visit.pfs_visit_id.desc())\
         .limit(limit)\
         .offset(offset)
@@ -79,20 +95,52 @@ def visit_list(
     q2 = ctx.db.query(M.visit_set)\
         .filter(M.visit_set.pfs_visit_id.in_(v.id for v in visits))\
         .options(selectinload('sps_sequence'))
+
     visit_sets = [VisitSetDetail.from_orm(row) for row in q2]
 
     return VisitList(
         visits=visits,
         visit_sets=visit_sets,
+        count=count,
     )
 
 
 @static_check_init_args
+class VisitNoteDetail(VisitNote):
+    user: ObslogUser
+
+
+@static_check_init_args
+class VisitSetNoteDetail(VisitSetNote):
+    user: ObslogUser
+
+
+@static_check_init_args
+class SpsSequenceDetail(SpsSequence):
+    notes: list[VisitSetNoteDetail]
+
+    class Config:
+        orm_mode = True
+
+        class getter_dict(orm_getter_dict):
+            def _row_to_obj(self, row: M.sps_sequence):
+                return SpsSequenceDetail(
+                    visit_set_id=row.visit_set_id,
+                    sequence_type=row.sequence_type,
+                    name=row.name,
+                    comments=row.comments,
+                    cmd_str=row.cmd_str,
+                    status=row.status,
+                    notes=row.obslog_notes,
+                )
+
+
+@static_check_init_args
 class VisitDetail(Visit):
-    notes: list[VisitNote]
+    notes: list[VisitNoteDetail]
     sps: Optional[SpsVisit]
     mcs: Optional[McsVisit]
-    visit_set: Optional[VisitSetDetail]
+    sps_sequence: Optional[SpsSequenceDetail]
 
     class Config:
         orm_mode = True
@@ -106,11 +154,11 @@ class VisitDetail(Visit):
                     notes=row.obslog_notes,
                     sps=row.sps_visit,
                     mcs=None if len(row.mcs_exposure) == 0 else McsVisit(exposures=row.mcs_exposure),
-                    visit_set=row.sps_visit.visit_set if row.sps_visit else None,
+                    sps_sequence=row.sps_visit.visit_set.sps_sequence if row.sps_visit else None,
                 )
 
 
-@ router.get('/api/visits/{id}', response_model=VisitDetail)
+@router.get('/api/visits/{id}', response_model=VisitDetail)
 def visit_detail(
     id: int,
     ctx: Context = Depends(),

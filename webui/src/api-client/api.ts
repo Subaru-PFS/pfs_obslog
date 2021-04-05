@@ -166,6 +166,25 @@ export interface McsVisit {
 /**
  * 
  * @export
+ * @interface ObslogUser
+ */
+export interface ObslogUser {
+    /**
+     * 
+     * @type {number}
+     * @memberof ObslogUser
+     */
+    id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObslogUser
+     */
+    account_name: string;
+}
+/**
+ * 
+ * @export
  * @interface Session
  */
 export interface Session {
@@ -234,6 +253,12 @@ export interface SpsExposure {
 export interface SpsSequence {
     /**
      * 
+     * @type {number}
+     * @memberof SpsSequence
+     */
+    visit_set_id: number;
+    /**
+     * 
      * @type {string}
      * @memberof SpsSequence
      */
@@ -262,6 +287,55 @@ export interface SpsSequence {
      * @memberof SpsSequence
      */
     status?: string;
+}
+/**
+ * 
+ * @export
+ * @interface SpsSequenceDetail
+ */
+export interface SpsSequenceDetail {
+    /**
+     * 
+     * @type {number}
+     * @memberof SpsSequenceDetail
+     */
+    visit_set_id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequenceDetail
+     */
+    sequence_type?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequenceDetail
+     */
+    name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequenceDetail
+     */
+    comments?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequenceDetail
+     */
+    cmd_str?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequenceDetail
+     */
+    status?: string;
+    /**
+     * 
+     * @type {Array<VisitSetNoteDetail>}
+     * @memberof SpsSequenceDetail
+     */
+    notes: Array<VisitSetNoteDetail>;
 }
 /**
  * 
@@ -333,10 +407,10 @@ export interface VisitDetail {
     issued_at?: string;
     /**
      * 
-     * @type {Array<VisitNote>}
+     * @type {Array<VisitNoteDetail>}
      * @memberof VisitDetail
      */
-    notes: Array<VisitNote>;
+    notes: Array<VisitNoteDetail>;
     /**
      * 
      * @type {SpsVisit}
@@ -351,10 +425,10 @@ export interface VisitDetail {
     mcs?: McsVisit;
     /**
      * 
-     * @type {VisitSetDetail}
+     * @type {SpsSequenceDetail}
      * @memberof VisitDetail
      */
-    visit_set?: VisitSetDetail;
+    sps_sequence?: SpsSequenceDetail;
 }
 /**
  * 
@@ -374,6 +448,12 @@ export interface VisitList {
      * @memberof VisitList
      */
     visit_sets: Array<VisitSetDetail>;
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitList
+     */
+    count: number;
 }
 /**
  * 
@@ -421,31 +501,82 @@ export interface VisitListEntry {
 /**
  * 
  * @export
- * @interface VisitNote
+ * @interface VisitNoteCreateRequest
  */
-export interface VisitNote {
+export interface VisitNoteCreateRequest {
     /**
      * 
      * @type {number}
-     * @memberof VisitNote
+     * @memberof VisitNoteCreateRequest
+     */
+    visit_id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VisitNoteCreateRequest
+     */
+    body: string;
+}
+/**
+ * 
+ * @export
+ * @interface VisitNoteCreateResponse
+ */
+export interface VisitNoteCreateResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitNoteCreateResponse
+     */
+    id: number;
+}
+/**
+ * 
+ * @export
+ * @interface VisitNoteDetail
+ */
+export interface VisitNoteDetail {
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitNoteDetail
      */
     id: number;
     /**
      * 
      * @type {number}
-     * @memberof VisitNote
+     * @memberof VisitNoteDetail
      */
     user_id: number;
     /**
      * 
      * @type {number}
-     * @memberof VisitNote
+     * @memberof VisitNoteDetail
      */
     pfs_visit_id: number;
     /**
      * 
      * @type {string}
-     * @memberof VisitNote
+     * @memberof VisitNoteDetail
+     */
+    body: string;
+    /**
+     * 
+     * @type {ObslogUser}
+     * @memberof VisitNoteDetail
+     */
+    user: ObslogUser;
+}
+/**
+ * 
+ * @export
+ * @interface VisitNoteUpdateRequest
+ */
+export interface VisitNoteUpdateRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof VisitNoteUpdateRequest
      */
     body: string;
 }
@@ -473,6 +604,88 @@ export interface VisitSetDetail {
      * @memberof VisitSetDetail
      */
     sps_sequence: SpsSequence;
+}
+/**
+ * 
+ * @export
+ * @interface VisitSetNoteCreateRequest
+ */
+export interface VisitSetNoteCreateRequest {
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitSetNoteCreateRequest
+     */
+    visit_set_id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VisitSetNoteCreateRequest
+     */
+    body: string;
+}
+/**
+ * 
+ * @export
+ * @interface VisitSetNoteCreateResponse
+ */
+export interface VisitSetNoteCreateResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitSetNoteCreateResponse
+     */
+    id: number;
+}
+/**
+ * 
+ * @export
+ * @interface VisitSetNoteDetail
+ */
+export interface VisitSetNoteDetail {
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitSetNoteDetail
+     */
+    id: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitSetNoteDetail
+     */
+    user_id: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitSetNoteDetail
+     */
+    visit_set_id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VisitSetNoteDetail
+     */
+    body: string;
+    /**
+     * 
+     * @type {ObslogUser}
+     * @memberof VisitSetNoteDetail
+     */
+    user: ObslogUser;
+}
+/**
+ * 
+ * @export
+ * @interface VisitSetNoteUpdateRequest
+ */
+export interface VisitSetNoteUpdateRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof VisitSetNoteUpdateRequest
+     */
+    body: string;
 }
 
 /**
@@ -646,11 +859,12 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          * @summary Visit List
          * @param {number} [offset] 
          * @param {number} [limit] 
+         * @param {string} [filter] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        visitList: async (offset?: number, limit?: number, options: any = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/visists`;
+        visitList: async (offset?: number, limit?: number, filter?: string, options: any = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/visits`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -670,11 +884,235 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['limit'] = limit;
             }
 
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Visit Note Create
+         * @param {VisitNoteCreateRequest} visitNoteCreateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitNoteCreate: async (visitNoteCreateRequest: VisitNoteCreateRequest, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'visitNoteCreateRequest' is not null or undefined
+            assertParamExists('visitNoteCreate', 'visitNoteCreateRequest', visitNoteCreateRequest)
+            const localVarPath = `/api/visit_notes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(visitNoteCreateRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Visit Note Destroy
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitNoteDestroy: async (id: number, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('visitNoteDestroy', 'id', id)
+            const localVarPath = `/api/visit_notes/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Visit Note Update
+         * @param {number} id 
+         * @param {VisitNoteUpdateRequest} visitNoteUpdateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitNoteUpdate: async (id: number, visitNoteUpdateRequest: VisitNoteUpdateRequest, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('visitNoteUpdate', 'id', id)
+            // verify required parameter 'visitNoteUpdateRequest' is not null or undefined
+            assertParamExists('visitNoteUpdate', 'visitNoteUpdateRequest', visitNoteUpdateRequest)
+            const localVarPath = `/api/visit_notes/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(visitNoteUpdateRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Visit Set Note Create
+         * @param {VisitSetNoteCreateRequest} visitSetNoteCreateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitSetNoteCreate: async (visitSetNoteCreateRequest: VisitSetNoteCreateRequest, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'visitSetNoteCreateRequest' is not null or undefined
+            assertParamExists('visitSetNoteCreate', 'visitSetNoteCreateRequest', visitSetNoteCreateRequest)
+            const localVarPath = `/api/visit_set_notes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(visitSetNoteCreateRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Visit Set Note Destroy
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitSetNoteDestroy: async (id: number, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('visitSetNoteDestroy', 'id', id)
+            const localVarPath = `/api/visit_set_notes/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Visit Set Note Update
+         * @param {number} id 
+         * @param {VisitSetNoteUpdateRequest} visitSetNoteUpdateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitSetNoteUpdate: async (id: number, visitSetNoteUpdateRequest: VisitSetNoteUpdateRequest, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('visitSetNoteUpdate', 'id', id)
+            // verify required parameter 'visitSetNoteUpdateRequest' is not null or undefined
+            assertParamExists('visitSetNoteUpdate', 'visitSetNoteUpdateRequest', visitSetNoteUpdateRequest)
+            const localVarPath = `/api/visit_set_notes/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(visitSetNoteUpdateRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -748,11 +1186,80 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @summary Visit List
          * @param {number} [offset] 
          * @param {number} [limit] 
+         * @param {string} [filter] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async visitList(offset?: number, limit?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitList>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.visitList(offset, limit, options);
+        async visitList(offset?: number, limit?: number, filter?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.visitList(offset, limit, filter, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Visit Note Create
+         * @param {VisitNoteCreateRequest} visitNoteCreateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async visitNoteCreate(visitNoteCreateRequest: VisitNoteCreateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitNoteCreateResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.visitNoteCreate(visitNoteCreateRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Visit Note Destroy
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async visitNoteDestroy(id: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.visitNoteDestroy(id, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Visit Note Update
+         * @param {number} id 
+         * @param {VisitNoteUpdateRequest} visitNoteUpdateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async visitNoteUpdate(id: number, visitNoteUpdateRequest: VisitNoteUpdateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.visitNoteUpdate(id, visitNoteUpdateRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Visit Set Note Create
+         * @param {VisitSetNoteCreateRequest} visitSetNoteCreateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async visitSetNoteCreate(visitSetNoteCreateRequest: VisitSetNoteCreateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitSetNoteCreateResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.visitSetNoteCreate(visitSetNoteCreateRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Visit Set Note Destroy
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async visitSetNoteDestroy(id: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.visitSetNoteDestroy(id, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Visit Set Note Update
+         * @param {number} id 
+         * @param {VisitSetNoteUpdateRequest} visitSetNoteUpdateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async visitSetNoteUpdate(id: number, visitSetNoteUpdateRequest: VisitSetNoteUpdateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.visitSetNoteUpdate(id, visitSetNoteUpdateRequest, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -817,11 +1324,74 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @summary Visit List
          * @param {number} [offset] 
          * @param {number} [limit] 
+         * @param {string} [filter] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        visitList(offset?: number, limit?: number, options?: any): AxiosPromise<VisitList> {
-            return localVarFp.visitList(offset, limit, options).then((request) => request(axios, basePath));
+        visitList(offset?: number, limit?: number, filter?: string, options?: any): AxiosPromise<VisitList> {
+            return localVarFp.visitList(offset, limit, filter, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Visit Note Create
+         * @param {VisitNoteCreateRequest} visitNoteCreateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitNoteCreate(visitNoteCreateRequest: VisitNoteCreateRequest, options?: any): AxiosPromise<VisitNoteCreateResponse> {
+            return localVarFp.visitNoteCreate(visitNoteCreateRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Visit Note Destroy
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitNoteDestroy(id: number, options?: any): AxiosPromise<any> {
+            return localVarFp.visitNoteDestroy(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Visit Note Update
+         * @param {number} id 
+         * @param {VisitNoteUpdateRequest} visitNoteUpdateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitNoteUpdate(id: number, visitNoteUpdateRequest: VisitNoteUpdateRequest, options?: any): AxiosPromise<any> {
+            return localVarFp.visitNoteUpdate(id, visitNoteUpdateRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Visit Set Note Create
+         * @param {VisitSetNoteCreateRequest} visitSetNoteCreateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitSetNoteCreate(visitSetNoteCreateRequest: VisitSetNoteCreateRequest, options?: any): AxiosPromise<VisitSetNoteCreateResponse> {
+            return localVarFp.visitSetNoteCreate(visitSetNoteCreateRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Visit Set Note Destroy
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitSetNoteDestroy(id: number, options?: any): AxiosPromise<any> {
+            return localVarFp.visitSetNoteDestroy(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Visit Set Note Update
+         * @param {number} id 
+         * @param {VisitSetNoteUpdateRequest} visitSetNoteUpdateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitSetNoteUpdate(id: number, visitSetNoteUpdateRequest: VisitSetNoteUpdateRequest, options?: any): AxiosPromise<any> {
+            return localVarFp.visitSetNoteUpdate(id, visitSetNoteUpdateRequest, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -895,12 +1465,87 @@ export class DefaultApi extends BaseAPI {
      * @summary Visit List
      * @param {number} [offset] 
      * @param {number} [limit] 
+     * @param {string} [filter] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    public visitList(offset?: number, limit?: number, options?: any) {
-        return DefaultApiFp(this.configuration).visitList(offset, limit, options).then((request) => request(this.axios, this.basePath));
+    public visitList(offset?: number, limit?: number, filter?: string, options?: any) {
+        return DefaultApiFp(this.configuration).visitList(offset, limit, filter, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Visit Note Create
+     * @param {VisitNoteCreateRequest} visitNoteCreateRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public visitNoteCreate(visitNoteCreateRequest: VisitNoteCreateRequest, options?: any) {
+        return DefaultApiFp(this.configuration).visitNoteCreate(visitNoteCreateRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Visit Note Destroy
+     * @param {number} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public visitNoteDestroy(id: number, options?: any) {
+        return DefaultApiFp(this.configuration).visitNoteDestroy(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Visit Note Update
+     * @param {number} id 
+     * @param {VisitNoteUpdateRequest} visitNoteUpdateRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public visitNoteUpdate(id: number, visitNoteUpdateRequest: VisitNoteUpdateRequest, options?: any) {
+        return DefaultApiFp(this.configuration).visitNoteUpdate(id, visitNoteUpdateRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Visit Set Note Create
+     * @param {VisitSetNoteCreateRequest} visitSetNoteCreateRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public visitSetNoteCreate(visitSetNoteCreateRequest: VisitSetNoteCreateRequest, options?: any) {
+        return DefaultApiFp(this.configuration).visitSetNoteCreate(visitSetNoteCreateRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Visit Set Note Destroy
+     * @param {number} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public visitSetNoteDestroy(id: number, options?: any) {
+        return DefaultApiFp(this.configuration).visitSetNoteDestroy(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Visit Set Note Update
+     * @param {number} id 
+     * @param {VisitSetNoteUpdateRequest} visitSetNoteUpdateRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public visitSetNoteUpdate(id: number, visitSetNoteUpdateRequest: VisitSetNoteUpdateRequest, options?: any) {
+        return DefaultApiFp(this.configuration).visitSetNoteUpdate(id, visitSetNoteUpdateRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

@@ -16,6 +16,7 @@ textarea,
 select {
   box-shadow: 0 0 2px white;
   border-style: none;
+  margin: 2px;
 }
 
 button,
@@ -45,23 +46,8 @@ hr {
   border-top-color: $color;
 }
 
-.visit_list {
-  .entry {
-    cursor: default;
-  }
-  .selected {
-    outline: solid;
-    &.sps {
-      background-color: green;
-    }
-    &.mcs {
-      background-color: blue;
-    }
-  }
-  .sps {
-    background-color: darkgreen;
-  }
-  .mcs {
-    background-color: darkblue;
-  }
+code {
+  box-shadow: 0 0 4px white;
+  background-origin: rgba(black, 0.5);
+  color: cyan;
 }

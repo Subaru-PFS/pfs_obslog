@@ -22,7 +22,7 @@ class SpsExposure(BaseModel):
                     camera_id=row.sps_camera_id,
                     exptime=row.exptime,
                     exp_start=row.time_exp_start,
-                    exp_end=row.exptime,
+                    exp_end=row.time_exp_end,
                 )
 
 
@@ -92,10 +92,30 @@ class McsVisit(BaseModel):
 
 
 @static_check_init_args
+class ObslogUser(BaseModel):
+    id: int
+    account_name: str
+
+    class Config:
+        orm_mode = True
+
+
+@static_check_init_args
 class VisitNote(BaseModel):
     id: int
     user_id: int
     pfs_visit_id: int
+    body: str
+
+    class Config:
+        orm_mode = True
+
+
+@static_check_init_args
+class VisitSetNote(BaseModel):
+    id: int
+    user_id: int
+    visit_set_id: int
     body: str
 
     class Config:
@@ -122,6 +142,7 @@ class Visit(BaseModel):
 
 @static_check_init_args
 class SpsSequence(BaseModel):
+    visit_set_id: int
     sequence_type: Optional[str]
     name: Optional[str]
     comments: Optional[str]

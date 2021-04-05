@@ -11,6 +11,12 @@ body {
   height: 100%;
 }
 
+form {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
 #app,
 .router-view {
   height: 100%;
@@ -18,4 +24,51 @@ body {
 
 .visit_list {
   box-shadow: 0 0 4px #777;
+}
+
+.id {
+  font-family: monospace;
+  font-size: small;
+  display: inline;
+  opacity: 0.75;
+}
+
+.time {
+  font-family: monospace;
+  font-size: small;
+  display: inline;
+  opacity: 0.75;
+}
+
+.json {
+  font-family: monospace;
+}
+
+.page {
+  margin: 1em;
+}
+
+code {
+  padding: 0.5em;
+  margin: 0.5em;
+  border-radius: 0.5em;
+  display: block;
+}
+
+table.matrix {
+  border-collapse: collapse;
+  th {
+    border-width: 0 0 1px 0;
+    border-style: solid;
+    border-color: #777;
+  }
+  th,
+  td {
+    padding: .125em 1em;
+  }
+}
+
+.number {
+  text-align: right;
+  font-family: monospace;
 }

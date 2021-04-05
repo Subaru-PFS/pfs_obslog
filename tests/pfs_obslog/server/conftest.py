@@ -1,10 +1,11 @@
 import json
 from pathlib import Path
+from typing import Final
 
 import pytest
 
-HERE = Path(__file__).parent
-CREDFILE = HERE / 'secrets' / 'account.json'
+HERE: Final = Path(__file__).parent
+CREDFILE: Final = HERE / 'secrets' / 'account.json'
 
 
 @pytest.fixture

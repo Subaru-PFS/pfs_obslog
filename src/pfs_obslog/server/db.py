@@ -1,20 +1,21 @@
 import os
 import contextlib
-from typing import Callable, Optional
+from typing import Callable, Final, Optional
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from .env import PFS_OBSLOG_ENV
 
-DSN = os.environ.get('PFS_OBSLOG_DSN') or {
+DSN: Final = os.environ.get('PFS_OBSLOG_DSN') or {
     'test': 'postgresql://postgres@localhost/opdb_test',
     'development': 'postgresql://postgres@localhost/opdb',
 }.get(PFS_OBSLOG_ENV)
 
-assert DSN, "PFS_OBSLOG_DSN must be set"
+if not DSN:
+    raise RuntimeError("PFS_OBSLOG_DSN must be set")
 
-engine = create_engine(DSN, future=True, echo=True)
+engine = create_engine(DSN, future=True, echo=PFS_OBSLOG_ENV != 'production')
 
 _DBSession: Callable[..., Session] = sessionmaker(bind=engine, autoflush=False)
 

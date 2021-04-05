@@ -1,13 +1,13 @@
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Final, Optional
 
 from pfs_obslog.server.env import PFS_OBSLOG_ENV
 
-HERE = Path(__file__).parent
+HERE: Final = Path(__file__).parent
 
-TEST_USER = 'test'
-TEST_PASSWORD = 'password'
+TEST_USER: Final = 'test'
+TEST_PASSWORD: Final = 'password'
 
 if PFS_OBSLOG_ENV == 'test':
 

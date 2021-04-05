@@ -8,7 +8,8 @@ test-watch:
 			--cov-config=.coveragerc \
 			--cov=pfs_obslog \
 			--cov-report=html \
-			--cov-branch tests
+			--cov-branch tests \
+			tests src
 
 test:
 	./.venv/bin/pytest \
@@ -21,6 +22,12 @@ test:
 
 dev-server:
 	PFS_OBSLOG_ENV=development bash ./start.bash
+
+prod-server:
+	(cd webui && npm run build -- --base=./)
+	PFS_OBSLOG_ENV=production \
+	PFS_OBSLOG_DSN=postgresql://postgres@localhost/opdb \
+	bash ./start.bash --port=5000
 
 setup:
 	$(MAKE) -B .venv

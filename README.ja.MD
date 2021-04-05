@@ -1,16 +1,24 @@
 # pfs-obslog
 
-## 残タスク
-
-* webui
-    * [ ] テストデータの作成
-    * [ ] リスト表示
-        * [ ] sps_visit, msc_visitの有無
-        * [ ] visit set でグルーピング
-        * [ ] ページネーション
+## 明日まで
+    * [x] リスト表示
+        * [x] sps_visit, msc_visitの有無
+        * [x] visit set でグルーピング
+        * [x] ページネーション
     * [ ] 検索
+        * [*] 枠組み
+        * [*] 除外
+        * [ ] 日付
+    * [ ] inspector
+        * [ ] mcs_data
+            * https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html
+        * [ ] cobra_status
     * [ ] コメント
     * [ ] 台内から見えるように
+
+## そのうち
+    * [ ] テストデータの作成
+    * [ ] sps_exposure has many sps_annotation
 
 ## 背景
 

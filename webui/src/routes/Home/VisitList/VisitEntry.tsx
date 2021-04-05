@@ -9,7 +9,7 @@ export default defineComponent({
     watchEffect(() => {
       if ($$.selected) {
         el.value?.scrollIntoView({
-          behavior: 'smooth',
+          // behavior: 'smooth',
           block: 'nearest',
         })
       }
@@ -17,20 +17,16 @@ export default defineComponent({
 
     const render = () => {
       const classes = {
+        visitEntry: true,
         selected: $$.selected,
         sps: $$.m.sps_present,
         mcs: $$.m.mcs_present,
       }
-      return <>
-        <div
-          ref={el} class={{ entry: true, ...classes }}
-          style={{ userSelect: 'none', paddingLeft: '1em' }}
-        >
-          <div>
-            {$$.m.id} [{$$.m.description}]
-            </div>
+      return (
+        <div ref={el} class={classes}>
+          <div class="id">{$$.m.id}</div> <div class="time">@{time($$.m.issued_at)}</div> - {$$.m.description}
         </div>
-      </>
+      )
     }
 
     return render
@@ -46,3 +42,9 @@ export default defineComponent({
     },
   },
 })
+
+function time(s?: string) {
+  if (s) {
+    return s.split('T')[1].slice(0, 5)
+  }
+}

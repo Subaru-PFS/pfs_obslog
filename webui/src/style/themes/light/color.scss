@@ -1,3 +1,35 @@
 body {
   background-color: #eee;
 }
+
+input,
+button,
+textarea,
+select {
+  box-shadow: 0 0 2px black;
+  border-style: none;
+  margin: 2px;
+}
+
+button,
+input[type="submit"] {
+  border-radius: 4px;
+  &:hover {
+    background-color: #ddd;
+  }
+  &:active {
+    background-color: #ccc;
+  }
+}
+
+*:focus {
+  outline: none;
+  box-shadow: 0 0 8px darkcyan;
+}
+
+
+code {
+  box-shadow: 0 0 4px black;
+  background-origin: rgba(black, 0.5);
+  color: darkcyan;
+}

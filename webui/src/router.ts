@@ -2,6 +2,8 @@ import { createRouter, createWebHashHistory } from "vue-router"
 import { $g } from "./global"
 import { sessionReload } from "./session"
 
+const devMode = import.meta.env.DEV
+
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -11,8 +13,21 @@ const router = createRouter({
       component: () => import('./routes/Login'),
       meta: { noLogin: true },
     },
+    {
+      path: '/help',
+      component: () => import('./routes/Help'),
+      meta: { noLogin: true },
+    },
+    ...(devMode ? [
+      {
+        path: '/devel',
+        component: () => import('./routes/Devel'),
+      }
+    ] : []),
   ],
 })
+
+const x = { x: 0, ...{ y: 3 } }
 
 router.beforeEach(async (to, from, next) => {
   if ($g.session === null && !to.meta.noLogin) {

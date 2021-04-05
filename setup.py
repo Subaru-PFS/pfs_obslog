@@ -10,6 +10,7 @@ setup(
     python_requires='>=3.9',
     install_requires=[
         'fastapi>=0.63',
+        'psqlparse',
         'aiofiles',
         'uvicorn',
         'pycryptodome',

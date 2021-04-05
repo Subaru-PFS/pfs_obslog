@@ -1,3 +1,4 @@
+from typing import Final
 from fastapi.param_functions import Header
 import pytest
 import time_machine
@@ -9,8 +10,8 @@ from pfs_obslog.server.httpsession import TokenOrCookieSession
 app = FastAPI()
 
 
-EXPIRES_IN = 10
-HEADER_NAME = 'token'
+EXPIRES_IN: Final = 10
+HEADER_NAME: Final = 'token'
 
 
 class Session(TokenOrCookieSession):

@@ -1,5 +1,5 @@
 import time
-from typing import Dict, Generic, Tuple, TypeVar, Union
+from typing import Generic, Tuple, TypeVar, Union
 
 _K = TypeVar('_K')
 _V = TypeVar('_V')
@@ -11,7 +11,7 @@ _D = TypeVar('_D')
 class TtlCache(Generic[_K, _V]):
     def __init__(self, *, ttl: float = 300.):
         self._ttl = ttl
-        self._cache: Dict[_K, _TtlValue[_V]] = {}
+        self._cache: dict[_K, _TtlValue[_V]] = {}
 
     def set(self, k: _K, v: _V):
         self._cache[k] = (time.time() + self._ttl, v)
