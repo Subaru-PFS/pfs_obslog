@@ -11,12 +11,18 @@ export default defineComponent({
     const render = () => (
       <div class="search-condition" style={{ display: 'flex', alignItems: 'center' }}>
         <div class="type">
-          <label>
-            <input type="checkbox" checked={true} disabled={true} /> SpS
-            </label>
-          <label >
-            <input type="checkbox" checked={true} disabled={true} /> MCS
-          </label>
+          #SpS:
+          <select v-model={visitList.q.include_sps}>
+            <option value="false">==0</option>
+            <option value="any">&gt;=0</option>
+            <option value="true">&gt;=1</option>
+          </select>
+          #MCS:
+          <select v-model={visitList.q.include_mcs}>
+            <option value="false">==0</option>
+            <option value="any">&gt;=0</option>
+            <option value="true">&gt;=1</option>
+          </select>
         </div>
         <div class="date" style={{ display: 'flex', alignItems: 'center' }}>
           {MI('date_range')}

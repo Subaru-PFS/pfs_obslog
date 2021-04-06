@@ -10,6 +10,8 @@ from sqlalchemy import select, distinct
 def test_visit_query():
     visit_query(""" where sequence_type LIKE '?domeflat?' """)
     visit_query(""" where issued_at::date = '2021-01-03' """)
+    visit_query(""" where is_sps_visit """)
+    visit_query(""" where is_mcs_visit """)
 
 
 def test_build_filter():

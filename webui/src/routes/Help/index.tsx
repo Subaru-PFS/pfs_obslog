@@ -18,7 +18,7 @@ export default defineComponent({
             and don't contain string `object`.
           </dt>
           <dd><code>science - object</code></dd>
-          
+
           <dt>
             Select visits in error status.
             (It looks that `sps_sequence.status` keeps error message.)
@@ -32,8 +32,12 @@ export default defineComponent({
             <th>/</th>
             <td>Focus on search box.</td>
           </tr>
+          <tr>
+            <th>R</th>
+            <td>Refresh</td>
+          </tr>
         </table>
-      </div>
+      </div >
     )
     return render
   }

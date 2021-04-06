@@ -13,6 +13,7 @@ export default defineComponent({
     const visitList = useVisitList()
     useKeyboardShortcuts().add({
       '/': () => searchRef.value?.focus(),
+      'r': () => visitList.refresh(),
     })
 
     const isSql = computed(() => visitList.q.filter.match(/^(?:where|order)\s/i))

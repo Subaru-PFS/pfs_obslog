@@ -9,6 +9,9 @@ import { async_debounce } from "~/utils/functools"
 const KEY = Symbol('visit-list')
 
 
+type ExposureSelector = 'any' | 'true' | 'false'
+
+
 function makeProvider(perPage = 100) {
   const $ = reactive({
     visits: [] as VisitListEntry[],
@@ -24,10 +27,12 @@ function makeProvider(perPage = 100) {
       begin: null as null | string,
       end: null as null | string,
       range: false,
-    }
+    },
+    include_sps: 'any' as ExposureSelector,
+    include_mcs: 'any' as ExposureSelector,
   })
 
-  watch(() => q.date, () => {
+  watch(() => [q.date, q.include_mcs, q.include_sps], () => {
     refresh(true)
   }, { deep: true })
 
@@ -36,7 +41,8 @@ function makeProvider(perPage = 100) {
       q.start = 0
       q.end = perPage
     }
-    const sqlFilter = buildSqlFilter(q.filter, q.date)
+    const { include_mcs, include_sps } = q
+    const sqlFilter = buildSqlFilter(q.filter, q.date, { include_mcs, include_sps })
     const { visits, visit_sets, count } = (await api.visitList(q.start, q.end - q.start, sqlFilter)).data
     $.visits = visits
     $.visitSets = Object.fromEntries(visit_sets.map(vs => [vs.id, vs]))
@@ -107,8 +113,13 @@ type DateQuery = {
   end: string | null
   range: boolean
 }
+type VisitType = {
+  include_sps: ExposureSelector,
+  include_mcs: ExposureSelector,
+}
 
-function buildSqlFilter(filter: string, date: DateQuery) {
+
+function buildSqlFilter(filter: string, date: DateQuery, type: VisitType) {
   const terms = filterToSqlTerms(filter)
   if (date.begin && !date.range) { // day selection
     terms.push(`issued_at::date = '${date.begin}'`)
@@ -121,6 +132,8 @@ function buildSqlFilter(filter: string, date: DateQuery) {
       terms.push(`issued_at::date <= '${date.end}'`)
     }
   }
+  terms.push({ true: 'is_sps_visit', false: 'not is_sps_visit', any: 'true' }[type.include_sps])
+  terms.push({ true: 'is_mcs_visit', false: 'not is_mcs_visit', any: 'true' }[type.include_mcs])
   console.info(terms)
   return terms.length > 0 ? 'where ' + terms.join(' AND ') : ''
 }

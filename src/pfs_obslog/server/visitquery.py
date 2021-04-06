@@ -37,6 +37,7 @@ def query_pfs_visit_ids(where: ast.Evaluatable):
         outerjoin(M.visit_set).\
         outerjoin(M.sps_sequence).\
         outerjoin(M.obslog_visit_set_note).\
+        outerjoin(M.mcs_exposure).\
         filter(where(ctx))  # type: ignore
     return q
 
@@ -63,6 +64,8 @@ class VisitQueryContext(ast.EvaluationContext):
             (ast.String('any_column'),): AnyColumn,
             (ast.String('sequence_type'),): M.sps_sequence.sequence_type,
             (ast.String('issued_at'),): M.pfs_visit.issued_at,
+            (ast.String('is_sps_visit'),): M.sps_visit.pfs_visit_id != None,
+            (ast.String('is_mcs_visit'),): M.mcs_exposure.mcs_frame_id != None,
         }
         if node.fields not in columns:
             raise ast.SqlError(f'Unknown column: {node.fields}')

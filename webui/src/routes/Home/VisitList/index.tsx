@@ -61,7 +61,7 @@ export default defineComponent({
             <button onClick={async e => { await visitList.firstPage(); listEl.value?.scrollTo(0, 0) }} disabled={visitList.q.start == 0}> {MI('first_page')} </button>
             <button onClick={async e => { await visitList.prevPage(); listEl.value?.scrollTo(0, listEl.value?.scrollHeight) }} disabled={visitList.q.start == 0}> {MI('navigate_before')} </button>
             <input
-              style={{ textAlign: 'center', flexGrow: 1 }} type="text" readonly={true}
+              style={{ textAlign: 'center', flexGrow: 1, width: 0 }} type="text" readonly={true}
               value={`${visitList.q.start}-${visitList.q.end} / ${visitList.$.count}`}
             />
             <button onClick={async e => { await visitList.nextPage(); listEl.value?.scrollTo(0, 0) }}> {MI('navigate_next')}
