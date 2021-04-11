@@ -8,17 +8,18 @@ T = TypeVar('T')
 
 
 class OrmConfig(Generic[T]):
-    def __call__(self, mapper: Callable[[T], Any] = None):
+    def __call__(self, mapper: Callable[[T], BaseModel]):
         class Config:
             orm_mode = True
 
-            if mapper is not None:
-                class getter_dict(GetterDict):
-                    def __init__(self, obj):
-                        if isinstance(obj, BaseModel):  # pragma: no cover
-                            super().__init__(obj)
-                        else:
-                            super().__init__(mapper(obj))  # type: ignore
+            class getter_dict(GetterDict):
+                def __init__(self, obj):
+                    if isinstance(obj, BaseModel):  # pragma: no cover
+                        super().__init__(obj)
+                    else:
+                        super().__init__(mapper(obj))  # type: ignore
+
+            row_to_model = staticmethod(mapper)
         return Config
 
 
