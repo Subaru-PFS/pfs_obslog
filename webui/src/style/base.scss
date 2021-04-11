@@ -64,11 +64,18 @@ table.matrix {
   }
   th,
   td {
-    padding: .125em 1em;
+    padding: 0.125em 1em;
   }
 }
 
 .number {
   text-align: right;
   font-family: monospace;
+}
+
+.fixed-header {
+  position: sticky;
+  top: 0;
+  // z-index: 1;
+  margin: 0.5em 0;
 }

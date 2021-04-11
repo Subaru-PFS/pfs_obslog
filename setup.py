@@ -1,4 +1,6 @@
 from setuptools import setup, find_packages
+from pathlib import Path
+HERE = Path(__file__).parent
 
 
 setup(
@@ -11,12 +13,15 @@ setup(
     install_requires=[
         'fastapi>=0.63',
         'psqlparse',
+        'matplotlib',
+        'scipy',
         'aiofiles',
         'uvicorn',
         'pycryptodome',
         'ldap3',
         'psycopg2-binary',
-        'opdb@git+https://github.com/Subaru-PFS/spt_operational_database.git@3a1e403ed464d59edf43994ee4ded37a1fa0da1b',
+        # 'opdb@git+https://github.com/Subaru-PFS/spt_operational_database.git@3a1e403ed464d59edf43994ee4ded37a1fa0da1b',
+        # f'opdb@git+file://{HERE / "spt_operational_database"}',
         'gunicorn',
         'uvloop',
         'httptools',
@@ -26,10 +31,12 @@ setup(
             'pytest-watch',
             'pytest-cov',
             'pytest-env',
+            'pytest-asyncio',
             'autopep8',
             'time-machine',
             'pdbpp',
             'requests',
+            'Pillow',
         ],
     },
 )

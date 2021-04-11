@@ -5,6 +5,7 @@ import BaseDetail from "./BaseDetail"
 import VisitSetDetail from "./VisitSetDetail"
 import './style.scss'
 import SpsDetail from "./SpsDetail"
+import MCSDetail from "./MCSDetail"
 
 
 export default defineComponent({
@@ -25,6 +26,10 @@ export default defineComponent({
             <hr />
             <SpsDetail />
             <hr />
+          </>
+          }
+          {visitInspector.$.m?.mcs && <>
+            <MCSDetail />
           </>
           }
           <div class="end-h">

@@ -49,8 +49,10 @@ schemaspy:
 .venv:
 	$(python) -m venv $@
 	.venv/bin/python -m venv .venv
+	.venv/bin/pip install .
+	.venv/bin/pip install ."[dev]"
 	.venv/bin/pip install -e .
-	.venv/bin/pip install -e ."[dev]"
+	.venv/bin/pip install -e ./spt_operational_database
 
 deploy:
 	bash ./deploy.bash

@@ -1,0 +1,12 @@
+.root {
+  svg {
+    background-color: #777;
+    border-radius: 4pt;
+  }
+  polygon:hover {
+    stroke-alignment: inner;
+    stroke: red;
+    stroke-width: 0.4;
+  }
+  font-family: monospace;
+}

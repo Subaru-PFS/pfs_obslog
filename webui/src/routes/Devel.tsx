@@ -1,4 +1,19 @@
 import { defineComponent } from "@vue/runtime-core"
+import PfsFoculPlane from '~/components/PfsFoculPlane'
+
+export default defineComponent({
+  setup() {
+    const render = () => (
+      <>
+        <div>Devel</div>
+        <PfsFoculPlane />
+      </>
+    )
+
+    return render
+  },
+})
+
 
 function range(end: number): number[] {
   const a: number[] = []
@@ -7,28 +22,3 @@ function range(end: number): number[] {
   }
   return a
 }
-
-export default defineComponent({
-  setup() {
-    return () => <>
-      <div style={{
-        height: '100%', border: 'solid 1px red',
-        display: 'flex', flexDirection: 'column'
-      }}>
-        <div style={{ border: 'solid 1px green;' }}>
-          header
-        </div>
-        <div style={{ flexGrow: 1, display: 'flex', height: 0 }}>
-          <div style={{ overflow: 'auto', backgroundColor: '#333' }}>
-            {range(200).map(i => <div>hello-world-{i}</div>)}
-          </div>
-          <div style={{ flexGrow: 1 }}></div>
-        </div>
-        <div style={{ border: 'solid 1px green;' }}>
-          footer
-        </div>
-      </div>
-    </>
-  }
-})
-

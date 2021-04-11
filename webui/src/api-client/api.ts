@@ -149,6 +149,69 @@ export interface McsExposure {
      * @memberof McsExposure
      */
     taken_at: string;
+    /**
+     * 
+     * @type {Array<McsExposureNote>}
+     * @memberof McsExposure
+     */
+    notes: Array<McsExposureNote>;
+}
+/**
+ * 
+ * @export
+ * @interface McsExposureNote
+ */
+export interface McsExposureNote {
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposureNote
+     */
+    id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof McsExposureNote
+     */
+    body: string;
+    /**
+     * 
+     * @type {ObslogUser}
+     * @memberof McsExposureNote
+     */
+    user: ObslogUser;
+}
+/**
+ * 
+ * @export
+ * @interface McsExposureNoteCreateRequest
+ */
+export interface McsExposureNoteCreateRequest {
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposureNoteCreateRequest
+     */
+    mcs_exposure_frame_id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof McsExposureNoteCreateRequest
+     */
+    body: string;
+}
+/**
+ * 
+ * @export
+ * @interface McsExposureNoteCreateResponse
+ */
+export interface McsExposureNoteCreateResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof McsExposureNoteCreateResponse
+     */
+    id: number;
 }
 /**
  * 
@@ -185,6 +248,32 @@ export interface ObslogUser {
 /**
  * 
  * @export
+ * @interface PfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest
+ */
+export interface PfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof PfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest
+     */
+    body: string;
+}
+/**
+ * 
+ * @export
+ * @interface PfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest
+ */
+export interface PfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof PfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest
+     */
+    body: string;
+}
+/**
+ * 
+ * @export
  * @interface Session
  */
 export interface Session {
@@ -217,6 +306,37 @@ export interface SessionCreateRequest {
 /**
  * 
  * @export
+ * @interface SpsAnnotation
+ */
+export interface SpsAnnotation {
+    /**
+     * 
+     * @type {number}
+     * @memberof SpsAnnotation
+     */
+    data_flag: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsAnnotation
+     */
+    notes: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SpsAnnotation
+     */
+    annotation_id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsAnnotation
+     */
+    created_at?: string;
+}
+/**
+ * 
+ * @export
  * @interface SpsExposure
  */
 export interface SpsExposure {
@@ -244,6 +364,12 @@ export interface SpsExposure {
      * @memberof SpsExposure
      */
     exp_end: string;
+    /**
+     * 
+     * @type {Array<SpsAnnotation>}
+     * @memberof SpsExposure
+     */
+    annotation: Array<SpsAnnotation>;
 }
 /**
  * 
@@ -570,19 +696,6 @@ export interface VisitNoteDetail {
 /**
  * 
  * @export
- * @interface VisitNoteUpdateRequest
- */
-export interface VisitNoteUpdateRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof VisitNoteUpdateRequest
-     */
-    body: string;
-}
-/**
- * 
- * @export
  * @interface VisitSetDetail
  */
 export interface VisitSetDetail {
@@ -718,6 +831,165 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Mcs Data Chart
+         * @param {number} frameId 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {string} [theme] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        mcsDataChart: async (frameId: number, width?: number, height?: number, theme?: string, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'frameId' is not null or undefined
+            assertParamExists('mcsDataChart', 'frameId', frameId)
+            const localVarPath = `/api/mcs_data_chart/{frame_id}`
+                .replace(`{${"frame_id"}}`, encodeURIComponent(String(frameId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (width !== undefined) {
+                localVarQueryParameter['width'] = width;
+            }
+
+            if (height !== undefined) {
+                localVarQueryParameter['height'] = height;
+            }
+
+            if (theme !== undefined) {
+                localVarQueryParameter['theme'] = theme;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Mcs Exposure Note Create
+         * @param {McsExposureNoteCreateRequest} mcsExposureNoteCreateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        mcsExposureNoteCreate: async (mcsExposureNoteCreateRequest: McsExposureNoteCreateRequest, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'mcsExposureNoteCreateRequest' is not null or undefined
+            assertParamExists('mcsExposureNoteCreate', 'mcsExposureNoteCreateRequest', mcsExposureNoteCreateRequest)
+            const localVarPath = `/api/mcs_exposures`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(mcsExposureNoteCreateRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Mcs Exposure Note Destroy
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        mcsExposureNoteDestroy: async (id: number, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('mcsExposureNoteDestroy', 'id', id)
+            const localVarPath = `/api/mcs_exposures/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Mcs Exposure Note Update
+         * @param {number} id 
+         * @param {PfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest} pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        mcsExposureNoteUpdate: async (id: number, pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest: PfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('mcsExposureNoteUpdate', 'id', id)
+            // verify required parameter 'pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest' is not null or undefined
+            assertParamExists('mcsExposureNoteUpdate', 'pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest', pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest)
+            const localVarPath = `/api/mcs_exposures/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -973,15 +1245,15 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          * 
          * @summary Visit Note Update
          * @param {number} id 
-         * @param {VisitNoteUpdateRequest} visitNoteUpdateRequest 
+         * @param {PfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest} pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        visitNoteUpdate: async (id: number, visitNoteUpdateRequest: VisitNoteUpdateRequest, options: any = {}): Promise<RequestArgs> => {
+        visitNoteUpdate: async (id: number, pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest: PfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('visitNoteUpdate', 'id', id)
-            // verify required parameter 'visitNoteUpdateRequest' is not null or undefined
-            assertParamExists('visitNoteUpdate', 'visitNoteUpdateRequest', visitNoteUpdateRequest)
+            // verify required parameter 'pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest' is not null or undefined
+            assertParamExists('visitNoteUpdate', 'pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest', pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest)
             const localVarPath = `/api/visit_notes/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -1002,7 +1274,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(visitNoteUpdateRequest, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1141,6 +1413,54 @@ export const DefaultApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Mcs Data Chart
+         * @param {number} frameId 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {string} [theme] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async mcsDataChart(frameId: number, width?: number, height?: number, theme?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.mcsDataChart(frameId, width, height, theme, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Mcs Exposure Note Create
+         * @param {McsExposureNoteCreateRequest} mcsExposureNoteCreateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async mcsExposureNoteCreate(mcsExposureNoteCreateRequest: McsExposureNoteCreateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<McsExposureNoteCreateResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.mcsExposureNoteCreate(mcsExposureNoteCreateRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Mcs Exposure Note Destroy
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async mcsExposureNoteDestroy(id: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.mcsExposureNoteDestroy(id, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Mcs Exposure Note Update
+         * @param {number} id 
+         * @param {PfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest} pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async mcsExposureNoteUpdate(id: number, pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest: PfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.mcsExposureNoteUpdate(id, pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Session Create
          * @param {SessionCreateRequest} sessionCreateRequest 
          * @param {*} [options] Override http request option.
@@ -1220,12 +1540,12 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * 
          * @summary Visit Note Update
          * @param {number} id 
-         * @param {VisitNoteUpdateRequest} visitNoteUpdateRequest 
+         * @param {PfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest} pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async visitNoteUpdate(id: number, visitNoteUpdateRequest: VisitNoteUpdateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.visitNoteUpdate(id, visitNoteUpdateRequest, options);
+        async visitNoteUpdate(id: number, pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest: PfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.visitNoteUpdate(id, pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1280,6 +1600,50 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          */
         index(options?: any): AxiosPromise<any> {
             return localVarFp.index(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Mcs Data Chart
+         * @param {number} frameId 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {string} [theme] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        mcsDataChart(frameId: number, width?: number, height?: number, theme?: string, options?: any): AxiosPromise<any> {
+            return localVarFp.mcsDataChart(frameId, width, height, theme, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Mcs Exposure Note Create
+         * @param {McsExposureNoteCreateRequest} mcsExposureNoteCreateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        mcsExposureNoteCreate(mcsExposureNoteCreateRequest: McsExposureNoteCreateRequest, options?: any): AxiosPromise<McsExposureNoteCreateResponse> {
+            return localVarFp.mcsExposureNoteCreate(mcsExposureNoteCreateRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Mcs Exposure Note Destroy
+         * @param {number} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        mcsExposureNoteDestroy(id: number, options?: any): AxiosPromise<any> {
+            return localVarFp.mcsExposureNoteDestroy(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Mcs Exposure Note Update
+         * @param {number} id 
+         * @param {PfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest} pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        mcsExposureNoteUpdate(id: number, pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest: PfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, options?: any): AxiosPromise<any> {
+            return localVarFp.mcsExposureNoteUpdate(id, pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1355,12 +1719,12 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * 
          * @summary Visit Note Update
          * @param {number} id 
-         * @param {VisitNoteUpdateRequest} visitNoteUpdateRequest 
+         * @param {PfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest} pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        visitNoteUpdate(id: number, visitNoteUpdateRequest: VisitNoteUpdateRequest, options?: any): AxiosPromise<any> {
-            return localVarFp.visitNoteUpdate(id, visitNoteUpdateRequest, options).then((request) => request(axios, basePath));
+        visitNoteUpdate(id: number, pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest: PfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, options?: any): AxiosPromise<any> {
+            return localVarFp.visitNoteUpdate(id, pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1412,6 +1776,58 @@ export class DefaultApi extends BaseAPI {
      */
     public index(options?: any) {
         return DefaultApiFp(this.configuration).index(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Mcs Data Chart
+     * @param {number} frameId 
+     * @param {number} [width] 
+     * @param {number} [height] 
+     * @param {string} [theme] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public mcsDataChart(frameId: number, width?: number, height?: number, theme?: string, options?: any) {
+        return DefaultApiFp(this.configuration).mcsDataChart(frameId, width, height, theme, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Mcs Exposure Note Create
+     * @param {McsExposureNoteCreateRequest} mcsExposureNoteCreateRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public mcsExposureNoteCreate(mcsExposureNoteCreateRequest: McsExposureNoteCreateRequest, options?: any) {
+        return DefaultApiFp(this.configuration).mcsExposureNoteCreate(mcsExposureNoteCreateRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Mcs Exposure Note Destroy
+     * @param {number} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public mcsExposureNoteDestroy(id: number, options?: any) {
+        return DefaultApiFp(this.configuration).mcsExposureNoteDestroy(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Mcs Exposure Note Update
+     * @param {number} id 
+     * @param {PfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest} pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public mcsExposureNoteUpdate(id: number, pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest: PfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, options?: any) {
+        return DefaultApiFp(this.configuration).mcsExposureNoteUpdate(id, pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1502,13 +1918,13 @@ export class DefaultApi extends BaseAPI {
      * 
      * @summary Visit Note Update
      * @param {number} id 
-     * @param {VisitNoteUpdateRequest} visitNoteUpdateRequest 
+     * @param {PfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest} pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    public visitNoteUpdate(id: number, visitNoteUpdateRequest: VisitNoteUpdateRequest, options?: any) {
-        return DefaultApiFp(this.configuration).visitNoteUpdate(id, visitNoteUpdateRequest, options).then((request) => request(this.axios, this.basePath));
+    public visitNoteUpdate(id: number, pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest: PfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, options?: any) {
+        return DefaultApiFp(this.configuration).visitNoteUpdate(id, pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

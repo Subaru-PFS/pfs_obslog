@@ -3,9 +3,10 @@ from typing import Any, Final, Optional, Union, cast as type_cast, final
 
 from opdb import models as M
 from pfs_obslog.server.parsesql import ast, parse
-from sqlalchemy import distinct, not_, or_, and_, select, cast, Date
-from sqlalchemy.sql.expression import ColumnElement
+from sqlalchemy import distinct, not_, or_, and_, select, cast, Date, String
 from sqlalchemy.sql.operators import ColumnOperators
+from sqlalchemy.orm import aliased
+
 from webui.src.utils.symbol import Symbol
 
 
@@ -28,30 +29,47 @@ def visit_query(sql: str):
     )
 
 
+visit_note_user: M.obslog_user = aliased(M.obslog_user)  # type: ignore
+visit_set_note_user: M.obslog_user = aliased(M.obslog_user)  # type: ignore
+mcs_exposure_note_user: M.obslog_user = aliased(M.obslog_user)  # type: ignore
+# M.sps_exposure: M.sps_exposure = aliased(M.sps_exposure)  # type: ignore
+
+
 def query_pfs_visit_ids(where: ast.Evaluatable):
     ctx = VisitQueryContext()
     q = select(type_cast(Any, distinct(M.pfs_visit.pfs_visit_id))).\
         outerjoin(M.obslog_visit_note).\
-        outerjoin(M.obslog_user).\
+        outerjoin(visit_note_user, M.obslog_visit_note.user).\
         outerjoin(M.sps_visit).\
+        outerjoin(M.sps_exposure).\
+        outerjoin(M.sps_annotation).\
         outerjoin(M.visit_set).\
         outerjoin(M.sps_sequence).\
         outerjoin(M.obslog_visit_set_note).\
+        outerjoin(visit_set_note_user, M.obslog_visit_set_note.user).\
         outerjoin(M.mcs_exposure).\
+        outerjoin(M.obslog_mcs_exposure_note).\
+        outerjoin(mcs_exposure_note_user, M.obslog_mcs_exposure_note.user).\
         filter(where(ctx))  # type: ignore
     return q
 
 
 AnyColumn: Final = Symbol('AnyColumn')
 
-all_columns: Final = [
+
+columns_for_search: Final = [
+    cast(M.pfs_visit.pfs_visit_id, String),
     M.pfs_visit.pfs_visit_description,
     M.obslog_visit_note.body,
+    visit_note_user.account_name,
     M.obslog_visit_set_note.body,
-    M.obslog_user.account_name,
+    visit_set_note_user.account_name,
     M.sps_sequence.name,
     M.sps_sequence.sequence_type,
     M.sps_sequence.status,
+    M.sps_annotation.notes,
+    M.obslog_mcs_exposure_note.body,
+    mcs_exposure_note_user.account_name,
 ]
 
 
@@ -84,7 +102,7 @@ class VisitQueryContext(ast.EvaluationContext):
         if r == AnyColumn:
             l, r = r, l
         if l == AnyColumn:
-            return or_(c == r for c in all_columns)  # type: ignore
+            return or_(c == r for c in columns_for_search)  # type: ignore
         else:
             return l == r
 
@@ -100,7 +118,7 @@ class VisitQueryContext(ast.EvaluationContext):
         if not isinstance(r, str):
             raise ast.SqlError(f'Right operand for LIKE must be a string: {node.lexpr} LIKE {node.rexpr}')
         if l == AnyColumn:
-            return or_(c.ilike(r) for c in all_columns)  # type: ignore
+            return or_(c.ilike(r) for c in columns_for_search)  # type: ignore
             # null or true == true or null == true であるためこれで良い
         else:
             assert isinstance(l, ColumnOperators)

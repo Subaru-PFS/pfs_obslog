@@ -1,0 +1,3 @@
+[submodule "spt_operational_database"]
+	path = spt_operational_database
+	url = git@github.com:Subaru-PFS/spt_operational_database.git

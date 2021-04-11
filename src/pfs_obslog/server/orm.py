@@ -1,18 +1,32 @@
-from typing import TYPE_CHECKING
 import dataclasses
+from typing import Any, Callable, Generic, TYPE_CHECKING, Type, TypeVar
+
 from pydantic import BaseModel
 from pydantic.utils import GetterDict
 
+T = TypeVar('T')
 
-class orm_getter_dict(GetterDict):
-    def __init__(self, obj):
-        if isinstance(obj, BaseModel):  # pragma: no cover
-            super().__init__(obj)
-        else:
-            super().__init__(self._row_to_obj(obj))
 
-    def _row_to_obj(self, row):  # pragma: no cover
-        raise NotImplementedError()
+class OrmConfig(Generic[T]):
+    def __call__(self, mapper: Callable[[T], Any] = None):
+        class Config:
+            orm_mode = True
+
+            if mapper is not None:
+                class getter_dict(GetterDict):
+                    def __init__(self, obj):
+                        if isinstance(obj, BaseModel):  # pragma: no cover
+                            super().__init__(obj)
+                        else:
+                            super().__init__(mapper(obj))  # type: ignore
+        return Config
+
+
+U = TypeVar('U', bound=Type[BaseModel])
+
+
+def skip_validation(model: U) -> U:
+    return model.construct  # type: ignore
 
 
 # __init__ of class decorated with static_check_init_args will be statically type checked by Pylance.

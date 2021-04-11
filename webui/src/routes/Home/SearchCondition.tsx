@@ -17,6 +17,7 @@ export default defineComponent({
             <option value="any">&gt;=0</option>
             <option value="true">&gt;=1</option>
           </select>
+          &nbsp;
           #MCS:
           <select v-model={visitList.q.include_mcs}>
             <option value="false">==0</option>

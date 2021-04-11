@@ -6,7 +6,6 @@ from pfs_obslog.server.visitquery import VisitQueryContext, visit_query
 from sqlalchemy import select, distinct
 
 
-@pytest.mark.focus
 def test_visit_query():
     visit_query(""" where sequence_type LIKE '?domeflat?' """)
     visit_query(""" where issued_at::date = '2021-01-03' """)

@@ -89,7 +89,7 @@ export default defineComponent({
             {groupVisits(visitList.$.visits).map(g =>
               dragSelect.element(
                 () => setSelectedId(g.visits[0].id),
-                <VisitGroup visitSet={g.visit_set_id ? visitList.$.visitSets[g.visit_set_id] : undefined}>
+                <VisitGroup date={g.visits[0].issued_at} visitSet={g.visit_set_id ? visitList.$.visitSets[g.visit_set_id] : undefined}>
                   {g.visits.map(m =>
                     dragSelect.element(
                       () => setSelectedId(m.id),

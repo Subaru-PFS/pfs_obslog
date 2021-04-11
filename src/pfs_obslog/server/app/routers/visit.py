@@ -4,13 +4,14 @@ from typing import Optional
 from fastapi import APIRouter, Depends
 from opdb import models as M
 from pfs_obslog.server.app.context import Context
-from pfs_obslog.server.orm import orm_getter_dict, static_check_init_args
-from pfs_obslog.server.schema import (McsVisit, ObslogUser, SpsSequence, SpsVisit, Visit,
-                                      VisitNote, VisitSet, VisitSetNote)
+from pfs_obslog.server.orm import (OrmConfig, skip_validation,
+                                   static_check_init_args)
+from pfs_obslog.server.schema import (McsVisit, ObslogUser, SpsSequence,
+                                      SpsVisit, Visit, VisitNote, VisitSet,
+                                      VisitSetNote)
 from pfs_obslog.server.visitquery import visit_query
 from pydantic.main import BaseModel
 from sqlalchemy.orm import selectinload
-
 
 logger = getLogger(__name__)
 router = APIRouter()
@@ -22,35 +23,25 @@ class VisitListEntry(Visit):
     mcs_present: bool
     visit_set_id: Optional[int]
 
-    class Config:
-        orm_mode = True
-
-        class getter_dict(orm_getter_dict):
-            def _row_to_obj(self, row):
-                return VisitListEntry(
-                    id=row.pfs_visit.pfs_visit_id,
-                    description=row.pfs_visit.pfs_visit_description,
-                    issued_at=row.pfs_visit.issued_at,
-                    sps_present=row.sps_present,
-                    mcs_present=row.mcs_present,
-                    visit_set_id=row.visit_set_id,
-                )
+    Config = OrmConfig()(lambda row: skip_validation(VisitListEntry)(
+        id=row.pfs_visit.pfs_visit_id,
+        description=row.pfs_visit.pfs_visit_description,
+        issued_at=row.pfs_visit.issued_at,
+        sps_present=row.sps_present,
+        mcs_present=row.mcs_present,
+        visit_set_id=row.visit_set_id,
+    ))
 
 
 @static_check_init_args
 class VisitSetDetail(VisitSet):
     sps_sequence: SpsSequence
 
-    class Config:
-        orm_mode = True
-
-        class getter_dict(orm_getter_dict):
-            def _row_to_obj(self, row: M.visit_set):
-                return VisitSetDetail(
-                    id=row.visit_set_id,
-                    visit_id=row.pfs_visit_id,
-                    sps_sequence=row.sps_sequence,
-                )
+    Config = OrmConfig[M.visit_set]()(lambda row: skip_validation(VisitSetDetail)(
+        id=row.visit_set_id,
+        visit_id=row.pfs_visit_id,
+        sps_sequence=row.sps_sequence,
+    ))
 
 
 @static_check_init_args
@@ -119,20 +110,15 @@ class VisitSetNoteDetail(VisitSetNote):
 class SpsSequenceDetail(SpsSequence):
     notes: list[VisitSetNoteDetail]
 
-    class Config:
-        orm_mode = True
-
-        class getter_dict(orm_getter_dict):
-            def _row_to_obj(self, row: M.sps_sequence):
-                return SpsSequenceDetail(
-                    visit_set_id=row.visit_set_id,
-                    sequence_type=row.sequence_type,
-                    name=row.name,
-                    comments=row.comments,
-                    cmd_str=row.cmd_str,
-                    status=row.status,
-                    notes=row.obslog_notes,
-                )
+    Config = OrmConfig[M.sps_sequence]()(lambda row: skip_validation(SpsSequenceDetail)(
+        visit_set_id=row.visit_set_id,
+        sequence_type=row.sequence_type,
+        name=row.name,
+        comments=row.comments,
+        cmd_str=row.cmd_str,
+        status=row.status,
+        notes=row.obslog_notes,
+    ))
 
 
 @static_check_init_args
@@ -142,20 +128,15 @@ class VisitDetail(Visit):
     mcs: Optional[McsVisit]
     sps_sequence: Optional[SpsSequenceDetail]
 
-    class Config:
-        orm_mode = True
-
-        class getter_dict(orm_getter_dict):
-            def _row_to_obj(self, row: M.pfs_visit):
-                return VisitDetail(
-                    id=row.pfs_visit_id,
-                    description=row.pfs_visit_description,
-                    issued_at=row.issued_at,
-                    notes=row.obslog_notes,
-                    sps=row.sps_visit,
-                    mcs=None if len(row.mcs_exposure) == 0 else McsVisit(exposures=row.mcs_exposure),
-                    sps_sequence=row.sps_visit.visit_set.sps_sequence if row.sps_visit else None,
-                )
+    Config = OrmConfig[M.pfs_visit]()(lambda row: skip_validation(VisitDetail)(
+        id=row.pfs_visit_id,
+        description=row.pfs_visit_description,
+        issued_at=row.issued_at,
+        notes=row.obslog_notes,
+        sps=row.sps_visit,
+        mcs=None if len(row.mcs_exposure) == 0 else McsVisit(exposures=row.mcs_exposure),
+        sps_sequence=row.sps_visit.visit_set.sps_sequence if row.sps_visit else None,
+    ))
 
 
 @router.get('/api/visits/{id}', response_model=VisitDetail)

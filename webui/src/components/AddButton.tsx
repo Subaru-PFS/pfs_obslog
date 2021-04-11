@@ -32,14 +32,16 @@ const AddButton = defineComponent({
             type="text"
             v-model={$.value}
             style={{ flexGrow: 1 }}
-          // onBlur={cancel} // clicking "Check" button triggers this.
+            onBlur={cancel}
           />
         }
         {$.opened ?
-          <>
+          <div onMousedown={e => e.preventDefault()}>
+            {/* We cannot click buttons below withoutthe onMousedown above,
+                because mousedown on `document` hide the buttons before click */}
             <button type="button" onClick={cancel}>{MI('cancel')}</button>
             <button onClick={submit}>{MI('check')}</button>
-          </>
+          </div>
           :
           <button onClick={open}>{MI('add')}</button>
         }

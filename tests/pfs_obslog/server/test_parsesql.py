@@ -40,7 +40,6 @@ def test_a_star():
     assert sqleval('x.*') == (ast.String('x'), ast.A_Star())
 
 
-@pytest.mark.focus
 def test_binary_operators():
     assert sqleval('x = x')
     assert sqleval('x = y') is False
@@ -72,7 +71,6 @@ def test_unary_operators():
     assert sqleval('- "$one"') == -1
 
 
-@pytest.mark.focus
 def test_type_cast():
     assert sqleval('true') is True
     assert sqleval('false') is False

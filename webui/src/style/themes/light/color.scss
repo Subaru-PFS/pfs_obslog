@@ -27,9 +27,17 @@ input[type="submit"] {
   box-shadow: 0 0 8px darkcyan;
 }
 
-
 code {
   box-shadow: 0 0 4px black;
   background-origin: rgba(black, 0.5);
   color: darkcyan;
+}
+
+.lazy-image {
+  box-shadow: 0 0 4pt rgba(black, 0.5);
+  border-radius: 4px;
+}
+
+.fixed-header {
+  background-color: rgba(#eee, 0.75);
 }

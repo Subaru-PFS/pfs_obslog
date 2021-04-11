@@ -2,15 +2,11 @@
 import { createApp, defineComponent, h, reactive, Teleport, Transition } from "vue"
 import style from './style.module.scss'
 
-type Props = {
-  show: boolean
-}
-
 const SpinnerComponent = defineComponent({
   props: {
     show: { type: Boolean, required: true },
   },
-  setup(props: Props) {
+  setup($$) {
     return () => (
       <Teleport to="body">
         <Transition
@@ -20,7 +16,7 @@ const SpinnerComponent = defineComponent({
           leaveToClass={style.leaveTo}
         >{
             () => (
-              props.show &&
+              $$.show &&
               <div class={style.fill}>
                 <div class={style.loader}></div>
               </div>

@@ -1,11 +1,14 @@
-import { defineComponent, PropType } from "@vue/runtime-core"
+import { computed, defineComponent, PropType } from "@vue/runtime-core"
 import Color from "color"
+import moment from "moment"
 import { VisitSetDetail } from "~/api-client"
 import { bgColor, fgColor } from "~/utils/colors"
 
 
 export default defineComponent({
   setup($$, { slots }) {
+    const date = computed(() => $$.date ? moment($$.date).format('YYYY-MM-DD') : undefined)
+
     const render = () => {
       const backgroundColor: Color = bgColor(sequenceTypeBaseColor[$$.visitSet?.sps_sequence?.sequence_type!] || Color('grey'))
 
@@ -22,6 +25,7 @@ export default defineComponent({
         }} {...rootAttrs}>
           <div style={{ paddingBottom: '0.25em', borderStyle: 'solid', borderWidth: '1px 0 0 0', borderColor: '#777' }}></div>
           {$$.visitSet && sspSequenceDetail($$.visitSet)}
+          <div class="date" style={{ paddingLeft: '1em', opacity: 0.75 }}>{date.value}</div>
           <div style={{
             padding: '0.25em 0.125em .25em 2em'
           }}>
@@ -36,7 +40,10 @@ export default defineComponent({
   props: {
     visitSet: {
       type: Object as PropType<VisitSetDetail>,
-    }
+    },
+    date: {
+      type: String,
+    },
   },
 })
 

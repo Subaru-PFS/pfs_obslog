@@ -1,5 +1,5 @@
 import './style.scss'
-import { defineComponent, reactive, watchEffect } from "@vue/runtime-core"
+import { defineComponent, inject, provide, reactive, ref, watchEffect } from "@vue/runtime-core"
 import FlexScroll from "~/components/FlexScroll"
 import Menu from './Menu'
 import { useKeyboardShortcutsProvider } from "./useKeyboardShortcuts"
@@ -10,8 +10,23 @@ import VisitList from "./VisitList"
 import SearchCondition from './SearchCondition'
 
 
+const KEY = Symbol('home')
+
+function provideHome() {
+  const inspector = ref<null | HTMLDivElement>(null)
+  const home = { inspector }
+  provide(KEY, home)
+  return home
+}
+
+export function useHome() {
+  return inject<ReturnType<typeof provideHome>>(KEY)!
+}
+
+
 export default defineComponent({
   setup() {
+    const home = provideHome()
     const visitList = useVisitListProvider()
     const visitInspector = useVisitInspectorProvider()
     useKeyboardShortcutsProvider()
@@ -26,7 +41,7 @@ export default defineComponent({
             {/* visit-list */}
             <VisitList v-model={[$.selectedId, 'selectedId']} />
             {/* inspector */}
-            <FlexScroll>
+            <FlexScroll scrollElement={home.inspector}>
               {visitInspector.$.m && <VisitInspector />}
             </FlexScroll>
           </div>
