@@ -115,6 +115,7 @@ class VisitNote(BaseModel):
     user_id: int
     pfs_visit_id: int
     body: str
+    user: ObslogUser
 
     class Config:
         orm_mode = True
@@ -126,22 +127,10 @@ class VisitSetNote(BaseModel):
     user_id: int
     visit_set_id: int
     body: str
+    user: ObslogUser
 
     class Config:
         orm_mode = True
-
-
-@static_check_init_args
-class Visit(BaseModel):
-    id: int
-    description: Optional[str]
-    issued_at: Optional[datetime]
-
-    Config = OrmConfig[M.pfs_visit]()(lambda row: skip_validation(Visit)(
-        id=row.pfs_visit_id,
-        description=row.pfs_visit_description,
-        issued_at=row.issued_at,
-    ))
 
 
 @static_check_init_args
@@ -152,17 +141,40 @@ class SpsSequence(BaseModel):
     comments: Optional[str]
     cmd_str: Optional[str]
     status: Optional[str]
+    notes: list[VisitSetNote]
 
-    class Config:
-        orm_mode = True
+    Config = OrmConfig[M.sps_sequence]()(lambda row: skip_validation(SpsSequence)(
+        visit_set_id=row.visit_set_id,
+        sequence_type=row.sequence_type,
+        name=row.name,
+        comments=row.comments,
+        cmd_str=row.cmd_str,
+        status=row.status,
+        notes=row.obslog_notes,
+    ))
 
 
 @static_check_init_args
 class VisitSet(BaseModel):
     id: int
     visit_id: int
+    sps_sequence: SpsSequence
 
     Config = OrmConfig[M.visit_set]()(lambda row: skip_validation(VisitSet)(
         id=row.visit_set_id,
         visit_id=row.pfs_visit_id,
+        sps_sequence=row.sps_sequence,
+    ))
+
+
+@static_check_init_args
+class VisitBase(BaseModel):
+    id: int
+    description: Optional[str]
+    issued_at: Optional[datetime]
+
+    Config = OrmConfig[M.pfs_visit]()(lambda row: skip_validation(VisitBase)(
+        id=row.pfs_visit_id,
+        description=row.pfs_visit_description,
+        issued_at=row.issued_at,
     ))

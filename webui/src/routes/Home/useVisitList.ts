@@ -1,8 +1,7 @@
-import moment from 'moment'
 import { reactive } from "@vue/reactivity"
-import { inject, onMounted, provide, watch, watchEffect } from "@vue/runtime-core"
+import { inject, onMounted, provide, watch } from "@vue/runtime-core"
 import { api } from "~/api"
-import { VisitListEntry, VisitSetDetail } from "~/api-client"
+import { VisitListEntry, VisitSet } from "~/api-client"
 import { async_debounce } from "~/utils/functools"
 
 
@@ -15,7 +14,7 @@ type ExposureSelector = 'any' | 'true' | 'false'
 function makeProvider(perPage = 100) {
   const $ = reactive({
     visits: [] as VisitListEntry[],
-    visitSets: {} as { [id: number]: VisitSetDetail },
+    visitSets: {} as { [id: number]: VisitSet },
     count: 0,
   })
 

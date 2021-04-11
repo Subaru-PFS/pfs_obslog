@@ -413,55 +413,12 @@ export interface SpsSequence {
      * @memberof SpsSequence
      */
     status?: string;
-}
-/**
- * 
- * @export
- * @interface SpsSequenceDetail
- */
-export interface SpsSequenceDetail {
     /**
      * 
-     * @type {number}
-     * @memberof SpsSequenceDetail
+     * @type {Array<VisitSetNote>}
+     * @memberof SpsSequence
      */
-    visit_set_id: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof SpsSequenceDetail
-     */
-    sequence_type?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SpsSequenceDetail
-     */
-    name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SpsSequenceDetail
-     */
-    comments?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SpsSequenceDetail
-     */
-    cmd_str?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SpsSequenceDetail
-     */
-    status?: string;
-    /**
-     * 
-     * @type {Array<VisitSetNoteDetail>}
-     * @memberof SpsSequenceDetail
-     */
-    notes: Array<VisitSetNoteDetail>;
+    notes: Array<VisitSetNote>;
 }
 /**
  * 
@@ -533,10 +490,10 @@ export interface VisitDetail {
     issued_at?: string;
     /**
      * 
-     * @type {Array<VisitNoteDetail>}
+     * @type {Array<VisitNote>}
      * @memberof VisitDetail
      */
-    notes: Array<VisitNoteDetail>;
+    notes: Array<VisitNote>;
     /**
      * 
      * @type {SpsVisit}
@@ -551,10 +508,10 @@ export interface VisitDetail {
     mcs?: McsVisit;
     /**
      * 
-     * @type {SpsSequenceDetail}
+     * @type {SpsSequence}
      * @memberof VisitDetail
      */
-    sps_sequence?: SpsSequenceDetail;
+    sps_sequence?: SpsSequence;
 }
 /**
  * 
@@ -570,10 +527,10 @@ export interface VisitList {
     visits: Array<VisitListEntry>;
     /**
      * 
-     * @type {Array<VisitSetDetail>}
+     * @type {Array<VisitSet>}
      * @memberof VisitList
      */
-    visit_sets: Array<VisitSetDetail>;
+    visit_sets: Array<VisitSet>;
     /**
      * 
      * @type {number}
@@ -607,22 +564,47 @@ export interface VisitListEntry {
     issued_at?: string;
     /**
      * 
-     * @type {boolean}
-     * @memberof VisitListEntry
-     */
-    sps_present: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof VisitListEntry
-     */
-    mcs_present: boolean;
-    /**
-     * 
      * @type {number}
      * @memberof VisitListEntry
      */
     visit_set_id?: number;
+}
+/**
+ * 
+ * @export
+ * @interface VisitNote
+ */
+export interface VisitNote {
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitNote
+     */
+    id: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitNote
+     */
+    user_id: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitNote
+     */
+    pfs_visit_id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VisitNote
+     */
+    body: string;
+    /**
+     * 
+     * @type {ObslogUser}
+     * @memberof VisitNote
+     */
+    user: ObslogUser;
 }
 /**
  * 
@@ -659,64 +641,64 @@ export interface VisitNoteCreateResponse {
 /**
  * 
  * @export
- * @interface VisitNoteDetail
+ * @interface VisitSet
  */
-export interface VisitNoteDetail {
+export interface VisitSet {
     /**
      * 
      * @type {number}
-     * @memberof VisitNoteDetail
+     * @memberof VisitSet
      */
     id: number;
     /**
      * 
      * @type {number}
-     * @memberof VisitNoteDetail
-     */
-    user_id: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof VisitNoteDetail
-     */
-    pfs_visit_id: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof VisitNoteDetail
-     */
-    body: string;
-    /**
-     * 
-     * @type {ObslogUser}
-     * @memberof VisitNoteDetail
-     */
-    user: ObslogUser;
-}
-/**
- * 
- * @export
- * @interface VisitSetDetail
- */
-export interface VisitSetDetail {
-    /**
-     * 
-     * @type {number}
-     * @memberof VisitSetDetail
-     */
-    id: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof VisitSetDetail
+     * @memberof VisitSet
      */
     visit_id: number;
     /**
      * 
      * @type {SpsSequence}
-     * @memberof VisitSetDetail
+     * @memberof VisitSet
      */
     sps_sequence: SpsSequence;
+}
+/**
+ * 
+ * @export
+ * @interface VisitSetNote
+ */
+export interface VisitSetNote {
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitSetNote
+     */
+    id: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitSetNote
+     */
+    user_id: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitSetNote
+     */
+    visit_set_id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VisitSetNote
+     */
+    body: string;
+    /**
+     * 
+     * @type {ObslogUser}
+     * @memberof VisitSetNote
+     */
+    user: ObslogUser;
 }
 /**
  * 
@@ -749,43 +731,6 @@ export interface VisitSetNoteCreateResponse {
      * @memberof VisitSetNoteCreateResponse
      */
     id: number;
-}
-/**
- * 
- * @export
- * @interface VisitSetNoteDetail
- */
-export interface VisitSetNoteDetail {
-    /**
-     * 
-     * @type {number}
-     * @memberof VisitSetNoteDetail
-     */
-    id: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof VisitSetNoteDetail
-     */
-    user_id: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof VisitSetNoteDetail
-     */
-    visit_set_id: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof VisitSetNoteDetail
-     */
-    body: string;
-    /**
-     * 
-     * @type {ObslogUser}
-     * @memberof VisitSetNoteDetail
-     */
-    user: ObslogUser;
 }
 /**
  * 

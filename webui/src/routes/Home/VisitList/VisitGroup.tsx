@@ -1,7 +1,7 @@
 import { computed, defineComponent, PropType } from "@vue/runtime-core"
 import Color from "color"
 import moment from "moment"
-import { VisitSetDetail } from "~/api-client"
+import { VisitSet } from "~/api-client"
 import { bgColor, fgColor } from "~/utils/colors"
 
 
@@ -39,7 +39,7 @@ export default defineComponent({
   },
   props: {
     visitSet: {
-      type: Object as PropType<VisitSetDetail>,
+      type: Object as PropType<VisitSet>,
     },
     date: {
       type: String,
@@ -48,7 +48,7 @@ export default defineComponent({
 })
 
 
-const sspSequenceDetail = (vs: VisitSetDetail) => {
+const sspSequenceDetail = (vs: VisitSet) => {
   const statusColor: Color = fgColor(statusBaseColor[vs.sps_sequence.status!]! || Color('#f00'))
   return (<>
     <div>

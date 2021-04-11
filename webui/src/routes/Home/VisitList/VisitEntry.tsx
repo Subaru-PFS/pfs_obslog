@@ -19,8 +19,6 @@ export default defineComponent({
       const classes = {
         visitEntry: true,
         selected: $$.selected,
-        sps: $$.m.sps_present,
-        mcs: $$.m.mcs_present,
       }
       return (
         <div ref={el} class={classes}>

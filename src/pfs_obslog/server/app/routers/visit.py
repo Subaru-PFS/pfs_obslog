@@ -6,9 +6,8 @@ from opdb import models as M
 from pfs_obslog.server.app.context import Context
 from pfs_obslog.server.orm import (OrmConfig, skip_validation,
                                    static_check_init_args)
-from pfs_obslog.server.schema import (McsVisit, ObslogUser, SpsSequence,
-                                      SpsVisit, Visit, VisitNote, VisitSet,
-                                      VisitSetNote)
+from pfs_obslog.server.schema import (McsVisit, SpsSequence,
+                                      SpsVisit, VisitBase, VisitNote, VisitSet)
 from pfs_obslog.server.visitquery import visit_query
 from pydantic.main import BaseModel
 from sqlalchemy.orm import selectinload
@@ -18,36 +17,37 @@ router = APIRouter()
 
 
 @static_check_init_args
-class VisitListEntry(Visit):
-    sps_present: bool
-    mcs_present: bool
-    visit_set_id: Optional[int]
+class VisitDetail(VisitBase):
+    notes: list[VisitNote]
+    sps: Optional[SpsVisit]
+    mcs: Optional[McsVisit]
+    sps_sequence: Optional[SpsSequence]
 
-    Config = OrmConfig()(lambda row: skip_validation(VisitListEntry)(
-        id=row.pfs_visit.pfs_visit_id,
-        description=row.pfs_visit.pfs_visit_description,
-        issued_at=row.pfs_visit.issued_at,
-        sps_present=row.sps_present,
-        mcs_present=row.mcs_present,
-        visit_set_id=row.visit_set_id,
+    Config = OrmConfig[M.pfs_visit]()(lambda row: skip_validation(VisitDetail)(
+        id=row.pfs_visit_id,
+        description=row.pfs_visit_description,
+        issued_at=row.issued_at,
+        notes=row.obslog_notes,
+        sps=row.sps_visit,
+        mcs=None if len(row.mcs_exposure) == 0 else McsVisit(exposures=row.mcs_exposure),
+        sps_sequence=row.sps_visit.visit_set.sps_sequence if row.sps_visit else None,
     ))
 
 
 @static_check_init_args
-class VisitSetDetail(VisitSet):
-    sps_sequence: SpsSequence
+class VisitListEntry(VisitBase):
+    visit_set_id: Optional[int]
 
-    Config = OrmConfig[M.visit_set]()(lambda row: skip_validation(VisitSetDetail)(
-        id=row.visit_set_id,
-        visit_id=row.pfs_visit_id,
-        sps_sequence=row.sps_sequence,
+    Config = OrmConfig()(lambda row: skip_validation(VisitListEntry)(
+        **VisitBase.Config.row_to_model(row.pfs_visit).dict(),
+        visit_set_id=row.visit_set_id,
     ))
 
 
 @static_check_init_args
 class VisitList(BaseModel):
     visits: list[VisitListEntry]
-    visit_sets: list[VisitSetDetail]
+    visit_sets: list[VisitSet]
     count: int
 
 
@@ -60,8 +60,6 @@ def visit_list(
 ):
     q = ctx.db.query(
         M.pfs_visit,
-        M.pfs_visit.mcs_exposure.any().label('sps_present'),
-        M.pfs_visit.sps_visit.has().label('mcs_present'),
         M.pfs_visit.pfs_design_id,
         M.visit_set.visit_set_id,
     )\
@@ -87,56 +85,13 @@ def visit_list(
         .filter(M.visit_set.pfs_visit_id.in_(v.id for v in visits))\
         .options(selectinload('sps_sequence'))
 
-    visit_sets = [VisitSetDetail.from_orm(row) for row in q2]
+    visit_sets = [VisitSet.from_orm(row) for row in q2]
 
     return VisitList(
         visits=visits,
         visit_sets=visit_sets,
         count=count,
     )
-
-
-@static_check_init_args
-class VisitNoteDetail(VisitNote):
-    user: ObslogUser
-
-
-@static_check_init_args
-class VisitSetNoteDetail(VisitSetNote):
-    user: ObslogUser
-
-
-@static_check_init_args
-class SpsSequenceDetail(SpsSequence):
-    notes: list[VisitSetNoteDetail]
-
-    Config = OrmConfig[M.sps_sequence]()(lambda row: skip_validation(SpsSequenceDetail)(
-        visit_set_id=row.visit_set_id,
-        sequence_type=row.sequence_type,
-        name=row.name,
-        comments=row.comments,
-        cmd_str=row.cmd_str,
-        status=row.status,
-        notes=row.obslog_notes,
-    ))
-
-
-@static_check_init_args
-class VisitDetail(Visit):
-    notes: list[VisitNoteDetail]
-    sps: Optional[SpsVisit]
-    mcs: Optional[McsVisit]
-    sps_sequence: Optional[SpsSequenceDetail]
-
-    Config = OrmConfig[M.pfs_visit]()(lambda row: skip_validation(VisitDetail)(
-        id=row.pfs_visit_id,
-        description=row.pfs_visit_description,
-        issued_at=row.issued_at,
-        notes=row.obslog_notes,
-        sps=row.sps_visit,
-        mcs=None if len(row.mcs_exposure) == 0 else McsVisit(exposures=row.mcs_exposure),
-        sps_sequence=row.sps_visit.visit_set.sps_sequence if row.sps_visit else None,
-    ))
 
 
 @router.get('/api/visits/{id}', response_model=VisitDetail)
