@@ -15,7 +15,7 @@ from opdb import models as M
 from sqlalchemy.sql.sqltypes import Enum
 from pfs_obslog.server.app.context import Context
 
-from pfs_obslog.server.app.routers.processpool import background_process
+from pfs_obslog.server.app.routers.asynctask import background_process
 
 logger = getLogger(__name__)
 router = APIRouter()

@@ -21,7 +21,9 @@ test:
 	open ./htmlcov/index.html
 
 dev-server:
-	PFS_OBSLOG_ENV=development bash ./start.bash
+	PFS_OBSLOG_ENV=development \
+	PFS_OBSLOG_DATA_ROOT=$(HOME)/pfs/data \
+		bash ./start.bash
 
 prod-server:
 	(cd webui && npm run build -- --base=./)
@@ -56,3 +58,10 @@ schemaspy:
 
 deploy:
 	bash ./deploy.bash
+
+mount-data:
+	mkdir -p ~/pfs/data
+	sshfs pfs-obslog:/data ~/pfs/data -C -o volname=pfsdata -o reconnect
+
+umount-data:
+	umount ~/pfs/data

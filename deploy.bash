@@ -7,6 +7,11 @@ EOT
 
 cat <<'EOT' | ssh pfs-obslog bash
 cd ~/pfs_obslog
-[ -e tmp/server.pid ] && kill $(cat tmp/server.pid) || true
-PFS_OBSLOG_DSN=$(cat secrets/PFS_OBSLOG_DSN) bash ./start.bash -d --port 5000
+if [ -e tmp/server.pid ] ; then
+  kill -HUP $(cat tmp/server.pid)
+else
+  PFS_OBSLOG_DSN=$(cat secrets/PFS_OBSLOG_DSN) \
+  PFS_OBSLOG_DATA_ROOT=/data \
+  bash ./start.bash -d --port 5000
+fi
 EOT

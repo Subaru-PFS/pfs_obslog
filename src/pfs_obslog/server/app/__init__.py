@@ -8,9 +8,10 @@ from .routers.visit_set_note import router as visit_set_note_router
 from .routers.mcs_exposure_note import router as mcs_exposure_note_router
 from .routers.mcs_data import router as mcs_data_router
 from .routers.session import router as session_router
+from .routers.fits import router as fits_router
 from .staticassets import setup_static_assets
 from .debug import setup_debugger
-from .routers.processpool import setup_processpool
+from .routers.asynctask import setup_asynctask
 
 setup_debugger()
 
@@ -21,6 +22,7 @@ app.include_router(visit_note_router)
 app.include_router(visit_set_note_router)
 app.include_router(mcs_exposure_note_router)
 app.include_router(mcs_data_router)
+app.include_router(fits_router)
 setup_static_assets(app)
 
 
@@ -36,4 +38,4 @@ def use_route_names_as_operation_ids() -> None:  # pragma: no cover
 
 
 app.on_event('startup')(reset_loggers)
-app.on_event('startup')(setup_processpool)
+app.on_event('startup')(setup_asynctask)

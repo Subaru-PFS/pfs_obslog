@@ -7,7 +7,8 @@ from pfs_obslog.server.app.context import Context
 from pfs_obslog.server.orm import (OrmConfig, skip_validation,
                                    static_check_init_args)
 from pfs_obslog.server.schema import (McsVisit, SpsSequence,
-                                      SpsVisit, VisitBase, VisitNote, VisitSet)
+                                      SpsVisit, VisitBase, VisitNote, VisitSet, VisitSet,
+                                      VisitSetNote)
 from pfs_obslog.server.visitquery import visit_query
 from pydantic.main import BaseModel
 from sqlalchemy.orm import selectinload
@@ -17,11 +18,26 @@ router = APIRouter()
 
 
 @static_check_init_args
+class SpsSequenceDetail(SpsSequence):
+    notes: list[VisitSetNote]
+
+    Config = OrmConfig[M.sps_sequence]()(lambda row: skip_validation(SpsSequenceDetail)(
+        visit_set_id=row.visit_set_id,
+        sequence_type=row.sequence_type,
+        name=row.name,
+        comments=row.comments,
+        cmd_str=row.cmd_str,
+        status=row.status,
+        notes=row.obslog_notes,
+    ))
+
+
+@static_check_init_args
 class VisitDetail(VisitBase):
     notes: list[VisitNote]
     sps: Optional[SpsVisit]
     mcs: Optional[McsVisit]
-    sps_sequence: Optional[SpsSequence]
+    sps_sequence: Optional[SpsSequenceDetail]
 
     Config = OrmConfig[M.pfs_visit]()(lambda row: skip_validation(VisitDetail)(
         id=row.pfs_visit_id,
@@ -41,6 +57,17 @@ class VisitListEntry(VisitBase):
     Config = OrmConfig()(lambda row: skip_validation(VisitListEntry)(
         **VisitBase.Config.row_to_model(row.pfs_visit).dict(),
         visit_set_id=row.visit_set_id,
+    ))
+
+
+@static_check_init_args
+class VisitSetBase(BaseModel):
+    id: int
+    visit_id: int
+
+    Config = OrmConfig[M.visit_set]()(lambda row: skip_validation(VisitSetBase)(
+        id=row.visit_set_id,
+        visit_id=row.pfs_visit_id,
     ))
 
 

@@ -15,6 +15,7 @@ setup(
         'psqlparse',
         'matplotlib',
         'scipy',
+        'astropy',
         'aiofiles',
         'uvicorn',
         'pycryptodome',
