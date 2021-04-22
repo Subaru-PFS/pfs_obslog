@@ -1,0 +1,26 @@
+.fits-header {
+  border-collapse: collapse;
+  td {
+    font-size: small;
+    font-family: monospace;
+    border-width: 0 0 1px 0;
+    padding-top: 0.25em;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+}
+@media (prefers-color-scheme: dark) {
+  .fits-header {
+    td {
+      border: solid 1px darkslategray;
+      border-width: 0 0 1px 0;
+    }
+    .keyword {
+      color: gray;
+    }
+    .comment {
+      color: darkcyan;
+    }
+  }
+}

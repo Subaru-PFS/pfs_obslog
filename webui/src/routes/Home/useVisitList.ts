@@ -133,6 +133,5 @@ function buildSqlFilter(filter: string, date: DateQuery, type: VisitType) {
   }
   terms.push({ true: 'is_sps_visit', false: 'not is_sps_visit', any: 'true' }[type.include_sps])
   terms.push({ true: 'is_mcs_visit', false: 'not is_mcs_visit', any: 'true' }[type.include_mcs])
-  console.info(terms)
   return terms.length > 0 ? 'where ' + terms.join(' AND ') : ''
 }

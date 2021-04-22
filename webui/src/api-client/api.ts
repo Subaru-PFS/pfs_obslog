@@ -43,6 +43,57 @@ export interface CurrentUser {
 /**
  * 
  * @export
+ * @interface FitsHdu
+ */
+export interface FitsHdu {
+    /**
+     * 
+     * @type {number}
+     * @memberof FitsHdu
+     */
+    index: number;
+    /**
+     * 
+     * @type {FitsHeader}
+     * @memberof FitsHdu
+     */
+    header: FitsHeader;
+}
+/**
+ * 
+ * @export
+ * @interface FitsHeader
+ */
+export interface FitsHeader {
+    /**
+     * 
+     * @type {Array<any>}
+     * @memberof FitsHeader
+     */
+    cards: Array<any>;
+}
+/**
+ * 
+ * @export
+ * @interface FitsMeta
+ */
+export interface FitsMeta {
+    /**
+     * 
+     * @type {string}
+     * @memberof FitsMeta
+     */
+    frameid: string;
+    /**
+     * 
+     * @type {Array<FitsHdu>}
+     * @memberof FitsMeta
+     */
+    hdul: Array<FitsHdu>;
+}
+/**
+ * 
+ * @export
  * @interface HTTPValidationError
  */
 export interface HTTPValidationError {
@@ -423,6 +474,55 @@ export interface SpsSequence {
 /**
  * 
  * @export
+ * @interface SpsSequenceDetail
+ */
+export interface SpsSequenceDetail {
+    /**
+     * 
+     * @type {number}
+     * @memberof SpsSequenceDetail
+     */
+    visit_set_id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequenceDetail
+     */
+    sequence_type?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequenceDetail
+     */
+    name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequenceDetail
+     */
+    comments?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequenceDetail
+     */
+    cmd_str?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SpsSequenceDetail
+     */
+    status?: string;
+    /**
+     * 
+     * @type {Array<VisitSetNote>}
+     * @memberof SpsSequenceDetail
+     */
+    notes: Array<VisitSetNote>;
+}
+/**
+ * 
+ * @export
  * @interface SpsVisit
  */
 export interface SpsVisit {
@@ -508,10 +608,10 @@ export interface VisitDetail {
     mcs?: McsVisit;
     /**
      * 
-     * @type {SpsSequence}
+     * @type {SpsSequenceDetail}
      * @memberof VisitDetail
      */
-    sps_sequence?: SpsSequence;
+    sps_sequence?: SpsSequenceDetail;
 }
 /**
  * 
@@ -1073,6 +1173,40 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
+         * @summary Visit Fits
+         * @param {number} visitId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitFits: async (visitId: number, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'visitId' is not null or undefined
+            assertParamExists('visitFits', 'visitId', visitId)
+            const localVarPath = `/api/fits/{visit_id}`
+                .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Visit List
          * @param {number} [offset] 
          * @param {number} [limit] 
@@ -1448,6 +1582,17 @@ export const DefaultApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Visit Fits
+         * @param {number} visitId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async visitFits(visitId: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<FitsMeta>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.visitFits(visitId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Visit List
          * @param {number} [offset] 
          * @param {number} [limit] 
@@ -1627,6 +1772,16 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          */
         visitDetail(id: number, options?: any): AxiosPromise<VisitDetail> {
             return localVarFp.visitDetail(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Visit Fits
+         * @param {number} visitId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitFits(visitId: number, options?: any): AxiosPromise<Array<FitsMeta>> {
+            return localVarFp.visitFits(visitId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1819,6 +1974,18 @@ export class DefaultApi extends BaseAPI {
      */
     public visitDetail(id: number, options?: any) {
         return DefaultApiFp(this.configuration).visitDetail(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Visit Fits
+     * @param {number} visitId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public visitFits(visitId: number, options?: any) {
+        return DefaultApiFp(this.configuration).visitFits(visitId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

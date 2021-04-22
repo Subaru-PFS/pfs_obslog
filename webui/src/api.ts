@@ -1,25 +1,34 @@
 import Axios, { AxiosError } from 'axios'
 import { StatusCodes } from "http-status-codes"
-import { Spinner } from './components/Spinner'
 import { DefaultApi } from "./api-client/api"
+import { Spinner } from './components/Spinner'
 
 const spinner = new Spinner()
 
-export function baseAxios(ignoreErrors: number[]) {
+
+type AxisOptions = Partial<{
+  ignoreErrors: number[]
+  spinner: boolean
+}>
+
+
+function baseAxios(options: AxisOptions = {}) {
+  const ignoreErrors = options.ignoreErrors || []
+  const showSpinner = options.spinner ?? true
   const axios = Axios.create({
     headers: {}
   })
   axios.interceptors.request.use((config) => {
-    spinner.start()
+    showSpinner && spinner.start()
     return config
   })
   axios.interceptors.response.use(
     (response) => {
-      spinner.stop()
+      showSpinner && spinner.stop()
       return response
     },
     (error: AxiosError) => {
-      spinner.stop()
+      showSpinner && spinner.stop()
       do {
         if (!error.response) { // user triggered a reload during ajax
           break
@@ -40,11 +49,13 @@ export function baseAxios(ignoreErrors: number[]) {
   return axios
 }
 
-export function apiThrowsError(...errors: number[]) {
-  return new DefaultApi(undefined, '.', baseAxios(errors))
+
+export function apiThrowsError(options: AxisOptions = {}) {
+  return new DefaultApi(undefined, '.', baseAxios(options))
 }
 
-export const api = apiThrowsError(StatusCodes.UNPROCESSABLE_ENTITY)
+export const api = apiThrowsError({ ignoreErrors: [StatusCodes.UNPROCESSABLE_ENTITY] })
+export const apiNoSpinnere = apiThrowsError({ spinner: false, ignoreErrors: [StatusCodes.UNPROCESSABLE_ENTITY] })
 
 export function isAxiosError(error: any): error is AxiosError {
   return !!error.isAxiosError

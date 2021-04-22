@@ -24,7 +24,7 @@ export async function sessionLogout() {
 
 export async function sessionReload() {
   try {
-    const { data } = await apiThrowsError(StatusCodes.FORBIDDEN).sessionShow()
+    const { data } = await apiThrowsError({ ignoreErrors: [StatusCodes.FORBIDDEN] }).sessionShow()
     $g.session = { user: data.current_user }
     return true
   } catch (e) {

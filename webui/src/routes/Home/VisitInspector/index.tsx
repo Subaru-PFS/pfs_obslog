@@ -6,6 +6,7 @@ import VisitSetDetail from "./VisitSetDetail"
 import './style.scss'
 import SpsDetail from "./SpsDetail"
 import MCSDetail from "./MCSDetail"
+import VisitFitsHeader from "./VisitFitsHeader"
 
 
 export default defineComponent({
@@ -32,6 +33,7 @@ export default defineComponent({
             <MCSDetail />
           </>
           }
+          <VisitFitsHeader visit={visitInspector.$.m!.id} />
           <div class="end-h">
             <button onClick={e => $.showJson = !$.showJson}>{MI('bug_report')}</button>
           </div>

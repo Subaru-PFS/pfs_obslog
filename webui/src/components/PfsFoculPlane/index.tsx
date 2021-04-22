@@ -35,7 +35,6 @@ export default defineComponent({
 
 
 function drawCobras(ctx: CanvasRenderingContext2D) {
-  console.log('DRAW')
   // Set line width
   ctx.lineWidth = 10
 

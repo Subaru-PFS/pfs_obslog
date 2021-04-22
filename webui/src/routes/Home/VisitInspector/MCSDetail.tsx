@@ -1,4 +1,4 @@
-import { defineComponent, ref } from "@vue/runtime-core"
+import { computed, defineComponent, reactive, ref } from "@vue/runtime-core"
 import { api } from "~/api"
 import AddButton from "~/components/AddButton"
 import LazyImage from "~/components/LazyImage"

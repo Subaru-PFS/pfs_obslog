@@ -10,7 +10,6 @@ function makeProvider() {
   useEventListener(document, 'keydown', e => {
     if (!(e.target instanceof HTMLInputElement)) {
       const cbs = keymap.get(e.key) || []
-      console.log(e)
       if (cbs.length > 0 && !(e.metaKey || e.ctrlKey)) {
         e.preventDefault()
       }
