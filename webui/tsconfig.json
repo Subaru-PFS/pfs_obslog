@@ -13,7 +13,8 @@
       "dom"
     ],
     "types": [
-      "vite/client"
+      "vite/client",
+      "jest"
     ],
     "baseUrl": "./src",
     "paths": {
