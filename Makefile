@@ -60,6 +60,7 @@ deploy:
 	bash ./deploy.bash
 
 mount-data:
+	$(MAKE) umount-data || true
 	mkdir -p ~/pfs/data
 	sshfs pfs-obslog:/data ~/pfs/data -C -o volname=pfsdata -o reconnect
 
