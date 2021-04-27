@@ -1,4 +1,4 @@
-import { defineComponent, PropType } from "@vue/runtime-core"
+import { computed, defineComponent, PropType, reactive } from "@vue/runtime-core"
 import { FitsMeta } from "~/api-client"
 import "./fits-header.scss"
 
@@ -23,7 +23,8 @@ export default defineComponent({
                   <tr>
                     {keyword === 'COMMENT' ?
                       <>
-                        <td colspan={3} class="comment">{value}</td>
+                        <td class="keyword">{keyword}</td>
+                        <td colspan={2} class="comment">{value}</td>
                       </>
                       :
                       <>

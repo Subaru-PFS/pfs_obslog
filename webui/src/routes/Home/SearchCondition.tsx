@@ -49,7 +49,7 @@ const DateInput = defineComponent({
     )
 
     const render = () => (
-      <div style={{ display: 'flex', alignItems: 'center' }}>
+      <div style={{ display: 'flex' }}>
         <button onClick={e => $.value = null} disabled={$$.disabled}>
           {MI('cancel', 18)}
         </button>
