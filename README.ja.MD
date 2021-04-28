@@ -1,8 +1,30 @@
 # pfs-obslog
 
-## そのうち
+## やること
     * [ ] テストデータの作成
-    * [ ] sps_exposure has many sps_annotation
+    * [ ] FITSファイルのサポート
+        * [ ] ダウンロード
+        * [ ] ヘッダの表示
+        * [ ] 画像のプレビュー
+    * [ ] UIの構成を考える
+        * １つのvisitに対する情報量が多すぎてvisit内の情報でも欲しいものにすぐアクセスできない。
+            * 現状は１つのvisitに対する情報は１ページにまとめてしまっている
+        * １つのvisitに付随する情報は・・・
+            * pfs_visit
+            * sps_sequence
+            * mcs_visit
+                * exposures
+            * sps_visit
+                * exposures
+            * FITSファイル
+        * 改善案
+            * タブ
+            * ウインドウ
+    * [ ] URLに表示している情報を埋め込む
+    * [ ] spinner表示の再検討
+        * 非同期に読み込むパーツが多く、ajax中にずっと画面ブロックのローディングが出ていると長いこと操作できない
+    * [ ] メモのmarkdown化
+        * 画像も貼り付けられるように
 
 ## 背景
 
