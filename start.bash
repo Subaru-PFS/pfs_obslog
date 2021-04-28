@@ -2,11 +2,14 @@ set -e
 
 cd $(dirname $0)
 
-if ! [ -s ./secrets/SECRET_KEY_BASE ]; then
-  openssl rand -hex 32 > ./secrets/SECRET_KEY_BASE
-fi
+[ -s ./secrets/SECRET_KEY_BASE ] || openssl rand -hex 32 > ./secrets/SECRET_KEY_BASE
+[ -z "$SECRET_KEY_BASE" ] && SECRET_KEY_BASE=$(cat ./secrets/SECRET_KEY_BASE)
+[ -z "$PFS_OBSLOG_DSN" ] && PFS_OBSLOG_DSN=$(cat ./secrets/PFS_OBSLOG_DSN)
+[ -z "$PFS_OBSLOG_DATA_ROOT" ] && PFS_OBSLOG_DATA_ROOT=/data
 
-export SECRET_KEY_BASE=$(cat ./secrets/SECRET_KEY_BASE)
+export SECRET_KEY_BASE
+export PFS_OBSLOG_DSN
+export PFS_OBSLOG_DATA_ROOT
 
 daemon=
 port=8000

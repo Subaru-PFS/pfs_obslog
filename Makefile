@@ -25,12 +25,6 @@ dev-server:
 	PFS_OBSLOG_DATA_ROOT=$(HOME)/pfs/data \
 		bash ./start.bash
 
-prod-server:
-	(cd webui && npm run build -- --base=./)
-	PFS_OBSLOG_ENV=production \
-	PFS_OBSLOG_DSN=postgresql://postgres@localhost/opdb \
-	bash ./start.bash --port=5000
-
 setup:
 	$(MAKE) -B .venv
 
@@ -48,13 +42,16 @@ schemaspy:
 	bash ./schemaspy/run.bash
 	open ./schemaspy/html/index.html
 
+pip_option := --use-feature=in-tree-build
+
 .venv:
 	$(python) -m venv $@
+	.venv/bin/pip install --upgrade pip
 	.venv/bin/python -m venv .venv
-	.venv/bin/pip install .
-	.venv/bin/pip install ."[dev]"
-	.venv/bin/pip install -e .
-	.venv/bin/pip install -e ./spt_operational_database
+	.venv/bin/pip install . $(pip_option)
+	.venv/bin/pip install ."[dev]" $(pip_option)
+	.venv/bin/pip install -e . $(pip_option)
+	.venv/bin/pip install -e ./spt_operational_database $(pip_option)
 
 deploy:
 	bash ./deploy.bash
