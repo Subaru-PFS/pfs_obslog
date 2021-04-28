@@ -19,7 +19,8 @@
     "material-design-icons": "^3.0.1",
     "moment": "^2.29.1",
     "vue": "^3.0.5",
-    "vue-router": "^4.0.5"
+    "vue-router": "^4.0.5",
+    "vue3-markdown-it": "^1.0.8"
   },
   "devDependencies": {
     "@types/color": "^3.0.1",
