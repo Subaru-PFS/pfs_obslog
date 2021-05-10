@@ -11,6 +11,7 @@ import { useVisitList } from "./useVisitList"
 export default defineComponent({
   setup() {
     const visitList = useVisitList()
+    
     useKeyboardShortcuts().add({
       '/': () => searchRef.value?.focus(),
       'r': () => visitList.refresh(),

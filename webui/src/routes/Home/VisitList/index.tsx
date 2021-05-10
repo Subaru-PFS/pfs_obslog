@@ -1,6 +1,7 @@
 import { defineComponent, ref } from "vue"
 import { VisitListEntry } from "~/api-client"
 import { MI } from "~/components/MaterialIcon"
+import { $reactive } from "~/reactive"
 import { useVisitList } from "../useVisitList"
 import VisitEntry from "./VisitEntry"
 import VisitGroup from "./VisitGroup"
@@ -50,6 +51,12 @@ export default defineComponent({
       listEl.value!.scrollTop += h1 - h0
     }
 
+    const $ = $reactive({
+      get moreRecords() {
+        return visitList.$.count > visitList.q.end
+      }
+    })
+
     const render = () => {
       return (<>
         <div
@@ -64,7 +71,11 @@ export default defineComponent({
               style={{ textAlign: 'center', flexGrow: 1, width: 0 }} type="text" readonly={true}
               value={`${visitList.q.start}-${visitList.q.end} / ${visitList.$.count}`}
             />
-            <button onClick={async e => { await visitList.nextPage(); listEl.value?.scrollTo(0, 0) }}> {MI('navigate_next')}
+            <button
+              onClick={async e => { await visitList.nextPage(); listEl.value?.scrollTo(0, 0) }}
+              disabled={!$.moreRecords}
+            >
+              {MI('navigate_next')}
             </button>
           </div>
           {/* main list */}
@@ -101,7 +112,7 @@ export default defineComponent({
             )}
             <div ref={listEndEl}></div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <button onClick={e => visitList.loadMore()}>{MI('expand_more')}</button>
+              <button onClick={e => visitList.loadMore()} disabled={!$.moreRecords} >{MI('expand_more')}</button>
             </div>
           </div>
         </div>

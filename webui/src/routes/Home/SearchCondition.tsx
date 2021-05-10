@@ -1,5 +1,6 @@
-import { defineComponent, PropType, reactive, watchEffect } from "@vue/runtime-core"
+import { defineComponent } from "@vue/runtime-core"
 import { MI } from "~/components/MaterialIcon"
+import { DateInput } from "~/components/DateInput"
 import { useVisitList } from "./useVisitList"
 
 export default defineComponent({
@@ -25,7 +26,7 @@ export default defineComponent({
             <option value="true">&gt;=1</option>
           </select>
         </div>
-        <div class="date" style={{ display: 'flex' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
           {MI('date_range')}
           <DateInput v-model={$.begin} />
           <button onClick={e => $.range = !$.range}>{MI('more_horiz', 18)}</button>
@@ -34,37 +35,5 @@ export default defineComponent({
       </div>
     )
     return render
-  }
-})
-
-
-const DateInput = defineComponent({
-  setup($$, { emit }) {
-    const $ = reactive({
-      value: $$.modelValue || null,
-    })
-
-    watchEffect(() =>
-      emit('update:modelValue', $.value)
-    )
-
-    const render = () => (
-      <div style={{ display: 'flex' }}>
-        <button onClick={e => $.value = null} disabled={$$.disabled}>
-          {MI('cancel', 18)}
-        </button>
-        <input type="date" v-model={$.value} disabled={$$.disabled} />
-      </div>
-    )
-    return render
-  },
-  props: {
-    modelValue: {
-      type: String as PropType<string | null>,
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-    }
   }
 })
