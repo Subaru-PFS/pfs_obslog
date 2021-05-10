@@ -48,10 +48,11 @@ pip_option := --use-feature=in-tree-build
 	$(python) -m venv $@
 	.venv/bin/pip install --upgrade pip
 	.venv/bin/python -m venv .venv
-	.venv/bin/pip install . $(pip_option)
-	.venv/bin/pip install ."[dev]" $(pip_option)
-	.venv/bin/pip install -e . $(pip_option)
-	.venv/bin/pip install -e ./spt_operational_database $(pip_option)
+	.venv/bin/pip install --use-feature=in-tree-build --upgrade pip
+	.venv/bin/pip install --use-feature=in-tree-build .
+	.venv/bin/pip install --use-feature=in-tree-build ."[dev]"
+	.venv/bin/pip install --use-feature=in-tree-build -e .
+	.venv/bin/pip install --use-feature=in-tree-build -e ./spt_operational_database
 
 deploy:
 	bash ./deploy.bash

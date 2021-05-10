@@ -25,7 +25,7 @@ export default defineComponent({
             <option value="true">&gt;=1</option>
           </select>
         </div>
-        <div class="date" style={{ display: 'flex', alignItems: 'center' }}>
+        <div class="date" style={{ display: 'flex' }}>
           {MI('date_range')}
           <DateInput v-model={$.begin} />
           <button onClick={e => $.range = !$.range}>{MI('more_horiz', 18)}</button>
