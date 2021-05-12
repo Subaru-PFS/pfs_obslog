@@ -23,23 +23,24 @@ export default defineComponent({
       height: `${$$.height}px`,
     }
 
-    const render = () => <div class="lazy-image" ref={el} style={{ display: 'inline-block' }}>
-      {elIsVisible.value ? <>
-        <img
-          src={$$.src}
-          alt={$$.alt}
-          onLoad={onLoad}
-          style={{ display: $.loading ? 'none' : 'inline', ...dimensions, verticalAlign: 'bottom' }}
-        />
-        {$.loading &&
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', ...dimensions }}>
-            <div class={style.loader}></div>
-          </div>
+    const render = () =>
+      <div class="lazy-image" ref={el} style={{ display: 'inline-block' }}>
+        {elIsVisible.value ? <>
+          <img
+            src={$$.src}
+            alt={$$.alt}
+            onLoad={onLoad}
+            style={{ display: $.loading ? 'none' : 'inline', ...dimensions, verticalAlign: 'bottom' }}
+          />
+          {$.loading &&
+            <div class={style.box} style={dimensions}>
+              <div class={style.loader}></div>
+            </div>
+          }
+        </> :
+          <div style={dimensions} />
         }
-      </> :
-        <div style={dimensions} />
-      }
-    </div>
+      </div>
     return render
   },
   props: {

@@ -1,6 +1,7 @@
 import Color from "color"
 import { usePreferredDark } from "@vueuse/core"
 
+
 const isDark = usePreferredDark()
 
 

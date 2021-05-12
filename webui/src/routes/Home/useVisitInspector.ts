@@ -8,7 +8,7 @@ import { async_debounce } from "~/utils/functools"
 const KEY = Symbol('visit-inspector')
 
 
-export function useVisitInspectorProvider() {
+export function provideVisitInspector() {
   const $ = reactive({
     m: null as null | VisitDetail,
   })
@@ -28,5 +28,5 @@ export function useVisitInspectorProvider() {
 
 
 export function useVisitInspector() {
-  return inject<ReturnType<typeof useVisitInspectorProvider>>(KEY)!
+  return inject<ReturnType<typeof provideVisitInspector>>(KEY)!
 }

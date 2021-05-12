@@ -82,7 +82,7 @@ function makeProvider(perPage = 100) {
 }
 
 
-export function useVisitListProvider(...args: Parameters<typeof makeProvider>) {
+export function provideUseVisitList(...args: Parameters<typeof makeProvider>) {
   const provider = makeProvider(...args)
   provide(KEY, provider)
   return provider

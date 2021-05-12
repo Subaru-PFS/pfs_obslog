@@ -30,7 +30,13 @@ input[type="submit"] {
     background-color: #555;
   }
   &:disabled {
-    opacity: 0.5;
+    &:hover,
+    &:active {
+      background-color: #222;
+    }
+    * {
+      color: #555;
+    }
   }
 }
 

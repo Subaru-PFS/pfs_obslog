@@ -1,2 +1,1 @@
-import "./color.scss"
-import "./date-polyfill.scss"
+import "./index.scss"

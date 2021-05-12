@@ -3,8 +3,8 @@ import { defineComponent, inject, provide, reactive, ref, watchEffect } from "@v
 import FlexScroll from "~/components/FlexScroll"
 import Menu from './Menu'
 import { useKeyboardShortcutsProvider } from "./useKeyboardShortcuts"
-import { useVisitInspectorProvider } from "./useVisitInspector"
-import { useVisitListProvider } from "./useVisitList"
+import { provideVisitInspector } from "./useVisitInspector"
+import { provideUseVisitList } from "./useVisitList"
 import VisitInspector from "./VisitInspector"
 import VisitList from "./VisitList"
 import SearchCondition from './SearchCondition'
@@ -27,8 +27,8 @@ export function useHome() {
 export default defineComponent({
   setup() {
     const home = provideHome()
-    const visitList = useVisitListProvider()
-    const visitInspector = useVisitInspectorProvider()
+    const visitList = provideUseVisitList()
+    const visitInspector = provideVisitInspector()
     useKeyboardShortcutsProvider()
 
     const render = () => {

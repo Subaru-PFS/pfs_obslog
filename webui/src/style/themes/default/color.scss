@@ -14,11 +14,18 @@ select {
 button,
 input[type="submit"] {
   border-radius: 4px;
+  background-color: #eee;
   &:hover {
     background-color: #ddd;
   }
   &:active {
     background-color: #ccc;
+  }
+  &:disabled {
+    &:active,
+    &:hover {
+      background-color: #eee;
+    }
   }
 }
 
