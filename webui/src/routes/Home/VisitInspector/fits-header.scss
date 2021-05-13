@@ -4,7 +4,20 @@
     font-size: small;
     font-family: monospace;
     border-width: 0 0 1px 0;
-    padding-top: 0.25em;
+    padding: 0.25em 1em;
+  }
+}
+
+.fits-header {
+  td {
+    border: solid 1px #aaa;
+    border-width: 0 0 1px 0;
+  }
+  .keyword {
+    color: #555;
+  }
+  .comment {
+    color: #077;
   }
 }
 

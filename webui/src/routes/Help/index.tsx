@@ -1,12 +1,12 @@
 import { defineComponent } from "@vue/runtime-core"
-import { MI } from "~/components/MaterialIcon"
+import MI from "~/components/MaterialIcon"
 import { router } from "~/router"
 
 export default defineComponent({
   setup() {
     const render = () => (
       <div class="page">
-        <button onClick={e => router.push('/')}>{MI('home')}</button>
+        <button onClick={e => router.push('/')}><MI icon='home' /></button>
         <h2>Search Syntax</h2>
 
         <dl>

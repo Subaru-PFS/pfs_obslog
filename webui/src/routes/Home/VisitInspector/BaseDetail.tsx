@@ -1,7 +1,8 @@
 import { defineComponent } from "vue"
 import { api } from "~/api"
 import AddButton from "~/components/AddButton"
-import { MI } from "~/components/MaterialIcon"
+import Folder from "~/components/Folder"
+import MI from "~/components/MaterialIcon"
 import { $g } from "~/global"
 import { int } from "~/types"
 import { useVisitInspector } from "../useVisitInspector"
@@ -32,39 +33,39 @@ export default defineComponent({
     const render = () => {
       const m = visitInspector.$.m!
 
-      return (
-        <>
-          <h3>PFS Visit</h3>
-          <dl>
-            <dt>ID</dt>
-            <dd>{m.id}</dd>
-            <dt>Description</dt>
-            <dd>{m.description}</dd>
-            <dt>Issued</dt>
-            <dd>{m.issued_at}</dd>
-            <dt>Notes</dt>
-            <dd>
-              <ul class="notes">
-                {m.notes.slice().sort((a, b) => a.id - b.id).map(n =>
-                  <li key={n.id}>
-                    <div style={{ display: 'flex', alignItems: 'baseline' }}>
-                      <div style={{ flexGrow: 1 }}>{n.body}</div>
-                      <div class="username">{n.user.account_name}</div>
-                      <button
-                        onClick={e => editNote(n.id, n.body)}
-                        disabled={$g.session!.user.id !== n.user_id}
-                      > {MI('edit')}</button>
-                    </div>
-                  </li>
-                )}
-                <li>
-                  <AddButton onSubmit={(note) => addNote(m!.id, note)} />
-                </li>
-              </ul>
-            </dd>
-          </dl>
-        </>
-      )
+      return <>
+        <table class="compact-table">
+          <tr>
+            <th>ID</th>
+            <th>Desc.</th>
+            <th>Issued</th>
+          </tr>
+          <tr>
+            <td>{m.id} </td>
+            <td>{m.description} </td>
+            <td>{m.issued_at} </td>
+          </tr>
+        </table>
+        <Folder title="Notes" opened={true}>
+          <ul class="notes">
+            {m.notes.slice().sort((a, b) => a.id - b.id).map(n =>
+              <li key={n.id}>
+                <div style={{ display: 'flex', alignItems: 'baseline' }}>
+                  <div style={{ flexGrow: 1 }}>{n.body}</div>
+                  <div class="username">{n.user.account_name}</div>
+                  <button
+                    onClick={e => editNote(n.id, n.body)}
+                    disabled={$g.session!.user.id !== n.user_id}
+                  > <MI icon='edit' /></button>
+                </div>
+              </li>
+            )}
+            <li>
+              <AddButton onSubmit={(note) => addNote(m!.id, note)} />
+            </li>
+          </ul>
+        </Folder>
+      </>
     }
 
     return render

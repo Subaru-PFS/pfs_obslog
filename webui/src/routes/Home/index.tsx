@@ -1,6 +1,5 @@
 import './style.scss'
 import { defineComponent, inject, provide, reactive, ref, watchEffect } from "@vue/runtime-core"
-import FlexScroll from "~/components/FlexScroll"
 import Menu from './Menu'
 import { useKeyboardShortcutsProvider } from "./useKeyboardShortcuts"
 import { provideVisitInspector } from "./useVisitInspector"
@@ -13,7 +12,7 @@ import SearchCondition from './SearchCondition'
 const KEY = Symbol('home')
 
 function provideHome() {
-  const inspector = ref<null | HTMLDivElement>(null)
+  const inspector = ref<HTMLDivElement | undefined>()
   const home = { inspector }
   provide(KEY, home)
   return home
@@ -36,14 +35,16 @@ export default defineComponent({
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <Menu />
           <SearchCondition />
-          {/* main view */}
+          {/* vlisit-list & inspector */}
           <div style={{ display: 'flex', flexGrow: 1 }}>
             {/* visit-list */}
             <VisitList v-model={[$.selectedId, 'selectedId']} />
             {/* inspector */}
-            <FlexScroll scrollElement={home.inspector}>
-              {visitInspector.$.m && <VisitInspector />}
-            </FlexScroll>
+            <div style={{ flexGrow: 1, position: 'relative' }} >
+              <div ref={home.inspector} style={{ position: 'absolute', width: '100%', height: '100%', overflow: 'auto' }}>
+                {visitInspector.$.m && <VisitInspector />}
+              </div>
+            </div>
           </div>
         </div>
       )

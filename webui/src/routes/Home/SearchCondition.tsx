@@ -1,5 +1,5 @@
 import { defineComponent } from "@vue/runtime-core"
-import { MI } from "~/components/MaterialIcon"
+import MI from "~/components/MaterialIcon"
 import { DateInput } from "~/components/DateInput"
 import { useVisitList } from "./useVisitList"
 
@@ -27,9 +27,9 @@ export default defineComponent({
           </select>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {MI('date_range')}
+          <MI icon='date_range' />
           <DateInput v-model={$.begin} />
-          <button onClick={e => $.range = !$.range}>{MI('more_horiz', 18)}</button>
+          <button onClick={e => $.range = !$.range}><MI icon='more_horiz' size={18}  /></button>
           {$.range && <DateInput v-model={$.end} />}
         </div>
       </div>

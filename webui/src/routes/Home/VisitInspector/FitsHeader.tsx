@@ -1,4 +1,4 @@
-import { computed, defineComponent, PropType, reactive } from "@vue/runtime-core"
+import { defineComponent, PropType } from "@vue/runtime-core"
 import { FitsMeta } from "~/api-client"
 import "./fits-header.scss"
 

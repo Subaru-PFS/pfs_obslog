@@ -7,10 +7,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from .env import PFS_OBSLOG_ENV
 
-DSN: Final = os.environ.get('PFS_OBSLOG_DSN') or {
-    'test': 'postgresql://postgres@localhost/opdb',
-    'development': 'postgresql://postgres@localhost/opdb',
-}.get(PFS_OBSLOG_ENV)
+DSN: Final = os.environ.get('PFS_OBSLOG_DSN')
 
 if not DSN:
     raise RuntimeError("PFS_OBSLOG_DSN must be set")

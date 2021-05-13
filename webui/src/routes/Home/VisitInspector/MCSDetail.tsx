@@ -2,7 +2,7 @@ import { computed, defineComponent, reactive, ref } from "@vue/runtime-core"
 import { api } from "~/api"
 import AddButton from "~/components/AddButton"
 import LazyImage from "~/components/LazyImage"
-import { MI } from "~/components/MaterialIcon"
+import MI from "~/components/MaterialIcon"
 import { $g } from "~/global"
 import { int } from "~/types"
 import { useHome } from ".."
@@ -104,7 +104,7 @@ export default defineComponent({
                             <button
                               onClick={() => editNote(n.id, n.body)}
                               disabled={$g.session!.user.id !== n.user.id}
-                            > {MI('edit')}</button>
+                            > <MI icon='edit' /></button>
                           </div>
                         </li>
                       )}

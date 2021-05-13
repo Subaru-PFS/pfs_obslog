@@ -1,7 +1,7 @@
 import { computed, defineComponent, ref } from "@vue/runtime-core"
 import { CSSProperties } from "@vue/runtime-dom"
 import Color from "color"
-import { MI } from "~/components/MaterialIcon"
+import MI from "~/components/MaterialIcon"
 import { router } from "~/router"
 import { sessionLogout } from "~/session"
 import { fgColor } from "~/utils/colors"
@@ -11,7 +11,7 @@ import { useVisitList } from "./useVisitList"
 export default defineComponent({
   setup() {
     const visitList = useVisitList()
-    
+
     useKeyboardShortcuts().add({
       '/': () => searchRef.value?.focus(),
       'r': () => visitList.refresh(),
@@ -35,6 +35,7 @@ export default defineComponent({
 
     const render = () => (
       <div style={{ display: 'flex' }}>
+        <MI icon='search' />
         <form onSubmit={e => { e.preventDefault(); search() }} style={formStyle}>
           <input
             v-model={visitList.q.filter}
@@ -47,9 +48,9 @@ export default defineComponent({
             }}
           />
         </form>
-        <button onClick={visitList.refresh} title="Refresh">{MI('refresh')}</button>
-        <button onClick={() => router.push('/help')} title="Refresh">{MI('help')}</button>
-        <button onClick={logout} title="Logout">{MI('exit_to_app')}</button>
+        <button onClick={visitList.refresh} title="Refresh"><MI icon='refresh' /></button>
+        <button onClick={() => router.push('/help')} title="Refresh"><MI icon='help' /></button>
+        <button onClick={logout} title="Logout"><MI icon='exit_to_app' /></button>
       </div >
     )
 

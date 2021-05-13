@@ -15,7 +15,6 @@ export default defineComponent({
     })
 
     const render = () => (<>
-      <h2>FITS</h2>
       {
         $.fitsMetas.map(fm => (
           <FitsHeader meta={fm} />

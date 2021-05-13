@@ -27,8 +27,6 @@ const router = createRouter({
   ],
 })
 
-const x = { x: 0, ...{ y: 3 } }
-
 router.beforeEach(async (to, from, next) => {
   if ($g.session === null && !to.meta.noLogin) {
     if (await sessionReload()) {

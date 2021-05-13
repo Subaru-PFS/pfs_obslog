@@ -1,6 +1,6 @@
 import { defineComponent, ref } from "vue"
 import { VisitListEntry } from "~/api-client"
-import { MI } from "~/components/MaterialIcon"
+import MI from "~/components/MaterialIcon"
 import { $reactive } from "~/reactive"
 import { useVisitList } from "../useVisitList"
 import VisitEntry from "./VisitEntry"
@@ -65,8 +65,8 @@ export default defineComponent({
         >
           {/* navigations */}
           <div style={{ display: 'flex' }}>
-            <button onClick={async e => { await visitList.firstPage(); listEl.value?.scrollTo(0, 0) }} disabled={visitList.q.start == 0}> {MI('first_page')} </button>
-            <button onClick={async e => { await visitList.prevPage(); listEl.value?.scrollTo(0, listEl.value?.scrollHeight) }} disabled={visitList.q.start == 0}> {MI('navigate_before')} </button>
+            <button onClick={async e => { await visitList.firstPage(); listEl.value?.scrollTo(0, 0) }} disabled={visitList.q.start == 0}> <MI icon='first_page' /> </button>
+            <button onClick={async e => { await visitList.prevPage(); listEl.value?.scrollTo(0, listEl.value?.scrollHeight) }} disabled={visitList.q.start == 0}> <MI icon='navigate_before' /> </button>
             <input
               style={{ textAlign: 'center', flexGrow: 1, width: 0 }} type="text" readonly={true}
               value={`${visitList.q.start}-${visitList.q.end} / ${visitList.$.count}`}
@@ -75,7 +75,7 @@ export default defineComponent({
               onClick={async e => { await visitList.nextPage(); listEl.value?.scrollTo(0, 0) }}
               disabled={!$.moreRecords}
             >
-              {MI('navigate_next')}
+              <MI icon='navigate_next' />
             </button>
           </div>
           {/* main list */}
@@ -95,7 +95,7 @@ export default defineComponent({
             ref={listEl}
           >
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <button onClick={loadPrevsMore} disabled={visitList.q.start == 0}>{MI('expand_less')}</button>
+              <button onClick={loadPrevsMore} disabled={visitList.q.start == 0}><MI icon='expand_less' /></button>
             </div>
             {groupVisits(visitList.$.visits).map(g =>
               dragSelect.element(
@@ -112,7 +112,7 @@ export default defineComponent({
             )}
             <div ref={listEndEl}></div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <button onClick={e => visitList.loadMore()} disabled={!$.moreRecords} >{MI('expand_more')}</button>
+              <button onClick={e => visitList.loadMore()} disabled={!$.moreRecords} ><MI icon='expand_more' /></button>
             </div>
           </div>
         </div>

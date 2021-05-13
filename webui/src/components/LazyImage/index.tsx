@@ -5,7 +5,7 @@ import style from './style.module.scss'
 
 export default defineComponent({
   setup($$) {
-    const el = ref<HTMLDivElement | null>(null)
+    const el = ref<HTMLDivElement | undefined>()
     const elIsVisible = useElementVisibility(el, { scrollTarget: $$.scrollTarget })
 
     const $ = reactive({
@@ -45,7 +45,7 @@ export default defineComponent({
   },
   props: {
     scrollTarget: {
-      type: Object as PropType<Ref<null | HTMLDivElement>>,
+      type: Object as PropType<Ref<undefined | HTMLDivElement>>,
     },
     src: {
       type: String,

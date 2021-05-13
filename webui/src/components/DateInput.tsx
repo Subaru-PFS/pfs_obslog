@@ -1,5 +1,5 @@
 import { defineComponent, PropType, reactive, watchEffect } from "@vue/runtime-core"
-import { MI } from "~/components/MaterialIcon"
+import MI from "~/components/MaterialIcon"
 
 export const DateInput = defineComponent({
   setup($$, { emit }) {
@@ -20,7 +20,7 @@ export const DateInput = defineComponent({
       <div style={{ display: 'flex' }}>
         {/* <pre>{$.value}</pre> */}
         <button onClick={() => $.value = undefined} disabled={$$.disabled}>
-          {MI('cancel', 18)}
+          <MI icon='cancel' size={18}  />
         </button>
         <input type="date" v-model={[$.value, ['lazy']]} disabled={$$.disabled} />
       </div>

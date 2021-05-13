@@ -1,5 +1,5 @@
 import { defineComponent, nextTick, PropType, reactive, ref } from "vue"
-import { MI } from "~/components/MaterialIcon"
+import MI from "~/components/MaterialIcon"
 
 
 const AddButton = defineComponent({
@@ -39,11 +39,11 @@ const AddButton = defineComponent({
           <div onMousedown={e => e.preventDefault()}>
             {/* We cannot click buttons below withoutthe onMousedown above,
                 because mousedown on `document` hide the buttons before click */}
-            <button type="button" onClick={cancel}>{MI('cancel')}</button>
-            <button onClick={submit}>{MI('check')}</button>
+            <button type="button" onClick={cancel}><MI icon='cancel' /></button>
+            <button onClick={submit}><MI icon='check' /></button>
           </div>
           :
-          <button onClick={open}>{MI('add')}</button>
+          <button onClick={open}><MI icon='add' /></button>
         }
       </form>
     </>

@@ -22,6 +22,7 @@ test:
 
 dev-server:
 	PFS_OBSLOG_ENV=development \
+	PFS_OBSLOG_DSN=postgresql://postgres@localhost/opdb \
 	PFS_OBSLOG_DATA_ROOT=$(HOME)/pfs/data \
 		bash ./start.bash
 
