@@ -46,29 +46,25 @@ async def visit_fits(
     return [await background_thread(fits_meta, (p,)) for p in fits_path_for_visit(visit)]
 
 
-def main():
-    make_fits_preview('/Users/michitaro/Downloads/PFSA05180112.fits')
-
-
 @router.get('/api/fits_preview/{visit_id}/{camera_id}')
 async def fits_preview(
     visit_id: int,
     camera_id: int,
+    width=800,
+    height=800,
     ctx: Context = Depends(),
 ):
     visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
     filepath = fits_path(visit, camera_id)
-    png = await background_process(make_fits_preview, (filepath,))
+    png = await background_process(make_fits_preview, (filepath, width, height))
     return Response(content=png, media_type='image/png')
 
 
-def make_fits_preview(filepath: str):
+def make_fits_preview(filepath: str, width: int, height: int):
     from matplotlib import pyplot
     import io
     from astropy.visualization import ZScaleInterval
     DPI = 72
-    width = 800
-    height = 800
     pyplot.figure(dpi=DPI, figsize=(width / DPI, height / DPI))
     with afits.open(filepath) as hdul:
         data = hdul[1].data  # type: ignore
@@ -77,7 +73,6 @@ def make_fits_preview(filepath: str):
         pyplot.imshow(data, vmin=vmin, vmax=vmax)
     pyplot.colorbar()
     out = io.BytesIO()
-    # pyplot.savefig('/Users/michitaro/Desktop/a.png')
     pyplot.savefig(out, format='png', transparent=True)
     return out.getvalue()
 
@@ -126,7 +121,3 @@ def fits_path_for_visit(visit: M.pfs_visit):
     date = visit_date(visit)
     date_dir = data_root / 'raw' / date.strftime(r'%Y-%m-%d')
     return list(date_dir.glob(f'*/PFS?{visit.pfs_visit_id:06d}??.fits'))
-
-
-if __name__ == '__main__':
-    main()

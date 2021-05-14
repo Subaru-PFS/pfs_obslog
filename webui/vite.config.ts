@@ -13,6 +13,10 @@ export default defineConfig({
   ],
   server: {
     proxy: {
+      '^/api/(?:fits_preview|session).*': {
+        target: 'http://133.40.164.16',
+        rewrite: (path) => path.replace(/^\/api/, '/obslog/api')
+      },
       '/api/': 'http://localhost:8000',
     }
   },
