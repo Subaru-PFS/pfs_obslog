@@ -7,8 +7,7 @@ from sqlalchemy import distinct, not_, or_, and_, select, cast, Date, String
 from sqlalchemy.sql.operators import ColumnOperators
 from sqlalchemy.orm import aliased
 
-from webui.src.utils.symbol import Symbol
-
+from pfs_obslog.server.utils.symbol import Symbol
 
 @dataclass
 class VisitQuery:

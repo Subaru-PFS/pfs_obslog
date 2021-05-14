@@ -1,15 +1,14 @@
 import { defineComponent, PropType } from "@vue/runtime-core"
 import { FitsMeta } from "~/api-client"
+import Folder from "~/components/Folder"
 import "./fits-header.scss"
 
 export default defineComponent({
   setup($$) {
-    const render = () => (
+    return () =>
       <>
-        <h3>{$$.meta.frameid}</h3>
         {$$.meta.hdul.map((hdu, hduIndex) => (
-          <>
-            <h4>{$$.meta.frameid}[{hduIndex}]</h4>
+          <Folder title={`${$$.meta.frameid}[${hduIndex}]`} opened={false}>
             <table class="fits-header">
               <thead>
                 <tr>
@@ -37,11 +36,9 @@ export default defineComponent({
                 ))}
               </tbody>
             </table>
-          </>
+          </Folder>
         ))}
       </>
-    )
-    return render
   },
   props: {
     meta: {

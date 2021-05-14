@@ -12,12 +12,17 @@ export PFS_OBSLOG_DSN
 export PFS_OBSLOG_DATA_ROOT
 
 daemon=
+host=127.0.0.1
 port=8000
 
 while [ "$#" -gt 0 ] ; do
     case $1 in
         --daemon | -d)
             daemon=1
+            ;;
+        --host)
+            shift
+            host=$1
             ;;
         --port | -p)
             shift
@@ -40,6 +45,7 @@ if [ "$daemon" ] ; then
     --access-logfile=logs/access.log
 else
   exec ./.venv/bin/uvicorn pfs_obslog.server.app:app \
+    --host=$host \
     --port=$port \
     --reload \
     --reload-dir src

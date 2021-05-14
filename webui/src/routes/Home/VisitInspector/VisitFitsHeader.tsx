@@ -1,4 +1,4 @@
-import { defineComponent, reactive, watch } from "@vue/runtime-core"
+import { defineComponent, reactive, watch, watchEffect } from "@vue/runtime-core"
 import { api } from "~/api"
 import { FitsMeta } from "~/api-client"
 import FitsHeader from "./FitsHeader"
@@ -9,7 +9,8 @@ export default defineComponent({
       fitsMetas: [] as FitsMeta[],
     })
 
-    watch(() => $$.visit, async () => {
+    watchEffect(async () => {
+      // $.fitsMetas = []
       const fitsMetas = (await api.visitFits($$.visit)).data
       $.fitsMetas = fitsMetas
     })

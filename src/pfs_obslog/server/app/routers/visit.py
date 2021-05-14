@@ -82,7 +82,7 @@ class VisitList(BaseModel):
 def visit_list(
     offset: int = 0,
     limit: int = 50,
-    filter: Optional[str] = None,
+    sql: Optional[str] = None,
     ctx: Context = Depends(),
 ):
     q = ctx.db.query(
@@ -94,8 +94,8 @@ def visit_list(
         .outerjoin(M.sps_visit)\
         .outerjoin(M.visit_set)\
 
-    if filter:
-        vq = visit_query(filter)
+    if sql:
+        vq = visit_query(sql)
         if vq.pfs_visit_ids is not None:
             q = q.filter(M.pfs_visit.pfs_visit_id.in_(vq.pfs_visit_ids))
 

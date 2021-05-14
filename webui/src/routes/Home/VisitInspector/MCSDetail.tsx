@@ -1,65 +1,69 @@
-import { computed, defineComponent, reactive, ref } from "@vue/runtime-core"
+import { defineComponent, ref } from "@vue/runtime-core"
+import { CSSProperties } from "@vue/runtime-dom"
+import { usePreferredDark } from "@vueuse/core"
 import { api } from "~/api"
 import AddButton from "~/components/AddButton"
 import LazyImage from "~/components/LazyImage"
 import MI from "~/components/MI"
 import { $g } from "~/global"
 import { int } from "~/types"
-import { useHome } from ".."
-import { useVisitInspector } from "../useVisitInspector"
-import { usePreferredDark } from "@vueuse/core"
+import { $reactive } from "~/vue-utils/reactive"
+import { inspectorContext } from "./inspectorContext"
 
 export default defineComponent({
   setup() {
     const isDark = usePreferredDark()
-    const visitInspector = useVisitInspector()
-    const home = useHome()
+    const inspector = inspectorContext.inject()
+    const $c = inspector.$
+    const $ = $reactive({
+      get mcs() {
+        return $c.visit!.mcs!
+      },
+      get dls() {
+        return $.mcs.exposures.map(e => ref<HTMLDListElement>())
+      },
+    })
+    const exposureLinksEl = ref<HTMLDivElement>()
+    const addNote = async (mcs_exposure_frame_id: int, body: string) => {
+      await api.mcsExposureNoteCreate({ mcs_exposure_frame_id, body })
+      inspector.refresh()
+    }
 
-    const render = () => {
-      const mcs = visitInspector.$.m?.mcs!
-      const dls = mcs.exposures.map(e => ref<null | HTMLDListElement>(null))
-      const exposueLinksEl = ref<null | HTMLDivElement>(null)
-
-      const addNote = async (mcs_exposure_frame_id: int, body: string) => {
-        await api.mcsExposureNoteCreate({ mcs_exposure_frame_id, body })
-        await visitInspector.refresh()
-      }
-
-      const editNote = async (visit_note_id: int, initial: string) => {
-        const body = prompt(undefined, initial)
-        if (body !== null) {
-          if (body.length > 0) {
-            await api.mcsExposureNoteUpdate(visit_note_id, { body })
-          }
-          else {
-            await api.mcsExposureNoteDestroy(visit_note_id)
-          }
-          await visitInspector.refresh()
+    const editNote = async (visit_note_id: int, initial: string) => {
+      const body = prompt(undefined, initial)
+      if (body !== null) {
+        if (body.length > 0) {
+          await api.mcsExposureNoteUpdate(visit_note_id, { body })
         }
+        else {
+          await api.mcsExposureNoteDestroy(visit_note_id)
+        }
+        inspector.refresh()
       }
+    }
 
-      return <>
-        <h3>MCS</h3>
+    return () =>
+      <>
         <dl>
           <dt>Exposures</dt>
           <dd>
-            <div class="fixed-header" ref={exposueLinksEl} >
-              {mcs.exposures.map((e, i) => <button onClick={e => {
+            <div style={stickyHeader} ref={exposureLinksEl} >
+              {$.mcs.exposures.map((e, i) => <button onClick={_ => {
                 scrollIntoViewWithFixedHeader({
-                  parent: home.inspector.value!,
+                  parent: inspector.el.value!,
                   // @ts-ignore
-                  target: dls[i]!.value,
-                  header: exposueLinksEl.value!,
+                  target: $.dls[i]!.value,
+                  header: exposureLinksEl.value!,
                 })
               }}>{e.frame_id}</button>)}
             </div>
             {
-              mcs.exposures.map((e, i) => <>
-                <h4 ref={dls[i]}>Frame ID: {e.frame_id}</h4>
+              $.mcs.exposures.map((e, i) => <>
+                <h4 ref={$.dls[i]}>Frame ID: {e.frame_id}</h4>
                 <div style={{ display: 'inline-block' }}>
                   <LazyImage
                     width={640} height={480}
-                    scrollTarget={home.inspector}
+                    scrollTarget={inspector.el}
                     src={`./api/mcs_data_chart/${e.frame_id}?width=640&height=480&theme=${isDark.value ? 'dark' : 'light'}`} />
                 </div>
                 <dl>
@@ -120,11 +124,17 @@ export default defineComponent({
           </dd>
         </dl>
       </>
-    }
-    return render
   }
 })
 
+const stickyHeader: CSSProperties = {
+  position: 'sticky',
+  top: 0,
+  zIndex: 1, // animation loader has a new stacking context.
+  margin: '0.5em 0',
+  backgroundColor: 'rgba(127, 127, 127, 0.5)',
+  opacity: 0.75,
+}
 
 type ScrollOption = {
   parent: HTMLElement
@@ -133,8 +143,9 @@ type ScrollOption = {
 }
 
 function scrollIntoViewWithFixedHeader({ parent, target, header }: ScrollOption) {
+  // FIXME
   const topOfElement = target.offsetTop - header.getBoundingClientRect().height
   const s = getComputedStyle(header)
   const margin = parseFloat(s.marginTop) + parseFloat(s.marginBottom)
-  parent.scroll({ top: topOfElement - margin })
+  parent.scroll({ top: topOfElement - margin - 100 })
 }

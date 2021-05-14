@@ -1,47 +1,62 @@
-import { defineComponent, watch } from "@vue/runtime-core"
-import { api } from "~/api"
-import { VisitDetail } from "~/api-client"
+import { defineComponent } from "@vue/runtime-core"
 import Folder from "~/components/Folder"
-import { async_debounce } from "~/utils/functools"
-import { makeContext } from "~/vue-utils/context"
+import MI from "~/components/MI"
+import VisitFitsHeader from "./VisitFitsHeader"
 import { $reactive } from "~/vue-utils/reactive"
 import BaseDetail from "./BaseDetail"
+import { inspectorContext } from "./inspectorContext"
+import MCSDetail from "./MCSDetail"
+import SpsDetail from "./SpsDetail"
 import style from './style.module.scss'
-
-
-export const inspectorContext = makeContext(($$: { visitId?: number }) => {
-  const $ = $reactive({
-    visit: undefined as VisitDetail | undefined,
-  })
-
-  const refresh = async_debounce(400, async () => {
-    const visitId = $$.visitId
-    $.visit = visitId ? (await api.visitDetail(visitId)).data : undefined
-  })
-
-  watch(() => $$.visitId, () => refresh(), { immediate: true })
-
-  return {
-    $,
-    refresh,
-  }
-})
+import VisitSetDetail from "./VisitSetDetail"
 
 
 export default defineComponent({
   setup($$) {
     const inspector = inspectorContext.provide($$)
-    const { $ } = inspector
+    const $c = inspector.$
+    const $ = $reactive({
+      showJson: import.meta.env.DEV,
+      get visit() {
+        return $c.visit!
+      }
+    })
 
     return () =>
       <div class={style.main} style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ flexGrow: 1, height: 0, overflowY: 'auto' }}>
-          {$.visit &&
+        <div ref={inspector.el} style={{ flexGrow: 1, height: 0, overflowY: 'auto' }}>
+          {$c.visit &&
             <>
-              <Folder title={`pfs_visit(id=${$.visit.id})`} opened={true}>
+              <Folder title={`PFS Visit (id=${$c.visit.id})`} opened={true} key="pfs_visit">
                 <BaseDetail />
               </Folder>
-              <pre>{JSON.stringify($.visit, undefined, 2)}</pre>
+              {$.visit.sps &&
+                <>
+                  {$.visit.sps_sequence &&
+                    <>
+                      <Folder title="SpS Sequence" key="sps_sequence" opened={true}>
+                        <VisitSetDetail />
+                      </Folder>
+                    </>}
+                  <Folder title={`SpS (type=${$c.visit.sps!.exp_type})`} opened={true} key="sps">
+                    <SpsDetail />
+                  </Folder>
+                </>
+              }
+              {$.visit.mcs &&
+                <>
+                  <Folder title="mcs">
+                    <MCSDetail />
+                  </Folder>
+                </>
+              }
+              <Folder title="FITS Header" key="fits_header" opened={false}>
+                <VisitFitsHeader visit={$.visit.id} />
+              </Folder>
+              <div class="end-h">
+                <button onClick={e => $.showJson = !$.showJson}><MI icon='bug_report' /></button>
+              </div>
+              {$.showJson && <pre><code>{JSON.stringify($c.visit, null, 2)}</code></pre>}
             </>
           }
         </div>

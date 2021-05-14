@@ -16,16 +16,11 @@ export default defineComponent({
         if ($$.level) {
           return $$.level
         }
-        const injected = inject<Ref<number>>(KEY)
-        if (injected) {
-          console.log(injected.value)
-          return Math.min(injected.value + 1, 6)
-        }
-        return DEFAULT_LEVEL
+        return inject(KEY, DEFAULT_LEVEL)
       }
     })
 
-    provide(KEY, ref($.level))
+    provide(KEY, Math.min($.level + 1, 6))
 
     const render = () => {
       const H = `h${$.level}`

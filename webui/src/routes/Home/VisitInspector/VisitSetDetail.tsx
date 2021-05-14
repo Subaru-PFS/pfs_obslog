@@ -8,28 +8,30 @@ import { int } from "~/types"
 import { $reactive } from "~/vue-utils/reactive"
 import { inspectorContext } from "./inspectorContext"
 
+
 export default defineComponent({
   setup() {
     const inspector = inspectorContext.inject()
+    const $c = inspector.$
     const $ = $reactive({
-      get visit() {
-        return inspector.$.visit!
+      get seq() {
+        return $c.visit?.sps_sequence!
       }
     })
 
-    const addNote = async (visit_id: int, body: string) => {
-      await api.visitNoteCreate({ visit_id, body })
+    const addNote = async (visit_set_id: int, body: string) => {
+      await api.visitSetNoteCreate({ visit_set_id, body })
       inspector.refresh()
     }
 
-    const editNote = async (visit_note_id: int, initial: string) => {
+    const editNote = async (visit_set_note_id: int, initial: string) => {
       const body = prompt(undefined, initial)
       if (body !== null) {
         if (body.length > 0) {
-          await api.visitNoteUpdate(visit_note_id, { body })
+          await api.visitSetNoteUpdate(visit_set_note_id, { body })
         }
         else {
-          await api.visitNoteDestroy(visit_note_id)
+          await api.visitSetNoteDestroy(visit_set_note_id)
         }
         inspector.refresh()
       }
@@ -39,19 +41,28 @@ export default defineComponent({
       <>
         <table class="compact-table">
           <tr>
-            <th>ID</th>
-            <th>Desc.</th>
-            <th>Issued</th>
+            <th>Type</th>
+            <th>Name</th>
+            <th>Status</th>
           </tr>
           <tr>
-            <td>{$.visit.id} </td>
-            <td>{$.visit.description} </td>
-            <td>{$.visit.issued_at} </td>
+            <td>{$.seq.sequence_type}</td>
+            <td>{$.seq.name}</td>
+            <td>{$.seq.status}</td>
           </tr>
         </table>
-        <Folder title="Notes" opened={true}>
+        <dl>
+          <dt>Command</dt>
+          <dd><code>{$.seq.cmd_str}</code></dd>
+          {$.seq.comments &&
+            <>
+              <dt>Comments</dt>
+              <dd>{$.seq.comments}</dd>
+            </>}
+        </dl>
+        <Folder title="Notes">
           <ul class="notes">
-            {$.visit.notes.slice().sort((a, b) => a.id - b.id).map(n =>
+            {$.seq.notes.slice().sort((a, b) => a.id - b.id).map(n =>
               <li key={n.id}>
                 <div style={{ display: 'flex', alignItems: 'baseline' }}>
                   <div style={{ flexGrow: 1 }}>{n.body}</div>
@@ -59,12 +70,14 @@ export default defineComponent({
                   <button
                     onClick={e => editNote(n.id, n.body)}
                     disabled={$g.session!.user.id !== n.user_id}
-                  > <MI icon='edit' /></button>
+                  >
+                    <MI icon='edit' />
+                  </button>
                 </div>
               </li>
             )}
             <li>
-              <AddButton onSubmit={(note) => addNote($.visit.id, note)} />
+              <AddButton onSubmit={(note) => addNote($.seq.visit_set_id, note)} />
             </li>
           </ul>
         </Folder>

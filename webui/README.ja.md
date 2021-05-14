@@ -1,5 +1,14 @@
 # PFS-OBSLOG WebUI
 
+## 変数名ルール
+
+* `$`
+    * コンポーネントのreactive変数
+* `$$`
+    * コンポーネントの`props`
+* `$c`
+    * contextのreactive変数
+
 ## Routes
 
 ### Home

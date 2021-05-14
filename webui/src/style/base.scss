@@ -27,6 +27,7 @@ code {
   margin: 0.5em;
   border-radius: 0.5em;
   display: block;
+  font-family: monospace;
 }
 
 .id {
@@ -48,4 +49,35 @@ code {
 
 .shadow {
   box-shadow: 0 0 4px #777;
+}
+
+.compact-table {
+  border-collapse: collapse;
+  td,
+  th {
+    padding: 0 1em;
+    border-style: solid;
+    border-width: 0 0 1px 0;
+  }
+}
+
+.compact-table {
+  th,
+  td {
+    border-color: #aaa;
+    @media (prefers-color-scheme: dark) {
+      border-color: #777;
+    }
+  }
+  td {
+    padding-top: 0.25em;
+  }
+}
+
+ul.notes {
+  padding-left: 0;
+  list-style-type: none;
+  .username {
+    opacity: 0.5;
+  }
 }
