@@ -1,3 +1,5 @@
+set -e
+
 (cd webui && npm run build -- --base=./)
 rsync -av --delete --exclude={.venv,node_modules,schemaspy/html,htmlcov,.git} ./ pfs-ics-shell:pfs_obslog/
 cat <<'EOT' | ssh pfs-ics-shell bash

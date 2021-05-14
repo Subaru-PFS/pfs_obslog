@@ -1,5 +1,5 @@
 import style from "./style.module.scss"
-import { Cobra, NUM_OF_COBRAS } from '~/pfs/Cobra'
+// import { Cobra, NUM_OF_COBRAS } from '~/pfs/Cobra'
 import { defineComponent, onMounted, ref, watch, watchEffect } from "@vue/runtime-core"
 
 export default defineComponent({

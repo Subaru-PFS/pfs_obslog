@@ -36,7 +36,8 @@ if [ "$daemon" ] ; then
     --daemon \
     --bind=0.0.0.0:$port --workers=4 -k uvicorn.workers.UvicornWorker \
     --pid=tmp/server.pid \
-    --log-file=logs/production.log
+    --log-file=logs/gunicorn.log \
+    --access-logfile=logs/access.log
 else
   exec ./.venv/bin/uvicorn pfs_obslog.server.app:app \
     --port=$port \

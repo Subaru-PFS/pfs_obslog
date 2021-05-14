@@ -38,9 +38,9 @@ export default defineComponent({
           </Folder>
         </>
         }
-        <Folder title="FITS">
+        {/* <Folder title="FITS"> */}
           <VisitFitsHeader visit={visitInspector.$.m!.id} />
-        </Folder>
+        {/* </Folder> */}
         <div class="end-h">
           <button onClick={e => $.showJson = !$.showJson}><MI icon='bug_report' /></button>
         </div>

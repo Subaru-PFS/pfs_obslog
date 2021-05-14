@@ -1,6 +1,6 @@
 import { defineComponent } from "@vue/runtime-core"
 
-const MI = defineComponent({
+export default defineComponent({
   setup($$) {
     const render = () =>
       <i style={{ verticalAlign: 'bottom', fontSize: `${$$.size}px` }} class="material-icons" >{$$.icon}</i>
@@ -17,6 +17,3 @@ const MI = defineComponent({
     }
   },
 })
-
-export { MI }
-export default MI

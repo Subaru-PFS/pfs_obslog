@@ -50,7 +50,8 @@ export default defineComponent({
     },
     opened: {
       type: Boolean,
-      default: false,
+      // default: false,
+      default: true,
     },
     level: {
       type: Number,
