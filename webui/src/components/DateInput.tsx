@@ -1,5 +1,5 @@
 import { defineComponent, PropType, reactive, watchEffect } from "@vue/runtime-core"
-import MI from "~/components/MaterialIcon"
+import MI from "~/components/MI"
 
 export const DateInput = defineComponent({
   setup($$, { emit }) {

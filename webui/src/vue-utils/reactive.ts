@@ -1,4 +1,4 @@
-import { reactive, computed } from "@vue/reactivity"
+import { reactive, computed } from "vue"
 
 export function $reactive<T extends any>(o: T): T {
   const ds = Object.getOwnPropertyDescriptors(o)

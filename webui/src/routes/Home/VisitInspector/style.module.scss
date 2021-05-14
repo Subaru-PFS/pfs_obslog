@@ -1,0 +1,11 @@
+.main {
+  box-sizing: border-box;
+  border-radius: 8px 0 0 0;
+  border: solid 2px #aaa;
+  @media (prefers-color-scheme: dark) {
+    border: solid 2px #555;
+  }
+  border-width: 2px 0 0 2px;
+  padding-top: 0.25em;
+  padding-left: 0.25em;
+}

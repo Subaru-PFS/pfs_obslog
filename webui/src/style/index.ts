@@ -1,8 +1,7 @@
 import "./base.scss"
 import "./layout.scss"
-import "./date-polyfill.scss"
-import "./themes/default"
-import "./themes/dark"
+import "./input/default"
+import "./input/dark"
 
 if (import.meta.env.DEV) {
   import("./devel.scss")

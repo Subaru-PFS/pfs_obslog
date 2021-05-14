@@ -1,5 +1,5 @@
 // https://loading.io/css/
-import { createApp, defineComponent, h, reactive, Teleport, Transition } from "vue"
+import { createApp, defineComponent, reactive, Teleport, Transition } from "vue"
 import style from './style.module.scss'
 
 const SpinnerComponent = defineComponent({
@@ -44,7 +44,7 @@ export class Spinner {
           <SpinnerComponent show={this.$.showSpinner} />
           {this.$.count > 0 &&
             <Teleport to="body">
-              <div style={{ height: '100%' }}></div>
+              <div class={`${style.block} block`}></div>
             </Teleport>
           }
         </>

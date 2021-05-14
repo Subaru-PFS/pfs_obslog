@@ -1,11 +1,10 @@
 import { defineComponent, PropType, ref, watchEffect } from "vue"
 import { VisitListEntry } from "~/api-client"
+import style from "./style.module.scss"
 
 export default defineComponent({
   setup($$) {
-
-    const el = ref<null | HTMLDivElement>(null)
-
+    const el = ref<HTMLDivElement | undefined>()
     watchEffect(() => {
       if ($$.selected) {
         el.value?.scrollIntoView({
@@ -14,23 +13,19 @@ export default defineComponent({
         })
       }
     })
-
-    const render = () => {
-      const classes = {
-        visitEntry: true,
-        selected: $$.selected,
-      }
-      return (
-        <div ref={el} class={classes}>
-          <div class="id">{$$.m.id}</div> <div class="time">@{time($$.m.issued_at)}</div> - {$$.m.description}
-        </div>
-      )
-    }
-
-    return render
+    return () =>
+      <div
+        ref={el}
+        class={{ [style.selected]: $$.selected, [style.visitEntry]: true }}
+      >
+        <div class="id">{$$.visit.id}</div>
+        <div class="time">
+          @{time($$.visit.issued_at)}
+        </div> - {$$.visit.description}
+      </div>
   },
   props: {
-    m: {
+    visit: {
       type: Object as PropType<VisitListEntry>,
       required: true,
     },

@@ -1,7 +1,7 @@
 import { defineComponent } from "vue"
 import { api } from "~/api"
 import AddButton from "~/components/AddButton"
-import MI from "~/components/MaterialIcon"
+import MI from "~/components/MI"
 import { $g } from "~/global"
 import { int } from "~/types"
 import { useVisitInspector } from "../useVisitInspector"

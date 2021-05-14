@@ -1,71 +1,41 @@
-import { defineComponent, inject, provide, reactive, ref, watchEffect } from "@vue/runtime-core"
-import Menu from './Menu'
-import SearchCondition from './SearchCondition'
-import './style.scss'
-import { useKeyboardShortcutsProvider } from "./useKeyboardShortcuts"
-import { provideVisitInspector } from "./useVisitInspector"
-import { provideUseVisitList } from "./useVisitList"
-import VisitInspector from "./VisitInspector"
+import { defineComponent } from "vue"
+import MI from "~/components/MI"
+import { router } from "~/router"
+import { sessionLogout } from "~/session"
+import { homeContext } from "./homeContext"
+import SearchBox from "./SearchBox"
+import SearchConditions from "./SearchCondition"
+import VisitDetail from "./VisitInspector"
 import VisitList from "./VisitList"
-
-
-const KEY = Symbol('home')
-
-function provideHome() {
-  const inspector = ref<HTMLDivElement | undefined>()
-  const home = { inspector }
-  provide(KEY, home)
-  return home
-}
-
-export function useHome() {
-  return inject<ReturnType<typeof provideHome>>(KEY)!
-}
-
 
 export default defineComponent({
   setup() {
-    const home = provideHome()
-    const visitList = provideUseVisitList()
-    const visitInspector = provideVisitInspector()
-    useKeyboardShortcutsProvider()
+    const home = homeContext.provide()
 
-    const render = () => {
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <Menu />
-          <SearchCondition />
-          {/* vlisit-list & inspector */}
-          <div style={{ display: 'flex', flexGrow: 1 }}>
-            {/* visit-list */}
-            <VisitList v-model={[$.selectedId, 'selectedId']} />
-            {/* inspector */}
-            <div style={{ flexGrow: 1, position: 'relative' }} >
-              <div ref={home.inspector} style={{ position: 'absolute', width: '100%', height: '100%', overflow: 'auto' }}>
-                {visitInspector.$.m && <VisitInspector />}
-              </div>
-            </div>
-          </div>
+    return () =>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div style={{ display: 'flex' }}>
+          <MI style={{ alignSelf: 'center' }} icon="search"></MI>
+          <SearchBox style={{ flexGrow: 1 }} />
+          <button onClick={home.refresh} ><MI icon="refresh" /></button>
+          <button onClick={help}><MI icon="help" /></button>
+          <button onClick={logout}><MI title="Logout" icon="exit_to_app" /></button>
         </div>
-      )
-    }
-
-    const $ = reactive({
-      selectedId: null as null | number
-    })
-
-    watchEffect(() => {
-      if ($.selectedId === null && visitList.$.visits[0]?.id) {
-        $.selectedId = visitList.$.visits[0].id
-      }
-    })
-
-    watchEffect(() => {
-      if ($.selectedId !== null) {
-        visitInspector.reload($.selectedId)
-      }
-    })
-
-    return render
+        <SearchConditions />
+        <div style={{ flexGrow: 1, display: 'flex' }}>
+          <VisitList />
+          <VisitDetail style={{ flexGrow: 1 }} visitId={home.$.selectedVisitId} />
+        </div>
+      </div>
   }
 })
+
+async function logout(e: Event) {
+  e.preventDefault()
+  await sessionLogout()
+  router.push('/login')
+}
+
+function help() {
+  router.push('/help')
+}

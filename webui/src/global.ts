@@ -1,4 +1,4 @@
-import { reactive } from "@vue/reactivity"
+import { $reactive } from "./vue-utils/reactive"
 import { int } from "./types"
 
 
@@ -15,7 +15,7 @@ type $Global = {
   session: null | Session,
 }
 
-const $g = reactive<$Global>({
+const $g = $reactive<$Global>({
   session: null,
 })
 

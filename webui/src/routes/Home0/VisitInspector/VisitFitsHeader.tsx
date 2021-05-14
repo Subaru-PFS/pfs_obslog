@@ -1,5 +1,5 @@
 import { defineComponent, reactive, watch } from "@vue/runtime-core"
-import { api, apiNoSpinnere } from "~/api"
+import { api } from "~/api"
 import { FitsMeta } from "~/api-client"
 import FitsHeader from "./FitsHeader"
 
@@ -10,7 +10,7 @@ export default defineComponent({
     })
 
     watch(() => $$.visit, async () => {
-      const fitsMetas = (await apiNoSpinnere.visitFits($$.visit)).data
+      const fitsMetas = (await api.visitFits($$.visit)).data
       $.fitsMetas = fitsMetas
     })
 

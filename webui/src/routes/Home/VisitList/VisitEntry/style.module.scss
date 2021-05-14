@@ -1,0 +1,17 @@
+.visitEntry {
+  &:hover {
+    background-color: rgba(white, 0.5);
+    @media (prefers-color-scheme: dark) {
+      background-color: rgba(white, 0.125);
+    }
+  }
+}
+
+.selected {
+  outline: solid 2px rgba(#777, 0.5);
+  background-color: rgba(white, 0.5);
+  @media (prefers-color-scheme: dark) {
+    outline: solid 2px rgba(white, 0.5);
+    background-color: rgba(white, 0.125);
+  }
+}

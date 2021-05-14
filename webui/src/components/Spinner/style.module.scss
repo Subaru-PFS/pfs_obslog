@@ -1,3 +1,11 @@
+.block {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .fill {
   position: fixed;
   top: 0;
@@ -5,7 +13,10 @@
   width: 100%;
   height: 100%;
   display: flex;
-  background-color: rgba(#555, 0.75);
+  background-color: rgba(#999, 0.5);
+  @media (prefers-color-scheme: dark) {
+    background-color: rgba(#333, 0.5);
+  }
   justify-content: center;
   align-items: center;
 }
@@ -22,10 +33,15 @@
 /* https://www.w3schools.com/howto/howto_css_loader.asp */
 
 .loader {
-  border: 16px solid #777;
   border-radius: 50%;
+  border: 16px solid #ddd;
   border-top: 16px solid #aaa;
   border-bottom: 16px solid #aaa;
+  @media (prefers-color-scheme: dark) {
+    border: 16px solid #555;
+    border-top: 16px solid #777;
+    border-bottom: 16px solid #777;
+  }
   width: 120px;
   height: 120px;
   animation: spin 1s linear infinite;

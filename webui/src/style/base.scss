@@ -22,8 +22,11 @@ form {
   height: 100%;
 }
 
-.visit_list {
-  box-shadow: 0 0 4px #777;
+code {
+  padding: 0.5em;
+  margin: 0.5em;
+  border-radius: 0.5em;
+  display: block;
 }
 
 .id {
@@ -40,42 +43,9 @@ form {
   opacity: 0.75;
 }
 
-.json {
-  font-family: monospace;
+.date {
 }
 
-.page {
-  margin: 1em;
-}
-
-code {
-  padding: 0.5em;
-  margin: 0.5em;
-  border-radius: 0.5em;
-  display: block;
-}
-
-table.matrix {
-  border-collapse: collapse;
-  th {
-    border-width: 0 0 1px 0;
-    border-style: solid;
-    border-color: #777;
-  }
-  th,
-  td {
-    padding: 0.125em 1em;
-  }
-}
-
-.number {
-  text-align: right;
-  font-family: monospace;
-}
-
-.fixed-header {
-  position: sticky;
-  top: 0;
-  z-index: 1; // animation loader has a new stacking context.
-  margin: 0.5em 0;
+.shadow {
+  box-shadow: 0 0 4px #777;
 }

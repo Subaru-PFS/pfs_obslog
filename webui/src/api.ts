@@ -5,12 +5,10 @@ import { Spinner } from './components/Spinner'
 
 const spinner = new Spinner()
 
-
 type AxisOptions = Partial<{
   ignoreErrors: number[]
   spinner: boolean
 }>
-
 
 function baseAxios(options: AxisOptions = {}) {
   const ignoreErrors = options.ignoreErrors || []
@@ -55,7 +53,7 @@ export function apiThrowsError(options: AxisOptions = {}) {
 }
 
 export const api = apiThrowsError({ ignoreErrors: [StatusCodes.UNPROCESSABLE_ENTITY] })
-export const apiNoSpinnere = apiThrowsError({ spinner: false, ignoreErrors: [StatusCodes.UNPROCESSABLE_ENTITY] })
+export const apiNoSpinner = apiThrowsError({ spinner: false, ignoreErrors: [StatusCodes.UNPROCESSABLE_ENTITY] })
 
 export function isAxiosError(error: any): error is AxiosError {
   return !!error.isAxiosError

@@ -1,5 +1,5 @@
 import { defineComponent } from "@vue/runtime-core"
-import MI from "~/components/MaterialIcon"
+import MI from "~/components/MI"
 import { router } from "~/router"
 
 export default defineComponent({

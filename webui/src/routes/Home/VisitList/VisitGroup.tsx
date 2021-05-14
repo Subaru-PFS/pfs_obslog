@@ -25,7 +25,7 @@ export default defineComponent({
         }} {...rootAttrs}>
           <div style={{ paddingBottom: '0.25em', borderStyle: 'solid', borderWidth: '1px 0 0 0', borderColor: '#777' }}></div>
           {$$.visitSet && sspSequenceDetail($$.visitSet)}
-          <div class="date" style={{ paddingLeft: '1em', opacity: 0.75 }}>{date.value}</div>
+          <div class="date" style={{ paddingLeft: '1em' }}>{date.value}</div>
           <div style={{
             padding: '0.25em 0.125em .25em 2em'
           }}>
@@ -50,17 +50,18 @@ export default defineComponent({
 
 const sspSequenceDetail = (vs: VisitSet) => {
   const statusColor: Color = fgColor(statusBaseColor[vs.sps_sequence.status!]! || Color('#f00'))
-  return (<>
-    <div>
-      <div class="id">#{vs.id}</div> - {vs.sps_sequence.name}
-    </div>
-    <div style={{ paddingLeft: '1em' }}>
-      {vs.sps_sequence.sequence_type}<br />
-      <span style={{ color: statusColor.string() }}>
-        {vs.sps_sequence.status}
-      </span>
-    </div>
-  </>)
+  return (
+    <>
+      <div>
+        <div class="id">{vs.id}</div> - {vs.sps_sequence.name}
+      </div>
+      <div style={{ paddingLeft: '1em' }}>
+        {vs.sps_sequence.sequence_type}<br />
+        <span style={{ color: statusColor.string() }}>
+          {vs.sps_sequence.status}
+        </span>
+      </div>
+    </>)
 }
 
 const sequenceTypeBaseColor: { [name: string]: Color } = {

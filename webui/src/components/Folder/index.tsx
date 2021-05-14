@@ -1,6 +1,6 @@
 import { defineComponent, inject, provide, Ref, ref } from "@vue/runtime-core"
-import { $reactive } from "~/reactive"
-import MI from "~/components/MaterialIcon"
+import { $reactive } from "~/vue-utils/reactive"
+import MI from "~/components/MI"
 
 const KEY = Symbol('folder')
 const DEFAULT_LEVEL = 3

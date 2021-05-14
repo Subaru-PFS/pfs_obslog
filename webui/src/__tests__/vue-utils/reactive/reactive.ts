@@ -1,5 +1,5 @@
 import { watch } from "@vue/runtime-core"
-import { $reactive } from "~/reactive"
+import { $reactive } from "~/vue-utils/reactive"
 
 test('$reactive', () => {
   const cb = jest.fn(() => { })

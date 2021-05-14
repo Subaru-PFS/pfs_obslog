@@ -1,51 +1,55 @@
-import { defineComponent, reactive } from "vue"
-import MI from "~/components/MaterialIcon"
-import { useVisitInspector } from "../useVisitInspector"
-import BaseDetail from "./BaseDetail"
-import VisitSetDetail from "./VisitSetDetail"
-import './style.scss'
-import SpsDetail from "./SpsDetail"
-import MCSDetail from "./MCSDetail"
-import VisitFitsHeader from "./VisitFitsHeader"
+import { defineComponent, watch } from "@vue/runtime-core"
+import { api } from "~/api"
+import { VisitDetail } from "~/api-client"
 import Folder from "~/components/Folder"
+import { async_debounce } from "~/utils/functools"
+import { makeContext } from "~/vue-utils/context"
+import { $reactive } from "~/vue-utils/reactive"
+import BaseDetail from "./BaseDetail"
+import style from './style.module.scss'
+
+
+export const inspectorContext = makeContext(($$: { visitId?: number }) => {
+  const $ = $reactive({
+    visit: undefined as VisitDetail | undefined,
+  })
+
+  const refresh = async_debounce(400, async () => {
+    const visitId = $$.visitId
+    $.visit = visitId ? (await api.visitDetail(visitId)).data : undefined
+  })
+
+  watch(() => $$.visitId, () => refresh(), { immediate: true })
+
+  return {
+    $,
+    refresh,
+  }
+})
 
 
 export default defineComponent({
-  setup() {
-    const visitInspector = useVisitInspector()
+  setup($$) {
+    const inspector = inspectorContext.provide($$)
+    const { $ } = inspector
 
-    const $ = reactive({
-      showJson: import.meta.env.DEV,
-    })
-
-    return () => <>
-      <div class="visit-inspector" style={{ padding: '0 1em' }}>
-        <Folder title={`PFS Visit (id=${visitInspector.$.m?.id})`} opened={true}>
-          <BaseDetail />
-        </Folder>
-        {visitInspector.$.m?.sps && <>
-          <Folder title="SpS Sequence">
-            <VisitSetDetail />
-          </Folder>
-          <Folder title="SpS">
-            <SpsDetail />
-          </Folder>
-        </>
-        }
-        {visitInspector.$.m?.mcs && <>
-          <Folder title="MCS">
-            <MCSDetail />
-          </Folder>
-        </>
-        }
-        {/* <Folder title="FITS"> */}
-          <VisitFitsHeader visit={visitInspector.$.m!.id} />
-        {/* </Folder> */}
-        <div class="end-h">
-          <button onClick={e => $.showJson = !$.showJson}><MI icon='bug_report' /></button>
+    return () =>
+      <div class={style.main} style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flexGrow: 1, height: 0, overflowY: 'auto' }}>
+          {$.visit &&
+            <>
+              <Folder title={`pfs_visit(id=${$.visit.id})`} opened={true}>
+                <BaseDetail />
+              </Folder>
+              <pre>{JSON.stringify($.visit, undefined, 2)}</pre>
+            </>
+          }
         </div>
-        {$.showJson && <pre class="json">{JSON.stringify(visitInspector.$.m, null, 2)}</pre>}
       </div>
-    </>
+  },
+  props: {
+    visitId: {
+      type: Number,
+    },
   },
 })

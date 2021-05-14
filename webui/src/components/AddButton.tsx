@@ -1,5 +1,5 @@
 import { defineComponent, nextTick, PropType, reactive, ref } from "vue"
-import MI from "~/components/MaterialIcon"
+import MI from "~/components/MI"
 
 
 const AddButton = defineComponent({

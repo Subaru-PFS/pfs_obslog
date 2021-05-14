@@ -854,36 +854,6 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
     return {
         /**
          * 
-         * @summary Index
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        index: async (options: any = {}): Promise<RequestArgs> => {
-            const localVarPath = `/`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
          * @summary Mcs Data Chart
          * @param {number} frameId 
          * @param {number} [width] 
@@ -1210,11 +1180,11 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          * @summary Visit List
          * @param {number} [offset] 
          * @param {number} [limit] 
-         * @param {string} [filter] 
+         * @param {string} [sql] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        visitList: async (offset?: number, limit?: number, filter?: string, options: any = {}): Promise<RequestArgs> => {
+        visitList: async (offset?: number, limit?: number, sql?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/visits`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1235,8 +1205,8 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['limit'] = limit;
             }
 
-            if (filter !== undefined) {
-                localVarQueryParameter['filter'] = filter;
+            if (sql !== undefined) {
+                localVarQueryParameter['sql'] = sql;
             }
 
 
@@ -1482,16 +1452,6 @@ export const DefaultApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
-         * @summary Index
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async index(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.index(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * 
          * @summary Mcs Data Chart
          * @param {number} frameId 
          * @param {number} [width] 
@@ -1596,12 +1556,12 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @summary Visit List
          * @param {number} [offset] 
          * @param {number} [limit] 
-         * @param {string} [filter] 
+         * @param {string} [sql] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async visitList(offset?: number, limit?: number, filter?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitList>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.visitList(offset, limit, filter, options);
+        async visitList(offset?: number, limit?: number, sql?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.visitList(offset, limit, sql, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1682,15 +1642,6 @@ export const DefaultApiFp = function(configuration?: Configuration) {
 export const DefaultApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = DefaultApiFp(configuration)
     return {
-        /**
-         * 
-         * @summary Index
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        index(options?: any): AxiosPromise<any> {
-            return localVarFp.index(options).then((request) => request(axios, basePath));
-        },
         /**
          * 
          * @summary Mcs Data Chart
@@ -1788,12 +1739,12 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @summary Visit List
          * @param {number} [offset] 
          * @param {number} [limit] 
-         * @param {string} [filter] 
+         * @param {string} [sql] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        visitList(offset?: number, limit?: number, filter?: string, options?: any): AxiosPromise<VisitList> {
-            return localVarFp.visitList(offset, limit, filter, options).then((request) => request(axios, basePath));
+        visitList(offset?: number, limit?: number, sql?: string, options?: any): AxiosPromise<VisitList> {
+            return localVarFp.visitList(offset, limit, sql, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1867,17 +1818,6 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
  * @extends {BaseAPI}
  */
 export class DefaultApi extends BaseAPI {
-    /**
-     * 
-     * @summary Index
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DefaultApi
-     */
-    public index(options?: any) {
-        return DefaultApiFp(this.configuration).index(options).then((request) => request(this.axios, this.basePath));
-    }
-
     /**
      * 
      * @summary Mcs Data Chart
@@ -1993,13 +1933,13 @@ export class DefaultApi extends BaseAPI {
      * @summary Visit List
      * @param {number} [offset] 
      * @param {number} [limit] 
-     * @param {string} [filter] 
+     * @param {string} [sql] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    public visitList(offset?: number, limit?: number, filter?: string, options?: any) {
-        return DefaultApiFp(this.configuration).visitList(offset, limit, filter, options).then((request) => request(this.axios, this.basePath));
+    public visitList(offset?: number, limit?: number, sql?: string, options?: any) {
+        return DefaultApiFp(this.configuration).visitList(offset, limit, sql, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

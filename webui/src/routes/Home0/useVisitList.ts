@@ -2,7 +2,7 @@ import { reactive } from "@vue/reactivity"
 import { inject, onMounted, provide, watch } from "@vue/runtime-core"
 import { api } from "~/api"
 import { VisitListEntry, VisitSet } from "~/api-client"
-import { async_debounce } from "~/utils/functools"
+import { async_debounce_old } from "~/utils/functools"
 
 
 const KEY = Symbol('visit-list')
@@ -35,7 +35,7 @@ function makeProvider(perPage = 100) {
     refresh(true)
   }, { deep: true })
 
-  const refresh = async_debounce(400, async (goFirstPage = false) => {
+  const refresh = async_debounce_old(400, async (goFirstPage = false) => {
     if (goFirstPage) {
       q.start = 0
       q.end = perPage

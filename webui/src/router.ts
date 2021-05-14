@@ -1,10 +1,10 @@
-import { createRouter, createWebHashHistory } from "vue-router"
+import { createRouter, createWebHashHistory, LocationQuery } from "vue-router"
 import { $g } from "./global"
 import { sessionReload } from "./session"
 
 const devMode = import.meta.env.DEV
 
-const router = createRouter({
+export const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     { path: '/', component: () => import('./routes/Home'), },
@@ -40,4 +40,9 @@ router.beforeEach(async (to, from, next) => {
   }
 })
 
-export { router }
+export function pushQuery(query: LocationQuery) {
+  router.push({
+    query:
+      { ...router.currentRoute.value.query, ...query }
+  })
+}

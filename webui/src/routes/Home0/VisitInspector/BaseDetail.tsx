@@ -5,21 +5,16 @@ import Folder from "~/components/Folder"
 import MI from "~/components/MI"
 import { $g } from "~/global"
 import { int } from "~/types"
-import { $reactive } from "~/vue-utils/reactive"
-import { inspectorContext } from "."
+import { useVisitInspector } from "../useVisitInspector"
+
 
 export default defineComponent({
   setup() {
-    const inspector = inspectorContext.inject()
-    const $ = $reactive({
-      get visit() {
-        return inspector.$.visit!
-      }
-    })
+    const visitInspector = useVisitInspector()
 
     const addNote = async (visit_id: int, body: string) => {
       await api.visitNoteCreate({ visit_id, body })
-      inspector.refresh()
+      await visitInspector.refresh()
     }
 
     const editNote = async (visit_note_id: int, initial: string) => {
@@ -31,12 +26,14 @@ export default defineComponent({
         else {
           await api.visitNoteDestroy(visit_note_id)
         }
-        inspector.refresh()
+        await visitInspector.refresh()
       }
     }
 
-    return () =>
-      <>
+    const render = () => {
+      const m = visitInspector.$.m!
+
+      return <>
         <table class="compact-table">
           <tr>
             <th>ID</th>
@@ -44,14 +41,14 @@ export default defineComponent({
             <th>Issued</th>
           </tr>
           <tr>
-            <td>{$.visit.id} </td>
-            <td>{$.visit.description} </td>
-            <td>{$.visit.issued_at} </td>
+            <td>{m.id} </td>
+            <td>{m.description} </td>
+            <td>{m.issued_at} </td>
           </tr>
         </table>
         <Folder title="Notes" opened={true}>
           <ul class="notes">
-            {$.visit.notes.slice().sort((a, b) => a.id - b.id).map(n =>
+            {m.notes.slice().sort((a, b) => a.id - b.id).map(n =>
               <li key={n.id}>
                 <div style={{ display: 'flex', alignItems: 'baseline' }}>
                   <div style={{ flexGrow: 1 }}>{n.body}</div>
@@ -64,10 +61,13 @@ export default defineComponent({
               </li>
             )}
             <li>
-              <AddButton onSubmit={(note) => addNote($.visit.id, note)} />
+              <AddButton onSubmit={(note) => addNote(m!.id, note)} />
             </li>
           </ul>
         </Folder>
       </>
+    }
+
+    return render
   },
 })

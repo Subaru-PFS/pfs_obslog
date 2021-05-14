@@ -1,7 +1,7 @@
 import { computed, defineComponent, ref } from "@vue/runtime-core"
 import { CSSProperties } from "@vue/runtime-dom"
 import Color from "color"
-import MI from "~/components/MaterialIcon"
+import MI from "~/components/MI"
 import { router } from "~/router"
 import { sessionLogout } from "~/session"
 import { fgColor } from "~/utils/colors"

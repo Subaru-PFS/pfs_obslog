@@ -1,40 +1,53 @@
-// export function debounce<T>(delay: number, cb: () => void) {
-//   let timer: null | ReturnType<typeof setTimeout> = null
+export function runExclusively<U extends unknown[]>
+  (
+    cb: (...args: U) => Promise<void>,
+    conflict: 'error' | 'donothing' = 'donothing'
+  ):
+  (...args: U) => Promise<void> {
+  let running = false
+  return async (...args: U) => {
+    if (running) {
+      if (conflict === 'error') {
+        throw new Error("Simultaneous execution")
+      }
+    }
+    else {
+      running = true
+      try {
+        await cb(...args)
+      } finally {
+        running = false
+      }
+    }
+  }
+}
 
-//   return () => {
-//     if (timer === null) {
-//       timer = setTimeout(() => timer = null, delay)
-//       cb()
-//       return
-//     }
-//     if (timer) {
-//       clearTimeout(timer)
-//       timer = null
-//     }
-//     timer = setTimeout(() => {
-//       timer = null
-//       cb()
-//     }, delay)
-//   }
-// }
 
-export function async_debounce<T, U extends unknown[]>
-  (delay: number, cb: (...args: U) => Promise<T>):
-  (...args: U) => Promise<T> {
+export function ignoreSequentialEvents<T extends Event>
+  (cb: (e: T) => Promise<void>) {
+  const f = runExclusively(cb)
+  return (e: T) => {
+    f(e)
+  }
+}
+
+export function async_debounce<U extends unknown[]>
+  (delay: number, cb: (...args: U) => Promise<void>) {
   let timer: null | ReturnType<typeof setTimeout> = null
-  return (...args: U) => new Promise<T>(async resolve => {
-    if (timer === null) {
+  return (...args: U) => {
+    if (timer === null) { // first call
       timer = setTimeout(() => timer = null, delay)
-      resolve(cb(...args))
+      cb(...args)
       return
     }
-    if (timer) {
+    if (timer) { // after 2nd calls
       clearTimeout(timer)
-      timer = null
     }
     timer = setTimeout(() => {
       timer = null
-      resolve(cb(...args))
+      cb(...args)
     }, delay)
-  })
+  }
 }
+
+export const async_debounce_old = async_debounce
