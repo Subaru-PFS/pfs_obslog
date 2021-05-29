@@ -12,11 +12,7 @@ export function useDragSelect() {
       <div
         onMouseenter={e => {
           e.stopPropagation()
-          if (mouseState == 'down' &&
-            // @ts-ignore
-            !e.relatedTarget.matches('.block')
-            // Spinner's block element triggers mouseenter
-          ) {
+          if (mouseState == 'down') {
             onSelect()
           }
         }}

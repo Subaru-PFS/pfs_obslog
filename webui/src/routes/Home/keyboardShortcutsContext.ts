@@ -5,7 +5,7 @@ export const keyboardShortcutsContext = makeContext(() => {
   const keymap = new Map<string, (() => void)[]>()
 
   useEventListener(document, 'keydown', e => {
-    if (!(e.target instanceof HTMLInputElement)) {
+    if (!(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
       const cbs = keymap.get(e.key) || []
       if (cbs.length > 0 && !(e.metaKey || e.ctrlKey)) {
         e.preventDefault()

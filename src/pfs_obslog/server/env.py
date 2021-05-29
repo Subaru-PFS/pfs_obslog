@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 from typing import Final, Literal
 
@@ -6,3 +7,7 @@ PFS_OBSLOG_ENV: Final[Literal['development', 'production', 'test']] = \
 
 assert PFS_OBSLOG_ENV in {'development', 'production', 'test'},\
     f'Invalid value of PFS_OBSLOG_ENV: {PFS_OBSLOG_ENV}'
+
+HERE = Path(__file__).parent
+
+PFS_OBSLOG_ROOT = HERE / '..' / '..' / '..'

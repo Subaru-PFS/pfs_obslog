@@ -44,7 +44,7 @@ export class Spinner {
           <SpinnerComponent show={this.$.showSpinner} />
           {this.$.count > 0 &&
             <Teleport to="body">
-              <div class={`${style.block} block`}></div>
+              <div class={style.block}></div>
             </Teleport>
           }
         </>

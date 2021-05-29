@@ -1,0 +1,10 @@
+.editing {
+}
+
+.preview {
+  border-radius: 4px;
+  box-shadow: 0 0 4px blue;
+  @media (prefers-color-scheme: dark) {
+    box-shadow: 0 0 4px darkcyan;
+  }
+}

@@ -16,7 +16,7 @@ export default defineComponent({
     const inspector = inspectorContext.provide($$)
     const $c = inspector.$
     const $ = $reactive({
-      showJson: import.meta.env.DEV,
+      showJson: false,
       get visit() {
         return $c.visit!
       }
@@ -24,7 +24,7 @@ export default defineComponent({
 
     return () =>
       <div class={style.main} style={{ display: 'flex', flexDirection: 'column' }}>
-        <div ref={inspector.el} style={{ flexGrow: 1, height: 0, overflowY: 'auto' }}>
+        <div ref={inspector.el} style={{ flexGrow: 1, height: 0, overflowY: 'auto', paddingRight: '1em' }}>
           {$c.visit &&
             <>
               <Folder title={`PFS Visit (id=${$c.visit.id})`} opened={true} key="pfs_visit">

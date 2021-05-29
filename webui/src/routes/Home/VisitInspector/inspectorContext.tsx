@@ -18,7 +18,7 @@ export const inspectorContext = makeContext(($$: { visitId?: number }) => {
 
   watch(() => $$.visitId, () => refresh(), { immediate: true })
 
-  const el = ref<HTMLDivElement | undefined>()
+  const el = ref<HTMLDivElement>()
 
   return {
     $,

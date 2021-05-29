@@ -1,0 +1,57 @@
+.wrapper {
+  position: relative;
+  *:focus {
+    box-shadow: none;
+  }
+}
+
+.hover {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  pointer-events: none;
+  $accent-color: blue;
+  background-color: rgba($accent-color, 0.125);
+  border: 2px solid $accent-color;
+  @media (prefers-color-scheme: dark) {
+    $accent-color: cyan;
+    background-color: rgba($accent-color, 0.125);
+    border: 2px solid $accent-color;
+  }
+}
+
+.fileinput {
+  color: gray;
+  @media (prefers-color-scheme: dark) {
+    color: gray;
+  }
+}
+
+.progress {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  progress {
+    flex-grow: 1;
+    margin: 0 1em;
+  }
+  background-color: gray;
+}
+
+.statusline {
+  font-size: small;
+  background-color: #dde;
+  a {
+    color: darkblue;
+    @media (prefers-color-scheme: dark) {
+      color: darkcyan;
+    }
+  }
+  @media (prefers-color-scheme: dark) {
+    background-color: #033;
+  }
+}

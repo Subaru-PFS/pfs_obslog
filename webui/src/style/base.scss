@@ -1,4 +1,4 @@
-* {
+body {
   font-family: sans-serif;
 }
 
@@ -23,10 +23,6 @@ form {
 }
 
 code {
-  padding: 0.5em;
-  margin: 0.5em;
-  border-radius: 0.5em;
-  display: block;
   font-family: monospace;
 }
 
@@ -51,6 +47,10 @@ code {
   box-shadow: 0 0 4px #777;
 }
 
+label {
+  user-select: none;
+}
+
 .compact-table {
   border-collapse: collapse;
   td,
@@ -71,13 +71,5 @@ code {
   }
   td {
     padding-top: 0.25em;
-  }
-}
-
-ul.notes {
-  padding-left: 0;
-  list-style-type: none;
-  .username {
-    opacity: 0.5;
   }
 }

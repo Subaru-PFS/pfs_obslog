@@ -7,7 +7,7 @@ import { homeContext } from "./homeContext"
 export default defineComponent({
   setup() {
     const home = homeContext.inject()
-    const searchRef = ref<HTMLInputElement | undefined>()
+    const searchRef = ref<HTMLInputElement>()
     const $ = $reactive({
       keywords: home.$.query.keywords,
       get isSql() {

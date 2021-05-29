@@ -5,7 +5,7 @@ import style from './style.module.scss'
 
 export default defineComponent({
   setup($$) {
-    const el = ref<HTMLDivElement | undefined>()
+    const el = ref<HTMLDivElement>()
     const elIsVisible = useElementVisibility(el, { scrollTarget: $$.scrollTarget })
 
     const $ = reactive({

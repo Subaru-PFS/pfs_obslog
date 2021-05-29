@@ -17,6 +17,7 @@ setup(
         'scipy',
         'astropy',
         'aiofiles',
+        'python-multipart',
         'uvicorn',
         'pycryptodome',
         'ldap3',

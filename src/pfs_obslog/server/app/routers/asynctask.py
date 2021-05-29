@@ -2,6 +2,12 @@ import asyncio
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from typing import Callable, cast
 
+from matplotlib import pyplot
+import io
+from astropy.visualization import ZScaleInterval
+from matplotlib import pyplot
+import astropy.io.fits
+
 
 class _g:
     process_pool = cast(ProcessPoolExecutor, None)

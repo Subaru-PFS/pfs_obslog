@@ -4,7 +4,7 @@ import style from "./style.module.scss"
 
 export default defineComponent({
   setup($$) {
-    const el = ref<HTMLDivElement | undefined>()
+    const el = ref<HTMLDivElement>()
     watchEffect(() => {
       if ($$.selected) {
         el.value?.scrollIntoView({

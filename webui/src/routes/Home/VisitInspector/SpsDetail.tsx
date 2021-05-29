@@ -10,7 +10,7 @@ export default defineComponent({
   setup() {
     const inspector = inspectorContext.inject()
     const $ = $reactive({
-      showPreview: true,
+      showPreview: !import.meta.env.DEV,
       get visitId() {
         return inspector.$.visit?.id
       },
@@ -23,7 +23,7 @@ export default defineComponent({
         <Folder title="Exposures (Compact)" opened={true} key="sps_exposures_compact">
           <label style={{ display: 'flex', alignItems: 'center', marginBottom: '1em' }}>
             <input type="checkbox" v-model={$.showPreview} />&nbsp;
-            <MI icon="visibility" />
+            <MI icon="visibility" /> Preview
           </label>
           <table class="compact-table">
             <tr>
@@ -55,6 +55,7 @@ export default defineComponent({
                     <td>
                       <LazyImage
                         src={`./api/fits_preview/${$.visitId}/${e.camera_id}?width=400&height=400`}
+                        scrollTarget={inspector.el}
                         width={400}
                         height={400}
                       />

@@ -9,3 +9,26 @@
   padding-top: 0.25em;
   padding-left: 0.25em;
 }
+
+.command {
+  padding: 0.5em;
+  margin: 0.5em;
+  border-radius: 0.5em;
+  display: block;
+  box-shadow: 0 0 4px black;
+  background-origin: rgba(black, 0.5);
+  color: darkcyan;
+  @media (prefers-color-scheme: dark) {
+    box-shadow: 0 0 4px white;
+    background-origin: rgba(black, 0.5);
+    color: cyan;
+  }
+}
+
+.notes {
+  padding-left: 0;
+  list-style-type: none;
+  :global(.username) {
+    color: #777;
+  }
+}

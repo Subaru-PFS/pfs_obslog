@@ -2,7 +2,7 @@ import { $reactive } from "./vue-utils/reactive"
 import { int } from "./types"
 
 
-type User = {
+export type User = {
   id: int
   account_name: string
 }

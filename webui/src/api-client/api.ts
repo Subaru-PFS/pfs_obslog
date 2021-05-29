@@ -24,6 +24,25 @@ import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } fr
 /**
  * 
  * @export
+ * @interface CreateAttachmentResponse
+ */
+export interface CreateAttachmentResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateAttachmentResponse
+     */
+    id: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateAttachmentResponse
+     */
+    suffix: string;
+}
+/**
+ * 
+ * @export
  * @interface CurrentUser
  */
 export interface CurrentUser {
@@ -854,6 +873,163 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
     return {
         /**
          * 
+         * @summary Create Attachment
+         * @param {any} file 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createAttachment: async (file: any, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'file' is not null or undefined
+            assertParamExists('createAttachment', 'file', file)
+            const localVarPath = `/api/attachments`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
+
+
+            if (file !== undefined) { 
+                localVarFormParams.append('file', file as any);
+            }
+    
+    
+            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = localVarFormParams;
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Fits Download
+         * @param {number} visitId 
+         * @param {number} cameraId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        fitsDownload: async (visitId: number, cameraId: number, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'visitId' is not null or undefined
+            assertParamExists('fitsDownload', 'visitId', visitId)
+            // verify required parameter 'cameraId' is not null or undefined
+            assertParamExists('fitsDownload', 'cameraId', cameraId)
+            const localVarPath = `/api/fits_download/{visit_id}/{camera_id}`
+                .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)))
+                .replace(`{${"camera_id"}}`, encodeURIComponent(String(cameraId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Fits Preview
+         * @param {number} visitId 
+         * @param {number} cameraId 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        fitsPreview: async (visitId: number, cameraId: number, width?: number, height?: number, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'visitId' is not null or undefined
+            assertParamExists('fitsPreview', 'visitId', visitId)
+            // verify required parameter 'cameraId' is not null or undefined
+            assertParamExists('fitsPreview', 'cameraId', cameraId)
+            const localVarPath = `/api/fits_preview/{visit_id}/{camera_id}`
+                .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)))
+                .replace(`{${"camera_id"}}`, encodeURIComponent(String(cameraId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (width !== undefined) {
+                localVarQueryParameter['width'] = width;
+            }
+
+            if (height !== undefined) {
+                localVarQueryParameter['height'] = height;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Index
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        index: async (options: any = {}): Promise<RequestArgs> => {
+            const localVarPath = `/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Mcs Data Chart
          * @param {number} frameId 
          * @param {number} [width] 
@@ -1452,6 +1628,53 @@ export const DefaultApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
+         * @summary Create Attachment
+         * @param {any} file 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createAttachment(file: any, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateAttachmentResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createAttachment(file, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Fits Download
+         * @param {number} visitId 
+         * @param {number} cameraId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async fitsDownload(visitId: number, cameraId: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.fitsDownload(visitId, cameraId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Fits Preview
+         * @param {number} visitId 
+         * @param {number} cameraId 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async fitsPreview(visitId: number, cameraId: number, width?: number, height?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.fitsPreview(visitId, cameraId, width, height, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Index
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async index(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.index(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Mcs Data Chart
          * @param {number} frameId 
          * @param {number} [width] 
@@ -1644,6 +1867,49 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
     return {
         /**
          * 
+         * @summary Create Attachment
+         * @param {any} file 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createAttachment(file: any, options?: any): AxiosPromise<CreateAttachmentResponse> {
+            return localVarFp.createAttachment(file, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Fits Download
+         * @param {number} visitId 
+         * @param {number} cameraId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        fitsDownload(visitId: number, cameraId: number, options?: any): AxiosPromise<any> {
+            return localVarFp.fitsDownload(visitId, cameraId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Fits Preview
+         * @param {number} visitId 
+         * @param {number} cameraId 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        fitsPreview(visitId: number, cameraId: number, width?: number, height?: number, options?: any): AxiosPromise<any> {
+            return localVarFp.fitsPreview(visitId, cameraId, width, height, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Index
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        index(options?: any): AxiosPromise<any> {
+            return localVarFp.index(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Mcs Data Chart
          * @param {number} frameId 
          * @param {number} [width] 
@@ -1818,6 +2084,57 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
  * @extends {BaseAPI}
  */
 export class DefaultApi extends BaseAPI {
+    /**
+     * 
+     * @summary Create Attachment
+     * @param {any} file 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public createAttachment(file: any, options?: any) {
+        return DefaultApiFp(this.configuration).createAttachment(file, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Fits Download
+     * @param {number} visitId 
+     * @param {number} cameraId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public fitsDownload(visitId: number, cameraId: number, options?: any) {
+        return DefaultApiFp(this.configuration).fitsDownload(visitId, cameraId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Fits Preview
+     * @param {number} visitId 
+     * @param {number} cameraId 
+     * @param {number} [width] 
+     * @param {number} [height] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public fitsPreview(visitId: number, cameraId: number, width?: number, height?: number, options?: any) {
+        return DefaultApiFp(this.configuration).fitsPreview(visitId, cameraId, width, height, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Index
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public index(options?: any) {
+        return DefaultApiFp(this.configuration).index(options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * 
      * @summary Mcs Data Chart

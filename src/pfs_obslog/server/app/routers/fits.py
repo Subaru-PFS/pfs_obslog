@@ -5,17 +5,18 @@ from pathlib import Path
 from typing import Any
 
 import astropy.io.fits as afits
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from opdb import models as M
-from starlette.responses import FileResponse, Response
 from pfs_obslog.server.app.context import Context
+from pfs_obslog.server.app.routers.asynctask import (background_process,
+                                                     background_thread)
+from pfs_obslog.server.env import PFS_OBSLOG_ENV
 from pfs_obslog.server.orm import static_check_init_args
 from pydantic import BaseModel
-from sqlalchemy.orm.session import Session
-from pfs_obslog.server.app.routers.asynctask import background_process, background_thread
+from starlette.responses import FileResponse, Response
 
 logger = getLogger(__name__)
-router = APIRouter()
+data_root = Path(os.environ['PFS_OBSLOG_DATA_ROOT'])
 
 
 @static_check_init_args
@@ -35,6 +36,14 @@ class FitsMeta(BaseModel):
     hdul: list[FitsHdu]
 
 
+def disable_in_dev():
+    if PFS_OBSLOG_ENV == 'development':
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
+
+router = APIRouter(dependencies=[Depends(disable_in_dev)])
+
+
 @router.get('/api/fits/{visit_id}', response_model=list[FitsMeta])
 async def visit_fits(
     visit_id: int,
@@ -50,8 +59,8 @@ async def visit_fits(
 async def fits_preview(
     visit_id: int,
     camera_id: int,
-    width=800,
-    height=800,
+    width: int = 800,
+    height: int = 800,
     ctx: Context = Depends(),
 ):
     visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
@@ -61,9 +70,9 @@ async def fits_preview(
 
 
 def make_fits_preview(filepath: str, width: int, height: int):
-    from matplotlib import pyplot
     import io
     from astropy.visualization import ZScaleInterval
+    from matplotlib import pyplot
     DPI = 72
     pyplot.figure(dpi=DPI, figsize=(width / DPI, height / DPI))
     with afits.open(filepath) as hdul:
@@ -112,9 +121,6 @@ def fits_meta(path: Path) -> FitsMeta:
 
 def visit_date(visit: M.pfs_visit) -> datetime.date:
     return (visit.issued_at + datetime.timedelta(hours=10)).date()
-
-
-data_root = Path(os.environ['PFS_OBSLOG_DATA_ROOT'])
 
 
 def fits_path_for_visit(visit: M.pfs_visit):

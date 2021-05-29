@@ -48,8 +48,8 @@ const visitListContext = makeContext(() => {
     { deep: true, immediate: true },
   )
 
-  const listEl = ref<HTMLDivElement | undefined>(undefined)
-  const listEndEl = ref<HTMLDivElement | undefined>(undefined)
+  const listEl = ref<HTMLDivElement>()
+  const listEndEl = ref<HTMLDivElement>()
 
   return {
     $,
@@ -97,7 +97,7 @@ export default defineComponent({
   setup() {
     visitListContext.provide()
     return () =>
-      <div style={{ display: 'flex', flexDirection: 'column', }} >
+      <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '20em' }} >
         <PageNavigator />
         <MainList />
       </div>
@@ -151,14 +151,12 @@ const MainList = defineComponent({
 
     return () =>
       <div
-        tabindex={0}
         onMousedown={dragSelect.mousedownStart}
         onKeydown={onKeydown}
         style={{
           cursor: 'default',
           flexGrow: 1,
           height: 0, // https://github.com/philipwalton/flexbugs/issues/197
-          maxWidth: '20em',
           overflowY: 'auto'
         }}
         ref={visitList.listEl}
@@ -170,15 +168,17 @@ const MainList = defineComponent({
             disabled={!visitList.$.morePrevEntries}
           > <MI icon='expand_less' /> </button>
         </div>
-        {groupVisits(visitList.$.visits).map(g => dragSelect.element(
-          () => home.$.selectedVisitId = g.visits[0].id,
-          <VisitGroup date={g.visits[0].issued_at} visitSet={g.visit_set_id ? visitList.$.visitSets[g.visit_set_id] : undefined}>
-            {g.visits.map(m => dragSelect.element(
-              () => home.$.selectedVisitId = m.id,
-              <VisitEntry visit={m} selected={m.id === home.$.selectedVisitId} />
-            ))}
-          </VisitGroup>
-        ))}
+        <div tabindex={0}>
+          {groupVisits(visitList.$.visits).map(g => dragSelect.element(
+            () => home.$.selectedVisitId = g.visits[0].id,
+            <VisitGroup date={g.visits[0].issued_at} visitSet={g.visit_set_id ? visitList.$.visitSets[g.visit_set_id] : undefined}>
+              {g.visits.map(m => dragSelect.element(
+                () => home.$.selectedVisitId = m.id,
+                <VisitEntry visit={m} selected={m.id === home.$.selectedVisitId} />
+              ))}
+            </VisitGroup>
+          ))}
+        </div>
         <div ref={visitList.listEndEl}></div>
         <div class="fill-h">
           <button

@@ -11,6 +11,10 @@ select {
   margin: 2px;
 }
 
+input[type="radio"] {
+  box-shadow: none;
+}
+
 button,
 input[type="submit"] {
   border-radius: 4px;
@@ -32,12 +36,6 @@ input[type="submit"] {
 *:focus {
   outline: none;
   box-shadow: 0 0 8px #777;
-}
-
-code {
-  box-shadow: 0 0 4px black;
-  background-origin: rgba(black, 0.5);
-  color: darkcyan;
 }
 
 .lazy-image {

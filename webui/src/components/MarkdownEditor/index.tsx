@@ -1,0 +1,92 @@
+import { defineComponent, PropType } from "vue"
+import { $reactive } from "~/vue-utils/reactive"
+import MarkdownViewer from "../MarkdownViewer"
+import MI from "../MI"
+import MonacoEditor from "../MonacoEditor"
+import { MonacoEditorInstance } from "../MonacoEditor/impl"
+import style from './style.module.scss'
+
+
+export default defineComponent({
+  setup($$) {
+    const $ = $reactive({
+      preview: true,
+      body: $$.body ?? '',
+      progress: undefined as number | undefined,
+    })
+    const onFileDrop = (files: FileList) => {
+      for (const file of Array.from(files)) {
+        $$.onFileDrop?.(
+          file,
+          (value) => $.progress = value,
+          (marker) => {
+            const range = editor!.getSelection()!
+            const text = marker
+            const op2: Parameters<MonacoEditorInstance["executeEdits"]>[1] = [{
+              text, range, forceMoveMarkers: true,
+            }]
+            editor!.executeEdits(null, op2)
+          })
+      }
+    }
+    const onSubmit = async () => {
+      await $$.onSubmit?.($.body)
+    }
+
+    let editor: MonacoEditorInstance | undefined = undefined
+
+    return () =>
+      <>
+        <div class={style.editing}>
+          <MonacoEditor
+            v-model={$.body}
+            language="markdown"
+            onFileDrop={$$.onFileDrop && onFileDrop}
+            editorOptions={{ wordWrap: 'on', minimap: { enabled: false } }}
+            style={{ height: '150px' }}
+            v-slots={{
+              statusline: () =>
+                <div class="end-h">
+                  <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noopener">
+                    Markdown Basic Syntax
+                    </a>
+                </div>
+            }}
+            progress={$.progress}
+            {...{ onSetup: (ed: MonacoEditorInstance) => editor = ed } as any}
+          />
+          <div class="end-h" style={{ alignItems: 'baseline' }}>
+            <label style={{ flexGrow: 1 }} >
+              <input type="checkbox" v-model={$.preview} />
+              Preview
+            </label>
+            <button onClick={() => $$.onCancel?.()} ><MI icon="cancel" /></button>
+            <button onClick={onSubmit}><MI icon="check" /></button>
+          </div>
+          {$.preview &&
+            <div class={style.preview}>
+              <MarkdownViewer source={$.body} />
+            </div>
+          }
+        </div>
+      </>
+  },
+  props: {
+    body: {
+      type: String,
+    },
+    onSubmit: {
+      type: Function as PropType<(body: string) => (Promise<void> | void)>,
+    },
+    onFileDrop: {
+      type: Function as PropType<(
+        file: File,
+        setProgress: (value?: number) => void,
+        insertMarker: (marker: string) => void,
+      ) => Promise<void>>
+    },
+    onCancel: {
+      type: Function as PropType<() => void>,
+    },
+  },
+})

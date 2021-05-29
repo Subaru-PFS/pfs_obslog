@@ -19,6 +19,10 @@ select {
   margin: 2px;
 }
 
+input[type="radio"] {
+  box-shadow: none;
+}
+
 button,
 input[type="submit"] {
   border-radius: 4px;
@@ -50,12 +54,6 @@ hr {
   border-style: none;
   border-top-style: solid;
   border-top-color: $color;
-}
-
-code {
-  box-shadow: 0 0 4px white;
-  background-origin: rgba(black, 0.5);
-  color: cyan;
 }
 
 ::placeholder {

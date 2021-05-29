@@ -1,5 +1,5 @@
 import 'date-input-polyfill'
-import "material-design-icons/iconfont/material-icons.css"
+import "material-icons/iconfont/material-icons.css"
 import { createApp } from 'vue'
 import App from './App'
 import { router } from './router'
