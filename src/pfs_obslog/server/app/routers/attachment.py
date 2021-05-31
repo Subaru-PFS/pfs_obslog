@@ -1,14 +1,17 @@
 import os
-import secrets
-import shutil
+import re
 from logging import getLogger
+from mimetypes import guess_type
 from pathlib import Path
+from posixpath import splitext
+from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException
 from fastapi import Path as fPath
 from fastapi import Query, UploadFile, status
 from pfs_obslog.server.app.context import Context
 from pfs_obslog.server.env import PFS_OBSLOG_ROOT
+from pfs_obslog.server.fileseries import FileSeries
 from pfs_obslog.server.orm import static_check_init_args
 from pydantic.main import BaseModel
 from starlette.responses import FileResponse
@@ -21,45 +24,64 @@ router = APIRouter()
 
 @static_check_init_args
 class CreateAttachmentResponse(BaseModel):
-    id: str
-    suffix: str
+    path: str
 
 
 SUFFIX_BLOCKED = {'', 'exe', 'com', 'dll', 'vbs', 'php'}
 
 
+def allowed_file(file: UploadFile):
+    ext: str = splitext(file.filename)[1]
+    ext = ext.lower()
+    if ext in SUFFIX_BLOCKED:
+        return False
+    return True
+
+
+safe_account_name_regex = r'^(\w+|\w+@\w+)$'
+
+
+def safe_account_name(ctx: Context = Depends()):
+    account_name = ctx.current_user.account_name
+    if not re.match(safe_account_name_regex, account_name):
+        message = f'invalid username: {account_name}'
+        logger.error(message)
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, message)
+    return account_name
+
+
 @router.post('/api/attachments', response_model=CreateAttachmentResponse)
 def create_attachment(
     file: UploadFile = File(...),
-    ctx: Context = Depends(),
+    account_name: str = Depends(safe_account_name),
 ):
-    bname = Path(file.filename)
-    suffix = bname.suffix[1:].lower()
-    if suffix in SUFFIX_BLOCKED or len(suffix) == 0:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY)
-    a_id = secrets.token_hex(16)
-    dirname = attachments_dir / a_id[:2]
-    dirname.mkdir(parents=True, exist_ok=True)
-    with (dirname / f'{a_id}.{suffix}').open('wb') as new:
-        shutil.copyfileobj(file.file, new)
+    if not allowed_file(file):
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, 'filetype not allowed')
+
+    userdir = FileSeries(attachments_dir / account_name)
+    file_id = userdir.add(file.file, filename=file.filename)
     return {
-        'id': a_id,
-        'suffix': suffix,
+        'path': f'{account_name}/{file_id}',
     }
 
 
-@router.get('/api/attachments/{a_id}.{suffix}')
+@router.get('/api/attachments/{account_name}/{file_id}')
 def show_attachment(
-    a_id: str = fPath(..., regex=r'^\w+$'),
-    suffix: str = fPath(..., regex=r'^\w+$'),
-    filename: str = Query(None),
+    account_name: str = fPath(..., regex=safe_account_name_regex),
+    file_id: int = fPath(...),
+    filename: Optional[str] = Query(None),
     ctx: Context = Depends(),
 ):
-    if filename and Path(filename).suffix[:1].lower() in SUFFIX_BLOCKED:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST)
-    dirname = attachments_dir / a_id[:2]
-    filepath = dirname / f'{a_id}.{suffix}'
-    if filepath.exists():
-        return FileResponse(str(filepath), filename=filename)
-    logger.warn(f'File Not Found: {filepath}')
-    raise HTTPException(status.HTTP_404_NOT_FOUND)
+    userdir = FileSeries(attachments_dir / account_name)
+    path = userdir.file_path(file_id)
+    try:
+        media_type = guess_type(userdir.file_path(file_id).name)[0]
+        return FileResponse(
+            str(path),
+            media_type=media_type,
+            filename=filename,
+            headers={'Cache-Control': f'max-age={7*24*3600}'},
+        )
+    except FileNotFoundError:
+        logger.warn(f'File Not Found: {path}')
+        raise HTTPException(status.HTTP_404_NOT_FOUND)

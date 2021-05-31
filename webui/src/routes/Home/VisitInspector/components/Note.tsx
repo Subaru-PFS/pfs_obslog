@@ -1,10 +1,10 @@
-import { defineComponent, PropType, reactive } from "vue"
-import { $g, User } from "~/global"
+import { defineComponent, PropType } from "vue"
 import MarkdownEditor from "~/components/MarkdownEditor"
 import MarkdownViewer from "~/components/MarkdownViewer"
 import MI from "~/components/MI"
-import { noteOnFileDrop } from './NewNote'
+import { $g, User } from "~/global"
 import { $reactive } from "~/vue-utils/reactive"
+import { noteOnFileDrop } from './NewNote'
 
 
 export default defineComponent({

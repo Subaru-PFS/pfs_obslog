@@ -36,7 +36,7 @@ export default defineComponent({
         }
         {$.mode === 'folded' &&
           <div class="end-h">
-            <button onClick={() => $.mode = 'simpleeditor'}><MI icon='bolt' title="Quick" /></button>
+            <button onClick={() => $.mode = 'simpleeditor'}><MI icon='bolt' title="One line note" /></button>
             <button onClick={_ => $.mode = 'markdowneditor'} ><MI icon='add' /></button>
           </div>
         }
@@ -55,11 +55,10 @@ const onFileDrop = async (file: File, setProgress: (value?: number) => void, ins
     const res = await apiNoSpinner.createAttachment(file, {
       onUploadProgress: (e: ProgressEvent) => setProgress(e.loaded / e.total),
     })
-    const suf = suffix(file.name)
-    const link = `./api/attachments/${res.data.id}.${suf}?filename=${encodeURIComponent(file.name)}`
+    const link = `./api/attachments/${res.data.path}`
     const marker = file.type.match(/image\//) ?
       `![${file.name}](${link})\n` :
-      `[${file.name}](${link})\n`
+      `[${file.name}](${link}?filename=${encodeURIComponent(file.name)})\n`
     insertMarker(marker)
   }
   finally {

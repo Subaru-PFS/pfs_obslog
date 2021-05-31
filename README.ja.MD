@@ -90,6 +90,14 @@ PFSの観測中、またはエンジニアリング中にopDBの内容を確認�
     * 対応するものがない場合は1つだけのpfs_visitを含むvisit_setを作りそこにpfs_visitを放り込む
     * MCSのデータの場合はそうなる
 
+# 添付ファイル関連
+
+* DBは使わない
+* URLは`ユーザー名/通し番号`
+* ファイルパスは`ユーザー名/通し番号[:4]/通し番号`
+* ファイルの横にメタファイル
+* 採番の方法
+
 ## schemaメモ
 
 * pfs_visit has one visit_set (visit_set.pfs_visit_id が primary keyなので！)

@@ -1,4 +1,6 @@
+import { StatusCodes } from "http-status-codes"
 import { defineComponent, PropType } from "vue"
+import { isAxiosError } from "~/api"
 import { $reactive } from "~/vue-utils/reactive"
 import MarkdownViewer from "../MarkdownViewer"
 import MI from "../MI"
@@ -14,19 +16,36 @@ export default defineComponent({
       body: $$.body ?? '',
       progress: undefined as number | undefined,
     })
-    const onFileDrop = (files: FileList) => {
+    const onFileDrop = async (files: FileList) => {
       for (const file of Array.from(files)) {
-        $$.onFileDrop?.(
-          file,
-          (value) => $.progress = value,
-          (marker) => {
-            const range = editor!.getSelection()!
-            const text = marker
-            const op2: Parameters<MonacoEditorInstance["executeEdits"]>[1] = [{
-              text, range, forceMoveMarkers: true,
-            }]
-            editor!.executeEdits(null, op2)
-          })
+        try {
+          await $$.onFileDrop?.(
+            file,
+            (value) => $.progress = value,
+            (marker) => {
+              const range = editor!.getSelection()!
+              const text = marker
+              const op2: Parameters<MonacoEditorInstance["executeEdits"]>[1] = [{
+                text, range, forceMoveMarkers: true,
+              }]
+              editor!.executeEdits(null, op2)
+            })
+        }
+        catch (e) {
+          if (isAxiosError(e)) {
+            switch (e.response?.status) {
+              case StatusCodes.UNPROCESSABLE_ENTITY:
+                alert(JSON.stringify(e.response.data))
+                break
+              case StatusCodes.REQUEST_TOO_LONG:
+                alert('The file is too large')
+                break
+              default:
+                alert(`${e.response?.statusText}: ${JSON.stringify(e.response?.data, null, 2)}`)
+                break
+            }
+          }
+        }
       }
     }
     const onSubmit = async () => {
@@ -46,7 +65,8 @@ export default defineComponent({
             style={{ height: '150px' }}
             v-slots={{
               statusline: () =>
-                <div class="end-h">
+                <div class="end-h" style={{ alignItems: 'baseline' }}>
+                  <a href="" >Files</a>
                   <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noopener">
                     Markdown Basic Syntax
                     </a>

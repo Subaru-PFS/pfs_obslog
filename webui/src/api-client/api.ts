@@ -32,13 +32,7 @@ export interface CreateAttachmentResponse {
      * @type {string}
      * @memberof CreateAttachmentResponse
      */
-    id: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateAttachmentResponse
-     */
-    suffix: string;
+    path: string;
 }
 /**
  * 
@@ -1285,6 +1279,49 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
+         * @summary Show Attachment
+         * @param {string} accountName 
+         * @param {number} fileId 
+         * @param {string} [filename] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        showAttachment: async (accountName: string, fileId: number, filename?: string, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'accountName' is not null or undefined
+            assertParamExists('showAttachment', 'accountName', accountName)
+            // verify required parameter 'fileId' is not null or undefined
+            assertParamExists('showAttachment', 'fileId', fileId)
+            const localVarPath = `/api/attachments/{account_name}/{file_id}`
+                .replace(`{${"account_name"}}`, encodeURIComponent(String(accountName)))
+                .replace(`{${"file_id"}}`, encodeURIComponent(String(fileId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (filename !== undefined) {
+                localVarQueryParameter['filename'] = filename;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Visit Detail
          * @param {number} id 
          * @param {*} [options] Override http request option.
@@ -1754,6 +1791,19 @@ export const DefaultApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Show Attachment
+         * @param {string} accountName 
+         * @param {number} fileId 
+         * @param {string} [filename] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async showAttachment(accountName: string, fileId: number, filename?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.showAttachment(accountName, fileId, filename, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Visit Detail
          * @param {number} id 
          * @param {*} [options] Override http request option.
@@ -1979,6 +2029,18 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          */
         sessionShow(options?: any): AxiosPromise<Session> {
             return localVarFp.sessionShow(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Show Attachment
+         * @param {string} accountName 
+         * @param {number} fileId 
+         * @param {string} [filename] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        showAttachment(accountName: string, fileId: number, filename?: string, options?: any): AxiosPromise<any> {
+            return localVarFp.showAttachment(accountName, fileId, filename, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2219,6 +2281,20 @@ export class DefaultApi extends BaseAPI {
      */
     public sessionShow(options?: any) {
         return DefaultApiFp(this.configuration).sessionShow(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Show Attachment
+     * @param {string} accountName 
+     * @param {number} fileId 
+     * @param {string} [filename] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public showAttachment(accountName: string, fileId: number, filename?: string, options?: any) {
+        return DefaultApiFp(this.configuration).showAttachment(accountName, fileId, filename, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -52,8 +52,8 @@ export function apiThrowsError(options: AxisOptions = {}) {
   return new DefaultApi(undefined, '.', baseAxios(options))
 }
 
-export const api = apiThrowsError({ ignoreErrors: [StatusCodes.UNPROCESSABLE_ENTITY] })
-export const apiNoSpinner = apiThrowsError({ spinner: false, ignoreErrors: [StatusCodes.UNPROCESSABLE_ENTITY] })
+export const api = apiThrowsError({ ignoreErrors: [StatusCodes.UNPROCESSABLE_ENTITY, StatusCodes.REQUEST_TOO_LONG] })
+export const apiNoSpinner = apiThrowsError({ spinner: false, ignoreErrors: [StatusCodes.UNPROCESSABLE_ENTITY, StatusCodes.REQUEST_TOO_LONG] })
 
 export function isAxiosError(error: any): error is AxiosError {
   return !!error.isAxiosError

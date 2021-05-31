@@ -26,7 +26,7 @@ export default defineComponent({
       isDark: usePreferredDark(),
     })
 
-    let editor: ReturnType<typeof monaco.editor.create>
+    let editor: ReturnType<typeof monaco.editor.create> | undefined
     onMounted(() => {
       editor = monaco.editor.create(root.value as HTMLElement, {
         ...$$.editorOptions,
@@ -38,13 +38,14 @@ export default defineComponent({
         },
       })
       editor.onDidChangeModelContent(e => {
-        emit('update:modelValue', editor.getValue())
+        emit('update:modelValue', editor?.getValue())
       })
       editor.focus()
       emit('setup', editor)
     })
     onBeforeUnmount(() => {
-      editor.dispose()
+      editor?.dispose()
+      editor = undefined
     })
     watch(() => $.isDark, () => monaco.editor.setTheme($.isDark ? 'vs-dark' : 'vs'))
     const onHoverChange = (hover: boolean) => {
@@ -62,7 +63,10 @@ export default defineComponent({
             {$$.onFileDrop &&
               <FIleInput onSelect={onFileSelect} style={{ flexGrow: 1 }}>
                 <div style={{ position: 'relative' }}>
-                  <div class={style.fileinput}>Attach files by dragging &amp; dropping.</div>
+                  <div class={style.fileinput}>
+                    {/* <i style={{ verticalAlign: 'bottom' }} class="material-icons">upload_file</i> */}
+                    Attach files by dragging &amp; dropping.
+                  </div>
                   {$$.progress !== undefined &&
                     <div class={style.progress}>
                       <progress value={Number.isNaN($$.progress) ? undefined : $$.progress} />

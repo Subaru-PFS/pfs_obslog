@@ -1,5 +1,6 @@
 import { defineComponent, PropType, reactive, Ref, ref, watch } from '@vue/runtime-core'
 import { useElementVisibility } from '@vueuse/core'
+import Loading from '../Loading'
 import style from './style.module.scss'
 
 
@@ -33,9 +34,7 @@ export default defineComponent({
             style={{ display: $.loading ? 'none' : 'inline', ...dimensions, verticalAlign: 'bottom' }}
           />
           {$.loading &&
-            <div class={style.box} style={dimensions}>
-              <div class={style.loader}></div>
-            </div>
+            <Loading style={dimensions} />
           }
         </> :
           <div style={dimensions} />

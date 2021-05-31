@@ -8,6 +8,7 @@ export const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     { path: '/', component: () => import('./routes/Home'), },
+    { path: '/attachements', component: () => import('./routes/Attachments'), },
     {
       path: '/login',
       component: () => import('./routes/Login'),
