@@ -121,7 +121,7 @@ const PageNavigator = defineComponent({
         <input
           type="text"
           size={15}
-          style={{ textAlign: 'center' }}
+          style={{ textAlign: 'center', flexGrow: 1 }}
           readonly={true}
           value={`${visitList.$.q.start}-${visitList.$.q.end} / ${visitList.$.count}`}
         />
