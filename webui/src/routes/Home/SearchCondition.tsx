@@ -2,7 +2,7 @@ import { defineComponent } from "@vue/runtime-core"
 import { DateInput } from "~/components/DateInput"
 import MI from "~/components/MI"
 import { $reactive } from "~/vue-utils/reactive"
-import { homeContext } from "../homeContext"
+import { homeContext } from "./homeContext"
 import style from './style.module.scss'
 
 export default defineComponent({
@@ -15,7 +15,7 @@ export default defineComponent({
     })
 
     return () =>
-      <div class={style.searchCondition} style={{ display: 'flex', alignItems: 'center' }}>
+      <div class={style.SearchCondition} style={{ display: 'flex', alignItems: 'center' }}>
         <div>
           #SpS:
           <select v-model={$.q.include_sps}>

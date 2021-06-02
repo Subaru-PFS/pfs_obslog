@@ -11,11 +11,10 @@ import { inspectorContext } from "./inspectorContext"
 export default defineComponent({
   setup() {
     const isDark = usePreferredDark()
-    const inspector = inspectorContext.inject()
-    const $c = inspector.$
+    const $c = inspectorContext.inject()
     const $ = $reactive({
       get mcs() {
-        return $c.visit!.mcs!
+        return $c.$.visit!.mcs!
       },
       get dls() {
         return $.mcs.exposures.map(e => ref<HTMLDListElement>())
@@ -31,7 +30,7 @@ export default defineComponent({
             <div style={stickyHeader} ref={exposureLinksEl} >
               {$.mcs.exposures.map((e, i) => <button onClick={_ => {
                 scrollIntoViewWithFixedHeader({
-                  parent: inspector.el.value!,
+                  parent: $c.el.value!,
                   // @ts-ignore
                   target: $.dls[i]!.value,
                   header: exposureLinksEl.value!,
@@ -44,7 +43,7 @@ export default defineComponent({
                 <div style={{ display: 'inline-block' }}>
                   <LazyImage
                     width={640} height={480}
-                    scrollTarget={inspector.el}
+                    scrollTarget={$c.el}
                     src={`./api/mcs_data_chart/${e.frame_id}?width=640&height=480&theme=${isDark.value ? 'dark' : 'light'}`} />
                 </div>
                 <dl>

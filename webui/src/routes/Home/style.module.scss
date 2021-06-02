@@ -1,0 +1,40 @@
+.mainTableWrapper {
+  box-sizing: border-box;
+  border: solid 1px #777;
+}
+
+.mainTable {
+  width: 100%;
+  border-collapse: collapse;
+  thead th {
+    position: sticky;
+    top: 0px;
+    background-color: #ddd;
+    outline: solid #ccc 1px;
+    @media (prefers-color-scheme: dark) {
+      background-color: #333;
+      outline: solid #777 1px;
+    }
+  }
+  td,
+  th {
+    outline: 1px gray solid;
+  }
+}
+
+.SearchCondition {
+  padding: 0.25em;
+  & > * {
+    margin-right: 1em;
+  }
+}
+
+.SearchBox {
+  :global(.sql) {
+    font-family: monospace;
+    color: darkcyan;
+    @media (prefers-color-scheme: dark) {
+      color: cyan;
+    }
+  }
+}

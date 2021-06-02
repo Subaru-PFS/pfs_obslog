@@ -35,7 +35,9 @@ export default defineComponent({
           if (isAxiosError(e)) {
             switch (e.response?.status) {
               case StatusCodes.UNPROCESSABLE_ENTITY:
-                alert(JSON.stringify(e.response.data))
+                alert(
+                  e.response?.data?.detail ??
+                  JSON.stringify(e.response.data))
                 break
               case StatusCodes.REQUEST_TOO_LONG:
                 alert('The file is too large')
@@ -66,7 +68,6 @@ export default defineComponent({
             v-slots={{
               statusline: () =>
                 <div class="end-h" style={{ alignItems: 'baseline' }}>
-                  <a href="" >Files</a>
                   <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noopener">
                     Markdown Basic Syntax
                     </a>

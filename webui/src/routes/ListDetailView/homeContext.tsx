@@ -3,7 +3,7 @@ import { pushQuery, router } from "~/router"
 import { safeJsonParse } from "~/utils/safejson"
 import { makeContext } from "~/vue-utils/context"
 import { $reactive } from "~/vue-utils/reactive"
-import { keyboardShortcutsContext } from "./keyboardShortcutsContext"
+import { keyboardShortcutsContext } from "~/contexts/keyboardShortcutsContext"
 
 type ExposureSelector = 'any' | 'true' | 'false'
 
@@ -21,7 +21,7 @@ const defaultQuery = {
   include_mcs: 'any' as ExposureSelector,
 }
 
-export const homeContext = makeContext(() => {
+export const homeContext = makeContext('home', () => {
   const keyboardShortcuts = keyboardShortcutsContext.provide()
   const $ = $reactive({
     selectedVisitId: safeJsonParse(router.currentRoute.value.query?.['visit'], () => undefined) as undefined | number,
@@ -29,7 +29,7 @@ export const homeContext = makeContext(() => {
     get sql() {
       const { include_mcs, include_sps, keywords, date } = $.query
       return buildSql(keywords, date, { include_mcs, include_sps })
-    }
+    },
   })
   watch(() => $.sql, () => {
     $.query.start = 0

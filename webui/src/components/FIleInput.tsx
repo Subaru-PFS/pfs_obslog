@@ -15,8 +15,8 @@ export default defineComponent({
       $$.onSelect?.(files)
     }
     return () =>
-      <form ref={form} style={{ display: 'inline', margin: 0, padding: 0 }} >
-        <label style={{ cursor: 'pointer' }}>
+      <form ref={form}>
+        <label>
           <input type="file" onChange={onChange} multiple={$$.multiple} style={{ display: 'none' }} />
           <FileDrop onDrop={onDrop}>
             {slots.default?.()}

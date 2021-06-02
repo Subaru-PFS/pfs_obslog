@@ -11,7 +11,7 @@ import VisitEntry from "./VisitEntry"
 import VisitGroup from "./VisitGroup"
 
 
-const visitListContext = makeContext(() => {
+const visitListContext = makeContext('visitlist', () => {
   const home = homeContext.inject()
   const perPage = 100
 

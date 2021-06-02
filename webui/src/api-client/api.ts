@@ -24,6 +24,62 @@ import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } fr
 /**
  * 
  * @export
+ * @interface AttachmentEntry
+ */
+export interface AttachmentEntry {
+    /**
+     * 
+     * @type {number}
+     * @memberof AttachmentEntry
+     */
+    id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof AttachmentEntry
+     */
+    name: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AttachmentEntry
+     */
+    path: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AttachmentEntry
+     */
+    media_type: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AttachmentEntry
+     */
+    exists: boolean;
+}
+/**
+ * 
+ * @export
+ * @interface AttachmentList
+ */
+export interface AttachmentList {
+    /**
+     * 
+     * @type {number}
+     * @memberof AttachmentList
+     */
+    count: number;
+    /**
+     * 
+     * @type {Array<AttachmentEntry>}
+     * @memberof AttachmentList
+     */
+    entries: Array<AttachmentEntry>;
+}
+/**
+ * 
+ * @export
  * @interface CreateAttachmentResponse
  */
 export interface CreateAttachmentResponse {
@@ -867,6 +923,46 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
     return {
         /**
          * 
+         * @summary Attachment List
+         * @param {number} [start] 
+         * @param {number} [perPage] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        attachmentList: async (start?: number, perPage?: number, options: any = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/attachments`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (start !== undefined) {
+                localVarQueryParameter['start'] = start;
+            }
+
+            if (perPage !== undefined) {
+                localVarQueryParameter['per_page'] = perPage;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Create Attachment
          * @param {any} file 
          * @param {*} [options] Override http request option.
@@ -900,6 +996,40 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = localVarFormParams;
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete Attachment
+         * @param {number} fileId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteAttachment: async (fileId: number, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'fileId' is not null or undefined
+            assertParamExists('deleteAttachment', 'fileId', fileId)
+            const localVarPath = `/api/attachments/{file_id}`
+                .replace(`{${"file_id"}}`, encodeURIComponent(String(fileId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1665,6 +1795,18 @@ export const DefaultApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
+         * @summary Attachment List
+         * @param {number} [start] 
+         * @param {number} [perPage] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async attachmentList(start?: number, perPage?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AttachmentList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.attachmentList(start, perPage, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Create Attachment
          * @param {any} file 
          * @param {*} [options] Override http request option.
@@ -1672,6 +1814,17 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          */
         async createAttachment(file: any, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateAttachmentResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.createAttachment(file, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Delete Attachment
+         * @param {number} fileId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteAttachment(fileId: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteAttachment(fileId, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1917,6 +2070,17 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
     return {
         /**
          * 
+         * @summary Attachment List
+         * @param {number} [start] 
+         * @param {number} [perPage] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        attachmentList(start?: number, perPage?: number, options?: any): AxiosPromise<AttachmentList> {
+            return localVarFp.attachmentList(start, perPage, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Create Attachment
          * @param {any} file 
          * @param {*} [options] Override http request option.
@@ -1924,6 +2088,16 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          */
         createAttachment(file: any, options?: any): AxiosPromise<CreateAttachmentResponse> {
             return localVarFp.createAttachment(file, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete Attachment
+         * @param {number} fileId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteAttachment(fileId: number, options?: any): AxiosPromise<any> {
+            return localVarFp.deleteAttachment(fileId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2148,6 +2322,19 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
 export class DefaultApi extends BaseAPI {
     /**
      * 
+     * @summary Attachment List
+     * @param {number} [start] 
+     * @param {number} [perPage] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public attachmentList(start?: number, perPage?: number, options?: any) {
+        return DefaultApiFp(this.configuration).attachmentList(start, perPage, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
      * @summary Create Attachment
      * @param {any} file 
      * @param {*} [options] Override http request option.
@@ -2156,6 +2343,18 @@ export class DefaultApi extends BaseAPI {
      */
     public createAttachment(file: any, options?: any) {
         return DefaultApiFp(this.configuration).createAttachment(file, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete Attachment
+     * @param {number} fileId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public deleteAttachment(fileId: number, options?: any) {
+        return DefaultApiFp(this.configuration).deleteAttachment(fileId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

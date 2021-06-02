@@ -1,7 +1,6 @@
 import { defineComponent, PropType, reactive, Ref, ref, watch } from '@vue/runtime-core'
 import { useElementVisibility } from '@vueuse/core'
 import Loading from '../Loading'
-import style from './style.module.scss'
 
 
 export default defineComponent({

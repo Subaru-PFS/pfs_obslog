@@ -1,0 +1,8 @@
+.active {
+  transition: opacity 0.2s;
+}
+
+.enterFrom,
+.leaveTo {
+  opacity: 0;
+}

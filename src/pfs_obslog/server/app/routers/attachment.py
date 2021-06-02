@@ -1,9 +1,11 @@
 import os
 import re
+from io import FileIO
 from logging import getLogger
 from mimetypes import guess_type
 from pathlib import Path
 from posixpath import splitext
+from types import prepare_class
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException
@@ -14,6 +16,7 @@ from pfs_obslog.server.env import PFS_OBSLOG_ROOT
 from pfs_obslog.server.fileseries import FileSeries
 from pfs_obslog.server.orm import static_check_init_args
 from pydantic.main import BaseModel
+from sqlalchemy.sql.type_api import UserDefinedType
 from starlette.responses import FileResponse
 
 attachments_dir: Path = Path(os.environ.get('PFS_OBSLOG_ATTACHMENTS_DIR', PFS_OBSLOG_ROOT / 'attachments'))
@@ -27,7 +30,7 @@ class CreateAttachmentResponse(BaseModel):
     path: str
 
 
-SUFFIX_BLOCKED = {'', 'exe', 'com', 'dll', 'vbs', 'php'}
+SUFFIX_BLOCKED = {'', '.exe', '.com', '.dll', '.vbs', '.php'}
 
 
 def allowed_file(file: UploadFile):
@@ -74,7 +77,7 @@ def show_attachment(
 ):
     userdir = FileSeries(attachments_dir / account_name)
     path = userdir.file_path(file_id)
-    try:
+    if path.exists():
         media_type = guess_type(userdir.file_path(file_id).name)[0]
         return FileResponse(
             str(path),
@@ -82,6 +85,51 @@ def show_attachment(
             filename=filename,
             headers={'Cache-Control': f'max-age={7*24*3600}'},
         )
-    except FileNotFoundError:
-        logger.warn(f'File Not Found: {path}')
+    else:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+
+@static_check_init_args
+class AttachmentEntry(BaseModel):
+    id: int
+    name: str
+    path: str
+    media_type: str
+    exists: bool
+
+
+@static_check_init_args
+class AttachmentList(BaseModel):
+    count: int
+    entries: list[AttachmentEntry]
+
+
+@router.get('/api/attachments', response_model=AttachmentList)
+def attachment_list(
+    account_name: str = Depends(safe_account_name),
+    start: int = Query(1),
+    per_page: int = Query(100),
+):
+    userdir = FileSeries(attachments_dir / account_name)
+    return AttachmentList(
+        count=userdir.meta.current_id,
+        entries=[
+            AttachmentEntry(
+                id=file_id,
+                name=meta.name,
+                path=f'{account_name}/{file_id}',
+                media_type=guess_type(meta.name)[0] or 'application/octet-stream',
+                exists=exists,
+            )
+            for file_id, path, meta, exists
+            in userdir.files(slice(-start, -(start + per_page - 1), -1))
+        ])
+
+
+@router.delete('/api/attachments/{file_id}')
+def delete_attachment(
+    file_id: int,
+    account_name: str = Depends(safe_account_name),
+):
+    userdir = FileSeries(attachments_dir / account_name)
+    userdir.file_path(file_id).unlink(missing_ok=True)

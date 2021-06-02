@@ -1,13 +1,14 @@
-body {
+:root {
   font-family: sans-serif;
 }
 
+:root,
 body {
+  height: 100%;
   margin: 0;
 }
 
-html,
-body {
+#app {
   height: 100%;
 }
 
@@ -15,11 +16,6 @@ form {
   display: inline;
   margin: 0;
   padding: 0;
-}
-
-#app,
-.router-view {
-  height: 100%;
 }
 
 code {
@@ -72,4 +68,8 @@ label {
   td {
     padding-top: 0.25em;
   }
+}
+
+::-webkit-calendar-picker-indicator {
+  filter: invert(0.75);
 }

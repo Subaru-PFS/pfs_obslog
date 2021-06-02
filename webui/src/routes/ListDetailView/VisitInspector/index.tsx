@@ -14,20 +14,20 @@ import VisitSetDetail from "./VisitSetDetail"
 export default defineComponent({
   setup($$) {
     const inspector = inspectorContext.provide($$)
-    const $c = inspector.$
+    const $c = inspector
     const $ = $reactive({
       showJson: false,
       get visit() {
-        return $c.visit!
+        return $c.$.visit!
       }
     })
 
     return () =>
       <div class={style.main} style={{ display: 'flex', flexDirection: 'column' }}>
         <div ref={inspector.el} style={{ flexGrow: 1, height: 0, overflowY: 'auto', paddingRight: '1em' }}>
-          {$c.visit &&
+          {$c.$.visit &&
             <>
-              <Folder title={`PFS Visit (id=${$c.visit.id})`} opened={true} key="pfs_visit">
+              <Folder title={`PFS Visit (id=${$c.$.visit.id})`} opened={true} key="pfs_visit">
                 <BaseDetail />
               </Folder>
               {$.visit.sps &&
@@ -38,7 +38,7 @@ export default defineComponent({
                         <VisitSetDetail />
                       </Folder>
                     </>}
-                  <Folder title={`SpS (type=${$c.visit.sps!.exp_type})`} opened={true} key="sps">
+                  <Folder title={`SpS (type=${$c.$.visit.sps!.exp_type})`} opened={true} key="sps">
                     <SpsDetail />
                   </Folder>
                 </>
@@ -56,7 +56,7 @@ export default defineComponent({
               <div class="end-h">
                 <button onClick={e => $.showJson = !$.showJson}><MI icon='bug_report' /></button>
               </div>
-              {$.showJson && <pre><code>{JSON.stringify($c.visit, null, 2)}</code></pre>}
+              {$.showJson && <pre><code>{JSON.stringify($c.$.visit, null, 2)}</code></pre>}
             </>
           }
         </div>

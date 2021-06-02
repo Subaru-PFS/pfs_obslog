@@ -1,4 +1,4 @@
-import { defineComponent } from "@vue/runtime-core"
+import { defineComponent, PropType } from "@vue/runtime-core"
 import { capitalize } from "~/utils/string"
 import { $reactive } from "~/vue-utils/reactive"
 
@@ -11,7 +11,7 @@ export default defineComponent({
     })
 
     const render = () =>
-      <i title={$.title} style={{ verticalAlign: 'bottom', fontSize: `${$$.size}px` }} class="material-icons" >{$$.icon}</i>
+      <i title={$.title} style={{ verticalAlign: 'bottom', fontSize: `${$$.size}px` }} class={$$.type} >{$$.icon}</i>
     return render
   },
   props: {
@@ -25,7 +25,16 @@ export default defineComponent({
     },
     title: {
       type: String,
-    }
+    },
+    type: {
+      type: String as PropType<
+        'material-icons' |
+        'material-icons-outlined' |
+        'material-icons-round' |
+        'material-icons-two-tone'
+      >,
+      default: 'material-icons-outlined'
+    },
   },
 })
 

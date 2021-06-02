@@ -1,3 +1,4 @@
+import { nextTick } from "@vue/runtime-core"
 import { createRouter, createWebHashHistory, LocationQuery } from "vue-router"
 import { $g } from "./global"
 import { sessionReload } from "./session"
@@ -8,7 +9,8 @@ export const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     { path: '/', component: () => import('./routes/Home'), },
-    { path: '/attachements', component: () => import('./routes/Attachments'), },
+    { path: '/list', component: () => import('./routes/ListDetailView'), },
+    { path: '/attachments', component: () => import('./routes/Attachments'), },
     {
       path: '/login',
       component: () => import('./routes/Login'),
@@ -42,8 +44,11 @@ router.beforeEach(async (to, from, next) => {
 })
 
 export function pushQuery(query: LocationQuery) {
-  router.push({
-    query:
-      { ...router.currentRoute.value.query, ...query }
+  nextTick(() => {
+    // this nextTick is to prevent `router.currentRoute` to be tracked as callee's dependency
+    router.push({
+      query:
+        { ...router.currentRoute.value.query, ...query }
+    })
   })
 }

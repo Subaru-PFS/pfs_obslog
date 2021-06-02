@@ -4,22 +4,38 @@
 
 * `$`
     * コンポーネントのreactive変数
-* `$$`
+* `$p`
     * コンポーネントの`props`
 * `$c`
-    * contextのreactive変数
-
-## Routes
-
-### Home
-メイン画面
+    * contex
 
 
-## Style管理
+## ajax
 
-* 1度しか使わないようなレイアウトの指定のためにはstyle属性を使う
-* 色に関してはdarkモード対応のためスタイルシートを使う
-* アプリ共通パーツは`src/style`の中に書く
-* それ以外はコンポーネントに付随させる
-* 基本はlightモード用に書く
-* darkモード用は`preferred color scheme`でファイルの最後ででもまとめて上書きする
+* `watch`でajaxを発火しない。
+    * ajaxの終わりのタイミングがわからずボタンの無効化などの制御がしづらいため
+
+## テーブルビュー
+
+> One row per visit, lists fundamental information of telescope status, time, data type, and comments.
+
+> Each raw has columns for SMs, MCS, AG, where one finds the link to details of each exposure (or sequence of exposures) as the current log shows.  Pop-up window would be also nice, as HSC's one.
+
+* 1行1visitのテーブルビュー
+* 列
+    * ID
+    * Description
+    * Issued at
+    * notes
+    * SpSSequence
+        * type
+        * name
+        * status
+        * command
+        * comments
+        * notes
+    * SpSVisit
+        * type
+        * exposures: SpSExposure[]
+    * McsVisit
+        * exposures: MCSExposure[]

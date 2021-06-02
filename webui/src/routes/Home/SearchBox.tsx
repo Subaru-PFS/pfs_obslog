@@ -1,58 +1,52 @@
-import Color from "color"
-import { CSSProperties, defineComponent, ref } from "vue"
-import { fgColor } from "~/utils/colors"
+import { defineComponent, ref } from "vue"
+import MI from "~/components/MI"
 import { $reactive } from "~/vue-utils/reactive"
 import { homeContext } from "./homeContext"
+import style from './style.module.scss'
 
 export default defineComponent({
   setup() {
-    const home = homeContext.inject()
     const searchRef = ref<HTMLInputElement>()
+
+    const $c = homeContext.inject()
+
     const $ = $reactive({
-      keywords: home.$.query.keywords,
+      keywords: $c.$.query.searchBox,
       get isSql() {
         return $.keywords.match(/where\s/i)
       }
     })
-    home.keyboardShortcuts.add({
+
+    $c.keyboardShortcuts.add({
       '/': () => searchRef.value?.focus(),
     })
-    const onSubmit = (e: Event) => {
+
+    const onSubmit = async (e: Event) => {
       e.preventDefault()
-      home.$.query.keywords = $.keywords
+      $c.$.query.searchBox = $.keywords
+      await $c.refresh()
     }
-    const render = () =>
-      <form onSubmit={onSubmit} style={formStyle}>
+
+    return () =>
+      <form
+        class={style.SearchBox}
+        onSubmit={onSubmit}
+        style={{ display: 'flex', padding: '2px' }}
+      >
+        <MI style={{ alignSelf: 'center' }} icon="search" />
         <input
           type="text"
           ref={searchRef}
           v-model={$.keywords}
           placeholder='Search'
           style={{
-            ...inputStyle,
-            ...($.isSql ? sqlStyle : {})
+            flexGrow: 1,
+            borderRadius: '8px',
+            padding: '2px 4px',
+            margin: 0,
           }}
+          class={{ sql: $.isSql }}
         />
-      </form>
-    return render
+      </form >
   }
 })
-
-const formStyle: CSSProperties = {
-  margin: 0,
-  padding: '2px',
-}
-
-const inputStyle: CSSProperties = {
-  boxSizing: 'border-box',
-  borderRadius: '8px',
-  width: '100%',
-  height: '100%',
-  padding: '2px 4px',
-  margin: 0,
-}
-
-const sqlStyle: CSSProperties = {
-  fontFamily: 'monospace',
-  color: fgColor(Color('cyan')).string(),
-}

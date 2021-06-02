@@ -1,5 +1,11 @@
-import { defineAsyncComponent } from "vue"
-import Loading from "../Loading"
+import { defineAsyncComponent, defineComponent } from "vue"
+
+const Loading = defineComponent({
+  setup() {
+    return () =>
+      <div>Loading...</div>
+  }
+})
 
 export default defineAsyncComponent({
   loader: () => import('./impl'),

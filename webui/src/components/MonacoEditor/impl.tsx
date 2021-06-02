@@ -3,6 +3,7 @@ import { CSSProperties } from "@vue/runtime-dom"
 import { usePreferredDark } from "@vueuse/core"
 import * as monaco from 'monaco-editor'
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
+import { RouterLink } from "vue-router"
 import FileDrop from "~/components/FileDrop"
 import FIleInput from "~/components/FIleInput"
 import { $reactive } from "~/vue-utils/reactive"
@@ -64,7 +65,6 @@ export default defineComponent({
               <FIleInput onSelect={onFileSelect} style={{ flexGrow: 1 }}>
                 <div style={{ position: 'relative' }}>
                   <div class={style.fileinput}>
-                    {/* <i style={{ verticalAlign: 'bottom' }} class="material-icons">upload_file</i> */}
                     Attach files by dragging &amp; dropping.
                   </div>
                   {$$.progress !== undefined &&

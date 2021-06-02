@@ -9,11 +9,10 @@ import style from './style.module.scss'
 
 export default defineComponent({
   setup() {
-    const inspector = inspectorContext.inject()
-    const $c = inspector.$
+    const $c = inspectorContext.inject()
     const $ = $reactive({
       get seq() {
-        return $c.visit?.sps_sequence!
+        return $c.$.visit?.sps_sequence!
       }
     })
 

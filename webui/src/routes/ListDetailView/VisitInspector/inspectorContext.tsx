@@ -6,7 +6,7 @@ import { makeContext } from "~/vue-utils/context"
 import { $reactive } from "~/vue-utils/reactive"
 
 
-export const inspectorContext = makeContext(($$: { visitId?: number }) => {
+export const inspectorContext = makeContext('inspector', ($$: { visitId?: number }) => {
   const $ = $reactive({
     visit: undefined as VisitDetail | undefined,
   })
@@ -25,4 +25,4 @@ export const inspectorContext = makeContext(($$: { visitId?: number }) => {
     el,
     refresh,
   }
-}, 'inspector')
+})

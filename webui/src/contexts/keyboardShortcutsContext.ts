@@ -1,7 +1,7 @@
 import { useEventListener } from "@vueuse/core"
 import { makeContext } from "~/vue-utils/context"
 
-export const keyboardShortcutsContext = makeContext(() => {
+export const keyboardShortcutsContext = makeContext('keyboard', () => {
   const keymap = new Map<string, (() => void)[]>()
 
   useEventListener(document, 'keydown', e => {
