@@ -15,3 +15,13 @@ export default defineComponent({
       </>
   },
 })
+
+
+const wm = new WeakMap()
+
+const A = defineComponent({
+  setup() {
+    return () =>
+      <></>
+  },
+})

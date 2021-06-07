@@ -9,8 +9,12 @@ import SearchCondition from "./SearchCondition"
 import VisitInspector from "./VisitInspector"
 
 export default defineComponent({
-  setup() {
-    const $c = homeContext.provide()
+  setup($p, { emit }) {
+    const notifyRefresh = () => {
+      emit('update:revision', $p.revision + 1)
+    }
+
+    const $c = homeContext.provide({ $p, notifyRefresh })
     return () =>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div style={{ display: 'flex' }}>
@@ -32,4 +36,15 @@ export default defineComponent({
         </Splitpanes>
       </div>
   },
+  props: {
+    revision: {
+      Type: Number,
+      default: 0,
+    },
+  },
+  emits: {
+    'update:revision'(revision: number) {
+      return true
+    },
+  }
 })

@@ -5,7 +5,14 @@ import { makeContext } from "~/vue-utils/context"
 import { $reactive } from "~/vue-utils/reactive"
 import { buildSql, defaultQuery } from "./query"
 
-export const homeContext = makeContext('home', () => {
+
+type HomeContextOptions = {
+  $p: { revision: number },
+  notifyRefresh: () => void
+}
+
+
+export const homeContext = makeContext('home', (options: HomeContextOptions) => {
   const keyboardShortcuts = keyboardShortcutsContext.provide()
 
   const $ = $reactive({
@@ -17,6 +24,7 @@ export const homeContext = makeContext('home', () => {
   })
 
   const refresh = async () => {
+    options.notifyRefresh()
   }
 
   return {
