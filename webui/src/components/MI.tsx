@@ -1,17 +1,17 @@
-import { defineComponent, PropType } from "@vue/runtime-core"
+import { defineComponent, PropType } from "vue"
 import { capitalize } from "~/utils/string"
 import { $reactive } from "~/vue-utils/reactive"
 
 export default defineComponent({
-  setup($$) {
+  setup($p) {
     const $ = $reactive({
       get title() {
-        return $$.title || capitalize($$.icon)
+        return $p.title || capitalize($p.icon)
       }
     })
 
     const render = () =>
-      <i title={$.title} style={{ verticalAlign: 'bottom', fontSize: `${$$.size}px` }} class={$$.type} >{$$.icon}</i>
+      <i title={$.title} style={{ verticalAlign: 'bottom', fontSize: `${$p.size}px` }} class={$p.type} >{$p.icon}</i>
     return render
   },
   props: {

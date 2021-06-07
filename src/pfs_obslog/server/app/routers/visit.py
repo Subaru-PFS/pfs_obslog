@@ -6,11 +6,12 @@ from opdb import models as M
 from pfs_obslog.server.app.context import Context
 from pfs_obslog.server.orm import (OrmConfig, skip_validation,
                                    static_check_init_args)
-from pfs_obslog.server.schema import (McsVisit, SpsSequence,
-                                      SpsVisit, VisitBase, VisitNote, VisitSet, VisitSet,
+from pfs_obslog.server.schema import (McsVisit, SpsSequence, SpsVisit,
+                                      VisitBase, VisitNote, VisitSet,
                                       VisitSetNote)
 from pfs_obslog.server.visitquery import visit_query
 from pydantic.main import BaseModel
+from sqlalchemy import func
 from sqlalchemy.orm import selectinload
 
 logger = getLogger(__name__)
@@ -53,10 +54,16 @@ class VisitDetail(VisitBase):
 @static_check_init_args
 class VisitListEntry(VisitBase):
     visit_set_id: Optional[int]
+    n_sps_exposures: int
+    n_mcs_exposures: int
+    notes: list[VisitNote]
 
     Config = OrmConfig()(lambda row: skip_validation(VisitListEntry)(
         **VisitBase.Config.row_to_model(row.pfs_visit).dict(),
         visit_set_id=row.visit_set_id,
+        n_sps_exposures=row.n_sps_exposures,
+        n_mcs_exposures=row.n_mcs_exposures,
+        notes=[],
     ))
 
 
@@ -87,12 +94,16 @@ def visit_list(
 ):
     q = ctx.db.query(
         M.pfs_visit,
-        M.pfs_visit.pfs_design_id,
         M.visit_set.visit_set_id,
+        func.count(M.sps_exposure.pfs_visit_id).label('n_sps_exposures'),
+        func.count(M.mcs_exposure.pfs_visit_id).label('n_mcs_exposures'),
     )\
-        .select_from(M.pfs_visit)\
+        .outerjoin(M.mcs_exposure)\
         .outerjoin(M.sps_visit)\
+        .outerjoin(M.sps_exposure)\
         .outerjoin(M.visit_set)\
+        .group_by(M.pfs_visit.pfs_visit_id, M.visit_set.visit_set_id)\
+        .options(selectinload('obslog_notes.user'))
 
     if sql:
         vq = visit_query(sql)

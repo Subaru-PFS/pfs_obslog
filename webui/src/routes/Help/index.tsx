@@ -1,4 +1,4 @@
-import { defineComponent } from "@vue/runtime-core"
+import { defineComponent } from "vue"
 import MI from "~/components/MI"
 import { router } from "~/router"
 

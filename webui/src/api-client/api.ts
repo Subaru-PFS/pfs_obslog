@@ -737,6 +737,24 @@ export interface VisitListEntry {
      * @memberof VisitListEntry
      */
     visit_set_id?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitListEntry
+     */
+    n_sps_exposures: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitListEntry
+     */
+    n_mcs_exposures: number;
+    /**
+     * 
+     * @type {Array<VisitNote>}
+     * @memberof VisitListEntry
+     */
+    notes: Array<VisitNote>;
 }
 /**
  * 

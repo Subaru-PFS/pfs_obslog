@@ -1,14 +1,14 @@
-import { defineComponent, PropType } from "@vue/runtime-core"
+import { defineComponent, PropType } from "vue"
 import { FitsMeta } from "~/api-client"
 import Folder from "~/components/Folder"
 import "./fits-header.scss"
 
 export default defineComponent({
-  setup($$) {
+  setup($p) {
     return () =>
       <>
-        {$$.meta.hdul.map((hdu, hduIndex) => (
-          <Folder title={`${$$.meta.frameid}[${hduIndex}]`} opened={false}>
+        {$p.meta.hdul.map((hdu, hduIndex) => (
+          <Folder title={`${$p.meta.frameid}[${hduIndex}]`} opened={false}>
             <table class="fits-header">
               <thead>
                 <tr>

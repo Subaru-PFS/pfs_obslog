@@ -1,4 +1,4 @@
-import { nextTick } from "@vue/runtime-core"
+import { nextTick } from "vue"
 import { createRouter, createWebHashHistory, LocationQuery } from "vue-router"
 import { $g } from "./global"
 import { sessionReload } from "./session"
@@ -9,7 +9,6 @@ export const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     { path: '/', component: () => import('./routes/Home'), },
-    { path: '/list', component: () => import('./routes/ListDetailView'), },
     { path: '/attachments', component: () => import('./routes/Attachments'), },
     {
       path: '/login',

@@ -1,10 +1,10 @@
-import { defineComponent, PropType, reactive, watchEffect } from "@vue/runtime-core"
+import { defineComponent, PropType, reactive, watchEffect } from "vue"
 import MI from "~/components/MI"
 
 export const DateInput = defineComponent({
-  setup($$, { emit }) {
+  setup($p, { emit }) {
     const $ = reactive({
-      value: $$.modelValue,
+      value: $p.modelValue,
     })
 
     watchEffect(() => {
@@ -12,17 +12,17 @@ export const DateInput = defineComponent({
         emit('update:modelValue', $.value)
       }
       else {
-        $.value = $$.modelValue
+        $.value = $p.modelValue
       }
     })
 
     const render = () => (
       <div style={{ display: 'flex' }}>
         {/* <pre>{$.value}</pre> */}
-        <button onClick={() => $.value = undefined} disabled={$$.disabled}>
+        <button onClick={() => $.value = undefined} disabled={$p.disabled}>
           <MI icon='cancel' size={18}  />
         </button>
-        <input type="date" v-model={[$.value, ['lazy']]} disabled={$$.disabled} />
+        <input type="date" v-model={[$.value, ['lazy']]} disabled={$p.disabled} />
       </div>
     )
     return render

@@ -1,4 +1,4 @@
-import { defineComponent, onBeforeUnmount, onMounted, PropType, ref, watch } from "@vue/runtime-core"
+import { defineComponent, onBeforeUnmount, onMounted, PropType, ref, watch } from "vue"
 import { CSSProperties } from "@vue/runtime-dom"
 import { usePreferredDark } from "@vueuse/core"
 import * as monaco from 'monaco-editor'
@@ -20,7 +20,7 @@ self.MonacoEnvironment = {
 }
 
 export default defineComponent({
-  setup($$, { emit, slots }) {
+  setup($p, { emit, slots }) {
     const root = ref<HTMLElement>()
     const $ = $reactive({
       dragHover: false,
@@ -30,10 +30,10 @@ export default defineComponent({
     let editor: ReturnType<typeof monaco.editor.create> | undefined
     onMounted(() => {
       editor = monaco.editor.create(root.value as HTMLElement, {
-        ...$$.editorOptions,
+        ...$p.editorOptions,
         ...{
-          language: $$.language,
-          value: $$.modelValue || '',
+          language: $p.language,
+          value: $p.modelValue || '',
           theme: $.isDark ? 'vs-dark' : 'vs',
           scrollBeyondLastLine: false,
         },
@@ -53,23 +53,23 @@ export default defineComponent({
       $.dragHover = hover
     }
     const onFileSelect = (files: FileList) => {
-      $$.onFileDrop?.(files)
+      $p.onFileDrop?.(files)
     }
 
     return () =>
-      <FileDrop onHoverChange={onHoverChange} onDrop={onFileSelect} disabled={!$$.onFileDrop}>
-        <div class={style.wrapper} style={{ display: 'flex', flexDirection: 'column', ...$$.style }}>
+      <FileDrop onHoverChange={onHoverChange} onDrop={onFileSelect} disabled={!$p.onFileDrop}>
+        <div class={style.wrapper} style={{ display: 'flex', flexDirection: 'column', ...$p.style }}>
           <div ref={root} style={{ flexGrow: 1 }}></div>
           <div class={style.statusline} style={{ display: 'flex' }}>
-            {$$.onFileDrop &&
+            {$p.onFileDrop &&
               <FIleInput onSelect={onFileSelect} style={{ flexGrow: 1 }}>
                 <div style={{ position: 'relative' }}>
                   <div class={style.fileinput}>
                     Attach files by dragging &amp; dropping.
                   </div>
-                  {$$.progress !== undefined &&
+                  {$p.progress !== undefined &&
                     <div class={style.progress}>
-                      <progress value={Number.isNaN($$.progress) ? undefined : $$.progress} />
+                      <progress value={Number.isNaN($p.progress) ? undefined : $p.progress} />
                     </div>
                   }
                 </div>

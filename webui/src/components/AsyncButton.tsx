@@ -2,7 +2,7 @@ import { CSSProperties, defineComponent, PropType, reactive } from "vue"
 
 export default defineComponent({
   name: import.meta.url,
-  setup($$, { slots }) {
+  setup($p, { slots }) {
     const $ = reactive({
       ajax: false,
     })
@@ -10,7 +10,7 @@ export default defineComponent({
     const onClick = async (e: MouseEvent) => {
       $.ajax = true
       try {
-        return await $$.onClick(e)
+        return await $p.onClick(e)
       }
       finally {
         $.ajax = false
@@ -18,7 +18,7 @@ export default defineComponent({
     }
 
     return () =>
-      <button style={{}} onClick={onClick} disabled={$.ajax || $$.disabled}>
+      <button style={{}} onClick={onClick} disabled={$.ajax || $p.disabled}>
         {slots.default?.()}
       </button>
   },

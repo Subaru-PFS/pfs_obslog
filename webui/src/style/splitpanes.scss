@@ -1,0 +1,34 @@
+.splitpanes.pfs_obslog_splitpanes {
+  .splitpanes__pane {
+    // background-color: #777;
+  }
+  .splitpanes__splitter {
+    transition: background-color 0.2s, box-shadow 0.2s;
+    background-color: #ccc;
+    &:hover {
+      background-color: lightblue;
+      box-shadow: 0 0 8px rgba(lightblue, 1);
+    }
+    @media (prefers-color-scheme: dark) {
+      background-color: #333;
+      &:hover {
+        background-color: darkcyan;
+        box-shadow: 0 0 8px rgba(darkcyan, 1);
+      }
+    }
+    box-sizing: border-box;
+    position: relative;
+    flex-shrink: 0;
+  }
+}
+$splitter-width: 8px;
+.pfs_obslog_splitpanes {
+  &.splitpanes--vertical > .splitpanes__splitter,
+  .splitpanes--vertical > .splitpanes__splitter {
+    width: $splitter-width;
+  }
+  &.splitpanes--horizontal > .splitpanes__splitter,
+  .splitpanes--horizontal > .splitpanes__splitter {
+    height: $splitter-width;
+  }
+}

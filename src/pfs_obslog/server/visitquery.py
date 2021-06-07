@@ -111,6 +111,9 @@ class VisitQueryContext(ast.EvaluationContext):
     def LessEqual(self, node: ast.LessEqual):
         return node.lexpr(self) <= node.rexpr(self)
 
+    def GreaterEqual(self, node: ast.LessEqual):
+        return node.lexpr(self) >= node.rexpr(self)
+
     def Like(self, node: ast.Like):
         l = node.lexpr(self)
         r = node.rexpr(self)

@@ -10,16 +10,16 @@ import style from './style.module.scss'
 
 
 export default defineComponent({
-  setup($$) {
+  setup($p) {
     const $ = $reactive({
       preview: true,
-      body: $$.body ?? '',
+      body: $p.body ?? '',
       progress: undefined as number | undefined,
     })
     const onFileDrop = async (files: FileList) => {
       for (const file of Array.from(files)) {
         try {
-          await $$.onFileDrop?.(
+          await $p.onFileDrop?.(
             file,
             (value) => $.progress = value,
             (marker) => {
@@ -51,7 +51,7 @@ export default defineComponent({
       }
     }
     const onSubmit = async () => {
-      await $$.onSubmit?.($.body)
+      await $p.onSubmit?.($.body)
     }
 
     let editor: MonacoEditorInstance | undefined = undefined
@@ -62,7 +62,7 @@ export default defineComponent({
           <MonacoEditor
             v-model={$.body}
             language="markdown"
-            onFileDrop={$$.onFileDrop && onFileDrop}
+            onFileDrop={$p.onFileDrop && onFileDrop}
             editorOptions={{ wordWrap: 'on', minimap: { enabled: false } }}
             style={{ height: '150px' }}
             v-slots={{
@@ -81,7 +81,7 @@ export default defineComponent({
               <input type="checkbox" v-model={$.preview} />
               Preview
             </label>
-            <button onClick={() => $$.onCancel?.()} ><MI icon="cancel" /></button>
+            <button onClick={() => $p.onCancel?.()} ><MI icon="cancel" /></button>
             <button onClick={onSubmit}><MI icon="check" /></button>
           </div>
           {$.preview &&

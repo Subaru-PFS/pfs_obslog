@@ -1,12 +1,12 @@
-import { defineComponent, PropType, reactive, Ref, ref, watch } from '@vue/runtime-core'
+import { defineComponent, PropType, reactive, Ref, ref, watch } from 'vue'
 import { useElementVisibility } from '@vueuse/core'
 import Loading from '../Loading'
 
 
 export default defineComponent({
-  setup($$) {
+  setup($p) {
     const el = ref<HTMLDivElement>()
-    const elIsVisible = useElementVisibility(el, { scrollTarget: $$.scrollTarget })
+    const elIsVisible = useElementVisibility(el, { scrollTarget: $p.scrollTarget })
 
     const $ = reactive({
       loading: true,
@@ -16,19 +16,19 @@ export default defineComponent({
       $.loading = false
     }
 
-    watch(() => $$.src, () => $.loading = true)
+    watch(() => $p.src, () => $.loading = true)
 
     const dimensions = {
-      width: `${$$.width}px`,
-      height: `${$$.height}px`,
+      width: `${$p.width}px`,
+      height: `${$p.height}px`,
     }
 
     const render = () =>
       <div class="lazy-image" ref={el} style={{ display: 'inline-block' }}>
         {elIsVisible.value ? <>
           <img
-            src={$$.src}
-            alt={$$.alt}
+            src={$p.src}
+            alt={$p.alt}
             onLoad={onLoad}
             style={{ display: $.loading ? 'none' : 'inline', ...dimensions, verticalAlign: 'bottom' }}
           />

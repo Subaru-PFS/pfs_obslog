@@ -49,13 +49,6 @@ input[type="submit"] {
   box-shadow: 0 0 8px cyan;
 }
 
-hr {
-  $color: gray;
-  border-style: none;
-  border-top-style: solid;
-  border-top-color: $color;
-}
-
 ::placeholder {
   color: #555;
 }

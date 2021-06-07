@@ -20,6 +20,13 @@ test:
 			--cov-branch tests
 	open ./htmlcov/index.html
 
+dev-watch:
+	./.venv/bin/ptw -- \
+			$(opt) \
+			-s \
+			-v \
+			dev
+
 dev-server:
 	PFS_OBSLOG_ENV=development \
 	PFS_OBSLOG_DSN=postgresql://postgres@localhost/opdb \

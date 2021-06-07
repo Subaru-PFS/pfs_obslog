@@ -114,6 +114,9 @@ class TestContext(ast.EvaluationContext):
     def LessEqual(self, node: ast.LessEqual):
         return ('LESSEQUAL', node.lexpr(self), node.rexpr(self))
 
+    def GreaterEqual(self, node: ast.LessEqual):
+        return ('GREATEREQUAL', node.lexpr(self), node.rexpr(self))
+
     def UnaryMinus(self, node: ast.UnaryMinus):
         return - node.rexpr(self)
 

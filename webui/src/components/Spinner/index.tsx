@@ -6,7 +6,7 @@ const SpinnerComponent = defineComponent({
   props: {
     show: { type: Boolean, required: true },
   },
-  setup($$) {
+  setup($p) {
     return () => (
       <Teleport to="body">
         <Transition
@@ -16,7 +16,7 @@ const SpinnerComponent = defineComponent({
           leaveToClass={style.leaveTo}
         >{
             () => (
-              $$.show &&
+              $p.show &&
               <div class={style.fill}>
                 <div class={style.loader}></div>
               </div>

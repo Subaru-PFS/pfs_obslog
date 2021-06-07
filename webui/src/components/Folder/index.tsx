@@ -1,4 +1,4 @@
-import { defineComponent, inject, provide, Ref, ref } from "@vue/runtime-core"
+import { defineComponent, inject, provide, Ref, ref } from "vue"
 import { $reactive } from "~/vue-utils/reactive"
 import MI from "~/components/MI"
 
@@ -6,15 +6,15 @@ const KEY = Symbol('folder')
 const DEFAULT_LEVEL = 3
 
 export default defineComponent({
-  setup($$, { slots }) {
+  setup($p, { slots }) {
     const $ = $reactive({
-      opened: $$.opened,
+      opened: $p.opened,
       get icon() {
         return $.opened ? 'expand_more' : 'chevron_right'
       },
       get level() {
-        if ($$.level) {
-          return $$.level
+        if ($p.level) {
+          return $p.level
         }
         return inject(KEY, DEFAULT_LEVEL)
       }
@@ -27,7 +27,7 @@ export default defineComponent({
       return <>
         <H>
           <button onClick={() => $.opened = !$.opened}><MI icon={$.icon} /></button>{' '}
-          {$$.title}
+          {$p.title}
         </H>
         {$.opened &&
           <div style={{ marginLeft: '2em' }}>

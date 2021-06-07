@@ -8,17 +8,17 @@ import { noteOnFileDrop } from './NewNote'
 
 
 export default defineComponent({
-  setup($$) {
+  setup($p) {
     const $ = $reactive({
       editing: false,
       get disabled() {
-        return $g.session?.user.id !== $$.user.id
+        return $g.session?.user.id !== $p.user.id
       }
     })
 
     const onSubmit = async (body: string) => {
       try {
-        await $$.onSubmit?.(body)
+        await $p.onSubmit?.(body)
       }
       finally {
         $.editing = false
@@ -31,19 +31,19 @@ export default defineComponent({
           onSubmit={onSubmit}
           onFileDrop={noteOnFileDrop}
           onCancel={() => $.editing = false}
-          body={$$.body}
+          body={$p.body}
         />
         :
         <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-          <MarkdownViewer style={{ flexGrow: 1 }} source={$$.body} />
+          <MarkdownViewer style={{ flexGrow: 1 }} source={$p.body} />
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <div class="username">{$$.user.account_name}</div>
+            <div class="username">{$p.user.account_name}</div>
             <button
               onClick={_ => $.editing = true}
               disabled={$.disabled}
             > <MI icon='edit' /></button>
             <button
-              onClick={_ => $$.onDelete?.()}
+              onClick={_ => $p.onDelete?.()}
               disabled={$.disabled}
             > <MI icon='delete_forever' /></button>
           </div>

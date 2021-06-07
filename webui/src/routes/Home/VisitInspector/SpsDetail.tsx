@@ -34,7 +34,7 @@ export default defineComponent({
               {$.showPreview &&
                 <th>Preview</th>
               }
-              <th>Annotations</th>
+              <th><MI icon="comment" /></th>
             </tr>
             {$.sps.exposures.slice().sort((a, b) => a.camera_id - b.camera_id)
               .map(e => <>

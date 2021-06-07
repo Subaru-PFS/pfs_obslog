@@ -1,9 +1,9 @@
 import style from "./style.module.scss"
 // import { Cobra, NUM_OF_COBRAS } from '~/pfs/Cobra'
-import { defineComponent, onMounted, ref, watch, watchEffect } from "@vue/runtime-core"
+import { defineComponent, onMounted, ref, watch, watchEffect } from "vue"
 
 export default defineComponent({
-  setup($$) {
+  setup($p) {
     const canvas = ref<HTMLCanvasElement | null>(null)
     const ctx = ref<CanvasRenderingContext2D | null>(null)
 
@@ -16,7 +16,7 @@ export default defineComponent({
       <canvas
         ref={canvas}
         style={{ border: 'solid 1px red' }}
-        width={$$.width} height={$$.height} />
+        width={$p.width} height={$p.height} />
     )
 
     return render

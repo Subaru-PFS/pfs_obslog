@@ -1,4 +1,4 @@
-import { defineComponent, ref } from "@vue/runtime-core"
+import { defineComponent, ref } from "vue"
 import { CSSProperties } from "@vue/runtime-dom"
 import { usePreferredDark } from "@vueuse/core"
 import { api } from "~/api"

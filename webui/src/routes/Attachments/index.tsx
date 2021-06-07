@@ -82,35 +82,35 @@ export default defineComponent({
 })
 
 const EntryComponent = defineComponent({
-  setup($$) {
+  setup($p) {
     const $c = attachmentsContext.inject()
 
     const $ = $reactive({
       get link() {
-        return `./api/attachments/${$$.entry.path}`
+        return `./api/attachments/${$p.entry.path}`
       },
     })
 
     const deleteFile = async () => {
       if (confirm('Are you sure to delete this file?')) {
-        await api.deleteAttachment($$.entry.id)
+        await api.deleteAttachment($p.entry.id)
         await $c.refresh()
       }
     }
 
     return () =>
       <tr>
-        <td>{$$.entry.id}</td>
-        <td>{$$.entry.name}</td>
-        <td>{$$.entry.media_type}</td>
+        <td>{$p.entry.id}</td>
+        <td>{$p.entry.name}</td>
+        <td>{$p.entry.media_type}</td>
         <td>
-          {$$.entry.media_type.match(/^image\//) && $$.entry.exists &&
+          {$p.entry.media_type.match(/^image\//) && $p.entry.exists &&
             <>
               <img src={$.link} />
             </>
           }
           <>
-            {$$.entry.exists ?
+            {$p.entry.exists ?
               <>
                 <button onClick={deleteFile} ><MI icon="delete_forever" /></button>
                 <button onClick={() => location.href = $.link} ><MI icon="download" /></button>

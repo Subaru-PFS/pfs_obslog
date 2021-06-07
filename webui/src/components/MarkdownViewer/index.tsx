@@ -3,7 +3,7 @@ import { defineAsyncComponent, defineComponent } from "vue"
 const Loading = defineComponent({
   setup() {
     return () =>
-      <div>Loading...</div>
+      <div />
   }
 })
 

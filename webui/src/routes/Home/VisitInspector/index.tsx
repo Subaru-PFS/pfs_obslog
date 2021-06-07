@@ -1,4 +1,4 @@
-import { defineComponent } from "@vue/runtime-core"
+import { defineComponent, watch } from "vue"
 import Folder from "~/components/Folder"
 import MI from "~/components/MI"
 import VisitFitsHeader from "./VisitFitsHeader"
@@ -12,9 +12,9 @@ import VisitSetDetail from "./VisitSetDetail"
 
 
 export default defineComponent({
-  setup($$) {
-    const inspector = inspectorContext.provide($$)
-    const $c = inspector
+  setup($p) {
+    const $c = inspectorContext.provide($p)
+
     const $ = $reactive({
       showJson: false,
       get visit() {
@@ -23,25 +23,22 @@ export default defineComponent({
     })
 
     return () =>
-      <div class={style.main} style={{ display: 'flex', flexDirection: 'column' }}>
-        <div ref={inspector.el} style={{ flexGrow: 1, height: 0, overflowY: 'auto', paddingRight: '1em' }}>
+      <div class={style.main} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div ref={$c.el} style={{ flexGrow: 1, overflowY: 'auto', paddingRight: '1em' }}>
           {$c.$.visit &&
             <>
+              {$.visit.sps && $.visit.sps_sequence &&
+                <Folder title="SpS Sequence" key="sps_sequence" opened={true}>
+                  <VisitSetDetail />
+                </Folder>
+              }
               <Folder title={`PFS Visit (id=${$c.$.visit.id})`} opened={true} key="pfs_visit">
                 <BaseDetail />
               </Folder>
               {$.visit.sps &&
-                <>
-                  {$.visit.sps_sequence &&
-                    <>
-                      <Folder title="SpS Sequence" key="sps_sequence" opened={true}>
-                        <VisitSetDetail />
-                      </Folder>
-                    </>}
-                  <Folder title={`SpS (type=${$c.$.visit.sps!.exp_type})`} opened={true} key="sps">
-                    <SpsDetail />
-                  </Folder>
-                </>
+                <Folder title={`SpS (type=${$c.$.visit.sps!.exp_type})`} opened={true} key="sps">
+                  <SpsDetail />
+                </Folder>
               }
               {$.visit.mcs &&
                 <>

@@ -7,7 +7,7 @@ import style from './style.module.scss'
 
 
 export default defineComponent({
-  setup($$) {
+  setup($p) {
     const root = ref<HTMLDivElement>()
     useEventListener(root, 'click', e => {
       if ((e.target as HTMLElement).matches('img')) {
@@ -15,8 +15,8 @@ export default defineComponent({
       }
     })
     return () =>
-      <div class={style.preview} ref={root} style={$$.style}>
-        <VueMarkdownIt style={{ width: '100%', height: '100%' }} ref={root} source={$$.source} />
+      <div class={style.preview} ref={root} style={$p.style}>
+        <VueMarkdownIt style={{ width: '100%', height: '100%' }} ref={root} source={$p.source} />
       </div>
   },
   props: {

@@ -22,7 +22,7 @@
 > Each raw has columns for SMs, MCS, AG, where one finds the link to details of each exposure (or sequence of exposures) as the current log shows.  Pop-up window would be also nice, as HSC's one.
 
 * 1行1visitのテーブルビュー
-* 列
+* DBにある情報
     * ID
     * Description
     * Issued at
@@ -39,3 +39,15 @@
         * exposures: SpSExposure[]
     * McsVisit
         * exposures: MCSExposure[]
+* テーブルに表示する情報
+    * VisitSet
+        * ID
+        * Name
+        * Type
+        * Status
+    * VisitID
+    * Desc.
+    * IssuedAt
+    * number of MCSExposures
+    * number of SpSExposures
+    * VisitComments

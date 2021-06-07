@@ -7,14 +7,14 @@ import MI from "~/components/MI"
 
 
 export default defineComponent({
-  setup($$) {
+  setup($p) {
     const $ = $reactive({
       mode: 'folded' as 'folded' | 'markdowneditor' | 'simpleeditor',
     })
 
     const onSubmit = async (body: string) => {
       try {
-        await $$.onSubmit?.(body)
+        await $p.onSubmit?.(body)
       }
       finally {
         $.mode = 'folded'
@@ -70,17 +70,17 @@ export { onFileDrop as noteOnFileDrop }
 
 
 const SimpleEditor = defineComponent({
-  setup($$) {
+  setup($p) {
     const inputEl = ref<HTMLInputElement>()
     const $ = reactive({
       value: '',
     })
     const onSubmit = (e: Event) => {
       e.preventDefault()
-      $$.onSubmit?.($.value)
+      $p.onSubmit?.($.value)
     }
     const cancel = () => {
-      $$.onCancel?.()
+      $p.onCancel?.()
     }
     onMounted(() => {
       inputEl.value?.focus?.()

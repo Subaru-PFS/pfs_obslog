@@ -11,11 +11,13 @@ type Query = {
   include_mcs: 'any' | 'true' | 'false'
 }
 
+export const perPage = 200
+
 export function defaultQuery(): Query {
   return {
     searchBox: '',
     start: 0,
-    end: 100,
+    end: perPage,
     date: {
       begin: null,
       end: null,

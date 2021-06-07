@@ -5,3 +5,10 @@ export function sleep(duration: number) {
     }, duration)
   })
 }
+
+
+export function shortFormat(s?: string) {
+  if (s) {
+    return s.split('T')[1].slice(0, 5)
+  }
+}

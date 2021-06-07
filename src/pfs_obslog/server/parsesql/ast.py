@@ -68,7 +68,7 @@ class ColumnRef(Evaluatable):
 
 @node_factory('ColumnRef')
 def _ColumnRef(args):
-    return ColumnRef(fields=tuple(build_ast(f) for f in args['fields']))
+    return ColumnRef(fields=tuple(build_ast(f) for f in args['fields']))  # type: ignore
 
 
 @dataclass
@@ -134,6 +134,11 @@ class LessEqual(BinaryOperator):
     pass
 
 
+@dataclass
+class GreaterEqual(BinaryOperator):
+    pass
+
+
 @node_factory('A_Expr')
 def _A_Expr(args):
     kind = args['kind']
@@ -154,6 +159,11 @@ def _A_Expr(args):
     elif name == [String('<=')]:
         assert kind == 0
         return LessEqual(
+            build_ast(args['lexpr']),
+            build_ast(args['rexpr']))
+    elif name == [String('>=')]:
+        assert kind == 0
+        return GreaterEqual(
             build_ast(args['lexpr']),
             build_ast(args['rexpr']))
     elif name == [String('~~')]:
@@ -279,6 +289,10 @@ class EvaluationContext(ABC):  # pragma: no cover
 
     @abstractmethod
     def LessEqual(self, node: LessEqual):
+        ...
+
+    @abstractmethod
+    def GreaterEqual(self, node: GreaterEqual):
         ...
 
     @abstractmethod

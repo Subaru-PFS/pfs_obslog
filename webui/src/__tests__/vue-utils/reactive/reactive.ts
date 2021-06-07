@@ -1,4 +1,4 @@
-import { watch } from "@vue/runtime-core"
+import { watch } from "vue"
 import { $reactive } from "~/vue-utils/reactive"
 
 test('$reactive', () => {

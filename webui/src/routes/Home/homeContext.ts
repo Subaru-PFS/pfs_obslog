@@ -12,7 +12,8 @@ export const homeContext = makeContext('home', () => {
     query: safeJsonParse(router.currentRoute.value.query?.['q'], () => defaultQuery()),
     get sql() {
       return buildSql($.query)
-    }
+    },
+    visitId: undefined as undefined | number,
   })
 
   const refresh = async () => {

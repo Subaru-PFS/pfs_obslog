@@ -1,16 +1,29 @@
 from typing import Any, cast
 import pytest
 from opdb import models as M
+from sqlalchemy.orm.session import Session
 from pfs_obslog.server.parsesql import ast, parse
 from pfs_obslog.server.visitquery import VisitQueryContext, visit_query
 from sqlalchemy import select, distinct
 
 
-def test_visit_query():
-    visit_query(""" where sequence_type LIKE '?domeflat?' """)
-    visit_query(""" where issued_at::date = '2021-01-03' """)
-    visit_query(""" where is_sps_visit """)
-    visit_query(""" where is_mcs_visit """)
+@pytest.mark.focus
+def test_visit_query(db: Session):
+    apply_filter(db, """ where sequence_type LIKE '?domeflat?' """)
+    apply_filter(db, """ where issued_at::date = '2021-01-03' """)
+    apply_filter(db, """ where is_sps_visit """)
+    apply_filter(db, """ where is_mcs_visit """)
+
+
+def apply_filter(db: Session, sql: str):
+    vq = visit_query(sql)
+    if vq.pfs_visit_ids is not None:
+        q = db.query(
+            M.pfs_visit,
+        ).\
+            filter(M.pfs_visit.pfs_visit_id.in_(vq.pfs_visit_ids)).\
+            limit(10)
+        [*q]
 
 
 def test_build_filter():
@@ -22,28 +35,6 @@ def test_build_filter():
         outerjoin(M.sps_visit).\
         outerjoin(M.visit_set).\
         outerjoin(M.sps_sequence).\
-        filter(s.whereClause(ctx)) # type: ignore
-
+        filter(s.whereClause(ctx))  # type: ignore
     print(q)
     print(s.whereClause(ctx))
-
-
-def x():
-    q_which = db.query(distinct(opdbmodels.pfs_visit.pfs_visit_id)).\
-        outerjoin(opdbmodels.sps_visit).\
-        outerjoin(opdbmodels.sps_exposure).\
-        outerjoin(opdbmodels.visit_set).\
-        outerjoin(opdbmodels.sps_sequence).\
-        outerjoin(opdbmodels.mcs_exposure)
-
-    if not include_sps:
-        q_which = q_which.filter(opdbmodels.sps_visit.pfs_visit_id == None)
-    if not include_mcs:
-        q_which = q_which.filter(opdbmodels.mcs_exposure.pfs_visit_id == None)
-
-    if sql is not None:
-        q_which = apply_fulltext_search(q_which, sql)
-
-    q_which = apply_date_condition(q_which, date_start, date_end)
-    q_which = q_which.order_by(opdbmodels.pfs_visit.pfs_visit_id.desc())
-    q_which = q_which[page * per_page: (page + 1) * per_page]  # type: ignore

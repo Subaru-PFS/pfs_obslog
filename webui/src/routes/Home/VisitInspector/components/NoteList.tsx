@@ -17,31 +17,31 @@ type User = {
 }
 
 export default defineComponent({
-  setup($$) {
+  setup($p) {
     const inspector = inspectorContext.inject()
 
     const createNote = async (body: string) => {
-      await $$.createNote(body)
+      await $p.createNote(body)
       inspector.refresh()
     }
 
     const updateNote = async (note_id: int, body: string) => {
       if (body !== null) {
-        await $$.updateNote(note_id, body)
+        await $p.updateNote(note_id, body)
         inspector.refresh()
       }
     }
 
     const deleteNote = async (note_id: int) => {
       if (confirm(`Are you sure to delete this note?`)) {
-        await $$.deleteNote(note_id)
+        await $p.deleteNote(note_id)
         inspector.refresh()
       }
     }
 
     return () =>
       <ul class={style.notes}>
-        {$$.notes.slice().sort((a, b) => a.id - b.id).map(n =>
+        {$p.notes.slice().sort((a, b) => a.id - b.id).map(n =>
           <li key={n.id}>
             <Note
               body={n.body}

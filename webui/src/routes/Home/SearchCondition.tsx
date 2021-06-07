@@ -1,4 +1,4 @@
-import { defineComponent } from "@vue/runtime-core"
+import { defineComponent } from "vue"
 import { DateInput } from "~/components/DateInput"
 import MI from "~/components/MI"
 import { $reactive } from "~/vue-utils/reactive"

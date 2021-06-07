@@ -1,4 +1,4 @@
-import { defineComponent } from "@vue/runtime-core"
+import { defineComponent } from "vue"
 import { Transition } from "@vue/runtime-dom"
 import { RouterView } from "vue-router"
 import style from './style.module.scss'

@@ -1,28 +1,28 @@
 import { defineComponent, PropType } from "vue"
 
 export default defineComponent({
-  setup($$, { slots }) {
+  setup($p, { slots }) {
     return () =>
       <div
         style={{ display: 'inline' }}
         onDragover={e => {
-          if (!$$.disabled) {
+          if (!$p.disabled) {
             e.preventDefault()
-            $$.onHoverChange?.(true)
+            $p.onHoverChange?.(true)
           }
         }}
         onDrop={e => {
-          if (!$$.disabled) {
+          if (!$p.disabled) {
             e.preventDefault()
             e.stopPropagation()
             if (e.dataTransfer) {
-              $$.onDrop?.(e.dataTransfer.files)
+              $p.onDrop?.(e.dataTransfer.files)
             }
           }
-          $$.onHoverChange?.(false)
+          $p.onHoverChange?.(false)
         }}
         onDragleave={_ => {
-          $$.onHoverChange?.(false)
+          $p.onHoverChange?.(false)
         }}
       >
         {slots.default?.()}
