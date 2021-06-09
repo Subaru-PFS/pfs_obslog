@@ -28,7 +28,7 @@ visit詳細からvisitやvisitSetにコメントを追加すると、それがvi
   * 検索条件
   * `VisitTable`の表示内容を決めるために使う
   * propsで`VisitTable`に渡す
-* `focusedVisitId`
+* `visitId`
   * `VisitInspector`の表示内容を決める
   * propsで`VisitInspector`に渡す
 * `revision`

@@ -1,9 +1,11 @@
-import { defineComponent } from "vue"
+import { defineComponent, ref, watch } from "vue"
+import { api } from "~/api"
+import { VisitDetail } from "~/api-client"
 import Folder from "~/components/Folder"
 import MI from "~/components/MI"
+import { makeComponentContext } from "~/vue-utils/context"
 import { $reactive } from "~/vue-utils/reactive"
 import BaseDetail from "./BaseDetail"
-import { inspectorContext } from "./inspectorContext"
 import MCSDetail from "./MCSDetail"
 import SpsDetail from "./SpsDetail"
 import style from './style.module.scss'
@@ -11,9 +13,10 @@ import VisitFitsHeader from "./VisitFitsHeader"
 import VisitSetDetail from "./VisitSetDetail"
 
 
-export default defineComponent({
-  setup($p) {
-    const $c = inspectorContext.provide($p)
+const VisitInspector = defineComponent({
+  name: 'VisitInspector',
+  setup($p, ctx) {
+    const $c = inspectorContext.provide($p, ctx)
 
     const $ = $reactive({
       showJson: false,
@@ -27,12 +30,15 @@ export default defineComponent({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
+        position: 'relative'
       }}>
-        <div class={style.main} style={{
-          height: 0,
-          flexGrow: 1,
-          overflow: 'auto',
-        }}>
+        <div
+          ref={$c.el}
+          class={style.main} style={{
+            height: 0,
+            flexGrow: 1,
+            overflow: 'auto',
+          }}>
           {$c.$.visit &&
             <>
               {$.visit.sps && $.visit.sps_sequence &&
@@ -71,5 +77,41 @@ export default defineComponent({
     visitId: {
       type: Number,
     },
+    revision: {
+      type: Number,
+      default: -1,
+    }
   },
+  emits: ['update:revision'],
+})
+
+
+export default VisitInspector
+
+
+export const inspectorContext = makeComponentContext(VisitInspector, ($p, { emit }) => {
+  const $ = $reactive({
+    visit: undefined as VisitDetail | undefined,
+  })
+
+  const refresh = async () => {
+    const visitId = $p.visitId
+    $.visit = visitId ? (await api.visitDetail(visitId)).data : undefined
+  }
+
+  const notifyUpdate = () => {
+    emit('update:revision', $p.revision + 1)
+  }
+
+  watch(() => [$p.visitId, $p.revision], () => refresh(), { immediate: true })
+
+  const el = ref<HTMLDivElement>()
+
+  return {
+    $,
+    $p,
+    el,
+    notifyUpdate,
+    refresh,
+  }
 })

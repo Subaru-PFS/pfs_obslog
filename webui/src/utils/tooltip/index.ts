@@ -20,6 +20,14 @@ function on<
   }
 }
 
+function observe(target: Node, options: MutationObserverInit, cb: MutationCallback) {
+  const ob = new MutationObserver(cb)
+  ob.observe(target, options)
+  return () => {
+    ob.disconnect()
+  }
+}
+
 class Tooltip {
   private el: HTMLDivElement
   private off: (() => void)[] = []
@@ -37,15 +45,17 @@ class Tooltip {
     this.off.push(on(this.parent, 'mouseleave', () => {
       this.dispose()
     }))
-    const observer = new MutationObserver(() => {
+    this.off.push(observe(document.body, { childList: true, subtree: true }, () => {
       if (!document.body.contains(this.parent)) {
         this.dispose()
       }
-    })
-    this.off.push(() => {
-      observer.disconnect()
-    })
-    observer.observe(document.body, { childList: true, subtree: true })
+    }))
+    this.off.push(observe(this.parent, { attributes: true }, () => {
+      // @ts-ignore
+      if (this.parent.disabled) {
+        this.dispose()
+      }
+    }))
   }
 
   private dispoaseCount = 0

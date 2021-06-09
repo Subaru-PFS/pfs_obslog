@@ -1,12 +1,11 @@
-import { defineComponent, ref } from "vue"
 import { CSSProperties } from "@vue/runtime-dom"
 import { usePreferredDark } from "@vueuse/core"
+import { defineComponent, ref } from "vue"
 import { api } from "~/api"
 import LazyImage from "~/components/LazyImage"
-import { int } from "~/types"
 import { $reactive } from "~/vue-utils/reactive"
+import { inspectorContext } from "./"
 import NoteList from "./components/NoteList"
-import { inspectorContext } from "./inspectorContext"
 
 export default defineComponent({
   setup() {
@@ -105,7 +104,7 @@ const stickyHeader: CSSProperties = {
   zIndex: 1, // animation loader has a new stacking context.
   margin: '0.5em 0',
   backgroundColor: 'rgba(127, 127, 127, 0.5)',
-  opacity: 0.75,
+  opacity: 0.95,
 }
 
 type ScrollOption = {
@@ -115,9 +114,8 @@ type ScrollOption = {
 }
 
 function scrollIntoViewWithFixedHeader({ parent, target, header }: ScrollOption) {
-  // FIXME
-  const topOfElement = target.offsetTop - header.getBoundingClientRect().height
+  const topOfElement = target.offsetTop
   const s = getComputedStyle(header)
   const margin = parseFloat(s.marginTop) + parseFloat(s.marginBottom)
-  parent.scroll({ top: topOfElement - margin - 100 })
+  parent.scroll({ top: topOfElement - header.scrollHeight - margin })
 }

@@ -29,6 +29,7 @@ const VisitTable = defineComponent({
     },
     revision: {
       type: Number,
+      default: -1,
     },
     visitId: {
       type: Number,
@@ -36,6 +37,7 @@ const VisitTable = defineComponent({
   },
   emits: ['update:revision', 'update:query', 'update:visitId'],
 })
+
 
 export default VisitTable
 

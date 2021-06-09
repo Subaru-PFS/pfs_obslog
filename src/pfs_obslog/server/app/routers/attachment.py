@@ -16,7 +16,6 @@ from pfs_obslog.server.env import PFS_OBSLOG_ROOT
 from pfs_obslog.server.fileseries import FileSeries
 from pfs_obslog.server.orm import static_check_init_args
 from pydantic.main import BaseModel
-from sqlalchemy.sql.type_api import UserDefinedType
 from starlette.responses import FileResponse
 
 attachments_dir: Path = Path(os.environ.get('PFS_OBSLOG_ATTACHMENTS_DIR', PFS_OBSLOG_ROOT / 'attachments'))

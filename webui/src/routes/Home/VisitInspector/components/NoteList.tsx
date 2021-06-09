@@ -1,6 +1,6 @@
 import { defineComponent, PropType } from "vue"
 import { int } from "~/types"
-import { inspectorContext } from "../inspectorContext"
+import { inspectorContext } from "../"
 import style from '../style.module.scss'
 import NewNote from "./NewNote"
 import Note from "./Note"
@@ -22,20 +22,20 @@ export default defineComponent({
 
     const createNote = async (body: string) => {
       await $p.createNote(body)
-      inspector.refresh()
+      inspector.notifyUpdate()
     }
 
     const updateNote = async (note_id: int, body: string) => {
       if (body !== null) {
         await $p.updateNote(note_id, body)
-        inspector.refresh()
+        inspector.notifyUpdate()
       }
     }
 
     const deleteNote = async (note_id: int) => {
       if (confirm(`Are you sure to delete this note?`)) {
         await $p.deleteNote(note_id)
-        inspector.refresh()
+        inspector.notifyUpdate()
       }
     }
 

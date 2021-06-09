@@ -34,7 +34,7 @@ export default defineComponent({
             />
           </Pane>
           <Pane minSize={5}>
-            <VisitInspector visitId={$c.$.visitId} />
+            <VisitInspector visitId={$c.$.visitId} v-model={[$c.$.revision, 'revision']} />
           </Pane>
         </Splitpanes>
       </div>

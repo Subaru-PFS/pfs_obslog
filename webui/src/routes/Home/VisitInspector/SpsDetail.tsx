@@ -3,7 +3,7 @@ import Folder from "~/components/Folder"
 import LazyImage from "~/components/LazyImage"
 import MI from "~/components/MI"
 import { $reactive } from "~/vue-utils/reactive"
-import { inspectorContext } from "./inspectorContext"
+import { inspectorContext } from "./"
 
 
 export default defineComponent({

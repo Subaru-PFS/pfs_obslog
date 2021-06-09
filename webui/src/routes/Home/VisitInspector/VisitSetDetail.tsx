@@ -3,7 +3,7 @@ import { api } from "~/api"
 import Folder from "~/components/Folder"
 import { $reactive } from "~/vue-utils/reactive"
 import NoteList from "./components/NoteList"
-import { inspectorContext } from "./inspectorContext"
+import { inspectorContext } from "./"
 import style from './style.module.scss'
 
 

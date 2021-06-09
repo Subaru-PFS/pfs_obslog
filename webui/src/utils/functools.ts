@@ -49,5 +49,3 @@ export function async_debounce<U extends unknown[]>
     }, delay)
   }
 }
-
-export const async_debounce_old = async_debounce
