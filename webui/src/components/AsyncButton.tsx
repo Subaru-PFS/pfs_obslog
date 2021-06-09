@@ -18,7 +18,7 @@ export default defineComponent({
     }
 
     return () =>
-      <button style={{}} onClick={onClick} disabled={$.ajax || $p.disabled}>
+      <button style={$p.style} onClick={onClick} disabled={$.ajax || $p.disabled}>
         {slots.default?.()}
       </button>
   },

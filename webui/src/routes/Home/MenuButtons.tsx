@@ -10,10 +10,10 @@ export const MenuButtons = defineComponent({
   setup() {
     const $c = homeContext.inject()
     return () => <>
-      <AsyncButton onClick={$c.refresh}><MI icon="refresh" /></AsyncButton>
-      <button onClick={() => router.push('/attachments')}><MI icon="folder" /></button>
-      <button onClick={() => router.push('/help')}><MI icon="help" /></button>
-      <AsyncButton onClick={logout}><MI title="Logout" icon="exit_to_app" /></AsyncButton>
+      <AsyncButton data-tooltip="Refresh" onClick={$c.refresh}><MI icon="refresh"/></AsyncButton>
+      <button data-tooltip="Attachments" onClick={() => router.push('/attachments')}><MI icon="folder"/></button>
+      <button data-tooltip="Help" onClick={() => router.push('/help')}><MI icon="help"/></button>
+      <AsyncButton data-tooltip="Logout" onClick={logout}><MI icon="exit_to_app"/></AsyncButton>
     </>
   },
 })

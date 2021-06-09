@@ -1,0 +1,16 @@
+.tooltip {
+  font-family: sans-serif;
+  font-size: small;
+  position: fixed;
+  // z-index: 1;
+
+  padding: 2px 4px;
+  white-space: nowrap;
+  border-radius: 4px;
+  background-color: rgba(mix(#eee, white), 0.95);
+  box-shadow: 0 0 4px black;
+  @media (prefers-color-scheme: dark) {
+    background-color: rgba(#222, 0.95);
+    box-shadow: 0 0 4px white;
+  }
+}

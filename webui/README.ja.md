@@ -48,6 +48,7 @@
     * VisitID
     * Desc.
     * IssuedAt
+    * Avg(ExpTime)
     * number of MCSExposures
     * number of SpSExposures
     * VisitComments

@@ -56,6 +56,7 @@ class VisitListEntry(VisitBase):
     visit_set_id: Optional[int]
     n_sps_exposures: int
     n_mcs_exposures: int
+    avg_exptime: Optional[float]
     notes: list[VisitNote]
 
     Config = OrmConfig()(lambda row: skip_validation(VisitListEntry)(
@@ -63,7 +64,8 @@ class VisitListEntry(VisitBase):
         visit_set_id=row.visit_set_id,
         n_sps_exposures=row.n_sps_exposures,
         n_mcs_exposures=row.n_mcs_exposures,
-        notes=[],
+        avg_exptime=row.avg_exptime,
+        notes=row.pfs_visit.obslog_notes,
     ))
 
 
@@ -97,13 +99,17 @@ def visit_list(
         M.visit_set.visit_set_id,
         func.count(M.sps_exposure.pfs_visit_id).label('n_sps_exposures'),
         func.count(M.mcs_exposure.pfs_visit_id).label('n_mcs_exposures'),
+        func.coalesce(
+            func.avg(M.sps_exposure.exptime),
+            func.avg(M.mcs_exposure.mcs_exptime),
+        ).label('avg_exptime'),
     )\
         .outerjoin(M.mcs_exposure)\
         .outerjoin(M.sps_visit)\
         .outerjoin(M.sps_exposure)\
         .outerjoin(M.visit_set)\
         .group_by(M.pfs_visit.pfs_visit_id, M.visit_set.visit_set_id)\
-        .options(selectinload('obslog_notes.user'))
+        .options(selectinload('obslog_notes').selectinload('user'))
 
     if sql:
         vq = visit_query(sql)

@@ -1,4 +1,4 @@
-type Query = {
+export type VisitQuery = {
   searchBox: string,
   start: number,
   end: number,
@@ -13,7 +13,7 @@ type Query = {
 
 export const perPage = 200
 
-export function defaultQuery(): Query {
+export function defaultQuery(): VisitQuery {
   return {
     searchBox: '',
     start: 0,
@@ -47,7 +47,7 @@ function filterToSqlTerms(s: string) {
   }
 }
 
-export function buildSql(query: Query) {
+export function buildSql(query: VisitQuery) {
   const { include_mcs, include_sps, date } = query
   const keywords = query.searchBox
   const terms = filterToSqlTerms(keywords)

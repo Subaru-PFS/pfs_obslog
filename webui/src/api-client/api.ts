@@ -751,6 +751,12 @@ export interface VisitListEntry {
     n_mcs_exposures: number;
     /**
      * 
+     * @type {number}
+     * @memberof VisitListEntry
+     */
+    avg_exptime?: number;
+    /**
+     * 
      * @type {Array<VisitNote>}
      * @memberof VisitListEntry
      */

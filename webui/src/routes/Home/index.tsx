@@ -1,20 +1,17 @@
+// @ts-ignore
+import { Pane, Splitpanes } from 'splitpanes'
 import { defineComponent } from "vue"
 import { homeContext } from "./homeContext"
-import MainTable from "./MainTable"
+import VisitTable from "./VisitTable"
 import { MenuButtons } from "./MenuButtons"
 import SearchBox from './SearchBox'
-// @ts-ignore
-import { Splitpanes, Pane } from 'splitpanes'
 import SearchCondition from "./SearchCondition"
 import VisitInspector from "./VisitInspector"
 
 export default defineComponent({
-  setup($p, { emit }) {
-    const notifyRefresh = () => {
-      emit('update:revision', $p.revision + 1)
-    }
+  setup() {
+    const $c = homeContext.provide()
 
-    const $c = homeContext.provide({ $p, notifyRefresh })
     return () =>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div style={{ display: 'flex' }}>
@@ -28,7 +25,13 @@ export default defineComponent({
           class="pfs_obslog_splitpanes" style={{ flexGrow: 1 }}
         >
           <Pane minSize={5}>
-            <MainTable />
+            <VisitTable
+              v-models={[
+                [$c.$.query, 'query'],
+                [$c.$.revision, 'revision'],
+                [$c.$.visitId, 'visitId'],
+              ]}
+            />
           </Pane>
           <Pane minSize={5}>
             <VisitInspector visitId={$c.$.visitId} />
@@ -36,15 +39,4 @@ export default defineComponent({
         </Splitpanes>
       </div>
   },
-  props: {
-    revision: {
-      Type: Number,
-      default: 0,
-    },
-  },
-  emits: {
-    'update:revision'(revision: number) {
-      return true
-    },
-  }
 })

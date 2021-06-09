@@ -4,17 +4,14 @@ textarea,
 button,
 select {
   background-color: #222;
-}
-
-* {
-  color: #ccc;
+  color: #aaa;
 }
 
 input,
 button,
 textarea,
 select {
-  box-shadow: 0 0 2px white;
+  box-shadow: 0 0 2px rgba(white, 0.75);
   border-style: none;
   margin: 2px;
 }

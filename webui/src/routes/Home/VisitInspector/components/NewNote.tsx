@@ -36,8 +36,8 @@ export default defineComponent({
         }
         {$.mode === 'folded' &&
           <div class="end-h">
-            <button onClick={() => $.mode = 'simpleeditor'}><MI icon='bolt' title="One line note" /></button>
-            <button onClick={_ => $.mode = 'markdowneditor'} ><MI icon='add' /></button>
+            <button data-tooltip="Oneline Note" onClick={() => $.mode = 'simpleeditor'}><MI icon='bolt' /></button>
+            <button data-tooltip="Markdown Note" onClick={_ => $.mode = 'markdowneditor'} ><MI icon='add' /></button>
           </div>
         }
       </>

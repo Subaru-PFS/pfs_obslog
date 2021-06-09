@@ -3,28 +3,20 @@ import { router } from "~/router"
 import { safeJsonParse } from "~/utils/safejson"
 import { makeContext } from "~/vue-utils/context"
 import { $reactive } from "~/vue-utils/reactive"
-import { buildSql, defaultQuery } from "./query"
+import { defaultQuery } from "./query"
 
 
-type HomeContextOptions = {
-  $p: { revision: number },
-  notifyRefresh: () => void
-}
-
-
-export const homeContext = makeContext('home', (options: HomeContextOptions) => {
+export const homeContext = makeContext('home', () => {
   const keyboardShortcuts = keyboardShortcutsContext.provide()
 
   const $ = $reactive({
     query: safeJsonParse(router.currentRoute.value.query?.['q'], () => defaultQuery()),
-    get sql() {
-      return buildSql($.query)
-    },
     visitId: undefined as undefined | number,
+    revision: 0,
   })
 
-  const refresh = async () => {
-    options.notifyRefresh()
+  const refresh = () => {
+    $.revision += 1
   }
 
   return {

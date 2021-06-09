@@ -1,13 +1,13 @@
-import { defineComponent, watch } from "vue"
+import { defineComponent } from "vue"
 import Folder from "~/components/Folder"
 import MI from "~/components/MI"
-import VisitFitsHeader from "./VisitFitsHeader"
 import { $reactive } from "~/vue-utils/reactive"
 import BaseDetail from "./BaseDetail"
 import { inspectorContext } from "./inspectorContext"
 import MCSDetail from "./MCSDetail"
 import SpsDetail from "./SpsDetail"
 import style from './style.module.scss'
+import VisitFitsHeader from "./VisitFitsHeader"
 import VisitSetDetail from "./VisitSetDetail"
 
 
@@ -23,8 +23,16 @@ export default defineComponent({
     })
 
     return () =>
-      <div class={style.main} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <div ref={$c.el} style={{ flexGrow: 1, overflowY: 'auto', paddingRight: '1em' }}>
+      <div style={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        <div class={style.main} style={{
+          height: 0,
+          flexGrow: 1,
+          overflow: 'auto',
+        }}>
           {$c.$.visit &&
             <>
               {$.visit.sps && $.visit.sps_sequence &&
@@ -51,7 +59,7 @@ export default defineComponent({
                 <VisitFitsHeader visit={$.visit.id} />
               </Folder>
               <div class="end-h">
-                <button onClick={e => $.showJson = !$.showJson}><MI icon='bug_report' /></button>
+                <button data-tooltip="Debug Info" onClick={e => $.showJson = !$.showJson}><MI icon='bug_report' /></button>
               </div>
               {$.showJson && <pre><code>{JSON.stringify($c.$.visit, null, 2)}</code></pre>}
             </>

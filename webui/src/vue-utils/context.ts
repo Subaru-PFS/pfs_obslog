@@ -13,3 +13,22 @@ export function makeContext<T, U extends unknown[]>(name: string, context: (...a
     },
   }
 }
+
+type ExtractSetupParameters<T extends { setup?: (...args: any[]) => any }> = Parameters<NonNullable<T["setup"]>>
+
+export function makeComponentContext
+  <
+    V extends { name?: string, setup?: (...args: any) => any },
+    T,
+  >
+  (
+    v: V,
+    context: (
+      props: ExtractSetupParameters<V>[0],
+      ctx: ExtractSetupParameters<V>[1]) => T,
+) {
+  if (v.name === undefined) {
+    throw new Error('Name must be set')
+  }
+  return makeContext(v.name, context)
+}

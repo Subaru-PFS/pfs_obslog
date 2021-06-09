@@ -28,26 +28,32 @@ export default defineComponent({
           <table class="compact-table">
             <tr>
               <th>ID</th>
-              <th>Start</th>
-              <th>ExpTime[s]</th>
+              <th data-tooltip="Exposure Start"><MI icon="schedule" /></th>
+              <th data-tooltip="Exposure Time[s]"><MI icon="shutter_speed" /></th>
               <th>FITS</th>
               {$.showPreview &&
-                <th>Preview</th>
+                <th data-tooltip="Preview" ><MI icon="visibility" /></th>
               }
-              <th><MI icon="comment" /></th>
+              <th data-tooltip="Notes"><MI icon="comment" /></th>
             </tr>
             {$.sps.exposures.slice().sort((a, b) => a.camera_id - b.camera_id)
               .map(e => <>
                 <tr>
                   <td>{e.camera_id}</td>
                   <td>{time(e.exp_start)}</td>
-                  <td>{e.exptime}</td>
+                  <td style={{ textAlign: 'right' }}>{e.exptime}</td>
                   <td>
-                    <button onClick={_ => location.href = `./api/fits_download/${$.visitId}/${e.camera_id}`}>
+                    <button
+                      data-tooltip="Download"
+                      onClick={_ => location.href = `./api/fits_download/${$.visitId}/${e.camera_id}`}
+                    >
                       <MI icon="file_download" />
                     </button>
-                    <button onClick={_ => location.href = `./api/fits_preview/${$.visitId}/${e.camera_id}`}>
-                      <MI icon="visibility" />
+                    <button
+                      data-tooltip="Show"
+                      onClick={_ => location.href = `./api/fits_preview/${$.visitId}/${e.camera_id}`}
+                    >
+                      <MI icon="open_in_new" />
                     </button>
                   </td>
                   {

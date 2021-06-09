@@ -1,5 +1,5 @@
-import { defineComponent, reactive } from "vue"
-import { ref } from "vue"
+import { defineComponent, reactive, ref } from "vue"
+import AsyncButton from "~/components/AsyncButton"
 import { sessionLogin } from "~/session"
 import { router } from "../router"
 
@@ -38,7 +38,7 @@ export default defineComponent({
             </dd>
           </dl>
           <div class="end-h">
-            <input type="submit" value="Login" />
+            <AsyncButton onClick={onSubmit}>Login</AsyncButton>
           </div>
         </form>
       </div>

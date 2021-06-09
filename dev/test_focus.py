@@ -11,6 +11,10 @@ def test_visit(db: Session):
         M.visit_set.visit_set_id,
         func.count(M.sps_exposure.pfs_visit_id).label('n_sps_exposures'),
         func.count(M.mcs_exposure.pfs_visit_id).label('n_mcs_exposures'),
+        func.coalesce(
+            func.avg(M.sps_exposure.exptime),
+            func.avg(M.mcs_exposure.mcs_exptime),
+        ).label('avg_exptime'),
     )\
         .outerjoin(M.mcs_exposure)\
         .outerjoin(M.sps_visit)\

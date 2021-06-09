@@ -2,13 +2,22 @@ body {
   background-color: #eee;
 }
 
+body,
+input,
+textarea,
+button,
+select {
+  color: #333;
+}
+
 input,
 button,
 textarea,
 select {
-  box-shadow: 0 0 2px black;
+  box-shadow: 0 0 2px rgba(black, 0.75);
   border-style: none;
   margin: 2px;
+  background-color: mix(white, #eee);
 }
 
 input[type="radio"] {
@@ -30,12 +39,13 @@ input[type="submit"] {
     &:hover {
       background-color: #eee;
     }
+    color: #777;
   }
 }
 
 *:focus {
   outline: none;
-  box-shadow: 0 0 8px #777;
+  box-shadow: 0 0 8px blue;
 }
 
 .lazy-image {

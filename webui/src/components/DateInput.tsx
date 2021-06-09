@@ -19,8 +19,8 @@ export const DateInput = defineComponent({
     const render = () => (
       <div style={{ display: 'flex' }}>
         {/* <pre>{$.value}</pre> */}
-        <button onClick={() => $.value = undefined} disabled={$p.disabled}>
-          <MI icon='cancel' size={18}  />
+        <button data-tooltip="Clear" onClick={() => $.value = undefined} disabled={$p.disabled}>
+          <MI icon='cancel' size={18} />
         </button>
         <input type="date" v-model={[$.value, ['lazy']]} disabled={$p.disabled} />
       </div>

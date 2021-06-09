@@ -1,0 +1,53 @@
+.mainTableWrapper {
+  // box-sizing: border-box;
+  // border: solid 1px #777;
+}
+
+.mainTable {
+  width: 100%;
+  border-collapse: collapse;
+  th {
+    position: sticky;
+    top: 0px;
+    background-color: #ddd;
+    @media (prefers-color-scheme: dark) {
+      background-color: #333;
+    }
+  }
+  td {
+    vertical-align: top;
+  }
+  td,
+  th {
+    font-size: small;
+    padding: 0 0.5em;
+    border-style: solid;
+    border-width: 0 0 1px 0;
+    border-color: #444;
+    @media (prefers-color-scheme: dark) {
+      border-color: #444;
+    }
+    border-color: #ccc;
+  }
+
+  tr:hover {
+    background-color: mix(lightblue, #eee, 25);
+  }
+  tr.selected {
+    background-color: lightblue;
+  }
+  @media (prefers-color-scheme: dark) {
+    tr:hover {
+      background-color: #033;
+    }
+    tr.selected {
+      background-color: #055;
+    }
+  }
+}
+
+.visitSet {
+  position: sticky;
+  top: 0;
+  background-color: #555;
+}
