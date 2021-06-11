@@ -22,7 +22,7 @@
     font-size: small;
     padding: 0 0.5em;
     border-style: solid;
-    border-width: 0 0 1px 0;
+    border-width: 0 0 1px 1px;
     border-color: #444;
     @media (prefers-color-scheme: dark) {
       border-color: #444;
@@ -47,7 +47,14 @@
 }
 
 .visitSet {
-  position: sticky;
-  top: 0;
-  background-color: #555;
+  padding-top: 1em;
+}
+
+.notes {
+  & > * {
+    display: inline;
+  }
+  :global(.username) {
+    color: #777;
+  }
 }

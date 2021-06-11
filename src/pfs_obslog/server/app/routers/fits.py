@@ -11,6 +11,7 @@ from pfs_obslog.server.app.context import Context
 from pfs_obslog.server.app.routers.asynctask import (background_process,
                                                      background_thread)
 from pfs_obslog.server.env import PFS_OBSLOG_ENV
+from pfs_obslog.server.image import fits2png
 from pfs_obslog.server.orm import static_check_init_args
 from pydantic import BaseModel
 from starlette.responses import FileResponse, Response
@@ -70,20 +71,22 @@ async def fits_preview(
 
 
 def make_fits_preview(filepath: str, width: int, height: int):
-    import io
-    from astropy.visualization import ZScaleInterval
-    from matplotlib import pyplot
-    DPI = 72
-    pyplot.figure(dpi=DPI, figsize=(width / DPI, height / DPI))
-    with afits.open(filepath) as hdul:
-        data = hdul[1].data  # type: ignore
-        zscale = ZScaleInterval()
-        vmin, vmax = zscale.get_limits(data)
-        pyplot.imshow(data, vmin=vmin, vmax=vmax)
-    pyplot.colorbar()
-    out = io.BytesIO()
-    pyplot.savefig(out, format='png', transparent=True)
-    return out.getvalue()
+    return fits2png(filepath, scale=0.08)
+    
+    # import io
+    # from astropy.visualization import ZScaleInterval
+    # from matplotlib import pyplot
+    # DPI = 72
+    # pyplot.figure(dpi=DPI, figsize=(width / DPI, height / DPI))
+    # with afits.open(filepath) as hdul:
+    #     data = hdul[1].data  # type: ignore
+    #     zscale = ZScaleInterval()
+    #     vmin, vmax = zscale.get_limits(data)
+    #     pyplot.imshow(data, vmin=vmin, vmax=vmax)
+    # pyplot.colorbar()
+    # out = io.BytesIO()
+    # pyplot.savefig(out, format='png', transparent=True)
+    # return out.getvalue()
 
 
 @router.get('/api/fits_download/{visit_id}/{camera_id}')

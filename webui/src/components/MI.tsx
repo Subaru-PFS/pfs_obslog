@@ -13,7 +13,7 @@ export default defineComponent({
     },
     size: {
       type: Number,
-      default: 24,
+      default: 20,
     },
     title: {
       type: String,

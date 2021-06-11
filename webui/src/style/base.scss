@@ -51,18 +51,19 @@ label {
   border-collapse: collapse;
   td,
   th {
+    font-size: smaller;
     padding: 0 1em;
     border-style: solid;
-    border-width: 0 0 1px 0;
+    border-width: 1px;
   }
 }
 
 .compact-table {
   th,
   td {
-    border-color: #aaa;
+    border-color: #ccc;
     @media (prefers-color-scheme: dark) {
-      border-color: #777;
+      border-color: #444;
     }
   }
   td {
@@ -83,4 +84,41 @@ hr {
     background-color: #333;
   }
   border-style: none;
+}
+
+ul {
+  margin: 0;
+}
+
+.command {
+  padding: 0.5em;
+  margin: 0.5em;
+  border-radius: 0.5em;
+  display: block;
+  box-shadow: 0 0 4px rgba(darkcyan, 1);
+  background-color: mix(#eee, #033, 80);
+  color: mix(darkcyan, black);
+  @media (prefers-color-scheme: dark) {
+    box-shadow: 0 0 4px rgba(white, 0.25);
+    background-color: #022;
+    color: cyan;
+  }
+  font-size: smaller;
+}
+
+.notes {
+  font-size: small;
+  padding-left: 0;
+  list-style-type: none;
+  .username {
+    color: #777;
+  }
+}
+
+h3,
+h4,
+h5,
+h6 {
+  margin: 0.25em 0;
+  font-size: small;
 }

@@ -1,38 +1,15 @@
+import subprocess
+from pathlib import Path
+
 import pytest
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-import opdb.models as M
+from pfs_obslog.server.image import fits2png
+
+HERE = Path(__file__).parent
 
 
 @pytest.mark.focus
-def test_visit(db: Session):
-    q = db.query(
-        M.pfs_visit,
-        M.visit_set.visit_set_id,
-        func.count(M.sps_exposure.pfs_visit_id).label('n_sps_exposures'),
-        func.count(M.mcs_exposure.pfs_visit_id).label('n_mcs_exposures'),
-        func.coalesce(
-            func.avg(M.sps_exposure.exptime),
-            func.avg(M.mcs_exposure.mcs_exptime),
-        ).label('avg_exptime'),
-    )\
-        .outerjoin(M.mcs_exposure)\
-        .outerjoin(M.sps_visit)\
-        .outerjoin(M.sps_exposure)\
-        .outerjoin(M.visit_set)\
-        .group_by(M.pfs_visit.pfs_visit_id, M.visit_set.visit_set_id)\
-        .limit(10)
-
-    [*q]
-
-# * VisitSet
-#     * ID
-#     * Name
-#     * Type
-#     * Status
-# * VisitID
-# * Desc.
-# * IssuedAt
-# * number of MCSExposures
-# * number of SpSExposures
-# * VisitComments
+def test_fits_png():
+    for i in range(6):
+        png = fits2png(HERE / 'files' / 'PFSA06304111.fits', 1 / (1<<i))
+        (Path('/Users/michitaro/Desktop') / f'pfs-{i}.png').write_bytes(png)
+    # subprocess.check_call(['open', HERE / 'a.png'])

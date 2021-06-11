@@ -1,6 +1,6 @@
-import { defineComponent, inject, provide, Ref, ref } from "vue"
-import { $reactive } from "~/vue-utils/reactive"
+import { defineComponent, inject, provide } from "vue"
 import MI from "~/components/MI"
+import { $reactive } from "~/vue-utils/reactive"
 
 const KEY = Symbol('folder')
 const DEFAULT_LEVEL = 3
@@ -45,7 +45,6 @@ export default defineComponent({
     },
     opened: {
       type: Boolean,
-      // default: false,
       default: true,
     },
     level: {

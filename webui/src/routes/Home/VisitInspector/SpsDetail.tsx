@@ -20,7 +20,7 @@ export default defineComponent({
     })
     return () =>
       <>
-        <Folder title="Exposures (Compact)" opened={true} key="sps_exposures_compact">
+        <Folder title="Exposures" opened={true} key="sps_exposures_compact">
           <label style={{ display: 'flex', alignItems: 'center', marginBottom: '1em' }}>
             <input type="checkbox" v-model={$.showPreview} />&nbsp;
             <MI icon="visibility" /> Preview
@@ -41,7 +41,7 @@ export default defineComponent({
                 <tr>
                   <td>{e.camera_id}</td>
                   <td>{time(e.exp_start)}</td>
-                  <td style={{ textAlign: 'right' }}>{e.exptime}</td>
+                  <td style={{ textAlign: 'right' }}>{e.exptime.toFixed(2)}</td>
                   <td>
                     <button
                       data-tooltip="Download"
@@ -59,11 +59,12 @@ export default defineComponent({
                   {
                     $.showPreview &&
                     <td>
+                      {/* 4300 × 4416 */}
                       <LazyImage
                         src={`./api/fits_preview/${$.visitId}/${e.camera_id}?width=400&height=400`}
                         scrollTarget={inspector.el}
-                        width={400}
-                        height={400}
+                        width={Math.floor(0.08 * 4300)}
+                        height={Math.floor(0.08 * 4416)}
                       />
                     </td>
                   }
@@ -78,29 +79,6 @@ export default defineComponent({
               </>)
             }
           </table>
-        </Folder>
-        <Folder title="Exposures (Full)" opened={false} key="sps_exposures_compact">
-          {$.sps.exposures.slice().sort((a, b) => a.camera_id - b.camera_id)
-            .map(e => <>
-              <h4>Camera ID: {e.camera_id}</h4>
-              <dl>
-                <dt>exptime</dt>
-                <dd>{e.exptime}</dd>
-                <dt>exp_start</dt>
-                <dd>{e.exp_start}</dd>
-                <dt>exp_end</dt>
-                <dd>{e.exp_end}</dd>
-                <dt>Annotation</dt>
-                <dd>
-                  <ul class="notes">
-                    {e.annotation.map(a => (
-                      <li key={a.annotation_id}>{a.notes} flag={a.data_flag} {a.created_at}</li>
-                    ))}
-                  </ul>
-                </dd>
-              </dl>
-            </>)
-          }
         </Folder>
       </>
   },

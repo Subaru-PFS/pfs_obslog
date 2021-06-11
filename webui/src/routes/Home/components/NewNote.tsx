@@ -1,9 +1,8 @@
 import { defineComponent, onMounted, PropType, reactive, ref } from "vue"
 import { apiNoSpinner } from "~/api"
-import { suffix } from "~/utils/string"
-import { $reactive } from "~/vue-utils/reactive"
 import MarkdownEditor from "~/components/MarkdownEditor"
 import MI from "~/components/MI"
+import { $reactive } from "~/vue-utils/reactive"
 
 
 export default defineComponent({
@@ -95,7 +94,7 @@ const SimpleEditor = defineComponent({
           onBlur={cancel}
         />
         <div onMousedown={e => e.preventDefault()}>
-          {/* We cannot click buttons below withoutthe onMousedown above,
+          {/* We cannot click buttons below without the onMousedown above,
             because mousedown on `document` hide the buttons before click */}
           <button type="button" onClick={cancel}><MI icon='cancel' /></button>
           <button onClick={onSubmit}><MI icon='check' /></button>

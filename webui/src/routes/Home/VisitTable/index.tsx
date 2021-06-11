@@ -1,13 +1,15 @@
 import { defineComponent, PropType, ref, watch } from "vue"
 import { api } from "~/api"
-import { VisitListEntry, VisitSet } from "~/api-client"
+import { VisitListEntry, VisitNote, VisitSet } from "~/api-client"
 import AsyncButton from "~/components/AsyncButton"
 import MI from "~/components/MI"
+import { domStyle, int2color } from "~/utils/colors"
 import { shortFormat } from "~/utils/time"
 import { makeComponentContext } from "~/vue-utils/context"
 import { $reactive } from "~/vue-utils/reactive"
 import { buildSql, defaultQuery, perPage } from "../query"
 import style from './style.module.scss'
+import VisitSetDetail from "./VisitSetDetail"
 
 
 const VisitTable = defineComponent({
@@ -42,11 +44,12 @@ const VisitTable = defineComponent({
 export default VisitTable
 
 
-const visitListContext = makeComponentContext(VisitTable, ($p, { emit }) => {
+export const visitListContext = makeComponentContext(VisitTable, ($p, { emit }) => {
   const $ = $reactive({
     visits: [] as VisitListEntry[],
     visitSets: {} as { [id: number]: VisitSet },
     count: 0,
+    showVisitSet: true,
     get moreEntries() {
       return $.count > $.q.end
     },
@@ -58,7 +61,7 @@ const visitListContext = makeComponentContext(VisitTable, ($p, { emit }) => {
     },
     get sql() {
       return buildSql($p.query)
-    }
+    },
   })
 
   const refresh = async () => {
@@ -83,8 +86,11 @@ const visitListContext = makeComponentContext(VisitTable, ($p, { emit }) => {
     $p,
     listEl,
     listEndEl,
-    updateVisitId(visitId: number) {
+    updateVisitId: (visitId: number) => {
       emit('update:visitId', visitId)
+    },
+    notifyUpdate: () => {
+      emit('update:revision', $p.revision + 1)
     },
     async goFirstPage() {
       $.q.start = 0
@@ -128,17 +134,20 @@ const visitListContext = makeComponentContext(VisitTable, ($p, { emit }) => {
 
 const PageNavigator = defineComponent({
   setup() {
-    const visitList = visitListContext.inject()
+    const $c = visitListContext.inject()
     return () =>
       <div style={{ display: 'flex', width: '100%' }}>
+        <button onClick={() => $c.$.showVisitSet = !$c.$.showVisitSet}>
+          <MI icon={$c.$.showVisitSet ? 'folder_open' : 'folder'} />
+        </button>
         <AsyncButton
-          onClick={visitList.goFirstPage}
-          disabled={!visitList.$.morePrevEntries}
+          onClick={$c.goFirstPage}
+          disabled={!$c.$.morePrevEntries}
           data-tooltip="First Page"
         ><MI icon='first_page' /></AsyncButton>
         <AsyncButton
-          onClick={visitList.goPrevPage}
-          disabled={!visitList.$.morePrevEntries}
+          onClick={$c.goPrevPage}
+          disabled={!$c.$.morePrevEntries}
           data-tooltip="Previous Page"
         ><MI icon='navigate_before' /></AsyncButton>
         <input
@@ -146,16 +155,16 @@ const PageNavigator = defineComponent({
           size={15}
           style={{ textAlign: 'center', flexGrow: 1 }}
           readonly={true}
-          value={`${visitList.$.q.start}-${visitList.$.q.end} / ${visitList.$.count}`}
+          value={`${$c.$.q.start}-${$c.$.q.end} / ${$c.$.count}`}
         />
         <AsyncButton
-          onClick={visitList.goNextPage}
-          disabled={!visitList.$.moreEntries}
+          onClick={$c.goNextPage}
+          disabled={!$c.$.moreEntries}
           data-tooltip="Next Page"
         ><MI icon='navigate_next' /></AsyncButton>
         <AsyncButton
-          onClick={visitList.goLastPage}
-          disabled={!visitList.$.moreEntries}
+          onClick={$c.goLastPage}
+          disabled={!$c.$.moreEntries}
           data-tooltip="Last Page"
         ><MI icon='last_page' /></AsyncButton>
       </div>
@@ -206,66 +215,87 @@ const MainList = defineComponent({
 const MainTable = defineComponent({
   setup() {
     const $c = visitListContext.inject()
-    return () => groupVisits($c.$.visits).map(g => <VisitGroup
-      visits={g.visits} visitSet={g.visit_set_id ? $c.$.visitSets[g.visit_set_id] : undefined}
-    />)
-  },
-})
-
-
-const VisitGroup = defineComponent({
-  setup($p) {
-    const $c = visitListContext.inject()
-
     return () =>
-      <>
-        <div>
-          <code><pre>{JSON.stringify($p.visitSet, null, 2)}</pre></code>
-        </div>
-        <table class={style.mainTable} >
-          <thead>
-            <tr>
-              <th>Visit</th>
-              <th data-tooltip="Description"><MI icon="description" /></th>
-              <th data-tooltip="Issued at" ><MI icon="schedule" /></th>
-              <th data-tooltip="Number of SpS Exposures">SpS</th>
-              <th data-tooltip="Number of MCS Exposures">MCS</th>
-              <th data-tooltip="Average Exposure Time[s]" ><MI icon="shutter_speed" /></th>
-              <th data-tooltip="Notes" ><MI icon="comment" /></th>
-            </tr>
-          </thead>
-          <tbody>
-            {$p.visits.map(v =>
+      <table class={style.mainTable}>
+        {groupVisits($c.$.visits).map((g, gIndex) =>
+          <>
+            {$c.$.showVisitSet && g.visit_set_id &&
+              <tr>
+                <td colspan={12} >
+                  <VisitSetDetail visitSet={$c.$.visitSets[g.visit_set_id]} />
+                </td>
+              </tr>
+            }
+            {($c.$.showVisitSet || gIndex === 0) &&
+              <tr>
+                <th data-tooltip="Visit Set ID" ><MI icon="folder" /></th>
+                <th>Visit</th>
+                <th data-tooltip="Description"><MI icon="description" /></th>
+                <th data-tooltip="Issued at" ><MI icon="schedule" /></th>
+                <th data-tooltip="Number of SpS/MCS Exposures">SpS<br />-<br />MCS</th>
+                <th data-tooltip="Average Exposure Time[s]" ><MI icon="shutter_speed" /></th>
+                <th data-tooltip="Azimuth" >Az.</th>
+                <th data-tooltip="Elevation" >El.</th>
+                <th data-tooltip="Right Ascension" >&alpha;</th>
+                <th data-tooltip="Declination" >&delta;</th>
+                <th data-tooltip="Instrument Rotator" >Inr</th>
+                <th data-tooltip="Notes" ><MI icon="comment" /></th>
+              </tr>
+            }
+            {g.visits.map(v =>
               <tr
                 class={{ [style.selected]: $c.$p.visitId === v.id }}
                 onClick={() => $c.updateVisitId(v.id)}
               >
+                <td style={{
+                  textAlign: 'right',
+                  ...(!$c.$.showVisitSet && g.visit_set_id ? domStyle(int2color(g.visit_set_id)) : {}),
+                }} > {g.visit_set_id} </td>
                 <td style={{ textAlign: 'right' }} > {v.id} </td>
                 <td> {v.description} </td>
-                <td style={{ textAlign: 'center' }} > {shortFormat(v.issued_at)} </td>
-                <td style={{ textAlign: 'right' }}> {v.n_sps_exposures} </td>
-                <td style={{ textAlign: 'right' }}> {v.n_mcs_exposures} </td>
-                <td style={{ textAlign: 'right' }}> {v.avg_exptime} </td>
+                <td style={{ textAlign: 'center' }} data-tooltip={v.issued_at} > {shortFormat(v.issued_at)} </td>
+                <td style={{ textAlign: 'center' }}>
+                  {v.n_sps_exposures}/{v.n_mcs_exposures}
+                </td>
+                <td style={{ textAlign: 'right' }}> {v.avg_exptime?.toFixed(1)} </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
                 <td>
                   {v.notes.map(n =>
-                    <div class="usernote">{n.body}</div>
+                    <Note note={n} />
                   )}
                 </td>
               </tr>
             )}
-          </tbody>
-        </table >
-      </>
+          </>
+        )}
+      </table >
+  },
+})
+
+const Note = defineComponent({
+  setup($p) {
+    const $ = $reactive({
+      get body() {
+        return $p.note.body.replace(/\[(.*)\]\(.*?\)/g, '[$1]').replace(/(.{128,}?)(.*)/, '$1...')
+      }
+    })
+
+    return () =>
+      <div class={style.notes}>
+        <div class="body">{$.body}</div>{' '}
+        <div class="username">{$p.note.user.account_name}</div>
+      </div>
   },
   props: {
-    visitSet: {
-      type: Object as PropType<VisitSet>,
-    },
-    visits: {
-      type: Array as PropType<VisitListEntry[]>,
+    note: {
+      type: Object as PropType<VisitNote>,
       required: true,
-    },
-  },
+    }
+  }
 })
 
 

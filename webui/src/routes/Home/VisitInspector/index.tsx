@@ -8,7 +8,6 @@ import { $reactive } from "~/vue-utils/reactive"
 import BaseDetail from "./BaseDetail"
 import MCSDetail from "./MCSDetail"
 import SpsDetail from "./SpsDetail"
-import style from './style.module.scss'
 import VisitFitsHeader from "./VisitFitsHeader"
 import VisitSetDetail from "./VisitSetDetail"
 
@@ -19,6 +18,9 @@ const VisitInspector = defineComponent({
     const $c = inspectorContext.provide($p, ctx)
 
     const $ = $reactive({
+      folders: {
+        visitSetDetail: false,
+      },
       showJson: false,
       get visit() {
         return $c.$.visit!
@@ -34,7 +36,7 @@ const VisitInspector = defineComponent({
       }}>
         <div
           ref={$c.el}
-          class={style.main} style={{
+          style={{
             height: 0,
             flexGrow: 1,
             overflow: 'auto',
@@ -42,7 +44,7 @@ const VisitInspector = defineComponent({
           {$c.$.visit &&
             <>
               {$.visit.sps && $.visit.sps_sequence &&
-                <Folder title="SpS Sequence" key="sps_sequence" opened={true}>
+                <Folder title="SpS Sequence" key="sps_sequence" opened={$.folders.visitSetDetail}>
                   <VisitSetDetail />
                 </Folder>
               }

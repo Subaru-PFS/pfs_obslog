@@ -5,7 +5,7 @@ import { api } from "~/api"
 import LazyImage from "~/components/LazyImage"
 import { $reactive } from "~/vue-utils/reactive"
 import { inspectorContext } from "./"
-import NoteList from "./components/NoteList"
+import NoteList from "../components/NoteList"
 
 export default defineComponent({
   setup() {
@@ -86,6 +86,7 @@ export default defineComponent({
                       }}
                       updateNote={(note_id, body) => api.mcsExposureNoteUpdate(note_id, { body })}
                       deleteNote={note_id => api.mcsExposureNoteDestroy(note_id)}
+                      refresh={$c.notifyUpdate}
                     />
                   </dd>
                 </dl>

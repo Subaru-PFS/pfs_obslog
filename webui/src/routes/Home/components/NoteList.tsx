@@ -1,7 +1,5 @@
 import { defineComponent, PropType } from "vue"
 import { int } from "~/types"
-import { inspectorContext } from "../"
-import style from '../style.module.scss'
 import NewNote from "./NewNote"
 import Note from "./Note"
 
@@ -18,29 +16,27 @@ type User = {
 
 export default defineComponent({
   setup($p) {
-    const inspector = inspectorContext.inject()
-
     const createNote = async (body: string) => {
       await $p.createNote(body)
-      inspector.notifyUpdate()
+      $p.refresh()
     }
 
     const updateNote = async (note_id: int, body: string) => {
       if (body !== null) {
         await $p.updateNote(note_id, body)
-        inspector.notifyUpdate()
+        $p.refresh()
       }
     }
 
     const deleteNote = async (note_id: int) => {
       if (confirm(`Are you sure to delete this note?`)) {
         await $p.deleteNote(note_id)
-        inspector.notifyUpdate()
+        $p.refresh()
       }
     }
 
     return () =>
-      <ul class={style.notes}>
+      <ul class="notes">
         {$p.notes.slice().sort((a, b) => a.id - b.id).map(n =>
           <li key={n.id}>
             <Note
@@ -71,6 +67,10 @@ export default defineComponent({
     },
     deleteNote: {
       type: Function as PropType<(note_id: int) => Promise<any>>,
+      required: true,
+    },
+    refresh: {
+      type: Function as PropType<() => void>,
       required: true,
     },
   },
