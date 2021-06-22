@@ -2,7 +2,6 @@ import Color from "color"
 import { defineComponent, PropType } from "vue"
 import { api } from "~/api"
 import { VisitSet } from "~/api-client"
-import Folder from "~/components/Folder"
 import { bgColor, fgColor } from "~/utils/colors"
 import { $reactive } from "~/vue-utils/reactive"
 import NoteList from "../components/NoteList"
@@ -53,19 +52,16 @@ export default defineComponent({
           </tr>
         </table>
         <code class="command">{$.seq.cmd_str}</code>
-        {
-          $.seq.comments &&
-          <p>{$.seq.comments}</p>
+        {$.seq.comments &&
+          <p> {$.seq.comments} </p>
         }
-        <Folder title="Notes">
-          <NoteList
-            notes={$.seq.notes}
-            createNote={body => api.visitSetNoteCreate({ visit_set_id: $.seq.visit_set_id, body })}
-            updateNote={(note_id, body) => api.visitSetNoteUpdate(note_id, { body })}
-            deleteNote={note_id => api.visitSetNoteDestroy(note_id)}
-            refresh={$c.notifyUpdate}
-          />
-        </Folder>
+        <NoteList
+          notes={$.seq.notes}
+          createNote={body => api.visitSetNoteCreate({ visit_set_id: $.seq.visit_set_id, body })}
+          updateNote={(note_id, body) => api.visitSetNoteUpdate(note_id, { body })}
+          deleteNote={note_id => api.visitSetNoteDestroy(note_id)}
+          refresh={$c.notifyUpdate}
+        />
       </div>
   },
   props: {

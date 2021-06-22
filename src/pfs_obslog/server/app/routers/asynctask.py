@@ -1,12 +1,11 @@
 import asyncio
+import io
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from typing import Callable, cast
 
-from matplotlib import pyplot
-import io
+import astropy.io.fits
 from astropy.visualization import ZScaleInterval
 from matplotlib import pyplot
-import astropy.io.fits
 
 
 class _g:
@@ -15,7 +14,7 @@ class _g:
 
 
 def setup_asynctask():
-    _g.process_pool = ProcessPoolExecutor()
+    _g.process_pool = ProcessPoolExecutor(2)
     _g.thread_pool = ThreadPoolExecutor()
 
 

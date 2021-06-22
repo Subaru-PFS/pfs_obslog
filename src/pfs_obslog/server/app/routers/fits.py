@@ -42,7 +42,8 @@ def disable_in_dev():
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
 
-router = APIRouter(dependencies=[Depends(disable_in_dev)])
+# router = APIRouter(dependencies=[Depends(disable_in_dev)])
+router = APIRouter()
 
 
 @router.get('/api/fits/{visit_id}', response_model=list[FitsMeta])
@@ -129,4 +130,4 @@ def visit_date(visit: M.pfs_visit) -> datetime.date:
 def fits_path_for_visit(visit: M.pfs_visit):
     date = visit_date(visit)
     date_dir = data_root / 'raw' / date.strftime(r'%Y-%m-%d')
-    return list(date_dir.glob(f'*/PFS?{visit.pfs_visit_id:06d}??.fits'))
+    return sorted(list(date_dir.glob(f'*/PFS?{visit.pfs_visit_id:06d}??.fits')))

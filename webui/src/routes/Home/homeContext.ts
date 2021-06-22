@@ -9,6 +9,10 @@ import { defaultQuery } from "./query"
 export const homeContext = makeContext('home', () => {
   const keyboardShortcuts = keyboardShortcutsContext.provide()
 
+  keyboardShortcuts.add({
+    r: () => refresh(),
+  })
+
   const $ = $reactive({
     query: safeJsonParse(router.currentRoute.value.query?.['q'], () => defaultQuery()),
     visitId: undefined as undefined | number,

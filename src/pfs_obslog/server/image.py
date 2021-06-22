@@ -10,7 +10,7 @@ from PIL import Image
 
 def fits2png(filename: Union[str, Path], scale=0.25):
     with afits.open(filename) as hdul:
-        data = hdul[1].data  # type: ignore
+        data = hdul[1].data[::-1]  # type: ignore
     assert len(data.shape) == 2
     zscale = ZScaleInterval()
     vmin, vmax = zscale.get_limits(data)

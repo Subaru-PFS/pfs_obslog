@@ -27,10 +27,14 @@ dev-watch:
 			-v \
 			dev
 
+sync-dev:
+	rsync --rsync-path=/home/michitaro/machines/obslog-ics.pfs.sum.subaru.nao.ac.jp/packages/rsync/bin/rsync -av --delete --exclude={dist,.venv,node_modules,schemaspy/html,htmlcov,.git,logs,attachments,tmp} ./ pfs-obslog:devel/pfs_obslog/
+
+sync-dev-watch:
+	./.venv/bin/watchmedo shell-command -c '$(MAKE) sync-dev' -R src ./webui/src
+
 dev-server:
 	PFS_OBSLOG_ENV=development \
-	PFS_OBSLOG_DSN=postgresql://postgres@localhost/opdb \
-	PFS_OBSLOG_DATA_ROOT=$(HOME)/pfs/data \
 		bash ./start.bash
 
 setup:

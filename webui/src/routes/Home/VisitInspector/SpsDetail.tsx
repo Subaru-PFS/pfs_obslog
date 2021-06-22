@@ -2,6 +2,7 @@ import { defineComponent } from "vue"
 import Folder from "~/components/Folder"
 import LazyImage from "~/components/LazyImage"
 import MI from "~/components/MI"
+import { armName, decodeCameraId, fitsFileName } from "~/pfs"
 import { $reactive } from "~/vue-utils/reactive"
 import { inspectorContext } from "./"
 
@@ -10,12 +11,15 @@ export default defineComponent({
   setup() {
     const inspector = inspectorContext.inject()
     const $ = $reactive({
-      showPreview: !import.meta.env.DEV,
+      showPreview: true,
+      get visit() {
+        return inspector.$.visit!
+      },
       get visitId() {
-        return inspector.$.visit?.id
+        return $.visit.id
       },
       get sps() {
-        return inspector.$.visit?.sps!
+        return $.visit.sps!
       },
     })
     return () =>
@@ -26,20 +30,23 @@ export default defineComponent({
             <MI icon="visibility" /> Preview
           </label>
           <table class="compact-table">
-            <tr>
-              <th>ID</th>
-              <th data-tooltip="Exposure Start"><MI icon="schedule" /></th>
-              <th data-tooltip="Exposure Time[s]"><MI icon="shutter_speed" /></th>
-              <th>FITS</th>
-              {$.showPreview &&
-                <th data-tooltip="Preview" ><MI icon="visibility" /></th>
-              }
-              <th data-tooltip="Notes"><MI icon="comment" /></th>
-            </tr>
             {$.sps.exposures.slice().sort((a, b) => a.camera_id - b.camera_id)
-              .map(e => <>
+              .map((e, i_i) => <>
+                {($.showPreview || i_i == 0) &&
+                  <tr>
+                    <th>ID</th>
+                    <th data-tooltip="Module">M</th>
+                    <th data-tooltip="Arm">Arm</th>
+                    <th data-tooltip="Exposure Start"><MI icon="schedule" /></th>
+                    <th data-tooltip="Exposure Time[s]"><MI icon="shutter_speed" /></th>
+                    <th>FITS</th>
+                    <th data-tooltip="Notes"><MI icon="comment" /></th>
+                  </tr>
+                }
                 <tr>
                   <td>{e.camera_id}</td>
+                  <td>{decodeCameraId(e.camera_id).sm}</td>
+                  <td>{armName(e.camera_id)}</td>
                   <td>{time(e.exp_start)}</td>
                   <td style={{ textAlign: 'right' }}>{e.exptime.toFixed(2)}</td>
                   <td>
@@ -56,18 +63,6 @@ export default defineComponent({
                       <MI icon="open_in_new" />
                     </button>
                   </td>
-                  {
-                    $.showPreview &&
-                    <td>
-                      {/* 4300 × 4416 */}
-                      <LazyImage
-                        src={`./api/fits_preview/${$.visitId}/${e.camera_id}?width=400&height=400`}
-                        scrollTarget={inspector.el}
-                        width={Math.floor(0.08 * 4300)}
-                        height={Math.floor(0.08 * 4416)}
-                      />
-                    </td>
-                  }
                   <td>
                     <ul class="notes">
                       {e.annotation.map(a => (
@@ -75,6 +70,22 @@ export default defineComponent({
                       ))}
                     </ul>
                   </td>
+                </tr>
+                <tr>
+                  {
+                    $.showPreview &&
+                    <td colspan={7} style={{ textAlign: 'center' }} >
+                      {/* 4300 × 4416 */}
+                      <LazyImage
+                        style={{ marginBottom: '0.5em' }}
+                        src={`./api/fits_preview/${$.visitId}/${e.camera_id}?width=400&height=400`}
+                        scrollTarget={inspector.el}
+                        width={Math.floor(0.08 * 4300)}
+                        height={Math.floor(0.08 * 4416)}
+                      /><br />
+                      {fitsFileName($.visitId!, e.camera_id)}
+                    </td>
+                  }
                 </tr>
               </>)
             }

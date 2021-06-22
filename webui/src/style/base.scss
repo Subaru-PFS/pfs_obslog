@@ -55,19 +55,16 @@ label {
     padding: 0 1em;
     border-style: solid;
     border-width: 1px;
-  }
-}
-
-.compact-table {
-  th,
-  td {
     border-color: #ccc;
     @media (prefers-color-scheme: dark) {
       border-color: #444;
     }
   }
-  td {
-    padding-top: 0.25em;
+  th {
+    background-color: #ddd;
+    @media (prefers-color-scheme: dark) {
+      background-color: #444;
+    }
   }
 }
 

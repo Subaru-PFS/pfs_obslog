@@ -1,18 +1,8 @@
-.mainTableWrapper {
-  // box-sizing: border-box;
-  // border: solid 1px #777;
-}
-
 .mainTable {
-  width: 100%;
   border-collapse: collapse;
   th {
     position: sticky;
-    top: 0px;
-    background-color: #ddd;
-    @media (prefers-color-scheme: dark) {
-      background-color: #333;
-    }
+    top: 0;
   }
   td {
     vertical-align: top;
@@ -23,31 +13,52 @@
     padding: 0 0.5em;
     border-style: solid;
     border-width: 0 0 1px 1px;
-    border-color: #444;
-    @media (prefers-color-scheme: dark) {
-      border-color: #444;
-    }
-    border-color: #ccc;
   }
-
-  tr:hover {
+  tr.visit:hover {
     background-color: mix(lightblue, #eee, 25);
+    @media (prefers-color-scheme: dark) {
+      background-color: #033;
+    }
   }
   tr.selected {
     background-color: lightblue;
-  }
-  @media (prefers-color-scheme: dark) {
-    tr:hover {
-      background-color: #033;
-    }
-    tr.selected {
+    @media (prefers-color-scheme: dark) {
       background-color: #055;
+    }
+  }
+  .border {
+    height: 1em;
+    background-color: #ccc;
+    @media (prefers-color-scheme: dark) {
+      background-color: #444;
+    }
+  }
+}
+
+.visitGroup {
+  box-shadow: 0 0 8px rgba(black, 0.5);
+  @media (prefers-color-scheme: dark) {
+    box-shadow: 0 0 8px rgba(white, 0.5);
+  }
+  margin: 1em 0.5em;
+  border-radius: 8px;
+  // overflow: auto;
+  // ↑ this conflicts with thead th { position: sticky; } 
+  table {
+    width: 100%;
+    table-layout: fixed;
+    td {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
     }
   }
 }
 
 .visitSet {
-  padding-top: 1em;
+  table td {
+    text-align: center;
+  }
 }
 
 .notes {
@@ -56,5 +67,26 @@
   }
   :global(.username) {
     color: #777;
+  }
+}
+
+.columnList {
+  display: flex;
+  flex-wrap: wrap;
+  label {
+    display: flex;
+    align-items: center;
+    font-size: small;
+    margin: 0.25em;
+    padding: 0.25em;
+    border-radius: 4px;
+    box-shadow: 0 0 4px rgba(black, 0.5);
+    white-space: nowrap;
+    @media (prefers-color-scheme: dark) {
+      box-shadow: 0 0 4px rgba(white, 0.5);
+    }
+    input {
+      margin-right: 0.25em;
+    }
   }
 }

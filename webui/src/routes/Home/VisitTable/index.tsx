@@ -1,9 +1,10 @@
+import { useLocalStorage } from "@vueuse/core"
 import { defineComponent, PropType, ref, watch } from "vue"
 import { api } from "~/api"
 import { VisitListEntry, VisitNote, VisitSet } from "~/api-client"
 import AsyncButton from "~/components/AsyncButton"
 import MI from "~/components/MI"
-import { domStyle, int2color } from "~/utils/colors"
+import { env } from "~/env"
 import { shortFormat } from "~/utils/time"
 import { makeComponentContext } from "~/vue-utils/context"
 import { $reactive } from "~/vue-utils/reactive"
@@ -21,6 +22,7 @@ const VisitTable = defineComponent({
         <div style={{ display: 'flex' }}>
           <PageNavigator />
         </div>
+        <ColumnList />
         <MainList style={{ flexGrow: 1 }} />
       </div>
   },
@@ -49,7 +51,19 @@ export const visitListContext = makeComponentContext(VisitTable, ($p, { emit }) 
     visits: [] as VisitListEntry[],
     visitSets: {} as { [id: number]: VisitSet },
     count: 0,
-    showVisitSet: true,
+    columns: useLocalStorage(`${env.app_id}/VisitTable/columns`, {
+      visit: true,
+      description: true,
+      issuedAt: true,
+      numberOfExposures: true,
+      exposureTime: true,
+      coord_a: false,
+      coord_d: false,
+      azimuth: false,
+      elevation: false,
+      insturumentRotator: false,
+      notes: true,
+    }),
     get moreEntries() {
       return $.count > $.q.end
     },
@@ -137,9 +151,6 @@ const PageNavigator = defineComponent({
     const $c = visitListContext.inject()
     return () =>
       <div style={{ display: 'flex', width: '100%' }}>
-        <button onClick={() => $c.$.showVisitSet = !$c.$.showVisitSet}>
-          <MI icon={$c.$.showVisitSet ? 'folder_open' : 'folder'} />
-        </button>
         <AsyncButton
           onClick={$c.goFirstPage}
           disabled={!$c.$.morePrevEntries}
@@ -172,19 +183,74 @@ const PageNavigator = defineComponent({
 })
 
 
+const ColumnList = defineComponent({
+  setup() {
+    const $c = visitListContext.inject()
+    return () =>
+      <div class={style.columnList}>
+        <label data-tooltip="Visit" >
+          <input v-model={$c.$.columns.visit} type="checkbox" />
+          <span>Visit</span>
+        </label>
+        <label data-tooltip="Description" >
+          <input v-model={$c.$.columns.description} type="checkbox" />
+          <MI icon="description" size={18} />
+        </label>
+        <label data-tooltip="Issued at" >
+          <input v-model={$c.$.columns.issuedAt} type="checkbox" />
+          <MI icon="schedule" size={18} />
+        </label>
+        <label data-tooltip="Number of SpS/MCS Exposures" >
+          <input v-model={$c.$.columns.numberOfExposures} type="checkbox" />
+          <MI icon="tag" size={18} />
+        </label>
+        <label data-tooltip="Exposure Time" >
+          <input v-model={$c.$.columns.exposureTime} type="checkbox" />
+          <MI icon="shutter_speed" size={18} />
+        </label>
+        <label data-tooltip="Right Ascension" >
+          <input v-model={$c.$.columns.coord_a} type="checkbox" />
+          <span  >&alpha;</span>
+        </label>
+        <label data-tooltip="Declination">
+          <input v-model={$c.$.columns.coord_d} type="checkbox" />
+          <span  >&delta;</span>
+        </label>
+        <label data-tooltip="Azimuth">
+          <input v-model={$c.$.columns.azimuth} type="checkbox" />
+          <span  >A&deg;</span>
+        </label>
+        <label data-tooltip="Elevation">
+          <input v-model={$c.$.columns.elevation} type="checkbox" />
+          <span  >E&deg;</span>
+        </label>
+        <label data-tooltip="Instrument Rotator" >
+          <input v-model={$c.$.columns.insturumentRotator} type="checkbox" />
+          <span  >I&deg;</span>
+        </label>
+        <label data-tooltip="Notes" >
+          <input v-model={$c.$.columns.notes} type="checkbox" />
+          <MI icon="comment" size={18} />
+        </label>
+      </div>
+  },
+})
+
+
 const MainList = defineComponent({
   name: 'MainList',
   setup() {
     const $c = visitListContext.inject()
 
     return () =>
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
+      <div
+        class={style.mainList}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
         <div
           ref={$c.listEl}
-          class={style.mainTableWrapper}
           style={{
             height: 0,
             flexGrow: 1,
@@ -212,80 +278,151 @@ const MainList = defineComponent({
   },
 })
 
+
 const MainTable = defineComponent({
   setup() {
     const $c = visitListContext.inject()
     return () =>
-      <table class={style.mainTable}>
-        {groupVisits($c.$.visits).map((g, gIndex) =>
-          <>
-            {$c.$.showVisitSet && g.visit_set_id &&
-              <tr>
-                <td colspan={12} >
-                  <VisitSetDetail visitSet={$c.$.visitSets[g.visit_set_id]} />
-                </td>
-              </tr>
-            }
-            {($c.$.showVisitSet || gIndex === 0) &&
-              <tr>
-                <th data-tooltip="Visit Set ID" ><MI icon="folder" /></th>
-                <th>Visit</th>
-                <th data-tooltip="Description"><MI icon="description" /></th>
-                <th data-tooltip="Issued at" ><MI icon="schedule" /></th>
-                <th data-tooltip="Number of SpS/MCS Exposures">SpS<br />-<br />MCS</th>
-                <th data-tooltip="Average Exposure Time[s]" ><MI icon="shutter_speed" /></th>
-                <th data-tooltip="Azimuth" >Az.</th>
-                <th data-tooltip="Elevation" >El.</th>
-                <th data-tooltip="Right Ascension" >&alpha;</th>
-                <th data-tooltip="Declination" >&delta;</th>
-                <th data-tooltip="Instrument Rotator" >Inr</th>
+      groupVisits($c.$.visits).map(g =>
+        <VisitGroup visitSet={$c.$.visitSets[g.visit_set_id!]} visits={g.visits} />
+      )
+  },
+})
+
+
+const VisitGroup = defineComponent({
+  setup($p) {
+    const $c = visitListContext.inject()
+    return () =>
+      <div class={style.visitGroup}>
+        {$p.visitSet &&
+          <VisitSetDetail visitSet={$p.visitSet} />
+        }
+        <table class={[style.mainTable, 'compact-table']}>
+          <thead>
+            <tr>
+              {$c.$.columns.visit &&
+                <th
+                  style={{ width: '7ch' }}>Visit</th>
+              }
+              {$c.$.columns.description &&
+                <th
+                  style={{ width: '12ch' }}
+                  data-tooltip="Description"><MI icon="description" /></th>
+              }
+              {$c.$.columns.issuedAt &&
+                <th
+                  style={{ width: '5ch' }}
+                  data-tooltip="Issued at" ><MI icon="schedule" /></th>
+              }
+              {$c.$.columns.numberOfExposures &&
+                <th
+                  style={{ width: '5ch' }}
+                  data-tooltip="Number of SpS/MCS Exposures"><MI icon="tag" /></th>
+              }
+              {$c.$.columns.exposureTime &&
+                <th
+                  style={{ width: '6ch' }}
+                  data-tooltip="Average Exposure Time[s]" ><MI icon="shutter_speed" /></th>
+              }
+              {$c.$.columns.coord_a &&
+                <th style={{ width: '6ch' /* 000.00 */ }} data-tooltip="Right Ascension" >&alpha;</th>
+              }
+              {$c.$.columns.coord_d &&
+                <th style={{ width: '6ch' /* +00.00 */ }} data-tooltip="Declination" >&delta;</th>
+              }
+              {$c.$.columns.azimuth &&
+                <th style={{ width: '6ch' /* +00.00 */ }} data-tooltip="Azimuth" >A&deg;</th>
+              }
+              {$c.$.columns.elevation &&
+                <th style={{ width: '6ch' /* +00.00 */ }} data-tooltip="Elevation" >E&deg;</th>
+              }
+              {$c.$.columns.insturumentRotator &&
+                <th style={{ width: '6ch' }} data-tooltip="Instrument Rotator" >I&deg;</th>
+              }
+              {$c.$.columns.notes &&
                 <th data-tooltip="Notes" ><MI icon="comment" /></th>
-              </tr>
-            }
-            {g.visits.map(v =>
-              <tr
-                class={{ [style.selected]: $c.$p.visitId === v.id }}
-                onClick={() => $c.updateVisitId(v.id)}
-              >
-                <td style={{
-                  textAlign: 'right',
-                  ...(!$c.$.showVisitSet && g.visit_set_id ? domStyle(int2color(g.visit_set_id)) : {}),
-                }} > {g.visit_set_id} </td>
+              }
+            </tr>
+          </thead>
+          {$p.visits.map(v =>
+            <tr
+              class={{ [style.visit]: true, [style.selected]: $c.$p.visitId === v.id }}
+              onClick={() => $c.updateVisitId(v.id)}
+            >
+              {$c.$.columns.visit &&
                 <td style={{ textAlign: 'right' }} > {v.id} </td>
+              }
+              {$c.$.columns.description &&
                 <td> {v.description} </td>
-                <td style={{ textAlign: 'center' }} data-tooltip={v.issued_at} > {shortFormat(v.issued_at)} </td>
+              }
+              {$c.$.columns.issuedAt &&
+                <td style={{ textAlign: 'center' }} >
+                  <span data-tooltip={v.issued_at}>
+                    {shortFormat(v.issued_at)}
+                  </span>
+                </td>
+              }
+              {$c.$.columns.numberOfExposures &&
                 <td style={{ textAlign: 'center' }}>
                   {v.n_sps_exposures}/{v.n_mcs_exposures}
                 </td>
+              }
+              {$c.$.columns.exposureTime &&
                 <td style={{ textAlign: 'right' }}> {v.avg_exptime?.toFixed(1)} </td>
+              }
+              {$c.$.columns.coord_a &&
                 <td></td>
+              }
+              {$c.$.columns.coord_d &&
                 <td></td>
+              }
+              {$c.$.columns.azimuth &&
                 <td></td>
+              }
+              {$c.$.columns.elevation &&
                 <td></td>
+              }
+              {$c.$.columns.insturumentRotator &&
                 <td></td>
+              }
+              {$c.$.columns.notes &&
                 <td>
                   {v.notes.map(n =>
                     <Note note={n} />
                   )}
                 </td>
-              </tr>
-            )}
-          </>
-        )}
-      </table >
+              }
+            </tr>
+          )}
+        </table>
+      </div>
+  },
+  props: {
+    visitSet: {
+      type: Object as PropType<VisitSet>,
+    },
+    visits: {
+      type: Array as PropType<VisitListEntry[]>,
+      required: true,
+    },
   },
 })
+
 
 const Note = defineComponent({
   setup($p) {
     const $ = $reactive({
+      get readableText() {
+        return $p.note.body.replace(/\[(.*)\]\(.*?\)/g, '[$1]')
+      },
       get body() {
-        return $p.note.body.replace(/\[(.*)\]\(.*?\)/g, '[$1]').replace(/(.{128,}?)(.*)/, '$1...')
+        return $.readableText.replace(/(.{128,}?)(.*)/, '$1...')
       }
     })
 
     return () =>
-      <div class={style.notes}>
+      <div data-tooltip={`${$.readableText} / ${$p.note.user.account_name}`} class={style.notes}>
         <div class="body">{$.body}</div>{' '}
         <div class="username">{$p.note.user.account_name}</div>
       </div>

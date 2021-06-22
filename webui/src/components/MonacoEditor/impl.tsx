@@ -1,9 +1,8 @@
-import { defineComponent, onBeforeUnmount, onMounted, PropType, ref, watch } from "vue"
 import { CSSProperties } from "@vue/runtime-dom"
 import { usePreferredDark } from "@vueuse/core"
 import * as monaco from 'monaco-editor'
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
-import { RouterLink } from "vue-router"
+import { defineComponent, onBeforeUnmount, onMounted, PropType, ref, watch } from "vue"
 import FileDrop from "~/components/FileDrop"
 import FIleInput from "~/components/FIleInput"
 import { $reactive } from "~/vue-utils/reactive"

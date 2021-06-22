@@ -38,6 +38,7 @@ setup(
             'pdbpp',
             'requests',
             'Pillow',
+            'watchdog[watchmedo]',
         ],
     },
 )
