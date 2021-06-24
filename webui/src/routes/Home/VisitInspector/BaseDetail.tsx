@@ -30,8 +30,7 @@ export default defineComponent({
             <td>{$.visit.issued_at}</td>
           </tr>
         </table>
-
-        <Folder title="Notes" opened={true}>
+        {/* <Folder title="Notes" opened={true}> */}
           <NoteList
             notes={$.visit.notes}
             createNote={body => api.visitNoteCreate({ visit_id: $.visit.id, body })}
@@ -39,7 +38,7 @@ export default defineComponent({
             deleteNote={note_id => api.visitNoteDestroy(note_id)}
             refresh={inspector.notifyUpdate}
           />
-        </Folder>
+        {/* </Folder> */}
       </>
   },
 })

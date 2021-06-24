@@ -49,7 +49,7 @@ export default defineComponent({
                   <td>{armName(e.camera_id)}</td>
                   <td>{time(e.exp_start)}</td>
                   <td style={{ textAlign: 'right' }}>{e.exptime.toFixed(2)}</td>
-                  <td>
+                  <td style={{ whiteSpace: 'nowrap' }}>
                     <button
                       data-tooltip="Download"
                       onClick={_ => location.href = `./api/fits_download/${$.visitId}/${e.camera_id}`}

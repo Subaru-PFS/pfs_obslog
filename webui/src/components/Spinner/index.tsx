@@ -35,7 +35,7 @@ export class Spinner {
     showSpinner: false,
   })
 
-  constructor(readonly delay = 250) {
+  constructor(readonly delay = 400) {
     const root = document.createElement('div')
     document.body.appendChild(root)
     createApp(defineComponent({

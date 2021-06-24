@@ -1,6 +1,6 @@
 import { useLocalStorage } from "@vueuse/core"
 import { defineComponent, PropType, ref, watch } from "vue"
-import { api } from "~/api"
+import { apiFactory } from "~/api"
 import { VisitListEntry, VisitNote, VisitSet } from "~/api-client"
 import AsyncButton from "~/components/AsyncButton"
 import MI from "~/components/MI"
@@ -78,18 +78,23 @@ export const visitListContext = makeComponentContext(VisitTable, ($p, { emit }) 
     },
   })
 
-  const refresh = async () => {
+  const refresh = async (spinner = true) => {
     const q = $.q
-    const { visits, visit_sets, count } = (await api.visitList(q.start, q.end - q.start, $.sql)).data
+    const { visits, visit_sets, count } = (await apiFactory({ spinner }).visitList(q.start, q.end - q.start, $.sql)).data
     $.visits = visits
     $.visitSets = Object.fromEntries(visit_sets.map(vs => [vs.id, vs]))
     $.count = count
   }
 
   watch(
-    () => [$p.revision, $p.query],
-    refresh,
+    () => $p.query,
+    () => refresh(true),
     { deep: true, immediate: true },
+  )
+
+  watch(
+    () => $p.revision,
+    () => refresh(false),
   )
 
   const listEl = ref<HTMLDivElement>()

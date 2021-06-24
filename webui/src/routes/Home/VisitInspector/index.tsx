@@ -1,5 +1,5 @@
 import { defineComponent, ref, watch } from "vue"
-import { api } from "~/api"
+import { apiFactory } from "~/api"
 import { VisitDetail } from "~/api-client"
 import Folder from "~/components/Folder"
 import MI from "~/components/MI"
@@ -96,16 +96,25 @@ export const inspectorContext = makeComponentContext(VisitInspector, ($p, { emit
     visit: undefined as VisitDetail | undefined,
   })
 
-  const refresh = async () => {
+  const refresh = async (spinner = true) => {
     const visitId = $p.visitId
-    $.visit = visitId ? (await api.visitDetail(visitId)).data : undefined
+    $.visit = visitId ? (await apiFactory({ spinner }).visitDetail(visitId)).data : undefined
   }
 
   const notifyUpdate = () => {
     emit('update:revision', $p.revision + 1)
   }
 
-  watch(() => [$p.visitId, $p.revision], () => refresh(), { immediate: true })
+  watch(
+    () => $p.visitId,
+    () => refresh(),
+    { immediate: true }
+  )
+
+  watch(
+    () => $p.revision,
+    () => refresh(false),
+  )
 
   const el = ref<HTMLDivElement>()
 

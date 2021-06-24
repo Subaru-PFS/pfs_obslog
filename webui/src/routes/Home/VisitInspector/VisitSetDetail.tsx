@@ -1,6 +1,5 @@
 import { defineComponent } from "vue"
 import { api } from "~/api"
-import Folder from "~/components/Folder"
 import { $reactive } from "~/vue-utils/reactive"
 import NoteList from "../components/NoteList"
 import { inspectorContext } from "./"
@@ -33,15 +32,15 @@ export default defineComponent({
         {$.seq.comments &&
           <p>{$.seq.comments}</p>
         }
-        <Folder title="Notes">
-          <NoteList
-            notes={$.seq.notes}
-            createNote={body => api.visitSetNoteCreate({ visit_set_id: $.seq.visit_set_id, body })}
-            updateNote={(note_id, body) => api.visitSetNoteUpdate(note_id, { body })}
-            deleteNote={note_id => api.visitSetNoteDestroy(note_id)}
-            refresh={$c.notifyUpdate}
-          />
-        </Folder>
+        {/* <Folder title="Notes"> */}
+        <NoteList
+          notes={$.seq.notes}
+          createNote={body => api.visitSetNoteCreate({ visit_set_id: $.seq.visit_set_id, body })}
+          updateNote={(note_id, body) => api.visitSetNoteUpdate(note_id, { body })}
+          deleteNote={note_id => api.visitSetNoteDestroy(note_id)}
+          refresh={$c.notifyUpdate}
+        />
+        {/* </Folder> */}
       </>
   },
 })

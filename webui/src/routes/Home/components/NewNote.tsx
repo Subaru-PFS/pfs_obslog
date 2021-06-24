@@ -1,5 +1,5 @@
 import { defineComponent, onMounted, PropType, reactive, ref } from "vue"
-import { apiNoSpinner } from "~/api"
+import { apiFactory } from "~/api"
 import MarkdownEditor from "~/components/MarkdownEditor"
 import MI from "~/components/MI"
 import { $reactive } from "~/vue-utils/reactive"
@@ -51,7 +51,7 @@ export default defineComponent({
 
 const onFileDrop = async (file: File, setProgress: (value?: number) => void, insertMarker: (marker: string) => void) => {
   try {
-    const res = await apiNoSpinner.createAttachment(file, {
+    const res = await apiFactory({ spinner: false }).createAttachment(file, {
       onUploadProgress: (e: ProgressEvent) => setProgress(e.loaded / e.total),
     })
     const link = `./api/attachments/${res.data.path}`

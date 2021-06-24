@@ -14,3 +14,10 @@
     }
   }
 }
+
+.active {
+  color: darkcyan;
+  @media (prefers-color-scheme: dark) {
+    color: cyan;
+  }
+}
