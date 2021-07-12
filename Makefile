@@ -1,6 +1,10 @@
 python := python
 postgres_home := /usr
 
+a:
+	pwd
+	./.venv/bin/python -c 'print("hello")'
+
 test-watch:
 	./.venv/bin/ptw -- \
 			$(opt) \
@@ -28,7 +32,7 @@ dev-watch:
 			dev
 
 sync-dev:
-	rsync --rsync-path=/home/michitaro/machines/obslog-ics.pfs.sum.subaru.nao.ac.jp/packages/rsync/bin/rsync -av --delete --exclude={dist,.venv,node_modules,schemaspy/html,htmlcov,.git,logs,attachments,tmp} ./ pfs-obslog:devel/pfs_obslog/
+	rsync --rsync-path=/home/michitaro/machines/obslog-ics.pfs.sum.subaru.nao.ac.jp/packages/rsync/bin/rsync -av --delete --exclude={'*.sock',dist,.venv,node_modules,schemaspy/html,htmlcov,.git,logs,attachments,tmp} ./ pfs-obslog:devel/pfs_obslog/
 
 sync-dev-watch:
 	./.venv/bin/watchmedo shell-command -c '$(MAKE) sync-dev' -R src ./webui/src

@@ -8,16 +8,17 @@ import astropy.io.fits as afits
 from fastapi import APIRouter, Depends, HTTPException, status
 from opdb import models as M
 from pfs_obslog.server.app.context import Context
-from pfs_obslog.server.app.routers.asynctask import (background_process,
-                                                     background_thread)
-from pfs_obslog.server.env import PFS_OBSLOG_ENV
+from pfs_obslog.server.app.routers.asynctask import (background_process_typeunsafe,
+                                                     background_thread_typeunsafe)
+from pfs_obslog.server.env import PFS_OBSLOG_DATA_ROOT, PFS_OBSLOG_ENV
 from pfs_obslog.server.image import fits2png
 from pfs_obslog.server.orm import static_check_init_args
 from pydantic import BaseModel
 from starlette.responses import FileResponse, Response
 
 logger = getLogger(__name__)
-data_root = Path(os.environ['PFS_OBSLOG_DATA_ROOT'])
+
+data_root = Path(PFS_OBSLOG_DATA_ROOT)
 
 
 @static_check_init_args
@@ -54,40 +55,33 @@ async def visit_fits(
     visit = ctx.db.query(M.pfs_visit).get(visit_id)
     if visit is None:
         return []
-    return [await background_thread(fits_meta, (p,)) for p in fits_path_for_visit(visit)]
+    return [await background_thread_typeunsafe(fits_meta, (p,)) for p in fits_path_for_visit(visit)]
 
+# const imageSize = {
+#   raw: {
+#     width: 4416, height: 4300,
+#   },
+#   calexp: {
+#     width: 4096, height: 4176,
+#   }
+# }
 
 @router.get('/api/fits_preview/{visit_id}/{camera_id}')
 async def fits_preview(
     visit_id: int,
     camera_id: int,
-    width: int = 800,
-    height: int = 800,
+    width: int = int(0.25 * 4416),
+    height: int = int(0.25 * 4300),
     ctx: Context = Depends(),
 ):
     visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
     filepath = fits_path(visit, camera_id)
-    png = await background_process(make_fits_preview, (filepath, width, height))
+    png = await background_process_typeunsafe(make_fits_preview, (filepath, width, height))
     return Response(content=png, media_type='image/png')
 
 
 def make_fits_preview(filepath: str, width: int, height: int):
     return fits2png(filepath, scale=0.08)
-    
-    # import io
-    # from astropy.visualization import ZScaleInterval
-    # from matplotlib import pyplot
-    # DPI = 72
-    # pyplot.figure(dpi=DPI, figsize=(width / DPI, height / DPI))
-    # with afits.open(filepath) as hdul:
-    #     data = hdul[1].data  # type: ignore
-    #     zscale = ZScaleInterval()
-    #     vmin, vmax = zscale.get_limits(data)
-    #     pyplot.imshow(data, vmin=vmin, vmax=vmax)
-    # pyplot.colorbar()
-    # out = io.BytesIO()
-    # pyplot.savefig(out, format='png', transparent=True)
-    # return out.getvalue()
 
 
 @router.get('/api/fits_download/{visit_id}/{camera_id}')

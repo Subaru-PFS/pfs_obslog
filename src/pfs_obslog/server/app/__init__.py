@@ -10,6 +10,7 @@ from .routers.mcs_exposure_note import router as mcs_exposure_note_router
 from .routers.mcs_data import router as mcs_data_router
 from .routers.session import router as session_router
 from .routers.fits import router as fits_router
+from .routers.imagepreview.calexp import router as imagepreview_calexp_router
 from .routers.attachment import router as attachment_router
 from .staticassets import setup_static_assets
 from .debug import setup_debugger
@@ -26,6 +27,7 @@ app.include_router(mcs_exposure_note_router)
 app.include_router(mcs_data_router)
 app.include_router(fits_router)
 app.include_router(attachment_router)
+app.include_router(imagepreview_calexp_router)
 setup_static_assets(app)
 
 

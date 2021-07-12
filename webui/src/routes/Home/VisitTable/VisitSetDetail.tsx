@@ -53,7 +53,7 @@ export default defineComponent({
         </table>
         <code class="command">{$.seq.cmd_str}</code>
         {$.seq.comments &&
-          <p> {$.seq.comments} </p>
+          <div style={{ fontFamily: 'monospace' }}> {$.seq.comments} </div>
         }
         <NoteList
           notes={$.seq.notes}

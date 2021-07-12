@@ -92,13 +92,13 @@ ul {
   margin: 0.5em;
   border-radius: 0.5em;
   display: block;
-  box-shadow: 0 0 4px rgba(darkcyan, 1);
-  background-color: mix(#eee, #033, 80);
-  color: mix(darkcyan, black);
+  box-shadow: 0 0 4px desaturate(rgba(darkcyan, 1), 25);
+  background-color: desaturate(mix(#eee, #033, 80), 25);
+  color: desaturate(mix(darkcyan, black), 25);
   @media (prefers-color-scheme: dark) {
     box-shadow: 0 0 4px rgba(white, 0.25);
-    background-color: #022;
-    color: cyan;
+    background-color: desaturate(#002, 75);
+    color: desaturate(lightblue, 75);
   }
   font-size: smaller;
 }

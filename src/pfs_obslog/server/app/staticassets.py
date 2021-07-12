@@ -13,4 +13,4 @@ def setup_static_assets(app: FastAPI):  # pragma: no cover
 
         @ app.get("/")
         def index():
-            return FileResponse(str(dist_dir / 'index.html'))
+            return FileResponse(str(dist_dir / 'index.html'), headers={'Cache-Control': 'no-cache'})

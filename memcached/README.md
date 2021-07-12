@@ -1,0 +1,1 @@
+memcached is not used for this app. This directory is just for record.

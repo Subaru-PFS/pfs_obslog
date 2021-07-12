@@ -15,7 +15,7 @@ from opdb import models as M
 from sqlalchemy.sql.sqltypes import Enum
 from pfs_obslog.server.app.context import Context
 
-from pfs_obslog.server.app.routers.asynctask import background_process
+from pfs_obslog.server.app.routers.asynctask import background_process_typeunsafe
 
 logger = getLogger(__name__)
 router = APIRouter()
@@ -43,7 +43,7 @@ async def mcs_data_chart(
         row.bgvalue
     ] for row in rows])
     x, y, peakvalue, bvgalue = numpy.array(xypb).T
-    png = await background_process(color_scatter_plot_png, (x, y, peakvalue, theme, width, height))
+    png = await background_process_typeunsafe(color_scatter_plot_png, (x, y, peakvalue, theme, width, height))
     return Response(content=png, media_type='image/png')
 
 

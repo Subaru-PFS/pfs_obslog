@@ -73,7 +73,6 @@ const counter = new class {
 
   decrease() {
     --this.count
-    console.log(this.count)
     if (this.count === 0) {
       while (this.doneCallbacks.length > 0) {
         this.doneCallbacks.shift()!()

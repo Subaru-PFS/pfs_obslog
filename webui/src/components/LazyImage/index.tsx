@@ -14,6 +14,10 @@ export default defineComponent({
       error: undefined as undefined | string,
     })
 
+    const refresh = () => {
+      $.state = elIsVisible.value ? 'loading' : 'inactive'
+    }
+
     watch(() => elIsVisible.value, visible => {
       if (visible && $.state === 'inactive') {
         $.state = 'loading'
@@ -21,7 +25,7 @@ export default defineComponent({
     }, { immediate: true })
 
     watch(() => $p.src, () => {
-      $.state = elIsVisible.value ? 'loading' : 'inactive'
+      refresh()
     })
 
     const onLoad = () => {
@@ -37,6 +41,7 @@ export default defineComponent({
       width: `${$p.width}px`,
       height: `${$p.height}px`,
     }
+
 
     const render = () =>
       <div class="lazy-image" ref={el} style={{ display: 'inline-block' }}>
@@ -56,8 +61,13 @@ export default defineComponent({
           </>
         }
         {$.state === 'error' &&
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', ...dimensions }}>
-            <MI data-tooltip={`Failed to download ${$p.src}`} icon="error" size={48} />
+          <div style={{ position: 'relative', ...dimensions }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+              <button data-tooltip="Reload" onClick={refresh}>
+                <MI icon="refresh" size={48} />
+              </button>
+            </div>
+            <div style={{ position: 'absolute', bottom: '1em', fontSize: 'small' }}>Failed to load {$p.src}</div>
           </div>
         }
       </div>

@@ -11,3 +11,5 @@ assert PFS_OBSLOG_ENV in {'development', 'production', 'test'},\
 HERE = Path(__file__).parent
 
 PFS_OBSLOG_ROOT = HERE / '..' / '..' / '..'
+
+PFS_OBSLOG_DATA_ROOT = os.environ['PFS_OBSLOG_DATA_ROOT']

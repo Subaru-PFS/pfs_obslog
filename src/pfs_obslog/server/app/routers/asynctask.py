@@ -1,7 +1,8 @@
 import asyncio
+from asyncio.futures import Future
 import io
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-from typing import Callable, cast
+from typing import Callable, TypeVar, cast
 
 import astropy.io.fits
 from astropy.visualization import ZScaleInterval
@@ -18,9 +19,17 @@ def setup_asynctask():
     _g.thread_pool = ThreadPoolExecutor()
 
 
-def background_process(f: Callable, args: tuple):
+def background_process_typeunsafe(f: Callable, args: tuple):
     return asyncio.wrap_future(_g.process_pool.submit(f, *args))
 
 
-def background_thread(f: Callable, args: tuple):
+T = TypeVar('T')
+U = TypeVar('U')
+
+
+def background_process(f: Callable[[T], U], args: T) -> Future[U]:
+    return asyncio.wrap_future(_g.process_pool.submit(f, args))
+
+
+def background_thread_typeunsafe(f: Callable, args: tuple):
     return asyncio.wrap_future(_g.thread_pool.submit(f, *args))
