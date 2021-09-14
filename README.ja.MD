@@ -100,6 +100,7 @@ PFSの観測中、またはエンジニアリング中にopDBの内容を確認�
 
 ## schemaメモ
 
+* sps_sequenceはiic_sequenceと名前が変わった！
 * pfs_visit has one visit_set (visit_set.pfs_visit_id が primary keyなので！)
 * visit_set has one sps_sequence
 * -> pfs_visit has one sps_sequence

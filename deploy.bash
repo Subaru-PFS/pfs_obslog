@@ -2,7 +2,7 @@ set -e
 set -v
 
 (cd webui && npm run build -- --base=./)
-rsync -av --delete --exclude={.venv,node_modules,schemaspy/html,htmlcov,.git,logs,attachments,tmp} ./ pfs-ics-shell:pfs_obslog/
+rsync -av --delete --exclude={secrets,.venv,node_modules,schemaspy/html,htmlcov,.git,logs,attachments,tmp} ./ pfs-ics-shell:pfs_obslog/
 cat <<'EOT' | ssh pfs-ics-shell bash
 cd ~/pfs_obslog
 make setup python=~/miniconda3/envs/py39/bin/python

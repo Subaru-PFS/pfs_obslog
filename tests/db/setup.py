@@ -11,7 +11,7 @@ def main():
     M.Base.metadata.drop_all(bind=engine)
     M.Base.metadata.create_all(bind=engine)
     db = sessionmaker(bind=engine, autoflush=False)()
-    generate_sample_data(db)
+    # generate_sample_data(db)
 
 
 def generate_sample_data(db: Session):

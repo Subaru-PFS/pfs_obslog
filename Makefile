@@ -32,7 +32,7 @@ dev-watch:
 			dev
 
 sync-dev:
-	rsync --rsync-path=/home/michitaro/machines/obslog-ics.pfs.sum.subaru.nao.ac.jp/packages/rsync/bin/rsync -av --delete --exclude={'*.sock',dist,.venv,node_modules,schemaspy/html,htmlcov,.git,logs,attachments,tmp} ./ pfs-obslog:devel/pfs_obslog/
+	rsync --rsync-path=/home/michitaro/machines/obslog-ics.pfs.sum.subaru.nao.ac.jp/packages/rsync/bin/rsync -av --delete --exclude={secrets,'*.sock',dist,.venv,node_modules,schemaspy/html,htmlcov,.git,logs,attachments,tmp} ./ pfs-obslog:devel/pfs_obslog/
 
 sync-dev-watch:
 	./.venv/bin/watchmedo shell-command -c '$(MAKE) sync-dev' -R src ./webui/src
@@ -47,7 +47,10 @@ setup:
 setup-test-db:
 	$(postgres_home)/bin/dropdb --user=postgres opdb_test || true
 	$(postgres_home)/bin/createdb --user=postgres opdb_test
-	PFS_OBSLOG_ENV=test ./.venv/bin/python -m tests.db.setup
+	PFS_OBSLOG_ENV=test \
+	PFS_OBSLOG_DATA_ROOT=. \
+	PFS_OBSLOG_DSN=postgresql://postgres@localhost/opdb_test \
+	./.venv/bin/python -m tests.db.setup
 
 clean:
 	rm -rf .venv

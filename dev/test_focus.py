@@ -1,15 +1,14 @@
-import subprocess
-from pathlib import Path
-
 import pytest
-from pfs_obslog.server.image import fits2png
+from opdb import models as M
 
-HERE = Path(__file__).parent
+from sqlalchemy.orm import aliased
+
+
+visit_note_user: M.obslog_user = aliased(M.obslog_user)  # type: ignore
+# visit_set_note_user: M.obslog_user = aliased(M.obslog_user)  # type: ignore
+# mcs_exposure_note_user: M.obslog_user = aliased(M.obslog_user)  # type: ignore
 
 
 @pytest.mark.focus
-def test_fits_png():
-    for i in range(6):
-        png = fits2png(HERE / 'files' / 'PFSA06304111.fits', scale=1 / (1<<i))
-        (Path('/Users/michitaro/Desktop') / f'pfs-{i}.png').write_bytes(png)
-    # subprocess.check_call(['open', HERE / 'a.png'])
+def test_opdb():
+    pass
