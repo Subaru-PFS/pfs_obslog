@@ -22,13 +22,13 @@ router = APIRouter()
 class SpsSequenceDetail(SpsSequence):
     notes: list[VisitSetNote]
 
-    Config = OrmConfig[M.sps_sequence]()(lambda row: skip_validation(SpsSequenceDetail)(
+    Config = OrmConfig[M.iic_sequence]()(lambda row: skip_validation(SpsSequenceDetail)(
         visit_set_id=row.visit_set_id,
         sequence_type=row.sequence_type,
         name=row.name,
         comments=row.comments,
         cmd_str=row.cmd_str,
-        status=row.status,
+        status=row.iic_sequence_status,
         notes=row.obslog_notes,
     ))
 
@@ -47,7 +47,7 @@ class VisitDetail(VisitBase):
         notes=row.obslog_notes,
         sps=row.sps_visit,
         mcs=None if len(row.mcs_exposure) == 0 else McsVisit(exposures=row.mcs_exposure),
-        sps_sequence=row.sps_visit.visit_set.sps_sequence if (row.sps_visit and row.sps_visit.visit_set) else None,
+        sps_sequence=row.visit_set.iic_sequence if row.visit_set else None,
     ))
 
 
@@ -127,7 +127,9 @@ def visit_list(
 
     q2 = ctx.db.query(M.visit_set)\
         .filter(M.visit_set.pfs_visit_id.in_(v.id for v in visits))\
-        .options(selectinload('sps_sequence'))
+        .options(selectinload('iic_sequence'))\
+        .options(selectinload('iic_sequence.obslog_notes'))\
+        .options(selectinload('iic_sequence.iic_sequence_status'))
 
     visit_sets = [VisitSet.from_orm(row) for row in q2]
 

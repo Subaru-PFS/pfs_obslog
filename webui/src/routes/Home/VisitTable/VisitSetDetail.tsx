@@ -15,11 +15,14 @@ export default defineComponent({
       get seq() {
         return $p.visitSet.sps_sequence!
       },
+      get seqStatusText() {
+        return $.seq.status?.cmd_output
+      },
       get typeColor() {
         return sequenceTypeBaseColor[$.seq.sequence_type!] || Color('grey')
       },
       get statusColor() {
-        return statusBaseColor[$.seq.status!]! || Color('#f00')
+        return statusBaseColor[$.seqStatusText!]! || Color('#f00')
       },
     })
 
@@ -48,7 +51,9 @@ export default defineComponent({
                 color: fgColor($.statusColor).string(),
                 backgroundColor: bgColor($.statusColor).string(),
               }}
-            >{$.seq.status}</td>
+            >{
+                $.seqStatusText && `${$.seqStatusText} (${$.seq.status?.status_flag})`
+              }</td>
           </tr>
         </table>
         <code class="command">{$.seq.cmd_str}</code>

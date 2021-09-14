@@ -11,21 +11,28 @@ export default defineComponent({
     const $ = $reactive({
       get seq() {
         return $c.$.visit?.sps_sequence!
-      }
+      },
+      get seqStatusText() {
+        return $.seq.status?.cmd_output
+      },
     })
 
     return () =>
       <>
         <table class="compact-table">
           <tr>
+            <th>VisitSet</th>
             <th>Type</th>
             <th>Name</th>
             <th>Status</th>
           </tr>
           <tr>
+            <td>{$.seq.visit_set_id}</td>
             <td>{$.seq.sequence_type}</td>
             <td>{$.seq.name}</td>
-            <td>{$.seq.status}</td>
+            <td>{
+              $.seq && `${$.seqStatusText} (${$.seq.status?.status_flag})`
+            }</td>
           </tr>
         </table>
         <code class="command">{$.seq.cmd_str}</code>

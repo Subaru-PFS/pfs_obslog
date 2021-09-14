@@ -134,24 +134,40 @@ class VisitSetNote(BaseModel):
 
 
 @static_check_init_args
-class SpsSequence(BaseModel):
+class IicSequenceStatus(BaseModel):
+    visit_set_id: int
+    status_flag: Optional[int]
+    cmd_output: Optional[str]
+
+    Config = OrmConfig[M.iic_sequence_status]()(lambda row: skip_validation(IicSequenceStatus)(
+        visit_set_id=row.visit_set_id,
+        status_flag=row.status_flag,
+        cmd_output=row.cmd_output,
+    ))
+
+
+@static_check_init_args
+class IicSequence(BaseModel):
     visit_set_id: int
     sequence_type: Optional[str]
     name: Optional[str]
     comments: Optional[str]
     cmd_str: Optional[str]
-    status: Optional[str]
+    status: Optional[IicSequenceStatus]
     notes: list[VisitSetNote]
 
-    Config = OrmConfig[M.sps_sequence]()(lambda row: skip_validation(SpsSequence)(
+    Config = OrmConfig[M.iic_sequence]()(lambda row: skip_validation(SpsSequence)(
         visit_set_id=row.visit_set_id,
         sequence_type=row.sequence_type,
         name=row.name,
         comments=row.comments,
         cmd_str=row.cmd_str,
-        status=row.status,
+        status=row.iic_sequence_status,
         notes=row.obslog_notes,
     ))
+
+
+SpsSequence = IicSequence
 
 
 @static_check_init_args
@@ -163,7 +179,7 @@ class VisitSet(BaseModel):
     Config = OrmConfig[M.visit_set]()(lambda row: skip_validation(VisitSet)(
         id=row.visit_set_id,
         visit_id=row.pfs_visit_id,
-        sps_sequence=row.sps_sequence,
+        sps_sequence=row.iic_sequence,
     ))
 
 

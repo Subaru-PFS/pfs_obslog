@@ -34,7 +34,7 @@ def test_build_filter():
     q = select(cast(Any, distinct(M.pfs_visit.pfs_visit_id))).\
         outerjoin(M.sps_visit).\
         outerjoin(M.visit_set).\
-        outerjoin(M.sps_sequence).\
+        outerjoin(M.iic_sequence).\
         filter(s.whereClause(ctx))  # type: ignore
     print(q)
     print(s.whereClause(ctx))

@@ -176,6 +176,80 @@ export interface HTTPValidationError {
 /**
  * 
  * @export
+ * @interface IicSequence
+ */
+export interface IicSequence {
+    /**
+     * 
+     * @type {number}
+     * @memberof IicSequence
+     */
+    visit_set_id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof IicSequence
+     */
+    sequence_type?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof IicSequence
+     */
+    name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof IicSequence
+     */
+    comments?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof IicSequence
+     */
+    cmd_str?: string;
+    /**
+     * 
+     * @type {IicSequenceStatus}
+     * @memberof IicSequence
+     */
+    status?: IicSequenceStatus;
+    /**
+     * 
+     * @type {Array<VisitSetNote>}
+     * @memberof IicSequence
+     */
+    notes: Array<VisitSetNote>;
+}
+/**
+ * 
+ * @export
+ * @interface IicSequenceStatus
+ */
+export interface IicSequenceStatus {
+    /**
+     * 
+     * @type {number}
+     * @memberof IicSequenceStatus
+     */
+    visit_set_id: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof IicSequenceStatus
+     */
+    status_flag?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof IicSequenceStatus
+     */
+    cmd_output?: string;
+}
+/**
+ * 
+ * @export
  * @interface McsExposure
  */
 export interface McsExposure {
@@ -494,55 +568,6 @@ export interface SpsExposure {
 /**
  * 
  * @export
- * @interface SpsSequence
- */
-export interface SpsSequence {
-    /**
-     * 
-     * @type {number}
-     * @memberof SpsSequence
-     */
-    visit_set_id: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof SpsSequence
-     */
-    sequence_type?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SpsSequence
-     */
-    name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SpsSequence
-     */
-    comments?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SpsSequence
-     */
-    cmd_str?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SpsSequence
-     */
-    status?: string;
-    /**
-     * 
-     * @type {Array<VisitSetNote>}
-     * @memberof SpsSequence
-     */
-    notes: Array<VisitSetNote>;
-}
-/**
- * 
- * @export
  * @interface SpsSequenceDetail
  */
 export interface SpsSequenceDetail {
@@ -578,10 +603,10 @@ export interface SpsSequenceDetail {
     cmd_str?: string;
     /**
      * 
-     * @type {string}
+     * @type {IicSequenceStatus}
      * @memberof SpsSequenceDetail
      */
-    status?: string;
+    status?: IicSequenceStatus;
     /**
      * 
      * @type {Array<VisitSetNote>}
@@ -851,10 +876,10 @@ export interface VisitSet {
     visit_id: number;
     /**
      * 
-     * @type {SpsSequence}
+     * @type {IicSequence}
      * @memberof VisitSet
      */
-    sps_sequence: SpsSequence;
+    sps_sequence: IicSequence;
 }
 /**
  * 
@@ -972,6 +997,54 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
             if (perPage !== undefined) {
                 localVarQueryParameter['per_page'] = perPage;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Calexp Preview
+         * @param {number} visitId 
+         * @param {number} cameraId 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        calexpPreview: async (visitId: number, cameraId: number, width?: number, height?: number, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'visitId' is not null or undefined
+            assertParamExists('calexpPreview', 'visitId', visitId)
+            // verify required parameter 'cameraId' is not null or undefined
+            assertParamExists('calexpPreview', 'cameraId', cameraId)
+            const localVarPath = `/api/imagepreview/calexp/{visit_id}/{camera_id}`
+                .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)))
+                .replace(`{${"camera_id"}}`, encodeURIComponent(String(cameraId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (width !== undefined) {
+                localVarQueryParameter['width'] = width;
+            }
+
+            if (height !== undefined) {
+                localVarQueryParameter['height'] = height;
             }
 
 
@@ -1831,6 +1904,20 @@ export const DefaultApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Calexp Preview
+         * @param {number} visitId 
+         * @param {number} cameraId 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async calexpPreview(visitId: number, cameraId: number, width?: number, height?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.calexpPreview(visitId, cameraId, width, height, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Create Attachment
          * @param {any} file 
          * @param {*} [options] Override http request option.
@@ -2105,6 +2192,19 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
+         * @summary Calexp Preview
+         * @param {number} visitId 
+         * @param {number} cameraId 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        calexpPreview(visitId: number, cameraId: number, width?: number, height?: number, options?: any): AxiosPromise<any> {
+            return localVarFp.calexpPreview(visitId, cameraId, width, height, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Create Attachment
          * @param {any} file 
          * @param {*} [options] Override http request option.
@@ -2355,6 +2455,21 @@ export class DefaultApi extends BaseAPI {
      */
     public attachmentList(start?: number, perPage?: number, options?: any) {
         return DefaultApiFp(this.configuration).attachmentList(start, perPage, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Calexp Preview
+     * @param {number} visitId 
+     * @param {number} cameraId 
+     * @param {number} [width] 
+     * @param {number} [height] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public calexpPreview(visitId: number, cameraId: number, width?: number, height?: number, options?: any) {
+        return DefaultApiFp(this.configuration).calexpPreview(visitId, cameraId, width, height, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

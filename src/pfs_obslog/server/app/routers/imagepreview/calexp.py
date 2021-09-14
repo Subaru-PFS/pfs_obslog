@@ -35,18 +35,22 @@ cache = SimpleCache(PFS_OBSLOG_ROOT / 'simplecache.sock')
 
 
 @router.get('/api/imagepreview/calexp/{visit_id}/{camera_id}')
-async def fits_preview(
+async def calexp_preview(
     visit_id: int,
     camera_id: int,
     width: int = int(0.25 * 4096),
     height: int = int(0.25 * 4176),
     ctx: Context = Depends(),
 ):
-    cache_key = f'/api/imagepreview/calexp/{visit_id}/{camera_id}?width={width}&height={height}'
-    png_bytes = cache.get(cache_key)
-    if png_bytes is None:
+    use_cache = False
+    if use_cache:
+        cache_key = f'/api/imagepreview/calexp/{visit_id}/{camera_id}?width={width}&height={height}'
+        png_bytes = cache.get(cache_key)
+        if png_bytes is None:
+            png_bytes = await make_calexp_preview(ctx.db, visit_id, camera_id, width, height)
+            cache.set(cache_key, png_bytes)
+    else:
         png_bytes = await make_calexp_preview(ctx.db, visit_id, camera_id, width, height)
-        cache.set(cache_key, png_bytes)
     return Response(content=png_bytes, media_type='image/png')
 
 

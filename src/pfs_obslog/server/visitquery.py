@@ -9,6 +9,7 @@ from sqlalchemy.orm import aliased
 
 from pfs_obslog.server.utils.symbol import Symbol
 
+
 @dataclass
 class VisitQuery:
     pfs_visit_ids: Optional[Any]
@@ -36,14 +37,16 @@ mcs_exposure_note_user: M.obslog_user = aliased(M.obslog_user)  # type: ignore
 
 def query_pfs_visit_ids(where: ast.Evaluatable):
     ctx = VisitQueryContext()
-    q = select(type_cast(Any, distinct(M.pfs_visit.pfs_visit_id))).\
+    q = select(
+        distinct(M.pfs_visit.pfs_visit_id)  # type: ignore
+    ).\
         outerjoin(M.obslog_visit_note).\
         outerjoin(visit_note_user, M.obslog_visit_note.user).\
         outerjoin(M.sps_visit).\
         outerjoin(M.sps_exposure).\
         outerjoin(M.sps_annotation).\
         outerjoin(M.visit_set).\
-        outerjoin(M.sps_sequence).\
+        outerjoin(M.iic_sequence).\
         outerjoin(M.obslog_visit_set_note).\
         outerjoin(visit_set_note_user, M.obslog_visit_set_note.user).\
         outerjoin(M.mcs_exposure).\
@@ -63,9 +66,9 @@ columns_for_search: Final = [
     visit_note_user.account_name,
     M.obslog_visit_set_note.body,
     visit_set_note_user.account_name,
-    M.sps_sequence.name,
-    M.sps_sequence.sequence_type,
-    M.sps_sequence.status,
+    M.iic_sequence.name,
+    M.iic_sequence.sequence_type,
+    # M.iic_sequence.status,
     M.sps_annotation.notes,
     M.obslog_mcs_exposure_note.body,
     mcs_exposure_note_user.account_name,
@@ -79,7 +82,7 @@ class VisitQueryContext(ast.EvaluationContext):
     def ColumnRef(self, node: ast.ColumnRef):
         columns: dict[tuple[Union[ast.String, ast.A_Star]], object] = {
             (ast.String('any_column'),): AnyColumn,
-            (ast.String('sequence_type'),): M.sps_sequence.sequence_type,
+            (ast.String('sequence_type'),): M.iic_sequence.sequence_type,
             (ast.String('issued_at'),): M.pfs_visit.issued_at,
             (ast.String('is_sps_visit'),): M.sps_visit.pfs_visit_id != None,
             (ast.String('is_mcs_visit'),): M.mcs_exposure.mcs_frame_id != None,
