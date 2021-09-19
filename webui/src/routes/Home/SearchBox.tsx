@@ -24,7 +24,7 @@ export default defineComponent({
     const onSubmit = async (e: Event) => {
       e.preventDefault()
       $c.$.query.searchBox = $.keywords
-      await $c.refresh()
+      // await $c.refresh()
     }
 
     return () =>

@@ -23,7 +23,7 @@ def fits2png(filename: Union[str, Path], *, scale: Optional[float] = None, dimen
         w = int(scale * size[1])
     else:
         h, w = dimensions  # type:ignore
-    img = img.resize((h, w))
+    img = img.resize((w, h))
     buffer = io.BytesIO()
     img.save(buffer, format='png')
     return buffer.getvalue()

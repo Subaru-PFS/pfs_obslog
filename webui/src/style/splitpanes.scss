@@ -1,6 +1,7 @@
 .splitpanes.pfs_obslog_splitpanes {
   .splitpanes__pane {
     // background-color: #777;
+    overflow: auto;
   }
   .splitpanes__splitter {
     transition: background-color 0.2s, box-shadow 0.2s;

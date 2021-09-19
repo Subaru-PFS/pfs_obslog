@@ -6,6 +6,7 @@ import LazyImage from "~/components/LazyImage"
 import { $reactive } from "~/vue-utils/reactive"
 import { inspectorContext } from "./"
 import NoteList from "../components/NoteList"
+import Folder from "~/components/Folder"
 
 export default defineComponent({
   setup() {
@@ -26,6 +27,7 @@ export default defineComponent({
         <dl>
           <dt>Exposures</dt>
           <dd>
+            {/* links */}
             <div style={stickyHeader} ref={exposureLinksEl} >
               {$.mcs.exposures.map((e, i) => <button onClick={_ => {
                 scrollIntoViewWithFixedHeader({
@@ -38,59 +40,69 @@ export default defineComponent({
             </div>
             {
               $.mcs.exposures.map((e, i) => <>
-                <h4 ref={$.dls[i]}>Frame ID: {e.frame_id}</h4>
-                <div style={{ display: 'inline-block' }}>
-                  <LazyImage
-                    width={640} height={480}
-                    scrollTarget={$c.el}
-                    src={`./api/mcs_data_chart/${e.frame_id}?width=640&height=480&theme=${isDark.value ? 'dark' : 'light'}`} />
-                </div>
-                <dl>
-                  {/* <dt>frame_id</dt>
-                  <dd>{e.frame_id}</dd> */}
-                  <dt>exptime</dt>
-                  <dd>{e.exptime}</dd>
-                  <dt>altitude</dt>
-                  <dd>{e.altitude}</dd>
-                  <dt>azimuth</dt>
-                  <dd>{e.azimuth}</dd>
-                  <dt>insrot</dt>
-                  <dd>{e.insrot}</dd>
-                  <dt>adc_pa</dt>
-                  <dd>{e.adc_pa}</dd>
-                  <dt>dome_temperature</dt>
-                  <dd>{e.dome_temperature}</dd>
-                  <dt>dome_pressure</dt>
-                  <dd>{e.dome_pressure}</dd>
-                  <dt>dome_humidity</dt>
-                  <dd>{e.dome_humidity}</dd>
-                  <dt>outside_temperature</dt>
-                  <dd>{e.outside_temperature}</dd>
-                  <dt>outside_pressure</dt>
-                  <dd>{e.outside_pressure}</dd>
-                  <dt>outside_humidity</dt>
-                  <dd>{e.outside_humidity}</dd>
-                  <dt>mcs_cover_temperature</dt>
-                  <dd>{e.mcs_cover_temperature}</dd>
-                  <dt>mcs_m1_temperature</dt>
-                  <dd>{e.mcs_m1_temperature}</dd>
-                  <dt>taken_at</dt>
-                  <dd>{e.taken_at}</dd>
-                  <dt>Notes</dt>
-                  <dd>
-                    <NoteList
-                      notes={e.notes}
-                      createNote={async body => {
-                        const mcs_exposure_frame_id = e.frame_id
-                        await api.mcsExposureNoteCreate({ mcs_exposure_frame_id, body })
-                      }}
-                      updateNote={(note_id, body) => api.mcsExposureNoteUpdate(note_id, { body })}
-                      deleteNote={note_id => api.mcsExposureNoteDestroy(note_id)}
-                      refresh={$c.notifyUpdate}
-                    />
-                  </dd>
-                </dl>
-                <hr />
+                <div ref={$.dls[i]}></div>
+                <Folder title={`Frame ID: ${e.frame_id}`}>
+                  <div style={{ display: 'inline-block', margin: '0.5em 0' }}>
+                    <LazyImage
+                      width={0.08 * 8960} height={0.08 * 5778}
+                      scrollTarget={$c.el}
+                      src={`./api/mcs_preview/${$c.$.visit?.id}/${e.frame_id}`} />
+                  </div>
+                  <div style={{ display: 'inline-block', margin: '0.5em 0' }}>
+                    <LazyImage
+                      width={640} height={480}
+                      scrollTarget={$c.el}
+                      src={`./api/mcs_data_chart/${e.frame_id}?width=640&height=480&theme=${isDark.value ? 'dark' : 'light'}`} />
+                  </div>
+                  <Folder title="Details" opened={false}>
+                    <dl>
+                      <dt>exptime</dt>
+                      <dd>{e.exptime}</dd>
+                      <dt>altitude</dt>
+                      <dd>{e.altitude}</dd>
+                      <dt>azimuth</dt>
+                      <dd>{e.azimuth}</dd>
+                      <dt>insrot</dt>
+                      <dd>{e.insrot}</dd>
+                      <dt>adc_pa</dt>
+                      <dd>{e.adc_pa}</dd>
+                      <dt>dome_temperature</dt>
+                      <dd>{e.dome_temperature}</dd>
+                      <dt>dome_pressure</dt>
+                      <dd>{e.dome_pressure}</dd>
+                      <dt>dome_humidity</dt>
+                      <dd>{e.dome_humidity}</dd>
+                      <dt>outside_temperature</dt>
+                      <dd>{e.outside_temperature}</dd>
+                      <dt>outside_pressure</dt>
+                      <dd>{e.outside_pressure}</dd>
+                      <dt>outside_humidity</dt>
+                      <dd>{e.outside_humidity}</dd>
+                      <dt>mcs_cover_temperature</dt>
+                      <dd>{e.mcs_cover_temperature}</dd>
+                      <dt>mcs_m1_temperature</dt>
+                      <dd>{e.mcs_m1_temperature}</dd>
+                      <dt>taken_at</dt>
+                      <dd>{e.taken_at}</dd>
+                    </dl>
+                  </Folder>
+                  <dl>
+                    <dt>Notes</dt>
+                    <dd>
+                      <NoteList
+                        notes={e.notes}
+                        createNote={async body => {
+                          const mcs_exposure_frame_id = e.frame_id
+                          await api.mcsExposureNoteCreate({ mcs_exposure_frame_id, body })
+                        }}
+                        updateNote={(note_id, body) => api.mcsExposureNoteUpdate(note_id, { body })}
+                        deleteNote={note_id => api.mcsExposureNoteDestroy(note_id)}
+                        refresh={$c.notifyUpdate}
+                      />
+                    </dd>
+                  </dl>
+                  <hr />
+                </Folder>
               </>)
             }
           </dd>

@@ -114,8 +114,14 @@ class TestContext(ast.EvaluationContext):
     def LessEqual(self, node: ast.LessEqual):
         return ('LESSEQUAL', node.lexpr(self), node.rexpr(self))
 
+    def LessThan(self, node: ast.LessEqual):
+        return ('LESSTHAN', node.lexpr(self), node.rexpr(self))
+
     def GreaterEqual(self, node: ast.LessEqual):
         return ('GREATEREQUAL', node.lexpr(self), node.rexpr(self))
+
+    def GreaterThan(self, node: ast.LessEqual):
+        return ('GREATERTHAN', node.lexpr(self), node.rexpr(self))
 
     def UnaryMinus(self, node: ast.UnaryMinus):
         return - node.rexpr(self)
@@ -128,6 +134,9 @@ class TestContext(ast.EvaluationContext):
 
     def Not(self, node: ast.Not):
         return ('NOT', node.value(self))
+
+    def Between(self, node: ast.Between):
+        return ('Between', node.lexpr(self), node.rexpr[0](self), node.rexpr[1](self))
 
 
 def sqleval(sql: str, Context: Type[ast.EvaluationContext] = TestContext) -> ast.Evaluatable:

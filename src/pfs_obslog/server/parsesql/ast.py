@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
+
+from pfs_obslog.server.env import safe_breakpoint
 
 
 node_factories = {}
@@ -133,9 +135,17 @@ class NotLike(BinaryOperator):
 class LessEqual(BinaryOperator):
     pass
 
+@dataclass
+class LessThan(BinaryOperator):
+    pass
+
 
 @dataclass
 class GreaterEqual(BinaryOperator):
+    pass
+
+@dataclass
+class GreaterThan(BinaryOperator):
     pass
 
 
@@ -161,9 +171,19 @@ def _A_Expr(args):
         return LessEqual(
             build_ast(args['lexpr']),
             build_ast(args['rexpr']))
+    elif name == [String('<')]:
+        assert kind == 0
+        return LessThan(
+            build_ast(args['lexpr']),
+            build_ast(args['rexpr']))
     elif name == [String('>=')]:
         assert kind == 0
         return GreaterEqual(
+            build_ast(args['lexpr']),
+            build_ast(args['rexpr']))
+    elif name == [String('>')]:
+        assert kind == 0
+        return GreaterThan(
             build_ast(args['lexpr']),
             build_ast(args['rexpr']))
     elif name == [String('~~')]:
@@ -176,8 +196,14 @@ def _A_Expr(args):
         return NotLike(
             lexpr=build_ast(args['lexpr']),
             rexpr=build_ast(args['rexpr']))
+    elif name == [String('BETWEEN')]:
+        assert kind == 10
+        return Between(
+            lexpr=build_ast(args['lexpr']),
+            rexpr=(build_ast(args['rexpr'][0]), build_ast(args['rexpr'][1])),
+        )
     else:  # pragma: no cover
-        breakpoint()
+        safe_breakpoint()
         raise SqlError(f'Unknown A_Expr name: {name}')
 
 
@@ -196,6 +222,12 @@ class Or(Evaluatable):
     args: list[Evaluatable]
 
 
+@dataclass
+class Between(Evaluatable):
+    lexpr: Evaluatable
+    rexpr: tuple[Evaluatable, Evaluatable]
+
+
 @node_factory('BoolExpr')
 def _BoolExpr(args):
     boolop = args['boolop']
@@ -208,7 +240,7 @@ def _BoolExpr(args):
     elif boolop == 2:  # NOT
         return Not(build_ast(args['args'][0]))
     else:  # pragma: no cover
-        breakpoint()
+        safe_breakpoint()
         raise SqlError(f'Unknown boolop {boolop}')
 
 
@@ -261,7 +293,7 @@ def build_ast(obj: dict[str, dict]):
 
 def build_ast0(factory_name: str, args: dict[str, dict]):
     if factory_name not in node_factories:  # pragma: no cover
-        breakpoint()
+        safe_breakpoint()
         raise SqlError(f'Unknown node type: {factory_name}')
     return node_factories[factory_name](args)
 
@@ -292,7 +324,15 @@ class EvaluationContext(ABC):  # pragma: no cover
         ...
 
     @abstractmethod
+    def LessThan(self, node: LessThan):
+        ...
+
+    @abstractmethod
     def GreaterEqual(self, node: GreaterEqual):
+        ...
+
+    @abstractmethod
+    def GreaterThan(self, node: GreaterThan):
         ...
 
     @abstractmethod
@@ -317,4 +357,8 @@ class EvaluationContext(ABC):  # pragma: no cover
 
     @abstractmethod
     def Not(self, node: Not):
+        ...
+
+    @abstractmethod
+    def Between(self, node: Between):
         ...

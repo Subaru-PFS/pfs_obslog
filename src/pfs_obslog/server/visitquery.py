@@ -8,6 +8,7 @@ from sqlalchemy.sql.operators import ColumnOperators
 from sqlalchemy.orm import aliased
 
 from pfs_obslog.server.utils.symbol import Symbol
+import psqlparse.exceptions
 
 
 @dataclass
@@ -17,7 +18,10 @@ class VisitQuery:
 
 
 def visit_query(sql: str):
-    stmt = parse(f'SELECT * {sql}')[0]
+    try:
+        stmt = parse(f'SELECT * {sql}')[0]
+    except psqlparse.exceptions.PSqlParseError as e:
+        raise ast.SqlError(e)
     if not isinstance(stmt, ast.SelectStmt):
         raise AssertionError()
     pfs_visit_ids = None
@@ -82,6 +86,8 @@ class VisitQueryContext(ast.EvaluationContext):
     def ColumnRef(self, node: ast.ColumnRef):
         columns: dict[tuple[Union[ast.String, ast.A_Star]], object] = {
             (ast.String('any_column'),): AnyColumn,
+            (ast.String('visit_id'),): M.pfs_visit.pfs_visit_id,
+            (ast.String('id'),): M.pfs_visit.pfs_visit_id,
             (ast.String('sequence_type'),): M.iic_sequence.sequence_type,
             (ast.String('issued_at'),): M.pfs_visit.issued_at,
             (ast.String('is_sps_visit'),): M.sps_visit.pfs_visit_id != None,
@@ -114,8 +120,14 @@ class VisitQueryContext(ast.EvaluationContext):
     def LessEqual(self, node: ast.LessEqual):
         return node.lexpr(self) <= node.rexpr(self)
 
+    def LessThan(self, node: ast.LessThan):
+        return node.lexpr(self) < node.rexpr(self)
+
     def GreaterEqual(self, node: ast.LessEqual):
         return node.lexpr(self) >= node.rexpr(self)
+
+    def GreaterThan(self, node: ast.LessThan):
+        return node.lexpr(self) > node.rexpr(self)
 
     def Like(self, node: ast.Like):
         l = node.lexpr(self)
@@ -159,3 +171,6 @@ class VisitQueryContext(ast.EvaluationContext):
     def Not(self, node: ast.Not):
         c = node.value(self)
         return not_(c) | (c == None)
+
+    def Between(self, node: ast.Between):
+        return node.lexpr(self).between(node.rexpr[0](self), node.rexpr[1](self))

@@ -1,10 +1,6 @@
 python := python
 postgres_home := /usr
 
-a:
-	pwd
-	./.venv/bin/python -c 'print("hello")'
-
 test-watch:
 	./.venv/bin/ptw -- \
 			$(opt) \

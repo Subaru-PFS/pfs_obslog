@@ -1,3 +1,4 @@
+import subprocess
 from pathlib import Path
 import os
 from typing import Final, Literal
@@ -13,3 +14,10 @@ HERE = Path(__file__).parent
 PFS_OBSLOG_ROOT = HERE / '..' / '..' / '..'
 
 PFS_OBSLOG_DATA_ROOT = os.environ['PFS_OBSLOG_DATA_ROOT']
+
+HOSTNAME = subprocess.check_output(['hostname', '-s']).decode().strip()
+
+
+def safe_breakpoint():
+    if PFS_OBSLOG_ENV == 'test':
+        breakpoint()

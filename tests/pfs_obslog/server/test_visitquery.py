@@ -7,12 +7,15 @@ from pfs_obslog.server.visitquery import VisitQueryContext, visit_query
 from sqlalchemy import select, distinct
 
 
-@pytest.mark.focus
 def test_visit_query(db: Session):
     apply_filter(db, """ where sequence_type LIKE '?domeflat?' """)
     apply_filter(db, """ where issued_at::date = '2021-01-03' """)
     apply_filter(db, """ where is_sps_visit """)
     apply_filter(db, """ where is_mcs_visit """)
+    apply_filter(db, """ where id = 3 """)
+    apply_filter(db, """ where id >= 3 """)
+    apply_filter(db, """ where id > 3 """)
+    apply_filter(db, """ where id between 0 and 3 """)
 
 
 def apply_filter(db: Session, sql: str):

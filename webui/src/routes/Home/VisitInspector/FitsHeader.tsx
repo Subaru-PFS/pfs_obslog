@@ -23,7 +23,7 @@ export default defineComponent({
   }
 })
 
-const Hdu = defineComponent({
+export const Hdu = defineComponent({
   setup($p) {
     const $ = $reactive({
       keywordSearch: '',
@@ -31,7 +31,7 @@ const Hdu = defineComponent({
       commentSearch: '',
       get cards() {
         return $p.header.cards.filter(([keyword, value, comment]: [string, any, string]) =>
-          keyword.toLowerCase() .search($.keywordSearch.toLowerCase()) >= 0 &&
+          keyword.toLowerCase().search($.keywordSearch.toLowerCase()) >= 0 &&
           String(value).toLocaleLowerCase().search($.valueSearch.toLowerCase()) >= 0 &&
           comment.toLowerCase().search($.commentSearch.toLowerCase()) >= 0
         )
@@ -62,7 +62,7 @@ const Hdu = defineComponent({
                 :
                 <>
                   <td class="keyword">{keyword}</td>
-                  <td class="value">{value}</td>
+                  <td class="value">{stringify(value)}</td>
                   <td class="comment">{comment}</td>
                 </>
               }
@@ -78,3 +78,12 @@ const Hdu = defineComponent({
     }
   }
 })
+
+
+function stringify(v: any) {
+  switch (typeof v) {
+    case 'boolean':
+      return v ? 'T' : 'F'
+  }
+  return String(v)
+}

@@ -7,6 +7,7 @@ from typing import Any
 import astropy.io.fits as afits
 from fastapi import APIRouter, Depends, HTTPException, status
 from opdb import models as M
+from pydantic.types import FilePath
 from pfs_obslog.server.app.context import Context
 from pfs_obslog.server.app.routers.asynctask import (background_process_typeunsafe,
                                                      background_thread_typeunsafe)
@@ -66,6 +67,7 @@ async def visit_fits(
 #   }
 # }
 
+
 @router.get('/api/fits_preview/{visit_id}/{camera_id}')
 async def fits_preview(
     visit_id: int,
@@ -75,7 +77,7 @@ async def fits_preview(
     ctx: Context = Depends(),
 ):
     visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
-    filepath = fits_path(visit, camera_id)
+    filepath = sps_fits_path(visit, camera_id)
     png = await background_process_typeunsafe(make_fits_preview, (filepath, width, height))
     return Response(content=png, media_type='image/png')
 
@@ -91,11 +93,11 @@ def fits_download(
     ctx: Context = Depends(),
 ):
     visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
-    filepath = fits_path(visit, camera_id)
+    filepath = sps_fits_path(visit, camera_id)
     return FileResponse(str(filepath), media_type='image/fits', filename=filepath.name)
 
 
-def fits_path(visit: M.pfs_visit, camera_id: int):
+def sps_fits_path(visit: M.pfs_visit, camera_id: int):
     date = visit_date(visit)
     date_dir = data_root / 'raw' / date.strftime(r'%Y-%m-%d')
     camera_id -= 1
@@ -125,3 +127,31 @@ def fits_path_for_visit(visit: M.pfs_visit):
     date = visit_date(visit)
     date_dir = data_root / 'raw' / date.strftime(r'%Y-%m-%d')
     return sorted(list(date_dir.glob(f'*/PFS?{visit.pfs_visit_id:06d}??.fits')))
+
+
+'''
+naxis1 = 8960
+naxis2 = 5778
+'''
+
+
+def mcs_fits_path(visit: M.pfs_visit, frame_id: int):
+    date = visit_date(visit)
+    date_dir = data_root / 'raw' / date.strftime(r'%Y-%m-%d')
+    # PFSC06735159.fits
+    path = date_dir / 'mcs' / f'PFSC{frame_id:08d}.fits'
+    return path
+
+
+@router.get('/api/mcs_preview/{visit_id}/{frame_id}')
+async def mcs_preview(
+    visit_id: int,
+    frame_id: int,
+    width: int = int(0.25 * 8960),
+    height: int = int(0.25 * 5778),
+    ctx: Context = Depends(),
+):
+    visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
+    filepath = mcs_fits_path(visit, frame_id)
+    png = await background_process_typeunsafe(make_fits_preview, (filepath, width, height))
+    return Response(content=png, media_type='image/png')

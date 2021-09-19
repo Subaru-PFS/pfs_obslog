@@ -1,5 +1,4 @@
 import datetime
-from functools import cache
 from logging import getLogger
 from pathlib import Path
 
@@ -12,7 +11,7 @@ from pfs_obslog.server.image import fits2png
 from sqlalchemy.orm.session import Session
 from starlette.responses import Response
 
-from pfs_obslog.server.simplecache import SimpleCache
+# from pfs_obslog.server.simplecache import SimpleCache
 
 
 logger = getLogger(__name__)
@@ -31,7 +30,7 @@ router = APIRouter()
 # }
 
 
-cache = SimpleCache(PFS_OBSLOG_ROOT / 'simplecache.sock')
+# cache = SimpleCache(PFS_OBSLOG_ROOT / 'simplecache.sock')
 
 
 @router.get('/api/imagepreview/calexp/{visit_id}/{camera_id}')
@@ -43,14 +42,14 @@ async def calexp_preview(
     ctx: Context = Depends(),
 ):
     use_cache = False
-    if use_cache:
-        cache_key = f'/api/imagepreview/calexp/{visit_id}/{camera_id}?width={width}&height={height}'
-        png_bytes = cache.get(cache_key)
-        if png_bytes is None:
-            png_bytes = await make_calexp_preview(ctx.db, visit_id, camera_id, width, height)
-            cache.set(cache_key, png_bytes)
-    else:
-        png_bytes = await make_calexp_preview(ctx.db, visit_id, camera_id, width, height)
+    # if use_cache:
+    #     cache_key = f'/api/imagepreview/calexp/{visit_id}/{camera_id}?width={width}&height={height}'
+    #     png_bytes = cache.get(cache_key)
+    #     if png_bytes is None:
+    #         png_bytes = await make_calexp_preview(ctx.db, visit_id, camera_id, width, height)
+    #         cache.set(cache_key, png_bytes)
+    # else:
+    png_bytes = await make_calexp_preview(ctx.db, visit_id, camera_id, width, height)
     return Response(content=png_bytes, media_type='image/png')
 
 

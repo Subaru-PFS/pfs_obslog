@@ -4,7 +4,7 @@ import sys
 
 
 def _noop(*args, **kwargs):
-    warnings.warn(f'breakpoint(*{args}, **{kwargs})')
+    warnings.warn(f'safe_breakpoint(*{args}, **{kwargs})')
 
 
 def setup_debugger():

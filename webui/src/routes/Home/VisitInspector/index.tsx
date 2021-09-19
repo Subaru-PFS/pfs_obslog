@@ -1,3 +1,5 @@
+//@ts-ignore
+import { Pane, Splitpanes } from 'splitpanes'
 import { defineComponent, ref, watch } from "vue"
 import { apiFactory } from "~/api"
 import { VisitDetail } from "~/api-client"
@@ -42,35 +44,40 @@ const VisitInspector = defineComponent({
             overflow: 'auto',
           }}>
           {$c.$.visit &&
-            <>
-              {$.visit.sps && $.visit.sps_sequence &&
-                <Folder title="SpS Sequence" key="sps_sequence" opened={$.folders.visitSetDetail}>
-                  <VisitSetDetail />
-                </Folder>
-              }
-              <Folder title={`PFS Visit (id=${$c.$.visit.id})`} opened={true} key="pfs_visit">
-                <BaseDetail />
-              </Folder>
-              {$.visit.sps &&
-                <Folder title={`SpS (type=${$c.$.visit.sps!.exp_type})`} opened={true} key="sps">
-                  <SpsDetail />
-                </Folder>
-              }
-              {$.visit.mcs &&
-                <>
-                  <Folder title="mcs">
-                    <MCSDetail />
+            <Splitpanes horizontal={true}>
+              <Pane>
+                {$.visit.sps && $.visit.sps_sequence &&
+                  <Folder title="SpS Sequence" key="sps_sequence" opened={$.folders.visitSetDetail}>
+                    <VisitSetDetail />
                   </Folder>
-                </>
-              }
-              <Folder title="FITS Header" key="fits_header" opened={false}>
+                }
+                <Folder title={`PFS Visit (id=${$c.$.visit.id})`} opened={true} key="pfs_visit">
+                  <BaseDetail />
+                </Folder>
+                {$.visit.sps &&
+                  <Folder title={`SpS (type=${$c.$.visit.sps!.exp_type})`} opened={true} key="sps">
+                    <SpsDetail />
+                  </Folder>
+                }
+                {$.visit.mcs &&
+                  <>
+                    <Folder title="mcs">
+                      <MCSDetail />
+                    </Folder>
+                  </>
+                }
+              </Pane>
+              <Pane size={20}>
                 <VisitFitsHeader visit={$.visit.id} />
-              </Folder>
-              <div class="end-h">
-                <button data-tooltip="Debug Info" onClick={e => $.showJson = !$.showJson}><MI icon='bug_report' /></button>
-              </div>
-              {$.showJson && <pre><code>{JSON.stringify($c.$.visit, null, 2)}</code></pre>}
-            </>
+                {/* <Folder title="FITS Header" key="fits_header" opened={false}>
+                  <VisitFitsHeader visit={$.visit.id} />
+                </Folder> */}
+                {/* <div class="end-h">
+                  <button data-tooltip="Debug Info" onClick={e => $.showJson = !$.showJson}><MI icon='bug_report' /></button>
+                </div>
+                {$.showJson && <pre><code>{JSON.stringify($c.$.visit, null, 2)}</code></pre>} */}
+              </Pane>
+            </Splitpanes>
           }
         </div>
       </div>

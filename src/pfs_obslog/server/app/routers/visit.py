@@ -1,11 +1,13 @@
 from logging import getLogger
 from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from opdb import models as M
+from starlette.status import HTTP_400_BAD_REQUEST
 from pfs_obslog.server.app.context import Context
 from pfs_obslog.server.orm import (OrmConfig, skip_validation,
                                    static_check_init_args)
+from pfs_obslog.server.parsesql.ast import SqlError
 from pfs_obslog.server.schema import (McsVisit, SpsSequence, SpsVisit,
                                       VisitBase, VisitNote, VisitSet,
                                       VisitSetNote)
@@ -57,6 +59,9 @@ class VisitListEntry(VisitBase):
     n_sps_exposures: int
     n_mcs_exposures: int
     avg_exptime: Optional[float]
+    avg_azimuth: Optional[float]
+    avg_altitude: Optional[float]
+    avg_insrot: Optional[float]
     notes: list[VisitNote]
 
     Config = OrmConfig()(lambda row: skip_validation(VisitListEntry)(
@@ -65,6 +70,9 @@ class VisitListEntry(VisitBase):
         n_sps_exposures=row.n_sps_exposures,
         n_mcs_exposures=row.n_mcs_exposures,
         avg_exptime=row.avg_exptime,
+        avg_azimuth=row.avg_azimuth,
+        avg_altitude=row.avg_altitude,
+        avg_insrot=row.avg_insrot,
         notes=row.pfs_visit.obslog_notes,
     ))
 
@@ -103,6 +111,9 @@ def visit_list(
             func.avg(M.sps_exposure.exptime),
             func.avg(M.mcs_exposure.mcs_exptime),
         ).label('avg_exptime'),
+        func.avg(M.mcs_exposure.azimuth).label('avg_azimuth'),
+        func.avg(M.mcs_exposure.altitude).label('avg_altitude'),
+        func.avg(M.mcs_exposure.insrot).label('avg_insrot'),
     )\
         .outerjoin(M.mcs_exposure)\
         .outerjoin(M.sps_visit)\
@@ -112,7 +123,10 @@ def visit_list(
         .options(selectinload('obslog_notes').selectinload('user'))
 
     if sql:
-        vq = visit_query(sql)
+        try:
+            vq = visit_query(sql)
+        except SqlError as e:
+            raise HTTPException(HTTP_400_BAD_REQUEST, str(e))
         if vq.pfs_visit_ids is not None:
             q = q.filter(M.pfs_visit.pfs_visit_id.in_(vq.pfs_visit_ids))
 

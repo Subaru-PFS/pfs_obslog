@@ -1,6 +1,7 @@
+import { StatusCodes } from "http-status-codes"
 import { useLocalStorage } from "@vueuse/core"
 import { defineComponent, PropType, ref, watch } from "vue"
-import { apiFactory } from "~/api"
+import { apiFactory, isAxiosError } from "~/api"
 import { VisitListEntry, VisitNote, VisitSet } from "~/api-client"
 import AsyncButton from "~/components/AsyncButton"
 import MI from "~/components/MI"
@@ -80,10 +81,19 @@ export const visitListContext = makeComponentContext(VisitTable, ($p, { emit }) 
 
   const refresh = async (spinner = true) => {
     const q = $.q
-    const { visits, visit_sets, count } = (await apiFactory({ spinner }).visitList(q.start, q.end - q.start, $.sql)).data
-    $.visits = visits
-    $.visitSets = Object.fromEntries(visit_sets.map(vs => [vs.id, vs]))
-    $.count = count
+    const api = apiFactory({ spinner, ignoreErrors: [StatusCodes.BAD_REQUEST] })
+    try {
+      const { visits, visit_sets, count } = (await api.visitList(q.start, q.end - q.start, $.sql)).data
+      $.visits = visits
+      $.visitSets = Object.fromEntries(visit_sets.map(vs => [vs.id, vs]))
+      $.count = count
+    }
+    catch (e) {
+      if (isAxiosError(e)) {
+        const msg = e.response?.data?.detail
+        msg && alert(msg)
+      }
+    }
   }
 
   watch(
@@ -93,6 +103,7 @@ export const visitListContext = makeComponentContext(VisitTable, ($p, { emit }) 
   )
 
   watch(
+
     () => $p.revision,
     () => refresh(false),
   )
@@ -383,13 +394,13 @@ const VisitGroup = defineComponent({
                 <td></td>
               }
               {$c.$.columns.azimuth &&
-                <td></td>
+                <td>{v.avg_azimuth}</td>
               }
               {$c.$.columns.elevation &&
-                <td></td>
+                <td>{v.avg_altitude}</td>
               }
               {$c.$.columns.insturumentRotator &&
-                <td></td>
+                <td>{v.avg_insrot}</td>
               }
               {$c.$.columns.notes &&
                 <td>
