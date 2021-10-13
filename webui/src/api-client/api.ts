@@ -161,6 +161,16 @@ export interface FitsMeta {
     hdul: Array<FitsHdu>;
 }
 /**
+ * An enumeration.
+ * @export
+ * @enum {string}
+ */
+export enum FitsType {
+    Raw = 'raw',
+    Calexp = 'calexp'
+}
+
+/**
  * 
  * @export
  * @interface HTTPValidationError
@@ -1156,10 +1166,11 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          * @summary Fits Download
          * @param {number} visitId 
          * @param {number} cameraId 
+         * @param {FitsType} [type] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        fitsDownload: async (visitId: number, cameraId: number, options: any = {}): Promise<RequestArgs> => {
+        fitsDownload: async (visitId: number, cameraId: number, type?: FitsType, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'visitId' is not null or undefined
             assertParamExists('fitsDownload', 'visitId', visitId)
             // verify required parameter 'cameraId' is not null or undefined
@@ -1177,6 +1188,51 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            if (type !== undefined) {
+                localVarQueryParameter['type'] = type;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Fits Download By Frameid
+         * @param {number} visitId 
+         * @param {string} frameid 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        fitsDownloadByFrameid: async (visitId: number, frameid: string, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'visitId' is not null or undefined
+            assertParamExists('fitsDownloadByFrameid', 'visitId', visitId)
+            // verify required parameter 'frameid' is not null or undefined
+            assertParamExists('fitsDownloadByFrameid', 'frameid', frameid)
+            const localVarPath = `/api/fits_download/{visit_id}`
+                .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (frameid !== undefined) {
+                localVarQueryParameter['frameid'] = frameid;
+            }
 
 
     
@@ -1225,6 +1281,36 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             if (height !== undefined) {
                 localVarQueryParameter['height'] = height;
             }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Healthz Get
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        healthzGet: async (options: any = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/healthz`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
 
     
@@ -2009,11 +2095,24 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @summary Fits Download
          * @param {number} visitId 
          * @param {number} cameraId 
+         * @param {FitsType} [type] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async fitsDownload(visitId: number, cameraId: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.fitsDownload(visitId, cameraId, options);
+        async fitsDownload(visitId: number, cameraId: number, type?: FitsType, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.fitsDownload(visitId, cameraId, type, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Fits Download By Frameid
+         * @param {number} visitId 
+         * @param {string} frameid 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async fitsDownloadByFrameid(visitId: number, frameid: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.fitsDownloadByFrameid(visitId, frameid, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -2028,6 +2127,16 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          */
         async fitsPreview(visitId: number, cameraId: number, width?: number, height?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.fitsPreview(visitId, cameraId, width, height, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Healthz Get
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async healthzGet(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.healthzGet(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -2308,11 +2417,23 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @summary Fits Download
          * @param {number} visitId 
          * @param {number} cameraId 
+         * @param {FitsType} [type] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        fitsDownload(visitId: number, cameraId: number, options?: any): AxiosPromise<any> {
-            return localVarFp.fitsDownload(visitId, cameraId, options).then((request) => request(axios, basePath));
+        fitsDownload(visitId: number, cameraId: number, type?: FitsType, options?: any): AxiosPromise<any> {
+            return localVarFp.fitsDownload(visitId, cameraId, type, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Fits Download By Frameid
+         * @param {number} visitId 
+         * @param {string} frameid 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        fitsDownloadByFrameid(visitId: number, frameid: string, options?: any): AxiosPromise<any> {
+            return localVarFp.fitsDownloadByFrameid(visitId, frameid, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2326,6 +2447,15 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          */
         fitsPreview(visitId: number, cameraId: number, width?: number, height?: number, options?: any): AxiosPromise<any> {
             return localVarFp.fitsPreview(visitId, cameraId, width, height, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Healthz Get
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        healthzGet(options?: any): AxiosPromise<any> {
+            return localVarFp.healthzGet(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2594,12 +2724,26 @@ export class DefaultApi extends BaseAPI {
      * @summary Fits Download
      * @param {number} visitId 
      * @param {number} cameraId 
+     * @param {FitsType} [type] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    public fitsDownload(visitId: number, cameraId: number, options?: any) {
-        return DefaultApiFp(this.configuration).fitsDownload(visitId, cameraId, options).then((request) => request(this.axios, this.basePath));
+    public fitsDownload(visitId: number, cameraId: number, type?: FitsType, options?: any) {
+        return DefaultApiFp(this.configuration).fitsDownload(visitId, cameraId, type, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Fits Download By Frameid
+     * @param {number} visitId 
+     * @param {string} frameid 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public fitsDownloadByFrameid(visitId: number, frameid: string, options?: any) {
+        return DefaultApiFp(this.configuration).fitsDownloadByFrameid(visitId, frameid, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -2615,6 +2759,17 @@ export class DefaultApi extends BaseAPI {
      */
     public fitsPreview(visitId: number, cameraId: number, width?: number, height?: number, options?: any) {
         return DefaultApiFp(this.configuration).fitsPreview(visitId, cameraId, width, height, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Healthz Get
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public healthzGet(options?: any) {
+        return DefaultApiFp(this.configuration).healthzGet(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

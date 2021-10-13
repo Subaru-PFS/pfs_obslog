@@ -1,10 +1,9 @@
 //@ts-ignore
 import { Pane, Splitpanes } from 'splitpanes'
-import { defineComponent, ref, watch } from "vue"
+import { defineComponent, ref, watch, onMounted } from "vue"
 import { apiFactory } from "~/api"
 import { VisitDetail } from "~/api-client"
 import Folder from "~/components/Folder"
-import MI from "~/components/MI"
 import { makeComponentContext } from "~/vue-utils/context"
 import { $reactive } from "~/vue-utils/reactive"
 import BaseDetail from "./BaseDetail"
@@ -26,8 +25,23 @@ const VisitInspector = defineComponent({
       showJson: false,
       get visit() {
         return $c.$.visit!
-      }
+      },
     })
+
+    const pane = ref()
+    watch(() => pane.value, () => {
+      if (pane.value) {
+        try {
+          if (!pane.value.$el.matches('.splitpanes__pane')) {
+            throw new Error(`Unexpected $el`)
+          }
+          $c.el.value = pane.value.$el
+        }
+        catch (e) {
+          alert(`Error during obtaining pane element: ${e}`)
+        }
+      }
+    }, { flush: 'sync' })
 
     return () =>
       <div style={{
@@ -37,15 +51,13 @@ const VisitInspector = defineComponent({
         position: 'relative'
       }}>
         <div
-          ref={$c.el}
           style={{
             height: 0,
             flexGrow: 1,
-            overflow: 'auto',
           }}>
           {$c.$.visit &&
             <Splitpanes horizontal={true}>
-              <Pane>
+              <Pane ref={pane}>
                 {$.visit.sps && $.visit.sps_sequence &&
                   <Folder title="SpS Sequence" key="sps_sequence" opened={$.folders.visitSetDetail}>
                     <VisitSetDetail />

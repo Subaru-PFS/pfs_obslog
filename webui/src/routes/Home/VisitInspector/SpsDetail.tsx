@@ -1,5 +1,6 @@
 import { defineComponent } from "vue"
-import { SpsExposure } from "~/api-client"
+import { apiUrl } from "~/api"
+import { FitsType, SpsExposure } from "~/api-client"
 import Folder from "~/components/Folder"
 import LazyImage from "~/components/LazyImage"
 import MI from "~/components/MI"
@@ -84,7 +85,17 @@ export default defineComponent({
                   <td style={{ whiteSpace: 'nowrap' }}>
                     <button
                       data-tooltip="Download Raw FITS"
-                      onClick={_ => location.href = `./api/fits_download/${$.visitId}/${e.camera_id}`}
+                      onClick={async () => {
+                        location.href = await apiUrl(c => c.fitsDownload($.visitId, e.camera_id, FitsType.Raw))
+                      }}
+                    >
+                      <MI icon="file_download" />
+                    </button>
+                    <button
+                      data-tooltip="Download ISR FITS"
+                      onClick={async () => {
+                        location.href = await apiUrl(c => c.fitsDownload($.visitId, e.camera_id, FitsType.Calexp))
+                      }}
                     >
                       <MI icon="file_download" />
                     </button>

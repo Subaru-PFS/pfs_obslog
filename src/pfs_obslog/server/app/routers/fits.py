@@ -1,3 +1,4 @@
+from enum import Enum
 import datetime
 import os
 from logging import getLogger
@@ -35,7 +36,7 @@ class FitsHdu(BaseModel):
 
 @static_check_init_args
 class FitsMeta(BaseModel):
-    frameid: str
+    frameid: str  # id of the file
     hdul: list[FitsHdu]
 
 
@@ -86,15 +87,35 @@ def make_fits_preview(filepath: str, width: int, height: int):
     return fits2png(filepath, scale=0.08)
 
 
+class FitsType(str, Enum):
+    raw = 'raw'
+    calexp = 'calexp'
+
+
 @router.get('/api/fits_download/{visit_id}/{camera_id}')
 def fits_download(
     visit_id: int,
     camera_id: int,
+    type: FitsType = FitsType.raw,
     ctx: Context = Depends(),
 ):
     visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
-    filepath = sps_fits_path(visit, camera_id)
+    if type == FitsType.calexp:
+        filepath = calexp_fits_path(visit, camera_id)
+    else:
+        filepath = sps_fits_path(visit, camera_id)
     return FileResponse(str(filepath), media_type='image/fits', filename=filepath.name)
+
+
+@router.get('/api/fits_download/{visit_id}')
+def fits_download_by_frameid(
+    visit_id: int,
+    frameid: str,
+    ctx: Context = Depends(),
+):
+    visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
+    path = [p for p in fits_path_for_visit(visit) if p.name == frameid][0]
+    return FileResponse(path, filename=path.name, media_type='image/fits')
 
 
 def sps_fits_path(visit: M.pfs_visit, camera_id: int):
@@ -104,6 +125,18 @@ def sps_fits_path(visit: M.pfs_visit, camera_id: int):
     sm = camera_id // 4 + 1
     arm = camera_id % 4 + 1
     path = date_dir / 'sps' / f'PFSA{visit.pfs_visit_id:06d}{sm:01d}{arm:01d}.fits'
+    return path
+
+
+def calexp_fits_path(visit: M.pfs_visit, camera_id: int):
+    # /data/drp/sm1-5.2/rerun/ginga/detrend/calExp/2021-07-06/v063797/calExp-SA063364b1.fits
+    visit_id = visit.pfs_visit_id
+    date = visit_date(visit)
+    date_dir = data_root / 'drp/sm1-5.2/rerun/ginga/detrend/calExp' / date.strftime(r'%Y-%m-%d')
+    camera_id -= 1
+    sm = camera_id // 4 + 1
+    arm = 'brnm'[camera_id % 4]
+    path = date_dir / f'v{visit_id:06d}' / f'calExp-SA{visit_id:06d}{arm}{sm}.fits'
     return path
 
 

@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 from pathlib import Path
 HERE = Path(__file__).parent
-
+print(        f'opdb @ file://localhost{HERE.absolute}/spt_operational_database' )
 
 setup(
     name='pfs_obslog',
@@ -22,10 +22,10 @@ setup(
         'pycryptodome',
         'ldap3',
         'psycopg2-binary',
-        # 'opdb', # venv/bin/pip install --use-feature=in-tree-build -e ./spt_operational_database
         'gunicorn',
         'uvloop',
         'httptools',
+        # f'opdb @ file://localhost{HERE.absolute()}/spt_operational_database',
     ],
     extras_require={
         'dev': [

@@ -1,6 +1,7 @@
 import Axios, { AxiosError } from 'axios'
 import { StatusCodes } from "http-status-codes"
-import { DefaultApi } from "./api-client/api"
+import { DefaultApi, DefaultApiAxiosParamCreator } from "./api-client/api"
+import { RequestArgs } from './api-client/base'
 import { Spinner } from './components/Spinner'
 
 
@@ -52,9 +53,15 @@ function baseAxios(options: AxisOptions = {}) {
   return axios
 }
 
+const BASE_PATH = '.'
+
 
 export function apiFactory(options: AxisOptions = {}) {
-  return new DefaultApi(undefined, '.', baseAxios(options))
+  return new DefaultApi(undefined, BASE_PATH, baseAxios(options))
+}
+
+export async function apiUrl(cb: (creator: ReturnType<typeof DefaultApiAxiosParamCreator>) => Promise<RequestArgs>) {
+  return `${BASE_PATH}${(await cb(DefaultApiAxiosParamCreator())).url}`
 }
 
 export const api = apiFactory({ ignoreErrors: [StatusCodes.UNPROCESSABLE_ENTITY, StatusCodes.REQUEST_TOO_LONG] })

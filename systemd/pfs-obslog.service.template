@@ -1,0 +1,11 @@
+[Unit]
+Description=pfs-obslog
+
+[Service]
+ExecStart=/usr/bin/bash $PWD/start.bash --port 5000
+ExecStop=/bin/kill \$MAINPID
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=default.target

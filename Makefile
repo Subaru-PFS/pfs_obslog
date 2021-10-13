@@ -1,15 +1,8 @@
 python := python
 postgres_home := /usr
+rsync_exclude := {secrets,.venv,node_modules,schemaspy/html,htmlcov,logs,attachments,tmp,__pycache__,'*.sock'}
 
-test-watch:
-	./.venv/bin/ptw -- \
-			$(opt) \
-			-v \
-			--cov-config=.coveragerc \
-			--cov=pfs_obslog \
-			--cov-report=html \
-			--cov-branch tests \
-			tests src
+.PHONY: schemaspy
 
 test:
 	./.venv/bin/pytest \
@@ -17,8 +10,15 @@ test:
 			--cov-config=.coveragerc \
 			--cov=pfs_obslog \
 			--cov-report=html \
-			--cov-branch tests
+			--cov-branch tests \
+			tests
 	open ./htmlcov/index.html
+
+test-watch:
+	./.venv/bin/ptw -- $(opt) -v tests
+
+dev-server:
+	PFS_OBSLOG_ENV=development bash ./start.bash
 
 dev-watch:
 	./.venv/bin/ptw -- \
@@ -27,55 +27,53 @@ dev-watch:
 			-v \
 			dev
 
-sync-dev:
-	rsync --rsync-path=/home/michitaro/machines/obslog-ics.pfs.sum.subaru.nao.ac.jp/packages/rsync/bin/rsync -av --delete --exclude={secrets,'*.sock',dist,.venv,node_modules,schemaspy/html,htmlcov,.git,logs,attachments,tmp} ./ pfs-obslog:devel/pfs_obslog/
+rsync_path := /home/michitaro/machines/obslog-ics.pfs.sum.subaru.nao.ac.jp/packages/rsync/bin/rsync
 
-sync-dev-watch:
-	./.venv/bin/watchmedo shell-command -c '$(MAKE) sync-dev' -R src ./webui/src
+dev-sync:
+	rsync \
+		--rsync-path=$(rsync_path) \
+		-av --delete --exclude=$(rsync_exclude) \
+		./ pfs-obslog:devel/pfs_obslog/
 
-dev-server:
-	PFS_OBSLOG_ENV=development \
-		bash ./start.bash
-
-setup:
-	$(MAKE) -B .venv
+dev-sync-watch:
+	$(MAKE) dev-sync
+	./.venv/bin/watchmedo shell-command -D -W -c '$(MAKE) dev-sync' -R src ./webui/src
 
 setup-test-db:
 	$(postgres_home)/bin/dropdb --user=postgres opdb_test || true
 	$(postgres_home)/bin/createdb --user=postgres opdb_test
 	PFS_OBSLOG_ENV=test \
-	PFS_OBSLOG_DATA_ROOT=. \
 	PFS_OBSLOG_DSN=postgresql://postgres@localhost/opdb_test \
 	./.venv/bin/python -m tests.db.setup
-
-clean:
-	rm -rf .venv
-
-.PHONY: schemaspy
 
 schemaspy:
 	bash ./schemaspy/run.bash
 	open ./schemaspy/html/index.html
 
-pip_option := --use-feature=in-tree-build
-
-.venv:
+setup:
 	$(python) -m venv $@
 	.venv/bin/pip install --upgrade pip
-	.venv/bin/python -m venv .venv
-	.venv/bin/pip install --use-feature=in-tree-build --upgrade pip
-	.venv/bin/pip install --use-feature=in-tree-build .
-	.venv/bin/pip install --use-feature=in-tree-build ."[dev]"
-	.venv/bin/pip install --use-feature=in-tree-build -e .
-	.venv/bin/pip install --use-feature=in-tree-build -e ./spt_operational_database
+	.venv/bin/pip install -e .
+	.venv/bin/pip install -e ."[dev]"
+	.venv/bin/pip install -e ./spt_operational_database
+
+webui-build:
+	cd webui && npm run build -- --base=./
+
+production-sync: webui-build
+	rsync -av --delete --exclude=$(rsync_exclude) ./ pfs-ics-shell:pfs_obslog/
+
+production-restart:
+	ssh pfs-obslog systemctl --user restart pfs-obslog
 
 deploy:
-	bash ./deploy.bash
+	$(MAKE) production-sync
+	$(MAKE) production-restart
 
-mount-data:
-	$(MAKE) umount-data || true
-	mkdir -p ~/pfs/data
-	sshfs pfs-obslog:/data ~/pfs/data -C -o volname=pfsdata -o reconnect
-
-umount-data:
-	umount ~/pfs/data
+install_systemd:
+	loginctl enable-linger $(USER)
+	mkdir -p ~/.config/systemd/user
+	bash -c 'template="$$(cat ./systemd/pfs-obslog.service.template)" ; eval "echo \"$$template\""' > ./systemd/pfs-obslog.service
+	cp ./systemd/pfs-obslog.service ~/.config/systemd/user/
+	systemctl --user daemon-reload
+	systemctl --user enable pfs-obslog --now

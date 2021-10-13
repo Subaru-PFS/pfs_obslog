@@ -1,12 +1,7 @@
 import asyncio
 from asyncio.futures import Future
-import io
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from typing import Callable, TypeVar, cast
-
-import astropy.io.fits
-from astropy.visualization import ZScaleInterval
-from matplotlib import pyplot
 
 
 class _g:

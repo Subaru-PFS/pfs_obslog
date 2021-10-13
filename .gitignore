@@ -1,11 +1,11 @@
 /.venv
 /*.egg-info
-/.coverage
-/htmlcov
 /.vscode
-__pycache__
-*.egg-info
-/data
+/tmp
 /.pytest_cache
 /attachments
+/.coverage
+/htmlcov
+__pycache__
+*.egg-info
 .DS_Store

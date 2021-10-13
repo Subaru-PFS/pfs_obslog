@@ -1,4 +1,4 @@
-import { defineComponent, PropType } from "vue"
+import { defineComponent, PropType, watchEffect } from "vue"
 import { FitsMeta } from "~/api-client"
 import Folder from "~/components/Folder"
 import { $reactive } from "~/vue-utils/reactive"
@@ -23,32 +23,57 @@ export default defineComponent({
   }
 })
 
+type SafeRegexpError = [number, string]
+
+function safeRegexp(pattern: string, flags: string, index: number) {
+  try {
+    return new RegExp(pattern, flags)
+  }
+  catch (e) {
+    throw [index, String(e)] as SafeRegexpError
+  }
+}
+
 export const Hdu = defineComponent({
-  setup($p) {
+  setup($p, { emit }) {
     const $ = $reactive({
-      keywordSearch: '',
-      valueSearch: '',
-      commentSearch: '',
+      keywordSearch: $p.keywordSearch,
+      valueSearch: $p.valueSearch,
+      commentSearch: $p.commentSearch,
+      error: [] as (string | undefined)[],
       get cards() {
-        return $p.header.cards.filter(([keyword, value, comment]: [string, any, string]) =>
-          keyword.toLowerCase().search($.keywordSearch.toLowerCase()) >= 0 &&
-          String(value).toLocaleLowerCase().search($.valueSearch.toLowerCase()) >= 0 &&
-          comment.toLowerCase().search($.commentSearch.toLowerCase()) >= 0
-        )
+        $.error = []
+        try {
+          return $p.header.cards.filter(([keyword, value, comment]: [string, any, string]) =>
+            keyword.search(safeRegexp($.keywordSearch, 'i', 0)) >= 0 &&
+            String(value).search(safeRegexp($.valueSearch, 'i', 1)) >= 0 &&
+            comment.search(safeRegexp($.commentSearch, 'i', 2)) >= 0
+          )
+        }
+        catch (e) {
+          const [index, error] = e as SafeRegexpError
+          $.error[index] = error
+        }
+        return $p.header.cards
       },
     })
+
+    watchEffect(() => emit('update:keywordSearch', $.keywordSearch))
+    watchEffect(() => emit('update:valueSearch', $.valueSearch))
+    watchEffect(() => emit('update:commentSearch', $.commentSearch))
+
     return () =>
-      <table class="fits-header">
+      <table class="fits-header" style={{ tableLayout: 'fixed', width: '100%' }}>
         <thead>
           <tr>
-            <th>Name</th>
+            <th style={{ width: '12ch' }}>Name</th>
             <th>Value</th>
             <th>Comment</th>
           </tr>
           <tr>
-            <th><input style={{ width: '100%' }} placeholder="Search" type="search" v-model={$.keywordSearch} /></th>
-            <th><input style={{ width: '100%' }} type="search" v-model={$.valueSearch} /></th>
-            <th><input style={{ width: '100%' }} type="search" v-model={$.commentSearch} /></th>
+            <th><input class={{ error: $.error[0] !== undefined }} style={{ width: '100%' }} placeholder="Search" type="search" v-model={$.keywordSearch} /></th>
+            <th><input class={{ error: $.error[1] !== undefined }} style={{ width: '100%' }} type="search" v-model={$.valueSearch} /></th>
+            <th><input class={{ error: $.error[2] !== undefined }} style={{ width: '100%' }} type="search" v-model={$.commentSearch} /></th>
           </tr>
         </thead>
         <tbody>
@@ -75,8 +100,21 @@ export const Hdu = defineComponent({
     header: {
       type: Object as PropType<FitsMeta["hdul"][0]["header"]>,
       required: true,
-    }
-  }
+    },
+    keywordSearch: {
+      type: String,
+      default: '',
+    },
+    valueSearch: {
+      type: String,
+      default: '',
+    },
+    commentSearch: {
+      type: String,
+      default: '',
+    },
+  },
+  emits: ['update:keywordSearch', 'update:valueSearch', 'update:commentSearch'],
 })
 
 

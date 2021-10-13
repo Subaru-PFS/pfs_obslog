@@ -6,20 +6,18 @@ cd $(dirname $0)
 [ -z "$SECRET_KEY_BASE" ] && SECRET_KEY_BASE=$(cat ./secrets/SECRET_KEY_BASE)
 [ -z "$PFS_OBSLOG_DSN" ] && PFS_OBSLOG_DSN=$(cat ./secrets/PFS_OBSLOG_DSN)
 [ -z "$PFS_OBSLOG_DATA_ROOT" ] && PFS_OBSLOG_DATA_ROOT=/data
+[ -z "$PFS_OBSLOG_ENV" ] && PFS_OBSLOG_ENV=production
 
 export SECRET_KEY_BASE
 export PFS_OBSLOG_DSN
 export PFS_OBSLOG_DATA_ROOT
+export PFS_OBSLOG_ENV
 
-daemon=
 host=127.0.0.1
 port=8000
 
 while [ "$#" -gt 0 ] ; do
     case $1 in
-        --daemon | -d)
-            daemon=1
-            ;;
         --host)
             shift
             host=$1
@@ -36,17 +34,16 @@ while [ "$#" -gt 0 ] ; do
 done
 
 
-if [ "$daemon" ] ; then
-  exec .venv/bin/gunicorn  pfs_obslog.server.app:app \
-    --daemon \
-    --bind=0.0.0.0:$port --workers=4 -k uvicorn.workers.UvicornWorker \
-    --pid=tmp/server.pid \
-    --log-file=logs/gunicorn.log \
-    --access-logfile=logs/access.log
-else
+if [ "$PFS_OBSLOG_ENV" == 'development' ] ; then
   exec ./.venv/bin/uvicorn pfs_obslog.server.app:app \
     --host=$host \
     --port=$port \
     --reload \
     --reload-dir src
+else
+  exec .venv/bin/gunicorn  pfs_obslog.server.app:app \
+    --bind=0.0.0.0:$port --workers=4 -k uvicorn.workers.UvicornWorker \
+    --pid=tmp/server.pid \
+    --log-file=logs/gunicorn.log \
+    --access-logfile=logs/access.log
 fi
