@@ -31,7 +31,7 @@ export default defineComponent({
             <option value="true">&gt;=1</option>
           </select>
         </div>
-        <div style={{ display: 'flex' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
           <MI data-tooltip="Date" icon='date_range' />
           <DateInput v-model={$.q.date.begin} />
           <button onClick={() => $.q.date.range = !$.q.date.range} ><MI icon='more_horiz' size={18} data-tooltip="Range" /></button>
