@@ -1,5 +1,8 @@
+$border-radius: 8px;
+
 .mainTable {
-  border-collapse: collapse;
+  border-spacing: 0;
+  border-radius: $border-radius;
   th {
     position: sticky;
     top: 0;
@@ -33,6 +36,14 @@
       background-color: #444;
     }
   }
+  tr:last-child {
+    td:first-child {
+      border-radius: 0 0 0 $border-radius;
+    }
+    td:last-child {
+      border-radius: 0 0 $border-radius 0;
+    }
+  }
 }
 
 .visitGroup {
@@ -40,10 +51,10 @@
   @media (prefers-color-scheme: dark) {
     box-shadow: 0 0 8px rgba(white, 0.5);
   }
-  margin: 1em 0.5em;
+  margin: 1em 0.5em 2em 0.5em;
   border-radius: 8px;
   // overflow: auto;
-  // ↑ this conflicts with thead th { position: sticky; } 
+  // ↑ this conflicts with thead th { position: sticky; }
   table {
     width: 100%;
     table-layout: fixed;
@@ -56,8 +67,17 @@
 }
 
 .visitSet {
-  table td {
-    text-align: center;
+  & > table {
+    border-radius: $border-radius;
+    td {
+      text-align: center;
+    }
+    th:first-child {
+      border-radius: $border-radius 0 0 0;
+    }
+    th:last-child {
+      border-radius: 0 $border-radius 0 0;
+    }
   }
 }
 
@@ -89,4 +109,8 @@
       margin-right: 0.25em;
     }
   }
+}
+
+.noVisitSet {
+  padding: 0.5em 0 0.25em 0.5em;
 }

@@ -311,8 +311,10 @@ const VisitGroup = defineComponent({
     const $c = visitListContext.inject()
     return () =>
       <div class={style.visitGroup}>
-        {$p.visitSet &&
+        {$p.visitSet ?
           <VisitSetDetail visitSet={$p.visitSet} />
+          :
+          <div class={style.noVisitSet}>No visitset</div>
         }
         <table class={[style.mainTable, 'compact-table']}>
           <thead>
