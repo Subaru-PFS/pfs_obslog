@@ -47,11 +47,17 @@ setup-test-db:
 	./.venv/bin/python -m tests.db.setup
 
 schemaspy:
+	$(postgres_home)/bin/dropdb --user=postgres opdb-schema || true
+	$(postgres_home)/bin/createdb --user=postgres opdb-schema
+	PFS_OBSLOG_ENV=test \
+	PFS_OBSLOG_DSN=postgresql://postgres@localhost/opdb-schema \
+	PFS_OBSLOG_DATA_ROOT=/data \
+	./.venv/bin/python -m tests.db.setup
 	bash ./schemaspy/run.bash
 	open ./schemaspy/html/index.html
 
 setup:
-	$(python) -m venv $@
+	$(python) -m venv .venv
 	.venv/bin/pip install --upgrade pip
 	.venv/bin/pip install -e .
 	.venv/bin/pip install -e ."[dev]"
