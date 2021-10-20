@@ -12,7 +12,7 @@ DSN: Final = os.environ.get('PFS_OBSLOG_DSN')
 if not DSN:
     raise RuntimeError("PFS_OBSLOG_DSN must be set")
 
-engine = create_engine(DSN, future=True, echo=PFS_OBSLOG_ENV != 'production')
+engine = create_engine(DSN, future=True) # , echo=PFS_OBSLOG_ENV != 'production')
 
 _DBSession: Callable[..., Session] = sessionmaker(bind=engine, autoflush=False)
 

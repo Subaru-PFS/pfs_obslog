@@ -1,8 +1,10 @@
 from logging import getLogger
-from typing import Optional
+from typing import Any, Generator, Iterable, Optional, TypeVar
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from opdb import models as M
+from sqlalchemy.orm.session import Session
+from starlette.responses import StreamingResponse
 from starlette.status import HTTP_400_BAD_REQUEST
 from pfs_obslog.server.app.context import Context
 from pfs_obslog.server.orm import (OrmConfig, skip_validation,
@@ -102,7 +104,34 @@ def visit_list(
     sql: Optional[str] = None,
     ctx: Context = Depends(),
 ):
-    q = ctx.db.query(
+    vq = visit_q(ctx.db, sql)
+
+    count = vq.count()
+
+    vq = vq\
+        .order_by(M.pfs_visit.pfs_visit_id.desc())\
+        .limit(limit)\
+        .offset(offset)
+
+    visits = [VisitListEntry.from_orm(row) for row in vq]
+
+    visitset_q = ctx.db.query(M.visit_set)\
+        .filter(M.visit_set.pfs_visit_id.in_(v.id for v in visits))\
+        .options(selectinload('iic_sequence'))\
+        .options(selectinload('iic_sequence.obslog_notes'))\
+        .options(selectinload('iic_sequence.iic_sequence_status'))
+
+    visit_sets = [VisitSet.from_orm(row) for row in visitset_q]
+
+    return VisitList(
+        visits=visits,
+        visit_sets=visit_sets,
+        count=count,
+    )
+
+
+def visit_q(db: Session, sql: Optional[str]):
+    q = db.query(
         M.pfs_visit,
         M.visit_set.visit_set_id,
         func.count(M.sps_exposure.pfs_visit_id).label('n_sps_exposures'),
@@ -130,28 +159,7 @@ def visit_list(
         if vq.pfs_visit_ids is not None:
             q = q.filter(M.pfs_visit.pfs_visit_id.in_(vq.pfs_visit_ids))
 
-    count = q.count()
-
-    q = q\
-        .order_by(M.pfs_visit.pfs_visit_id.desc())\
-        .limit(limit)\
-        .offset(offset)
-
-    visits = [VisitListEntry.from_orm(row) for row in q]
-
-    q2 = ctx.db.query(M.visit_set)\
-        .filter(M.visit_set.pfs_visit_id.in_(v.id for v in visits))\
-        .options(selectinload('iic_sequence'))\
-        .options(selectinload('iic_sequence.obslog_notes'))\
-        .options(selectinload('iic_sequence.iic_sequence_status'))
-
-    visit_sets = [VisitSet.from_orm(row) for row in q2]
-
-    return VisitList(
-        visits=visits,
-        visit_sets=visit_sets,
-        count=count,
-    )
+    return q
 
 
 @router.get('/api/visits/{id}', response_model=VisitDetail)
@@ -160,3 +168,70 @@ def visit_detail(
     ctx: Context = Depends(),
 ):
     return ctx.db.query(M.pfs_visit).get(id)
+
+
+@router.get('/api/visits.csv')
+def visit_csv(
+    sql: Optional[str] = None,
+    ctx: Context = Depends(),
+):
+    import csv
+    import io
+
+    vq = visit_q(ctx.db, sql)
+    batch_size = 512
+
+    def g():
+        for i_batch, v_batch in enumerate(batch(vq, batch_size)):
+            buf = io.StringIO()
+            writer = csv.writer(buf)
+            if i_batch == 0:
+                writer.writerow([
+                    '# visit_id',
+                    'description',
+                    'issued_at',
+                ])
+            for v in v_batch:
+                writer.writerow([
+                    v.pfs_visit.pfs_visit_id,
+                    v.pfs_visit.pfs_visit_description,
+                    v.pfs_visit.issued_at,
+                ])
+            yield buf.getvalue()
+
+        # id=row.pfs_visit_id,
+        # description=row.pfs_visit_description,
+        # issued_at=row.issued_at,
+    #     visit_set_id=row.visit_set_id,
+    #     n_sps_exposures=row.n_sps_exposures,
+    #     n_mcs_exposures=row.n_mcs_exposures,
+    #     avg_exptime=row.avg_exptime,
+    #     avg_azimuth=row.avg_azimuth,
+    #     avg_altitude=row.avg_altitude,
+    #     avg_insrot=row.avg_insrot,
+    #     notes=row.pfs_visit.obslog_notes,
+
+    content_disposition = f'attachment; filename="pfsobslog.utf8.csv"'
+    return StreamingResponse(g(), media_type='text/csv; charset=utf8', headers={'content-disposition': content_disposition})
+
+
+T = TypeVar('T')
+
+
+def batch(iterable0: Iterable[T], batch_size: int) -> Generator[Generator[T, None, None], None, None]:
+    assert batch_size > 0
+    iterable = iter(iterable0)
+    q: list[T] = [next(iterable)]
+
+    def g() -> Generator[T, None, None]:
+        start = len(q)
+        while len(q) > 0:
+            yield q.pop(0)
+        for i, item in enumerate(iterable, start):
+            if i == batch_size:
+                q.append(item)
+                return
+            yield item
+
+    while len(q) > 0:
+        yield g()
