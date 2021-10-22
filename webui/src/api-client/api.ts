@@ -1701,6 +1701,41 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
+         * @summary Visit Csv
+         * @param {string} [sql] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitCsv: async (sql?: string, options: any = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/visits.csv`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (sql !== undefined) {
+                localVarQueryParameter['sql'] = sql;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Visit Detail
          * @param {number} id 
          * @param {*} [options] Override http request option.
@@ -2257,6 +2292,17 @@ export const DefaultApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Visit Csv
+         * @param {string} [sql] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async visitCsv(sql?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.visitCsv(sql, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Visit Detail
          * @param {number} id 
          * @param {*} [options] Override http request option.
@@ -2562,6 +2608,16 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          */
         showAttachment(accountName: string, fileId: number, filename?: string, options?: any): AxiosPromise<any> {
             return localVarFp.showAttachment(accountName, fileId, filename, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Visit Csv
+         * @param {string} [sql] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        visitCsv(sql?: string, options?: any): AxiosPromise<any> {
+            return localVarFp.visitCsv(sql, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2896,6 +2952,18 @@ export class DefaultApi extends BaseAPI {
      */
     public showAttachment(accountName: string, fileId: number, filename?: string, options?: any) {
         return DefaultApiFp(this.configuration).showAttachment(accountName, fileId, filename, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Visit Csv
+     * @param {string} [sql] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public visitCsv(sql?: string, options?: any) {
+        return DefaultApiFp(this.configuration).visitCsv(sql, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

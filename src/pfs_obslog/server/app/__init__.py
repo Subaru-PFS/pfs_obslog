@@ -44,6 +44,6 @@ def use_route_names_as_operation_ids() -> None:  # pragma: no cover
             route.operation_id = route.name  # in this case, 'read_items'
 
 
-if PFS_OBSLOG_ENV == 'development':
+if PFS_OBSLOG_ENV == 'development':  # pragma: no cover
     app.on_event('startup')(reset_loggers)
 app.on_event('startup')(setup_asynctask)

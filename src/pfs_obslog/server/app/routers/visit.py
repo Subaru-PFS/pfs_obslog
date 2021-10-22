@@ -1,9 +1,11 @@
+import csv
+import functools
+import io
 from logging import getLogger
-from typing import Optional
+from typing import Any, Callable, Generator, Iterable, Optional, TypeVar
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from opdb import models as M
-from starlette.status import HTTP_400_BAD_REQUEST
 from pfs_obslog.server.app.context import Context
 from pfs_obslog.server.orm import (OrmConfig, skip_validation,
                                    static_check_init_args)
@@ -15,6 +17,11 @@ from pfs_obslog.server.visitquery import visit_query
 from pydantic.main import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import selectinload
+from sqlalchemy.orm.session import Session
+from starlette.responses import StreamingResponse
+from starlette.status import HTTP_400_BAD_REQUEST
+
+from ...utils import myitertools
 
 logger = getLogger(__name__)
 router = APIRouter()
@@ -102,7 +109,34 @@ def visit_list(
     sql: Optional[str] = None,
     ctx: Context = Depends(),
 ):
-    q = ctx.db.query(
+    vq = visit_q(ctx.db, sql)
+
+    count = vq.count()
+
+    vq = vq\
+        .order_by(M.pfs_visit.pfs_visit_id.desc())\
+        .limit(limit)\
+        .offset(offset)
+
+    visits = [VisitListEntry.from_orm(row) for row in vq]
+
+    visitset_q = ctx.db.query(M.visit_set)\
+        .filter(M.visit_set.pfs_visit_id.in_(v.id for v in visits))\
+        .options(selectinload('iic_sequence'))\
+        .options(selectinload('iic_sequence.obslog_notes'))\
+        .options(selectinload('iic_sequence.iic_sequence_status'))
+
+    visit_sets = [VisitSet.from_orm(row) for row in visitset_q]
+
+    return VisitList(
+        visits=visits,
+        visit_sets=visit_sets,
+        count=count,
+    )
+
+
+def visit_q(db: Session, sql: Optional[str]):
+    q = db.query(
         M.pfs_visit,
         M.visit_set.visit_set_id,
         func.count(M.sps_exposure.pfs_visit_id).label('n_sps_exposures'),
@@ -130,28 +164,7 @@ def visit_list(
         if vq.pfs_visit_ids is not None:
             q = q.filter(M.pfs_visit.pfs_visit_id.in_(vq.pfs_visit_ids))
 
-    count = q.count()
-
-    q = q\
-        .order_by(M.pfs_visit.pfs_visit_id.desc())\
-        .limit(limit)\
-        .offset(offset)
-
-    visits = [VisitListEntry.from_orm(row) for row in q]
-
-    q2 = ctx.db.query(M.visit_set)\
-        .filter(M.visit_set.pfs_visit_id.in_(v.id for v in visits))\
-        .options(selectinload('iic_sequence'))\
-        .options(selectinload('iic_sequence.obslog_notes'))\
-        .options(selectinload('iic_sequence.iic_sequence_status'))
-
-    visit_sets = [VisitSet.from_orm(row) for row in q2]
-
-    return VisitList(
-        visits=visits,
-        visit_sets=visit_sets,
-        count=count,
-    )
+    return q
 
 
 @router.get('/api/visits/{id}', response_model=VisitDetail)
@@ -160,3 +173,51 @@ def visit_detail(
     ctx: Context = Depends(),
 ):
     return ctx.db.query(M.pfs_visit).get(id)
+
+
+@router.get('/api/visits.csv')
+def visit_csv(
+    sql: Optional[str] = None,
+    ctx: Context = Depends(),
+):
+    vq = visit_q(ctx.db, sql)
+    batch_size = 512
+
+    def g():
+        for i_batch, v_batch in enumerate(myitertools.batch(vq, batch_size)):
+            buf = io.StringIO()
+            writer = csv.writer(buf)
+            if i_batch == 0:
+                columns = [f'# {c}' if i_c == 0 else c for i_c, c in enumerate(csv_columns().keys())]
+                writer.writerow(columns)
+            for v in v_batch:
+                writer.writerow(visit_q_row_to_csv_row(v))
+            yield buf.getvalue()
+
+    content_disposition = f'attachment; filename="pfsobslog.utf8.csv"'
+    return StreamingResponse(g(), media_type='text/csv; charset=utf8', headers={'content-disposition': content_disposition})
+
+
+@functools.lru_cache()
+def csv_columns():
+    columns: dict = {}
+    columns['visit_id'] = lambda v: v.pfs_visit.pfs_visit_id
+    columns['description'] = lambda v: v.pfs_visit.pfs_visit_description
+    columns['issued_at'] = lambda v: v.pfs_visit.issued_at
+    columns['visit_set_id'] = lambda v: v.visit_set_id
+    columns['n_sps_exposures'] = lambda v: v.n_sps_exposures
+    columns['n_mcs_exposures'] = lambda v: v.n_mcs_exposures
+    columns['avg_exptime'] = lambda v: v.avg_exptime
+    columns['avg_azimuth'] = lambda v: v.avg_azimuth
+    columns['avg_altitude'] = lambda v: v.avg_altitude
+    columns['avg_insrot'] = lambda v: v.avg_insrot
+    columns['notes'] = lambda v: visit_notes_to_csv_cell(v.pfs_visit.obslog_notes)
+    return columns
+
+
+def visit_q_row_to_csv_row(v):
+    return [m(v) for m in csv_columns().values()]
+
+
+def visit_notes_to_csv_cell(notes: list[M.obslog_visit_note]):
+    return '\n'.join(f'{n.body} by {n.user.account_name}' for n in notes)
