@@ -1,11 +1,11 @@
+import csv
+import functools
+import io
 from logging import getLogger
-from typing import Any, Generator, Iterable, Optional, TypeVar
+from typing import Any, Callable, Generator, Iterable, Optional, TypeVar
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from opdb import models as M
-from sqlalchemy.orm.session import Session
-from starlette.responses import StreamingResponse
-from starlette.status import HTTP_400_BAD_REQUEST
 from pfs_obslog.server.app.context import Context
 from pfs_obslog.server.orm import (OrmConfig, skip_validation,
                                    static_check_init_args)
@@ -17,6 +17,11 @@ from pfs_obslog.server.visitquery import visit_query
 from pydantic.main import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import selectinload
+from sqlalchemy.orm.session import Session
+from starlette.responses import StreamingResponse
+from starlette.status import HTTP_400_BAD_REQUEST
+
+from ...utils import myitertools
 
 logger = getLogger(__name__)
 router = APIRouter()
@@ -175,63 +180,44 @@ def visit_csv(
     sql: Optional[str] = None,
     ctx: Context = Depends(),
 ):
-    import csv
-    import io
-
     vq = visit_q(ctx.db, sql)
     batch_size = 512
 
     def g():
-        for i_batch, v_batch in enumerate(batch(vq, batch_size)):
+        for i_batch, v_batch in enumerate(myitertools.batch(vq, batch_size)):
             buf = io.StringIO()
             writer = csv.writer(buf)
             if i_batch == 0:
-                writer.writerow([
-                    '# visit_id',
-                    'description',
-                    'issued_at',
-                ])
+                columns = [f'# {c}' if i_c == 0 else c for i_c, c in enumerate(csv_columns().keys())]
+                writer.writerow(columns)
             for v in v_batch:
-                writer.writerow([
-                    v.pfs_visit.pfs_visit_id,
-                    v.pfs_visit.pfs_visit_description,
-                    v.pfs_visit.issued_at,
-                ])
+                writer.writerow(visit_q_row_to_csv_row(v))
             yield buf.getvalue()
-
-        # id=row.pfs_visit_id,
-        # description=row.pfs_visit_description,
-        # issued_at=row.issued_at,
-    #     visit_set_id=row.visit_set_id,
-    #     n_sps_exposures=row.n_sps_exposures,
-    #     n_mcs_exposures=row.n_mcs_exposures,
-    #     avg_exptime=row.avg_exptime,
-    #     avg_azimuth=row.avg_azimuth,
-    #     avg_altitude=row.avg_altitude,
-    #     avg_insrot=row.avg_insrot,
-    #     notes=row.pfs_visit.obslog_notes,
 
     content_disposition = f'attachment; filename="pfsobslog.utf8.csv"'
     return StreamingResponse(g(), media_type='text/csv; charset=utf8', headers={'content-disposition': content_disposition})
 
 
-T = TypeVar('T')
+@functools.lru_cache()
+def csv_columns():
+    columns: dict = {}
+    columns['visit_id'] = lambda v: v.pfs_visit.pfs_visit_id
+    columns['description'] = lambda v: v.pfs_visit.pfs_visit_description
+    columns['issued_at'] = lambda v: v.pfs_visit.issued_at
+    columns['visit_set_id'] = lambda v: v.visit_set_id
+    columns['n_sps_exposures'] = lambda v: v.n_sps_exposures
+    columns['n_mcs_exposures'] = lambda v: v.n_mcs_exposures
+    columns['avg_exptime'] = lambda v: v.avg_exptime
+    columns['avg_azimuth'] = lambda v: v.avg_azimuth
+    columns['avg_altitude'] = lambda v: v.avg_altitude
+    columns['avg_insrot'] = lambda v: v.avg_insrot
+    columns['notes'] = lambda v: visit_notes_to_csv_cell(v.pfs_visit.obslog_notes)
+    return columns
 
 
-def batch(iterable0: Iterable[T], batch_size: int) -> Generator[Generator[T, None, None], None, None]:
-    assert batch_size > 0
-    iterable = iter(iterable0)
-    q: list[T] = [next(iterable)]
+def visit_q_row_to_csv_row(v):
+    return [m(v) for m in csv_columns().values()]
 
-    def g() -> Generator[T, None, None]:
-        start = len(q)
-        while len(q) > 0:
-            yield q.pop(0)
-        for i, item in enumerate(iterable, start):
-            if i == batch_size:
-                q.append(item)
-                return
-            yield item
 
-    while len(q) > 0:
-        yield g()
+def visit_notes_to_csv_cell(notes: list[M.obslog_visit_note]):
+    return '\n'.join(f'{n.body} by {n.user.account_name}' for n in notes)

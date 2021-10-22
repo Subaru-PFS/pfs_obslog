@@ -1,4 +1,3 @@
-from pfs_obslog.server.app.routers.visit import batch
 from starlette.testclient import TestClient
 import pytest
 
@@ -41,7 +40,8 @@ def test_visit_list_with_invalid_query(client: TestClient):
     assert res.json()['detail'].startswith('Unknown column:')
 
 
+
 @pytest.mark.focus
-def test_batch():
-    assert [[*g] for g in batch(range(5), 3)] == [[0, 1, 2], [3, 4]]
-    assert [[*g] for g in batch(range(6), 3)] == [[0, 1, 2], [3, 4, 5]]
+def test_csv(client: TestClient):
+    res = client.get('/api/visits.csv', params={'sql': "where issued_at::date = '2021-07-02'"})
+    assert res.status_code == 200
