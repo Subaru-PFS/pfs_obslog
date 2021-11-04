@@ -6,16 +6,15 @@ finally:
 
 import io
 from logging import getLogger
-from fastapi import Query
 
 import numpy
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Query, Response, HTTPException, status
 from matplotlib import pyplot
 from opdb import models as M
-from sqlalchemy.sql.sqltypes import Enum
 from pfs_obslog.server.app.context import Context
-
-from pfs_obslog.server.app.routers.asynctask import background_process_typeunsafe
+from pfs_obslog.server.app.routers.asynctask import \
+    background_process_typeunsafe
+from sqlalchemy.sql.sqltypes import Enum
 
 logger = getLogger(__name__)
 router = APIRouter()
@@ -36,6 +35,8 @@ async def mcs_data_chart(
 ):
     q = ctx.db.query(M.mcs_data).filter(M.mcs_data.mcs_frame_id == frame_id)
     rows = list(q)
+    if len(rows) == 0:
+        raise HTTPException(status.HTTP_204_NO_CONTENT)
     xypb = numpy.array([[
         row.mcs_center_x_pix,
         row.mcs_center_y_pix,
