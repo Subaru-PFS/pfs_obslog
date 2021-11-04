@@ -1,5 +1,5 @@
 import { defineComponent, PropType } from "vue"
-import { api } from "~/api"
+import { api, apiUrl } from "~/api"
 import { AttachmentEntry } from "~/api-client"
 import AsyncButton from "~/components/AsyncButton"
 import LazyImage from "~/components/LazyImage"
@@ -22,7 +22,7 @@ const attachmentsContext = makeContext('attachment', () => {
   })
 
   const refresh = async () => {
-    const res = await api.attachmentList($.start, $.perPage + 1)
+    const res = await api.listAttachment($.start, $.perPage + 1)
     $.entries = res.data.entries
     $.count = res.data.count
   }
@@ -87,13 +87,14 @@ const EntryComponent = defineComponent({
 
     const $ = $reactive({
       get link() {
-        return `./api/attachments/${$p.entry.path}`
+        const { account_name, id: file_id } = $p.entry
+        return apiUrl(c => c.showAttachment(account_name, file_id))
       },
     })
 
     const deleteFile = async () => {
       if (confirm('Are you sure to delete this file?')) {
-        await api.deleteAttachment($p.entry.id)
+        await api.destroyAttachment($p.entry.id)
         await $c.refresh()
       }
     }
@@ -106,14 +107,14 @@ const EntryComponent = defineComponent({
         <td>
           {$p.entry.media_type.match(/^image\//) && $p.entry.exists &&
             <>
-              <img src={$.link} />
+              <LazyImage src={$.link} />
             </>
           }
           <>
             {$p.entry.exists ?
               <>
                 <button onClick={deleteFile} ><MI icon="delete_forever" /></button>
-                <button onClick={() => location.href = $.link} ><MI icon="download" /></button>
+                <button onClick={async () => location.href = await $.link} ><MI icon="download" /></button>
               </>
               :
               <div class={style.deleted}>Deleted</div>

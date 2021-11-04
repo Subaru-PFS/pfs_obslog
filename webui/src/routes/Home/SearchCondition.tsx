@@ -17,7 +17,7 @@ export default defineComponent({
     })
 
     const downloadCsv = async () => {
-      location.href = await apiUrl(c => c.visitCsv(buildSql(home.$.query)))
+      location.href = await apiUrl(c => c.listVisitCsv(buildSql(home.$.query)))
     }
 
     return () =>

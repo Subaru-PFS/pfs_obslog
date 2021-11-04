@@ -9,15 +9,6 @@ import { $reactive } from "~/vue-utils/reactive"
 import { inspectorContext } from "./"
 
 
-const imageSize = {
-  raw: {
-    width: 4416, height: 4300,
-  },
-  calexp: {
-    width: 4096, height: 4176,
-  }
-}
-
 
 export default defineComponent({
   setup() {
@@ -36,14 +27,13 @@ export default defineComponent({
         return $.visit.sps!
       },
       get previewPath() {
-        return (e: SpsExposure, params: { [key: string]: any } = {}) => {
-          const qs = object2qs(params)
-          return {
-            raw: `./api/fits_preview/${$.visitId}/${e.camera_id}?${qs}`,
-            calexp: `./api/imagepreview/calexp/${$.visitId}/${e.camera_id}?${qs}`,
+        return (e: SpsExposure, width: number, height: number) => (
+          {
+            raw: apiUrl(c => c.showSpsFitsPreview($.visitId, e.camera_id, width, height, FitsType.Raw)),
+            calexp: apiUrl(c => c.showSpsFitsPreview($.visitId, e.camera_id, width, height, FitsType.Calexp)),
           }[$.previewType]
-        }
-      }
+        )
+      },
     })
     return () =>
       <>
@@ -86,7 +76,7 @@ export default defineComponent({
                     <button
                       data-tooltip="Download Raw FITS"
                       onClick={async () => {
-                        location.href = await apiUrl(c => c.fitsDownload($.visitId, e.camera_id, FitsType.Raw))
+                        location.href = await apiUrl(c => c.showSpsFits($.visitId, e.camera_id, FitsType.Raw))
                       }}
                     >
                       <MI icon="file_download" />
@@ -94,14 +84,14 @@ export default defineComponent({
                     <button
                       data-tooltip="Download ISR FITS"
                       onClick={async () => {
-                        location.href = await apiUrl(c => c.fitsDownload($.visitId, e.camera_id, FitsType.Calexp))
+                        location.href = await apiUrl(c => c.showSpsFits($.visitId, e.camera_id, FitsType.Calexp))
                       }}
                     >
                       <MI icon="file_download" />
                     </button>
                     <button
                       data-tooltip="Show"
-                      onClick={_ => location.href = $.previewPath(e)}
+                      onClick={async _ => location.href = await $.previewPath(e, 1024, 1024)}
                     >
                       <MI icon="open_in_new" />
                     </button>
@@ -118,16 +108,13 @@ export default defineComponent({
                   {
                     $.showPreview &&
                     <td colspan={7} style={{ textAlign: 'center' }} >
-                      {/* 4300 × 4416 */}
                       <LazyImage
+                        // 295 × 287
                         style={{ marginBottom: '0.5em' }}
-                        src={$.previewPath(e, {
-                          width: Math.floor($.scale * imageSize[$.previewType].width),
-                          height: Math.floor($.scale * imageSize[$.previewType].height),
-                        })}
+                        src={$.previewPath(e, 295, 287)}
                         scrollTarget={inspector.el}
-                        width={Math.floor($.scale * imageSize[$.previewType].width)}
-                        height={Math.floor($.scale * imageSize[$.previewType].height)}
+                        width={295}
+                        height={287}
                       /><br />
                       {fitsFileName($.visitId!, e.camera_id)}
                     </td>

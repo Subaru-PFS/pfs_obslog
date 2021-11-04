@@ -42,9 +42,9 @@ export default defineComponent({
         {/* <Folder title="Notes"> */}
         <NoteList
           notes={$.seq.notes}
-          createNote={body => api.visitSetNoteCreate({ visit_set_id: $.seq.visit_set_id, body })}
-          updateNote={(note_id, body) => api.visitSetNoteUpdate(note_id, { body })}
-          deleteNote={note_id => api.visitSetNoteDestroy(note_id)}
+          createNote={body => api.createVisitSetNote({ visit_set_id: $.seq.visit_set_id, body })}
+          updateNote={(note_id, body) => api.updateVisitSetNote(note_id, { body })}
+          deleteNote={note_id => api.destroyVisitSetNote(note_id)}
           refresh={$c.notifyUpdate}
         />
         {/* </Folder> */}

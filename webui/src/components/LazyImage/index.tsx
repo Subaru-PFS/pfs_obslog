@@ -5,7 +5,7 @@ import Loading from '../Loading'
 import MI from '../MI'
 
 
-export default defineComponent({
+const SyncSrcLazyImage = defineComponent({
   setup($p) {
     const el = ref<HTMLDivElement>()
     const elIsVisible = useElementVisibility(el, { scrollTarget: $p.scrollTarget })
@@ -57,20 +57,28 @@ export default defineComponent({
     const render = () =>
       <div class="lazy-image" ref={el} style={{ display: 'inline-block' }}>
         {$.state === 'inactive' &&
-          <div style={$.dimentions} />
+          <Loading style={$.dimentions} />
         }
-        {($.state === 'loading' || $.state === 'ready') &&
+        {$.state === 'loading' &&
           <>
             <img
-              ref={imgEl}
               src={$p.src}
-              alt={$p.alt}
               onLoad={onLoad}
               onError={onError}
-              style={{ display: $.state === 'loading' ? 'none' : 'inline', ...$.dimentions, verticalAlign: 'bottom' }}
+              style={{ display: 'none' }}
             />
-            {$.state === 'loading' && <Loading style={$.dimentions} />}
+            <Loading style={$.dimentions} />
           </>
+        }
+        {$.state === 'ready' &&
+          <img
+            ref={imgEl}
+            src={$p.src}
+            alt={$p.alt}
+            onLoad={onLoad}
+            onError={onError}
+            style={{ display: 'inline', ...$.dimentions, verticalAlign: 'bottom' }}
+          />
         }
         {$.state === 'error' &&
           <div style={{ position: 'relative', ...$.dimentions }}>
@@ -107,3 +115,67 @@ export default defineComponent({
   }
 })
 
+
+const AsyncSrcLazyImage = defineComponent({
+  setup($p) {
+    const $ = $reactive({
+      resolvedSrc: undefined as undefined | string,
+      width: undefined as undefined | number,
+      height: undefined as undefined | number,
+      get dimentions() {
+        return {
+          width: `${$.width ?? $p.width}px`,
+          height: `${$.height ?? $p.height}px`,
+        }
+      }
+    })
+    let srcChange = 0
+    watch(() => $p.src, () => {
+      if ($p.src instanceof Promise) {
+        ++srcChange
+        const srcChange2 = srcChange
+        $.resolvedSrc = undefined
+        $p.src.then(newSrc => {
+          if (srcChange2 == srcChange) {
+            $.resolvedSrc = newSrc
+          }
+        })
+      }
+      else {
+        $.resolvedSrc = $p.src
+      }
+    }, { immediate: true })
+    return () =>
+      !!$.resolvedSrc ?
+        <SyncSrcLazyImage
+          src={$.resolvedSrc!}
+          alt={$p.alt}
+          width={$p.width}
+          height={$p.height}
+        /> :
+        <Loading style={$.dimentions} />
+  },
+  props: {
+    scrollTarget: {
+      type: Object as PropType<Ref<undefined | HTMLDivElement>>,
+    },
+    src: {
+      type: [String, Object] as PropType<string | Promise<string>>,
+      required: true,
+    },
+    alt: {
+      type: String,
+    },
+    width: {
+      type: Number,
+      default: 120,
+    },
+    height: {
+      type: Number,
+      default: 120,
+    },
+  }
+})
+
+
+export default AsyncSrcLazyImage

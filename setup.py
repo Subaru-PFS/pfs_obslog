@@ -1,7 +1,8 @@
-from setuptools import setup, find_packages
 from pathlib import Path
+
+from setuptools import find_packages, setup
+
 HERE = Path(__file__).parent
-print(        f'opdb @ file://localhost{HERE.absolute}/spt_operational_database' )
 
 setup(
     name='pfs_obslog',
@@ -25,6 +26,7 @@ setup(
         'gunicorn',
         'uvloop',
         'httptools',
+        'scikit-image',
         # f'opdb @ file://localhost{HERE.absolute()}/spt_operational_database',
     ],
     extras_require={

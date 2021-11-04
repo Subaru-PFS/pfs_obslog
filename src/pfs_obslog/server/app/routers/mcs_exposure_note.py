@@ -19,8 +19,8 @@ class McsExposureNoteCreateResponse(BaseModel):
     id: int
 
 
-@router.post('/api/mcs_exposures', response_model=McsExposureNoteCreateResponse)
-def mcs_exposure_note_create(
+@router.post('/api/mcs_exposure_notes', response_model=McsExposureNoteCreateResponse)
+def create_mcs_exposure_note(
     params: McsExposureNoteCreateRequest,
     ctx: Context = Depends(),
 ):
@@ -38,8 +38,8 @@ class VisitNoteUpdateRequest(BaseModel):
     body: str
 
 
-@router.put('/api/mcs_exposures/{id}')
-def mcs_exposure_note_update(
+@router.put('/api/mcs_exposure_notes/{id}')
+def update_mcs_exposure_note(
     id: int,
     params: VisitNoteUpdateRequest,
     ctx: Context = Depends(),
@@ -54,8 +54,8 @@ def mcs_exposure_note_update(
         ctx.db.commit()
 
 
-@router.delete('/api/mcs_exposures/{id}')
-def mcs_exposure_note_destroy(
+@router.delete('/api/mcs_exposure_notes/{id}')
+def destroy_mcs_exposure_note(
     id: int,
     ctx: Context = Depends(),
 ):

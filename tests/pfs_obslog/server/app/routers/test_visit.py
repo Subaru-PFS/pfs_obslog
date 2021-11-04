@@ -41,7 +41,6 @@ def test_visit_list_with_invalid_query(client: TestClient):
 
 
 
-@pytest.mark.focus
 def test_csv(client: TestClient):
     res = client.get('/api/visits.csv', params={'sql': "where issued_at::date = '2021-07-02'"})
     assert res.status_code == 200

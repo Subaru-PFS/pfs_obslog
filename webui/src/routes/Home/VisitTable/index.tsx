@@ -83,7 +83,7 @@ export const visitListContext = makeComponentContext(VisitTable, ($p, { emit }) 
     const q = $.q
     const api = apiFactory({ spinner, ignoreErrors: [StatusCodes.BAD_REQUEST] })
     try {
-      const { visits, visit_sets, count } = (await api.visitList(q.start, q.end - q.start, $.sql)).data
+      const { visits, visit_sets, count } = (await api.listVisit(q.start, q.end - q.start, $.sql)).data
       $.visits = visits
       $.visitSets = Object.fromEntries(visit_sets.map(vs => [vs.id, vs]))
       $.count = count

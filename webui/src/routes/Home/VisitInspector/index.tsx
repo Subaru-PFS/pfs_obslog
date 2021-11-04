@@ -117,7 +117,7 @@ export const inspectorContext = makeComponentContext(VisitInspector, ($p, { emit
 
   const refresh = async (spinner = true) => {
     const visitId = $p.visitId
-    $.visit = visitId ? (await apiFactory({ spinner }).visitDetail(visitId)).data : undefined
+    $.visit = visitId ? (await apiFactory({ spinner }).showVisit(visitId)).data : undefined
   }
 
   const notifyUpdate = () => {

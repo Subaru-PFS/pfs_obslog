@@ -42,7 +42,7 @@ if [ "$PFS_OBSLOG_ENV" == 'development' ] ; then
     --reload-dir src
 else
   exec .venv/bin/gunicorn  pfs_obslog.server.app:app \
-    --bind=0.0.0.0:$port --workers=8 -k uvicorn.workers.UvicornWorker \
+    --bind=0.0.0.0:$port --workers=4 -k uvicorn.workers.UvicornWorker \
     --pid=tmp/server.pid \
     --log-file=logs/gunicorn.log \
     --access-logfile=logs/access.log

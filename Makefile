@@ -20,13 +20,6 @@ test-watch:
 dev-server:
 	PFS_OBSLOG_ENV=development bash ./start.bash
 
-dev-watch:
-	./.venv/bin/ptw -- \
-			$(opt) \
-			-s \
-			-v \
-			dev
-
 rsync_path := /home/michitaro/machines/obslog-ics.pfs.sum.subaru.nao.ac.jp/packages/rsync/bin/rsync
 
 dev-sync:
@@ -37,7 +30,7 @@ dev-sync:
 
 dev-sync-watch:
 	$(MAKE) dev-sync
-	./.venv/bin/watchmedo shell-command -D -W -c '$(MAKE) dev-sync' -R src ./webui/src
+	./.venv/bin/watchmedo shell-command -D -W -c '$(MAKE) dev-sync' -R tests src ./webui/src
 
 setup-test-db:
 	$(postgres_home)/bin/dropdb --user=postgres opdb_test || true

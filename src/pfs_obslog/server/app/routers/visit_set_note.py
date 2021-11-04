@@ -20,7 +20,7 @@ class VisitSetNoteCreateResponse(BaseModel):
 
 
 @router.post('/api/visit_set_notes', response_model=VisitSetNoteCreateResponse)
-def visit_set_note_create(
+def create_visit_set_note(
     params: VisitSetNoteCreateRequest,
     ctx: Context = Depends(),
 ):
@@ -39,7 +39,7 @@ class VisitSetNoteUpdateRequest(BaseModel):
 
 
 @router.put('/api/visit_set_notes/{id}')
-def visit_set_note_update(
+def update_visit_set_note(
     id: int,
     params: VisitSetNoteUpdateRequest,
     ctx: Context = Depends(),
@@ -55,7 +55,7 @@ def visit_set_note_update(
 
 
 @router.delete('/api/visit_set_notes/{id}')
-def visit_set_note_destroy(
+def destroy_visit_set_note(
     id: int,
     ctx: Context = Depends(),
 ):

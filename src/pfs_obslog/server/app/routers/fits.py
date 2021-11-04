@@ -1,20 +1,20 @@
-from enum import Enum
+import asyncio
 import datetime
-import os
+from enum import Enum
 from logging import getLogger
 from pathlib import Path
-from typing import Any
 
-import astropy.io.fits as afits
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from opdb import models as M
-from pydantic.types import FilePath
+from sqlalchemy.orm.session import Session
 from pfs_obslog.server.app.context import Context
-from pfs_obslog.server.app.routers.asynctask import (background_process_typeunsafe,
-                                                     background_thread_typeunsafe)
-from pfs_obslog.server.env import PFS_OBSLOG_DATA_ROOT, PFS_OBSLOG_ENV
-from pfs_obslog.server.image import fits2png
+from pfs_obslog.server.app.routers.asynctask import (
+    backgrofund_process_typeunsafe_args, background_thread)
+from pfs_obslog.server.env import PFS_OBSLOG_DATA_ROOT
+from pfs_obslog.server.image import SizeHint, fits2png
 from pfs_obslog.server.orm import static_check_init_args
+from pfs_obslog.server.utils.metafits import load_fits_headers
+from pfs_obslog.server.utils.timeit import timeit
 from pydantic import BaseModel
 from starlette.responses import FileResponse, Response
 
@@ -40,51 +40,18 @@ class FitsMeta(BaseModel):
     hdul: list[FitsHdu]
 
 
-def disable_in_dev():
-    if PFS_OBSLOG_ENV == 'development':
-        raise HTTPException(status.HTTP_400_BAD_REQUEST)
-
-
-# router = APIRouter(dependencies=[Depends(disable_in_dev)])
 router = APIRouter()
 
 
 @router.get('/api/fits/{visit_id}', response_model=list[FitsMeta])
-async def visit_fits(
+async def list_fits_meta(
     visit_id: int,
     ctx: Context = Depends(),
 ):
     visit = ctx.db.query(M.pfs_visit).get(visit_id)
     if visit is None:
         return []
-    return [await background_thread_typeunsafe(fits_meta, (p,)) for p in fits_path_for_visit(visit)]
-
-# const imageSize = {
-#   raw: {
-#     width: 4416, height: 4300,
-#   },
-#   calexp: {
-#     width: 4096, height: 4176,
-#   }
-# }
-
-
-@router.get('/api/fits_preview/{visit_id}/{camera_id}')
-async def fits_preview(
-    visit_id: int,
-    camera_id: int,
-    width: int = int(0.25 * 4416),
-    height: int = int(0.25 * 4300),
-    ctx: Context = Depends(),
-):
-    visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
-    filepath = sps_fits_path(visit, camera_id)
-    png = await background_process_typeunsafe(make_fits_preview, (filepath, width, height))
-    return Response(content=png, media_type='image/png')
-
-
-def make_fits_preview(filepath: str, width: int, height: int):
-    return fits2png(filepath, scale=0.08)
+    return await asyncio.gather(*(background_thread(fits_meta, p) for p in fits_path_for_visit(visit)))
 
 
 class FitsType(str, Enum):
@@ -92,8 +59,8 @@ class FitsType(str, Enum):
     calexp = 'calexp'
 
 
-@router.get('/api/fits_download/{visit_id}/{camera_id}')
-def fits_download(
+@router.get('/api/fits/visits/{visit_id}/sps/{camera_id}.fits')
+def show_sps_fits(
     visit_id: int,
     camera_id: int,
     type: FitsType = FitsType.raw,
@@ -107,15 +74,74 @@ def fits_download(
     return FileResponse(str(filepath), media_type='image/fits', filename=filepath.name)
 
 
-@router.get('/api/fits_download/{visit_id}')
-def fits_download_by_frameid(
+@router.get('/api/fits/visits/{visit_id}/sps/{camera_id}.png')
+async def show_sps_fits_preview(
     visit_id: int,
-    frameid: str,
+    camera_id: int,
+    width: int = 1024,
+    height: int = 1024,
+    type: FitsType = FitsType.raw,
     ctx: Context = Depends(),
 ):
     visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
-    path = [p for p in fits_path_for_visit(visit) if p.name == frameid][0]
+    if type == FitsType.raw:
+        filepath = sps_fits_path(visit, camera_id)
+    else:
+        filepath = calexp_fits_path(visit, camera_id)
+    png = await backgrofund_process_typeunsafe_args(fits2png, (filepath, SizeHint(max_width=width, max_height=height)))
+    return Response(content=png, media_type='image/png')
+
+
+def fitspath_from_frame_id(
+    db: Session,
+    visit_id: int,
+    frame_id: str,
+):
+    visit = db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
+    return next(p for p in fits_path_for_visit(visit) if p.name == frame_id)
+
+
+@router.get('/api/fits/visits/{visit_id}/frames/{frame_id}.fits')
+def show_fits_by_frame_id(
+    visit_id: int,
+    frame_id: str,
+    ctx: Context = Depends(),
+):
+    path = fitspath_from_frame_id(ctx.db, visit_id, frame_id)
     return FileResponse(path, filename=path.name, media_type='image/fits')
+
+
+@router.get('/api/fits/visits/{visit_id}/mcs/{frame_id}.fits')
+def show_mcs_fits(
+    visit_id: int,
+    frame_id: str,
+    ctx: Context = Depends(),
+):
+    path = fitspath_from_frame_id(ctx.db, visit_id, frame_id)
+    return FileResponse(path, filename=path.name, media_type='image/fits')
+
+
+@router.get('/api/fits/visits/{visit_id}/mcs/{frame_id}.png')
+async def show_mcs_fits_preview(
+    visit_id: int,
+    frame_id: int,
+    width: int = 1024,
+    height: int = 1024,
+    ctx: Context = Depends(),
+):
+    visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
+    filepath = mcs_fits_path(visit, frame_id)
+    with timeit('make_fits_preview'):
+        png = await backgrofund_process_typeunsafe_args(fits2png, (filepath, SizeHint(max_width=width, max_height=height)))
+    return Response(content=png, media_type='image/png')
+
+
+def mcs_fits_path(visit: M.pfs_visit, frame_id: int):
+    date = visit_date(visit)
+    date_dir = data_root / 'raw' / date.strftime(r'%Y-%m-%d')
+    # PFSC06735159.fits
+    path = date_dir / 'mcs' / f'PFSC{frame_id:08d}.fits'
+    return path
 
 
 def sps_fits_path(visit: M.pfs_visit, camera_id: int):
@@ -129,7 +155,6 @@ def sps_fits_path(visit: M.pfs_visit, camera_id: int):
 
 
 def calexp_fits_path(visit: M.pfs_visit, camera_id: int):
-    # /data/drp/sm1-5.2/rerun/ginga/detrend/calExp/2021-07-06/v063797/calExp-SA063364b1.fits
     visit_id = visit.pfs_visit_id
     date = visit_date(visit)
     date_dir = data_root / 'drp/sm1-5.2/rerun/ginga/detrend/calExp' / date.strftime(r'%Y-%m-%d')
@@ -141,15 +166,17 @@ def calexp_fits_path(visit: M.pfs_visit, camera_id: int):
 
 
 def fits_meta(path: Path) -> FitsMeta:
-    with afits.open(path) as hdul:
-        return FitsMeta(
-            frameid=path.name,
-            hdul=[
-                FitsHdu(index=i, header=FitsHeader(cards=[[keyword, value, comment]
-                        for keyword, value, comment in hdu.header.cards]))
-                for i, hdu in enumerate(hdul)
-            ]
-        )
+    headers = load_fits_headers(str(path))
+    return FitsMeta(
+        frameid=path.name,
+        hdul=[
+            FitsHdu(
+                index=i,
+                header=FitsHeader(cards=[[keyword, value, comment] for keyword, value, comment in header.cards]),
+            )
+            for i, header in enumerate(headers)
+        ]
+    )
 
 
 def visit_date(visit: M.pfs_visit) -> datetime.date:
@@ -160,31 +187,3 @@ def fits_path_for_visit(visit: M.pfs_visit):
     date = visit_date(visit)
     date_dir = data_root / 'raw' / date.strftime(r'%Y-%m-%d')
     return sorted(list(date_dir.glob(f'*/PFS?{visit.pfs_visit_id:06d}??.fits')))
-
-
-'''
-naxis1 = 8960
-naxis2 = 5778
-'''
-
-
-def mcs_fits_path(visit: M.pfs_visit, frame_id: int):
-    date = visit_date(visit)
-    date_dir = data_root / 'raw' / date.strftime(r'%Y-%m-%d')
-    # PFSC06735159.fits
-    path = date_dir / 'mcs' / f'PFSC{frame_id:08d}.fits'
-    return path
-
-
-@router.get('/api/mcs_preview/{visit_id}/{frame_id}')
-async def mcs_preview(
-    visit_id: int,
-    frame_id: int,
-    width: int = int(0.25 * 8960),
-    height: int = int(0.25 * 5778),
-    ctx: Context = Depends(),
-):
-    visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
-    filepath = mcs_fits_path(visit, frame_id)
-    png = await background_process_typeunsafe(make_fits_preview, (filepath, width, height))
-    return Response(content=png, media_type='image/png')

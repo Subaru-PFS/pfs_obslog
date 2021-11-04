@@ -31,13 +31,13 @@ export default defineComponent({
           </tr>
         </table>
         {/* <Folder title="Notes" opened={true}> */}
-          <NoteList
-            notes={$.visit.notes}
-            createNote={body => api.visitNoteCreate({ visit_id: $.visit.id, body })}
-            updateNote={(note_id, body) => api.visitNoteUpdate(note_id, { body })}
-            deleteNote={note_id => api.visitNoteDestroy(note_id)}
-            refresh={inspector.notifyUpdate}
-          />
+        <NoteList
+          notes={$.visit.notes}
+          createNote={body => api.createVisitNote({ visit_id: $.visit.id, body })}
+          updateNote={(note_id, body) => api.updateVisitNote(note_id, { body })}
+          deleteNote={note_id => api.destroyVisitNote(note_id)}
+          refresh={inspector.notifyUpdate}
+        />
         {/* </Folder> */}
       </>
   },

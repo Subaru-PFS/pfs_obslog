@@ -92,7 +92,7 @@ def show_attachment(
 class AttachmentEntry(BaseModel):
     id: int
     name: str
-    path: str
+    account_name: str
     media_type: str
     exists: bool
 
@@ -104,7 +104,7 @@ class AttachmentList(BaseModel):
 
 
 @router.get('/api/attachments', response_model=AttachmentList)
-def attachment_list(
+def list_attachment(
     account_name: str = Depends(safe_account_name),
     start: int = Query(1),
     per_page: int = Query(100),
@@ -116,7 +116,7 @@ def attachment_list(
             AttachmentEntry(
                 id=file_id,
                 name=meta.name,
-                path=f'{account_name}/{file_id}',
+                account_name=account_name,
                 media_type=guess_type(meta.name)[0] or 'application/octet-stream',
                 exists=exists,
             )
@@ -126,7 +126,7 @@ def attachment_list(
 
 
 @router.delete('/api/attachments/{file_id}')
-def delete_attachment(
+def destroy_attachment(
     file_id: int,
     account_name: str = Depends(safe_account_name),
 ):

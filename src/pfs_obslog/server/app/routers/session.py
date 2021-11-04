@@ -29,7 +29,7 @@ class Session(BaseModel):
 
 
 @router.post('/api/session', response_model=Session)
-def session_create(
+def create_session(
     params: SessionCreateRequest,
     ctx: NoLoginContext = Depends(),
 ):
@@ -46,14 +46,14 @@ def session_create(
 
 
 @router.get('/api/session', response_model=Session)
-def session_show(
+def show_session(
     ctx: Context = Depends(),
 ):
     return Session(current_user=ctx.current_user)
 
 
 @router.delete('/api/session')
-def session_destroy(
+def destroy_session(
     ctx: Context = Depends(),
 ):
     ctx.session.clear()

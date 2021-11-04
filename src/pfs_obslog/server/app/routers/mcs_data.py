@@ -1,19 +1,19 @@
 try:  # this try block is to prevent IDE from reordering imports
     import matplotlib
     matplotlib.use('Agg')
-finally:
+except:
     pass
 
+import dataclasses
 import io
 from logging import getLogger
 
 import numpy
-from fastapi import APIRouter, Depends, Query, Response, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from matplotlib import pyplot
 from opdb import models as M
 from pfs_obslog.server.app.context import Context
-from pfs_obslog.server.app.routers.asynctask import \
-    background_process_typeunsafe
+from pfs_obslog.server.app.routers.asynctask import background_process
 from sqlalchemy.sql.sqltypes import Enum
 
 logger = getLogger(__name__)
@@ -25,8 +25,8 @@ class ThemeName(str, Enum):
     dark = 'dark'
 
 
-@router.get('/api/mcs_data_chart/{frame_id}')
-async def mcs_data_chart(
+@router.get('/api/mcs_data/{frame_id}.png')
+async def show_mcs_data_chart(
     frame_id: int,
     width: int = Query(640, le=1280),
     height: int = Query(480, le=960),
@@ -44,17 +44,27 @@ async def mcs_data_chart(
         row.bgvalue
     ] for row in rows])
     x, y, peakvalue, bvgalue = numpy.array(xypb).T
-    png = await background_process_typeunsafe(color_scatter_plot_png, (x, y, peakvalue, theme, width, height))
+    png = await background_process(color_scatter_plot_png, ColorScatterPlotPngParams(x, y, peakvalue, theme, width, height), new_process=True)
     return Response(content=png, media_type='image/png')
 
 
-def color_scatter_plot_png(x, y, z, theme: ThemeName, width: int, height: int) -> bytes:
+@dataclasses.dataclass
+class ColorScatterPlotPngParams:
+    x: numpy.ndarray
+    y: numpy.ndarray
+    z: numpy.ndarray
+    theme: ThemeName
+    width: int
+    height: int
+
+
+def color_scatter_plot_png(args: ColorScatterPlotPngParams) -> bytes:
     DPI = 72
-    set_mpl_theme(theme)
-    pyplot.figure(dpi=DPI, figsize=(width / DPI, height / DPI))
+    set_mpl_theme(args.theme)
+    pyplot.figure(dpi=DPI, figsize=(args.width / DPI, args.height / DPI))
     cm = pyplot.cm.get_cmap('viridis')
     pyplot.gca().set_aspect('equal')
-    pyplot.scatter(x, y, s=1, c=z, cmap=cm)
+    pyplot.scatter(args.x, args.y, s=1, c=args. z, cmap=cm)  # type: ignore
     pyplot.grid()
     pyplot.colorbar()
     out = io.BytesIO()

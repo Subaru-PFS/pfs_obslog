@@ -1,29 +1,49 @@
+import dataclasses
 import io
 from pathlib import Path
 from typing import Optional, Union
 
 import astropy.io.fits as afits
 import numpy
+import skimage.transform
 from astropy.visualization import ZScaleInterval
+from pfs_obslog.server.utils.timeit import timeit
 from PIL import Image
 
 
-def fits2png(filename: Union[str, Path], *, scale: Optional[float] = None, dimensions: Optional[tuple[int, int]] = None):
-    assert (not not scale) is not (not not dimensions) and (scale or dimensions)
-    with afits.open(filename) as hdul:
-        data = hdul[1].data[::-1]  # type: ignore
-    assert len(data.shape) == 2
-    zscale = ZScaleInterval()
-    vmin, vmax = zscale.get_limits(data)
-    data8 = numpy.array(255 * numpy.clip((data - vmin) / (vmax - vmin), 0., 1.), dtype=numpy.uint8)
-    img = Image.fromarray(data8)
-    size = data8.shape
-    if scale:
-        h = int(scale * size[0])
-        w = int(scale * size[1])
-    else:
-        h, w = dimensions  # type:ignore
-    img = img.resize((w, h))
-    buffer = io.BytesIO()
-    img.save(buffer, format='png')
-    return buffer.getvalue()
+@dataclasses.dataclass
+class SizeHint:
+    factor: Optional[int] = None
+    max_width: Optional[int] = None
+    max_height: Optional[int] = None
+
+    def __post_init__(self):
+        assert (
+            self.factor or
+            self.max_width or
+            self.max_height
+        ), f'factor, max_width or max_height must be specified'
+
+
+def fits2png(filename: Union[str, Path], sh: SizeHint):
+    with timeit(f'fits2png({filename})'):
+        with timeit('astropy.fits.open'):
+            with afits.open(filename) as hdul:
+                data = hdul[1].data[::-1]  # type: ignore
+        assert len(data.shape) == 2
+        factor = max(
+            (data.shape[0] - 1) // sh.max_height + 1 if sh.max_height else 0,
+            (data.shape[1] - 1) // sh.max_width + 1 if sh.max_width else 0,
+            sh.factor or 0,
+        )
+        with timeit('resize'):
+            data = skimage.transform.downscale_local_mean(data, (factor, factor))
+        zscale = ZScaleInterval()
+        with timeit('zscale'):
+            vmin, vmax = zscale.get_limits(data)
+        with timeit('convert2uint'):
+            data8 = numpy.array(255 * numpy.clip((data - vmin) / (vmax - vmin), 0., 1.), dtype=numpy.uint8)
+        img = Image.fromarray(data8)
+        buffer = io.BytesIO()
+        img.save(buffer, format='png')
+        return buffer.getvalue()

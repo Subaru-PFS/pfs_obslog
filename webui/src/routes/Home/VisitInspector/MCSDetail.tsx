@@ -1,7 +1,7 @@
 import { CSSProperties } from "@vue/runtime-dom"
 import { usePreferredDark } from "@vueuse/core"
 import { defineComponent, ref } from "vue"
-import { api } from "~/api"
+import { api, apiUrl } from "~/api"
 import LazyImage from "~/components/LazyImage"
 import { $reactive } from "~/vue-utils/reactive"
 import { inspectorContext } from "./"
@@ -44,15 +44,15 @@ export default defineComponent({
                 <Folder title={`Frame ID: ${e.frame_id}`}>
                   <div style={{ display: 'inline-block', margin: '0.5em 0' }}>
                     <LazyImage
-                      width={0.08 * 8960} height={0.08 * 5778}
+                      width={640} height={480}
                       scrollTarget={$c.el}
-                      src={`./api/mcs_preview/${$c.$.visit?.id}/${e.frame_id}`} />
+                      src={apiUrl(c => c.showMcsFitsPreview($c.$.visit?.id!, e.frame_id, 640, 480))} />
                   </div>
                   <div style={{ display: 'inline-block', margin: '0.5em 0' }}>
                     <LazyImage
                       width={640} height={480}
                       scrollTarget={$c.el}
-                      src={`./api/mcs_data_chart/${e.frame_id}?width=640&height=480&theme=${isDark.value ? 'dark' : 'light'}`} />
+                      src={apiUrl(c => c.showMcsDataChart(e.frame_id, 640, 480, isDark.value ? 'dark' : 'light'))} />
                   </div>
                   <Folder title="Details" opened={false}>
                     <dl>
@@ -93,10 +93,10 @@ export default defineComponent({
                         notes={e.notes}
                         createNote={async body => {
                           const mcs_exposure_frame_id = e.frame_id
-                          await api.mcsExposureNoteCreate({ mcs_exposure_frame_id, body })
+                          await api.createMcsExposureNote({ mcs_exposure_frame_id, body })
                         }}
-                        updateNote={(note_id, body) => api.mcsExposureNoteUpdate(note_id, { body })}
-                        deleteNote={note_id => api.mcsExposureNoteDestroy(note_id)}
+                        updateNote={(note_id, body) => api.updateMcsExposureNote(note_id, { body })}
+                        deleteNote={note_id => api.destroyMcsExposureNote(note_id)}
                         refresh={$c.notifyUpdate}
                       />
                     </dd>

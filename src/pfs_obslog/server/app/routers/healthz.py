@@ -5,5 +5,5 @@ router = APIRouter()
 
 
 @router.get('/api/healthz')
-def healthz_get():
+def healthz():
     pass

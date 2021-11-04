@@ -103,7 +103,7 @@ class VisitList(BaseModel):
 
 
 @router.get('/api/visits', response_model=VisitList)
-def visit_list(
+def list_visit(
     offset: int = 0,
     limit: int = 50,
     sql: Optional[str] = None,
@@ -167,16 +167,8 @@ def visit_q(db: Session, sql: Optional[str]):
     return q
 
 
-@router.get('/api/visits/{id}', response_model=VisitDetail)
-def visit_detail(
-    id: int,
-    ctx: Context = Depends(),
-):
-    return ctx.db.query(M.pfs_visit).get(id)
-
-
 @router.get('/api/visits.csv')
-def visit_csv(
+def list_visit_csv(
     sql: Optional[str] = None,
     ctx: Context = Depends(),
 ):
@@ -196,6 +188,14 @@ def visit_csv(
 
     content_disposition = f'attachment; filename="pfsobslog.utf8.csv"'
     return StreamingResponse(g(), media_type='text/csv; charset=utf8', headers={'content-disposition': content_disposition})
+
+
+@router.get('/api/visits/{id}', response_model=VisitDetail)
+def show_visit(
+    id: int,
+    ctx: Context = Depends(),
+):
+    return ctx.db.query(M.pfs_visit).get(id)
 
 
 @functools.lru_cache()

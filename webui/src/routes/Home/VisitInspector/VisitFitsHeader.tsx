@@ -43,13 +43,13 @@ export default defineComponent({
     // TODO: cleanup
     watch(() => $p.visit, async () => {
       const selectedIndex = $.selectedIndex
-      const fitsMetas = (await api.visitFits($p.visit)).data
+      const fitsMetas = (await api.listFitsMeta($p.visit)).data
       $.fitsMetas = fitsMetas
       $.selectedIndex = selectedIndex
     }, { immediate: true })
 
     const downloadFits = async (frameid: string) => {
-      const url = await apiUrl(c => c.fitsDownloadByFrameid($p.visit, frameid))
+      const url = await apiUrl(c => c.showFitsByFrameId($p.visit, frameid))
       location.href = url
     }
 
