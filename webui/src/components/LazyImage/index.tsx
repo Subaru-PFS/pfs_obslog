@@ -148,6 +148,7 @@ const AsyncSrcLazyImage = defineComponent({
     return () =>
       !!$.resolvedSrc ?
         <SyncSrcLazyImage
+          scrollTarget={$p.scrollTarget}
           src={$.resolvedSrc!}
           alt={$p.alt}
           width={$p.width}
