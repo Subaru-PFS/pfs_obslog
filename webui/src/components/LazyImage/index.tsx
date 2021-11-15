@@ -1,5 +1,5 @@
 import { useElementVisibility } from '@vueuse/core'
-import { defineComponent, PropType, Ref, ref, watch } from 'vue'
+import { defineComponent, PropType, Ref, ref, watch, nextTick } from 'vue'
 import { $reactive } from '~/vue-utils/reactive'
 import Loading from '../Loading'
 import MI from '../MI'
@@ -129,14 +129,25 @@ const AsyncSrcLazyImage = defineComponent({
         }
       }
     })
-    let srcChange = 0
+    let activeContext: {
+      resolved: boolean,
+    }
     watch(() => $p.src, () => {
       if ($p.src instanceof Promise) {
-        ++srcChange
-        const srcChange2 = srcChange
-        $.resolvedSrc = undefined
+        // we want to skip $.resolvedSrc = undefined
+        // when the promise is resolved before nextTick.
+        const context: typeof activeContext = {
+          resolved: false
+        }
+        activeContext = context
+        nextTick(() => {
+          if (!context.resolved) {
+            $.resolvedSrc = undefined
+          }
+        })
         $p.src.then(newSrc => {
-          if (srcChange2 == srcChange) {
+          if (activeContext === context) {
+            context.resolved = true
             $.resolvedSrc = newSrc
           }
         })
