@@ -37,7 +37,7 @@ setup-test-db:
 	$(postgres_home)/bin/dropdb --user=postgres opdb_test || true
 	$(postgres_home)/bin/createdb --user=postgres opdb_test
 	PFS_OBSLOG_ENV=test \
-	PFS_OBSLOG_DSN=postgresql://postgres@localhost/opdb_test \
+	PFS_OBSLOG_DSN=$(shell cat tests/pfs_obslog/server/secrets/dsn.example.txt) \
 	./.venv/bin/python -m tests.db.setup
 
 schemaspy:
