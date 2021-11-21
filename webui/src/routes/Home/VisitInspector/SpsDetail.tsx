@@ -1,3 +1,4 @@
+import { useStorage } from "@vueuse/core"
 import { defineComponent } from "vue"
 import { apiUrl } from "~/api"
 import { FitsType, SpsExposure } from "~/api-client"
@@ -16,7 +17,7 @@ export default defineComponent({
     const $ = $reactive({
       scale: 0.08,
       showPreview: true,
-      previewType: 'raw' as 'raw' | 'calexp',
+      previewType: useStorage<'raw' | 'calexp'>('sps-preview-type', 'raw'),
       get visit() {
         return inspector.$.visit!
       },
