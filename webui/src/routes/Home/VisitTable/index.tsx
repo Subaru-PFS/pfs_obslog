@@ -1,5 +1,5 @@
+import { useStorage } from "@vueuse/core"
 import { StatusCodes } from "http-status-codes"
-import { useLocalStorage } from "@vueuse/core"
 import { defineComponent, PropType, ref, watch } from "vue"
 import { apiFactory, isAxiosError } from "~/api"
 import { VisitListEntry, VisitNote, VisitSet } from "~/api-client"
@@ -52,7 +52,7 @@ export const visitListContext = makeComponentContext(VisitTable, ($p, { emit }) 
     visits: [] as VisitListEntry[],
     visitSets: {} as { [id: number]: VisitSet },
     count: 0,
-    columns: useLocalStorage(`${env.app_id}/VisitTable/columns`, {
+    columns: useStorage(`${env.app_id}/VisitTable/columns`, {
       visit: true,
       description: true,
       issuedAt: true,
