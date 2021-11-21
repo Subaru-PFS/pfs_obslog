@@ -406,7 +406,7 @@ const VisitGroup = defineComponent({
               }
               {$c.$.columns.notes &&
                 <td>
-                  {v.notes.map(n =>
+                  {v.notes.sort((a, b) => a.id - b.id).map(n =>
                     <Note note={n} />
                   )}
                 </td>
