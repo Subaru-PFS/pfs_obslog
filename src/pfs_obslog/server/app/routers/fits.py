@@ -1,21 +1,23 @@
 import asyncio
 import datetime
+import functools
 from enum import Enum
 from logging import getLogger
 from pathlib import Path
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from opdb import models as M
-from sqlalchemy.orm.session import Session
 from pfs_obslog.server.app.context import Context
 from pfs_obslog.server.app.routers.asynctask import (
     backgrofund_process_typeunsafe_args, background_thread)
-from pfs_obslog.server.env import PFS_OBSLOG_DATA_ROOT
+from pfs_obslog.server.env import PFS_OBSLOG_DATA_ROOT, PFS_OBSLOG_ENV
+from pfs_obslog.server.filecache import FileCache
 from pfs_obslog.server.image import SizeHint, fits2png
 from pfs_obslog.server.orm import static_check_init_args
 from pfs_obslog.server.utils.metafits import load_fits_headers
 from pfs_obslog.server.utils.timeit import timeit
 from pydantic import BaseModel
+from sqlalchemy.orm.session import Session
 from starlette.responses import FileResponse, Response
 
 logger = getLogger(__name__)
@@ -76,6 +78,7 @@ def show_sps_fits(
 
 @router.get('/api/fits/visits/{visit_id}/sps/{camera_id}.png')
 async def show_sps_fits_preview(
+    req: Request,
     visit_id: int,
     camera_id: int,
     width: int = 1024,
@@ -83,12 +86,15 @@ async def show_sps_fits_preview(
     type: FitsType = FitsType.raw,
     ctx: Context = Depends(),
 ):
-    visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
-    if type == FitsType.raw:
-        filepath = sps_fits_path(visit, camera_id)
-    else:
-        filepath = calexp_fits_path(visit, camera_id)
-    png = await backgrofund_process_typeunsafe_args(fits2png, (filepath, SizeHint(max_width=width, max_height=height)))
+    png, save_cache = preview_cache().get2(str(req.url))
+    if png is None:
+        visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
+        if type == FitsType.raw:
+            filepath = sps_fits_path(visit, camera_id)
+        else:
+            filepath = calexp_fits_path(visit, camera_id)
+        png = await backgrofund_process_typeunsafe_args(fits2png, (filepath, SizeHint(max_width=width, max_height=height)))
+        save_cache(png)
     return Response(content=png, media_type='image/png')
 
 
@@ -123,16 +129,20 @@ def show_mcs_fits(
 
 @router.get('/api/fits/visits/{visit_id}/mcs/{frame_id}.png')
 async def show_mcs_fits_preview(
+    req: Request,
     visit_id: int,
     frame_id: int,
     width: int = 1024,
     height: int = 1024,
     ctx: Context = Depends(),
 ):
-    visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
-    filepath = mcs_fits_path(visit, frame_id)
-    with timeit('make_fits_preview'):
-        png = await backgrofund_process_typeunsafe_args(fits2png, (filepath, SizeHint(max_width=width, max_height=height)))
+    png, save_cache = preview_cache().get2(str(req.url))
+    if png is None:
+        visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
+        filepath = mcs_fits_path(visit, frame_id)
+        with timeit('make_fits_preview'):
+            png = await backgrofund_process_typeunsafe_args(fits2png, (filepath, SizeHint(max_width=width, max_height=height)))
+        save_cache(png)
     return Response(content=png, media_type='image/png')
 
 
@@ -187,3 +197,8 @@ def fits_path_for_visit(visit: M.pfs_visit):
     date = visit_date(visit)
     date_dir = data_root / 'raw' / date.strftime(r'%Y-%m-%d')
     return sorted(list(date_dir.glob(f'*/PFS?{visit.pfs_visit_id:06d}??.fits')))
+
+
+@functools.cache
+def preview_cache():
+    return FileCache(Path(f'/tmp/obslog/{PFS_OBSLOG_ENV}/preview'))
