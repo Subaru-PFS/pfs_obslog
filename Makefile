@@ -6,16 +6,16 @@ rsync_exclude := {secrets,.venv,node_modules,schemaspy/html,htmlcov,logs,attachm
 
 test:
 	./.venv/bin/pytest \
+			$(opt) \
 			-v \
 			--cov-config=.coveragerc \
 			--cov=pfs_obslog \
 			--cov-report=html \
 			--cov-branch tests \
 			tests
-	open ./htmlcov/index.html
 
 test-watch:
-	./.venv/bin/ptw -- $(opt) -v tests
+	./.venv/bin/ptw --runner "$(MAKE) test"
 
 dev-server:
 	PFS_OBSLOG_ENV=development bash ./start.bash
