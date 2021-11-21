@@ -37,8 +37,8 @@ class KeyGenerator:
         self._secret = secret
         self._iterations = iterations
 
-    @functools.lru_cache(maxsize=None)
-    def generate_key(self, salt: str, key_size):
+    @functools.cache
+    def generate_key(self, salt: str, key_size: int):
         return hashlib.pbkdf2_hmac(
             hash_name='sha1',
             password=self._secret,
@@ -48,7 +48,7 @@ class KeyGenerator:
         )
 
     def __call__(self, salt: str, key_size: int):
-        return self.generate_key(salt, key_size)
+        return self.generate_key(salt, key_size)  # type: ignore
 
 
 @lru_cache()
