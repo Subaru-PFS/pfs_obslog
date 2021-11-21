@@ -157,7 +157,7 @@ def sps_fits_path(visit: M.pfs_visit, camera_id: int):
 def calexp_fits_path(visit: M.pfs_visit, camera_id: int):
     visit_id = visit.pfs_visit_id
     date = visit_date(visit)
-    date_dir = data_root / 'drp/sm1-5.2/rerun/ginga/detrend/calExp' / date.strftime(r'%Y-%m-%d')
+    date_dir = data_root / 'drp/sm1-5.2/rerun/ginga/pfi/calExp' / date.strftime(r'%Y-%m-%d')
     camera_id -= 1
     sm = camera_id // 4 + 1
     arm = 'brnm'[camera_id % 4]
