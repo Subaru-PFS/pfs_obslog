@@ -30,7 +30,8 @@ dev-sync:
 
 dev-sync-watch:
 	$(MAKE) dev-sync
-	./.venv/bin/watchmedo shell-command -D -W -c '$(MAKE) dev-sync' -R tests src ./webui/src
+	./.venv/bin/watchmedo shell-command -D -W -c '$(MAKE) dev-sync' -R \
+		tests src ./webui/src spt_operational_database/{python/opdb,tests}
 
 setup-test-db:
 	$(postgres_home)/bin/dropdb --user=postgres opdb_test || true
