@@ -1,6 +1,5 @@
-import { AsyncComponentLoader, Component, defineAsyncComponent, nextTick } from "vue"
+import { nextTick } from "vue"
 import { createRouter, createWebHashHistory, LocationQuery } from "vue-router"
-import Loading from "./components/Loading"
 import { $g } from "./global"
 import { sessionReload } from "./session"
 
@@ -13,12 +12,12 @@ export const router = createRouter({
     { path: '/attachments', component: () => import('./routes/Attachments'), },
     {
       path: '/login',
-      component: asyncComponent(() => import('./routes/Login')),
+      component: () => import('./routes/Login'),
       meta: { noLogin: true },
     },
     {
       path: '/help',
-      component: asyncComponent( () => import('./routes/Help')),
+      component: () => import('./routes/Help'),
       meta: { noLogin: true },
     },
     ...(devMode ? [
@@ -50,13 +49,5 @@ export function pushQuery(query: LocationQuery) {
       query:
         { ...router.currentRoute.value.query, ...query }
     })
-  })
-}
-
-function asyncComponent(component: AsyncComponentLoader) {
-  return defineAsyncComponent({
-    loader: component,
-    loadingComponent: Loading,
-    delay: 400,
   })
 }
