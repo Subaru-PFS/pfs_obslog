@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
+from pfs_obslog.server.app.orjsonresponse import ORJSONResponse
 from pfs_obslog.server.app.routers.asynctask import (setup_asynctask,
                                                      shutdown_asynctask)
 from pfs_obslog.server.env import PFS_OBSLOG_ENV
@@ -19,7 +20,8 @@ from .staticassets import setup_static_assets
 
 setup_debugger()
 
-app = FastAPI()
+app = FastAPI(default_response_class=ORJSONResponse)
+
 app.include_router(session_router)
 app.include_router(visit_router)
 app.include_router(visit_note_router)
