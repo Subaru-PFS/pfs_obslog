@@ -10,7 +10,7 @@ from .debug import setup_debugger
 from .routers.attachment import router as attachment_router
 from .routers.fits import router as fits_router
 from .routers.healthz import router as healthz_router
-from .routers.mcs_data import router as mcs_data_router
+from .routers.plot import router as plot_router
 from .routers.mcs_exposure_note import router as mcs_exposure_note_router
 from .routers.session import router as session_router
 from .routers.visit import router as visit_router
@@ -27,7 +27,7 @@ app.include_router(visit_router)
 app.include_router(visit_note_router)
 app.include_router(visit_set_note_router)
 app.include_router(mcs_exposure_note_router)
-app.include_router(mcs_data_router)
+app.include_router(plot_router)
 app.include_router(fits_router)
 app.include_router(attachment_router)
 app.include_router(healthz_router)

@@ -1,22 +1,18 @@
-try:  # this try block is to prevent IDE from reordering imports
-    import matplotlib
-    matplotlib.use('Agg')
-except:
-    pass
-
 import dataclasses
 import io
-from logging import getLogger
+from enum import Enum
 
+import matplotlib
 import numpy
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from matplotlib import pyplot
 from opdb import models as M
 from pfs_obslog.server.app.context import Context
 from pfs_obslog.server.app.routers.asynctask import background_process
-from sqlalchemy.sql.sqltypes import Enum
 
-logger = getLogger(__name__)
+matplotlib.use('Agg')
+
+
 router = APIRouter()
 
 
@@ -46,6 +42,30 @@ async def show_mcs_data_chart(
     x, y, peakvalue, bvgalue = numpy.array(xypb).T
     png = await background_process(color_scatter_plot_png, ColorScatterPlotPngParams(x, y, peakvalue, theme, width, height), new_process=True)
     return Response(content=png, media_type='image/png')
+
+
+@router.get('/api/agc_data/{visit_id}.png')
+async def show_agc_data_chart(
+    visit_id: int,
+    width: int = Query(640, le=1280),
+    height: int = Query(480, le=960),
+    theme: ThemeName = Query(ThemeName.light),
+    ctx: Context = Depends(),
+):
+    pass
+    # q = ctx.db.query(M.mcs_data).filter(M.mcs_data.mcs_frame_id == frame_id)
+    # rows = list(q)
+    # if len(rows) == 0:
+    #     raise HTTPException(status.HTTP_204_NO_CONTENT)
+    # xypb = numpy.array([[
+    #     row.mcs_center_x_pix,
+    #     row.mcs_center_y_pix,
+    #     row.peakvalue,
+    #     row.bgvalue
+    # ] for row in rows])
+    # x, y, peakvalue, bvgalue = numpy.array(xypb).T
+    # png = await background_process(color_scatter_plot_png, ColorScatterPlotPngParams(x, y, peakvalue, theme, width, height), new_process=True)
+    # return Response(content=png, media_type='image/png')
 
 
 @dataclasses.dataclass
