@@ -36,6 +36,13 @@ export default defineComponent({
             <option value="any">&gt;=0</option>
             <option value="true">&gt;=1</option>
           </select>
+          {' '}
+          <span data-tooltip="Number of AGC Exposures" >#AGC:</span>
+          <select v-model={$.q.include_agc}>
+            <option value="false">==0</option>
+            <option value="any">&gt;=0</option>
+            <option value="true">&gt;=1</option>
+          </select>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <MI data-tooltip="Date" icon='date_range' />

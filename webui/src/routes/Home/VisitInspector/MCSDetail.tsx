@@ -7,6 +7,7 @@ import { $reactive } from "~/vue-utils/reactive"
 import { inspectorContext } from "./"
 import NoteList from "../components/NoteList"
 import Folder from "~/components/Folder"
+import { ThemeName } from "~/api-client"
 
 export default defineComponent({
   setup() {
@@ -52,7 +53,7 @@ export default defineComponent({
                     <LazyImage
                       width={640} height={480}
                       scrollTarget={$c.el}
-                      src={apiUrl(c => c.showMcsDataChart(e.frame_id, 640, 480, isDark.value ? 'dark' : 'light'))} />
+                      src={apiUrl(c => c.showMcsDataChart(e.frame_id, 640, 480, isDark.value ? ThemeName.Dark : ThemeName.Light))} />
                   </div>
                   <Folder title="Details" opened={false}>
                     <dl>

@@ -335,8 +335,8 @@ const VisitGroup = defineComponent({
               }
               {$c.$.columns.numberOfExposures &&
                 <th
-                  style={{ width: '5ch' }}
-                  data-tooltip="Number of SpS/MCS Exposures"><MI icon="tag" /></th>
+                  style={{ width: '7ch' }}
+                  data-tooltip="Number of SpS/MCS/AGC Exposures"><MI icon="tag" /></th>
               }
               {$c.$.columns.exposureTime &&
                 <th
@@ -383,7 +383,7 @@ const VisitGroup = defineComponent({
               }
               {$c.$.columns.numberOfExposures &&
                 <td style={{ textAlign: 'center' }}>
-                  {v.n_sps_exposures}/{v.n_mcs_exposures}
+                  {v.n_sps_exposures}/{v.n_mcs_exposures}/{v.n_agc_exposures}
                 </td>
               }
               {$c.$.columns.exposureTime &&

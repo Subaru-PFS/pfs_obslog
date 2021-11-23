@@ -6,6 +6,7 @@ import { VisitDetail } from "~/api-client"
 import Folder from "~/components/Folder"
 import { makeComponentContext } from "~/vue-utils/context"
 import { $reactive } from "~/vue-utils/reactive"
+import AGCDetail from './AGCDetail'
 import BaseDetail from "./BaseDetail"
 import MCSDetail from "./MCSDetail"
 import SpsDetail from "./SpsDetail"
@@ -73,8 +74,16 @@ const VisitInspector = defineComponent({
                 }
                 {$.visit.mcs &&
                   <>
-                    <Folder title="mcs">
+                    <Folder title="MCS">
                       <MCSDetail />
+                    </Folder>
+                  </>
+                }
+                {
+                  $.visit.agc &&
+                  <>
+                    <Folder title="AGC">
+                      <AGCDetail />
                     </Folder>
                   </>
                 }

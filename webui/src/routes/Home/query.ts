@@ -9,6 +9,7 @@ export type VisitQuery = {
   }
   include_sps: 'any' | 'true' | 'false'
   include_mcs: 'any' | 'true' | 'false'
+  include_agc: 'any' | 'true' | 'false'
 }
 
 export const perPage = 200
@@ -25,6 +26,7 @@ export function defaultQuery(): VisitQuery {
     },
     include_sps: 'any',
     include_mcs: 'any',
+    include_agc: 'any',
   }
 }
 
@@ -48,7 +50,7 @@ function filterToSqlTerms(s: string) {
 }
 
 export function buildSql(query: VisitQuery) {
-  const { include_mcs, include_sps, date } = query
+  const { include_mcs, include_sps, include_agc, date } = query
   const keywords = query.searchBox
   const terms = filterToSqlTerms(keywords)
   if (date.range) {
@@ -66,6 +68,7 @@ export function buildSql(query: VisitQuery) {
   }
   terms.push({ true: 'is_sps_visit', false: 'not is_sps_visit', any: 'true' }[include_sps])
   terms.push({ true: 'is_mcs_visit', false: 'not is_mcs_visit', any: 'true' }[include_mcs])
+  terms.push({ true: 'is_agc_visit', false: 'not is_agc_visit', any: 'true' }[include_agc])
   const cleanTerms = terms.filter(t => t !== 'true')
   return cleanTerms.length > 0 ? 'where ' + cleanTerms.join(' AND ') : ''
 }

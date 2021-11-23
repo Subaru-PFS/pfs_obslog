@@ -24,6 +24,213 @@ import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } fr
 /**
  * 
  * @export
+ * @interface AgcExposure
+ */
+export interface AgcExposure {
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcExposure
+     */
+    id: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcExposure
+     */
+    exptime?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcExposure
+     */
+    altitude?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcExposure
+     */
+    azimuth?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcExposure
+     */
+    insrot?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcExposure
+     */
+    adc_pa?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcExposure
+     */
+    m2_pos3?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcExposure
+     */
+    outside_temperature?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcExposure
+     */
+    outside_pressure?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcExposure
+     */
+    outside_humidity?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgcExposure
+     */
+    measurement_algorithm?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgcExposure
+     */
+    version_actor?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgcExposure
+     */
+    version_instdata?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgcExposure
+     */
+    taken_at?: string;
+    /**
+     * 
+     * @type {AgcGuideOffset}
+     * @memberof AgcExposure
+     */
+    guide_offset?: AgcGuideOffset;
+}
+/**
+ * 
+ * @export
+ * @interface AgcGuideOffset
+ */
+export interface AgcGuideOffset {
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    ra?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    dec?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    pa?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    delta_ra?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    delta_dec?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    delta_insrot?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    delta_az?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    delta_el?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    delta_z?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    delta_z1?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    delta_z2?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    delta_z3?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    delta_z4?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    delta_z5?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgcGuideOffset
+     */
+    delta_z6?: number;
+}
+/**
+ * 
+ * @export
+ * @interface AgcVisit
+ */
+export interface AgcVisit {
+    /**
+     * 
+     * @type {AgcExposure}
+     * @memberof AgcVisit
+     */
+    exposure?: AgcExposure;
+}
+/**
+ * 
+ * @export
  * @interface AttachmentEntry
  */
 export interface AttachmentEntry {
@@ -644,6 +851,16 @@ export interface SpsVisit {
     exposures: Array<SpsExposure>;
 }
 /**
+ * An enumeration.
+ * @export
+ * @enum {string}
+ */
+export enum ThemeName {
+    Light = 'light',
+    Dark = 'dark'
+}
+
+/**
  * 
  * @export
  * @interface ValidationError
@@ -710,6 +927,12 @@ export interface VisitDetail {
      * @memberof VisitDetail
      */
     mcs?: McsVisit;
+    /**
+     * 
+     * @type {AgcVisit}
+     * @memberof VisitDetail
+     */
+    agc?: AgcVisit;
     /**
      * 
      * @type {SpsSequenceDetail}
@@ -784,6 +1007,12 @@ export interface VisitListEntry {
      * @memberof VisitListEntry
      */
     n_mcs_exposures: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VisitListEntry
+     */
+    n_agc_exposures: number;
     /**
      * 
      * @type {number}
@@ -1565,6 +1794,107 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
+         * @summary Show Agc Data Chart
+         * @param {number} visitId 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {ThemeName} [theme] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        showAgcDataChart: async (visitId: number, width?: number, height?: number, theme?: ThemeName, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'visitId' is not null or undefined
+            assertParamExists('showAgcDataChart', 'visitId', visitId)
+            const localVarPath = `/api/agc_data/{visit_id}.png`
+                .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (width !== undefined) {
+                localVarQueryParameter['width'] = width;
+            }
+
+            if (height !== undefined) {
+                localVarQueryParameter['height'] = height;
+            }
+
+            if (theme !== undefined) {
+                localVarQueryParameter['theme'] = theme;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Show Agc Fits Preview
+         * @param {number} visitId 
+         * @param {number} frameId 
+         * @param {number} hduIndex 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        showAgcFitsPreview: async (visitId: number, frameId: number, hduIndex: number, width?: number, height?: number, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'visitId' is not null or undefined
+            assertParamExists('showAgcFitsPreview', 'visitId', visitId)
+            // verify required parameter 'frameId' is not null or undefined
+            assertParamExists('showAgcFitsPreview', 'frameId', frameId)
+            // verify required parameter 'hduIndex' is not null or undefined
+            assertParamExists('showAgcFitsPreview', 'hduIndex', hduIndex)
+            const localVarPath = `/api/fits/visits/{visit_id}/agc/{frame_id}-{hdu_index}.png`
+                .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)))
+                .replace(`{${"frame_id"}}`, encodeURIComponent(String(frameId)))
+                .replace(`{${"hdu_index"}}`, encodeURIComponent(String(hduIndex)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (width !== undefined) {
+                localVarQueryParameter['width'] = width;
+            }
+
+            if (height !== undefined) {
+                localVarQueryParameter['height'] = height;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Show Attachment
          * @param {string} accountName 
          * @param {number} fileId 
@@ -1650,11 +1980,11 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          * @param {number} frameId 
          * @param {number} [width] 
          * @param {number} [height] 
-         * @param {string} [theme] 
+         * @param {ThemeName} [theme] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        showMcsDataChart: async (frameId: number, width?: number, height?: number, theme?: string, options: any = {}): Promise<RequestArgs> => {
+        showMcsDataChart: async (frameId: number, width?: number, height?: number, theme?: ThemeName, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'frameId' is not null or undefined
             assertParamExists('showMcsDataChart', 'frameId', frameId)
             const localVarPath = `/api/mcs_data/{frame_id}.png`
@@ -2247,6 +2577,35 @@ export const DefaultApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Show Agc Data Chart
+         * @param {number} visitId 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {ThemeName} [theme] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async showAgcDataChart(visitId: number, width?: number, height?: number, theme?: ThemeName, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.showAgcDataChart(visitId, width, height, theme, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Show Agc Fits Preview
+         * @param {number} visitId 
+         * @param {number} frameId 
+         * @param {number} hduIndex 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async showAgcFitsPreview(visitId: number, frameId: number, hduIndex: number, width?: number, height?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.showAgcFitsPreview(visitId, frameId, hduIndex, width, height, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Show Attachment
          * @param {string} accountName 
          * @param {number} fileId 
@@ -2276,11 +2635,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @param {number} frameId 
          * @param {number} [width] 
          * @param {number} [height] 
-         * @param {string} [theme] 
+         * @param {ThemeName} [theme] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async showMcsDataChart(frameId: number, width?: number, height?: number, theme?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+        async showMcsDataChart(frameId: number, width?: number, height?: number, theme?: ThemeName, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.showMcsDataChart(frameId, width, height, theme, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2567,6 +2926,33 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
+         * @summary Show Agc Data Chart
+         * @param {number} visitId 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {ThemeName} [theme] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        showAgcDataChart(visitId: number, width?: number, height?: number, theme?: ThemeName, options?: any): AxiosPromise<any> {
+            return localVarFp.showAgcDataChart(visitId, width, height, theme, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Show Agc Fits Preview
+         * @param {number} visitId 
+         * @param {number} frameId 
+         * @param {number} hduIndex 
+         * @param {number} [width] 
+         * @param {number} [height] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        showAgcFitsPreview(visitId: number, frameId: number, hduIndex: number, width?: number, height?: number, options?: any): AxiosPromise<any> {
+            return localVarFp.showAgcFitsPreview(visitId, frameId, hduIndex, width, height, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Show Attachment
          * @param {string} accountName 
          * @param {number} fileId 
@@ -2594,11 +2980,11 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @param {number} frameId 
          * @param {number} [width] 
          * @param {number} [height] 
-         * @param {string} [theme] 
+         * @param {ThemeName} [theme] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        showMcsDataChart(frameId: number, width?: number, height?: number, theme?: string, options?: any): AxiosPromise<any> {
+        showMcsDataChart(frameId: number, width?: number, height?: number, theme?: ThemeName, options?: any): AxiosPromise<any> {
             return localVarFp.showMcsDataChart(frameId, width, height, theme, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2907,6 +3293,37 @@ export class DefaultApi extends BaseAPI {
 
     /**
      * 
+     * @summary Show Agc Data Chart
+     * @param {number} visitId 
+     * @param {number} [width] 
+     * @param {number} [height] 
+     * @param {ThemeName} [theme] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public showAgcDataChart(visitId: number, width?: number, height?: number, theme?: ThemeName, options?: any) {
+        return DefaultApiFp(this.configuration).showAgcDataChart(visitId, width, height, theme, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Show Agc Fits Preview
+     * @param {number} visitId 
+     * @param {number} frameId 
+     * @param {number} hduIndex 
+     * @param {number} [width] 
+     * @param {number} [height] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public showAgcFitsPreview(visitId: number, frameId: number, hduIndex: number, width?: number, height?: number, options?: any) {
+        return DefaultApiFp(this.configuration).showAgcFitsPreview(visitId, frameId, hduIndex, width, height, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
      * @summary Show Attachment
      * @param {string} accountName 
      * @param {number} fileId 
@@ -2938,12 +3355,12 @@ export class DefaultApi extends BaseAPI {
      * @param {number} frameId 
      * @param {number} [width] 
      * @param {number} [height] 
-     * @param {string} [theme] 
+     * @param {ThemeName} [theme] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    public showMcsDataChart(frameId: number, width?: number, height?: number, theme?: string, options?: any) {
+    public showMcsDataChart(frameId: number, width?: number, height?: number, theme?: ThemeName, options?: any) {
         return DefaultApiFp(this.configuration).showMcsDataChart(frameId, width, height, theme, options).then((request) => request(this.axios, this.basePath));
     }
 
