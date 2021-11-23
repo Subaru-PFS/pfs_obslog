@@ -1,11 +1,12 @@
 import os
 from pathlib import Path
 
-import pytest
+os.environ['PFS_OBSLOG_DSN'] = Path('tests/pfs_obslog/server/secrets/dsn.txt').read_text().strip()
 
-from pfs_obslog.server.db import sandbox
+if True:
+    import pytest
 
-os.environ['PFS_OBSLOG_DSN'] = Path('tests/pfs_obslog/server/secrets/dsn.example.txt').read_text().strip()
+    from pfs_obslog.server.db import sandbox
 
 
 @pytest.fixture(autouse=True)
