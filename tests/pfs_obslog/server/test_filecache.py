@@ -4,7 +4,7 @@ import pytest
 import time_machine
 from pfs_obslog.server.filecache import FileCache
 
-pytestmark = pytest.mark.focus
+# pytestmark = pytest.mark.focus
 
 
 @pytest.fixture
