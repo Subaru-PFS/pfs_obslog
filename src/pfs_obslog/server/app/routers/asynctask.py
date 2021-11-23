@@ -12,7 +12,7 @@ class _g:
 
 def setup_asynctask():
     _g.thread_pool = ThreadPoolExecutor()
-    _g.process_pool = ProcessPoolExecutor(8)
+    _g.process_pool = ProcessPoolExecutor(4)
 
 
 def shutdown_asynctask():
@@ -36,12 +36,12 @@ T = TypeVar('T')
 U = TypeVar('U')
 
 
-def background_process(f: Callable[[T], U], args: T, *, new_process=False) -> Future[U]:
-    return _background_process_typeunsafe(f, (args,), new_process)
+def background_process(f: Callable[[T], U], args: T, kwargs={}, *, new_process=False) -> Future[U]:
+    return _background_process_typeunsafe(f, (args,), kwargs, new_process)
 
 
-def backgrofund_process_typeunsafe_args(f: Callable[..., U], args: tuple, *, new_process=False) -> Future[U]:
-    return _background_process_typeunsafe(f, args, new_process)
+def backgrofund_process_typeunsafe_args(f: Callable[..., U], args: tuple, kwargs={}, *, new_process=False) -> Future[U]:
+    return _background_process_typeunsafe(f, args, kwargs, new_process)
 
 
 def background_thread(f: Callable[[T], U], args: T) -> Future[U]:
@@ -52,9 +52,9 @@ def _background_thread_typeunsafe(f: Callable, args: tuple):
     return asyncio.wrap_future(_g.thread_pool.submit(f, *args))
 
 
-def _background_process_typeunsafe(f: Callable, args: tuple, new_process: bool):
+def _background_process_typeunsafe(f: Callable, args: tuple, kwargs: dict, new_process: bool):
     if new_process:
         with ProcessPoolExecutor(1) as pool:
-            return asyncio.wrap_future(pool.submit(f, *args))
+            return asyncio.wrap_future(pool.submit(f, *args, **kwargs))
     else:
-        return asyncio.wrap_future(_g.process_pool.submit(f, *args))
+        return asyncio.wrap_future(_g.process_pool.submit(f, *args, **kwargs))

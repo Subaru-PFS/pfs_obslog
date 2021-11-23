@@ -25,11 +25,11 @@ class SizeHint:
         ), f'factor, max_width or max_height must be specified'
 
 
-def fits2png(filename: Union[str, Path], sh: SizeHint):
+def fits2png(filename: Union[str, Path], sh: SizeHint, hdu_index=1):
     with timeit(f'fits2png({filename})'):
         with timeit('astropy.fits.open'):
             with afits.open(filename) as hdul:
-                data = hdul[1].data[::-1]  # type: ignore
+                data = hdul[hdu_index].data[::-1]  # type: ignore
         assert len(data.shape) == 2
         factor = max(
             (data.shape[0] - 1) // sh.max_height + 1 if sh.max_height else 0,
