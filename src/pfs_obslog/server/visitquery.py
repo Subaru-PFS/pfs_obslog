@@ -56,6 +56,7 @@ def query_pfs_visit_ids(where: ast.Evaluatable):
         outerjoin(M.mcs_exposure).\
         outerjoin(M.obslog_mcs_exposure_note).\
         outerjoin(mcs_exposure_note_user, M.obslog_mcs_exposure_note.user).\
+        outerjoin(M.agc_exposure).\
         filter(where(ctx))  # type: ignore
     return q
 
@@ -63,7 +64,7 @@ def query_pfs_visit_ids(where: ast.Evaluatable):
 AnyColumn: Final = Symbol('AnyColumn')
 
 
-columns_for_search: Final = [
+columns_for_simple_search: Final = [
     cast(M.pfs_visit.pfs_visit_id, String),
     M.pfs_visit.pfs_visit_description,
     M.obslog_visit_note.body,
@@ -92,6 +93,7 @@ class VisitQueryContext(ast.EvaluationContext):
             (ast.String('issued_at'),): M.pfs_visit.issued_at,
             (ast.String('is_sps_visit'),): M.sps_visit.pfs_visit_id != None,
             (ast.String('is_mcs_visit'),): M.mcs_exposure.mcs_frame_id != None,
+            (ast.String('is_agc_visit'),): M.agc_exposure.agc_exposure_id != None,
         }
         if node.fields not in columns:
             raise ast.SqlError(f'Unknown column: {node.fields}')
@@ -110,7 +112,7 @@ class VisitQueryContext(ast.EvaluationContext):
         if r == AnyColumn:
             l, r = r, l
         if l == AnyColumn:
-            return or_(c == r for c in columns_for_search)  # type: ignore
+            return or_(c == r for c in columns_for_simple_search)  # type: ignore
         else:
             return l == r
 
@@ -135,7 +137,7 @@ class VisitQueryContext(ast.EvaluationContext):
         if not isinstance(r, str):
             raise ast.SqlError(f'Right operand for LIKE must be a string: {node.lexpr} LIKE {node.rexpr}')
         if l == AnyColumn:
-            return or_(c.ilike(r) for c in columns_for_search)  # type: ignore
+            return or_(c.ilike(r) for c in columns_for_simple_search)  # type: ignore
             # null or true == true or null == true であるためこれで良い
         else:
             assert isinstance(l, ColumnOperators)

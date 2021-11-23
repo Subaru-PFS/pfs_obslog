@@ -98,7 +98,7 @@ async def show_sps_fits_preview(
     return Response(content=png, media_type='image/png')
 
 
-def fitspath_from_frame_id(
+def mcs_fitspath(
     db: Session,
     visit_id: int,
     frame_id: str,
@@ -113,7 +113,7 @@ def show_fits_by_frame_id(
     frame_id: str,
     ctx: Context = Depends(),
 ):
-    path = fitspath_from_frame_id(ctx.db, visit_id, frame_id)
+    path = mcs_fitspath(ctx.db, visit_id, frame_id)
     return FileResponse(path, filename=path.name, media_type='image/fits')
 
 
@@ -123,7 +123,18 @@ def show_mcs_fits(
     frame_id: str,
     ctx: Context = Depends(),
 ):
-    path = fitspath_from_frame_id(ctx.db, visit_id, frame_id)
+    path = mcs_fitspath(ctx.db, visit_id, frame_id)
+    return FileResponse(path, filename=path.name, media_type='image/fits')
+
+
+@router.get('/api/fits/visits/{visit_id}/agc/{frame_id}.fits')
+def show_agc_fits(
+    visit_id: int,
+    frame_id: int,
+    ctx: Context = Depends(),
+):
+    visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
+    path = agc_fits_path(visit, frame_id)
     return FileResponse(path, filename=path.name, media_type='image/fits')
 
 
@@ -146,6 +157,29 @@ async def show_mcs_fits_preview(
     return Response(content=png, media_type='image/png')
 
 
+@router.get('/api/fits/visits/{visit_id}/agc/{frame_id}-{hdu_index}.png')
+async def show_agc_fits_preview(
+    req: Request,
+    visit_id: int,
+    frame_id: int,  # FRAMEID in FITS and agc_exposure_id in opdb
+    hdu_index: int,
+    width: int = 512,
+    height: int = 512,
+    ctx: Context = Depends(),
+):
+    png, save_cache = preview_cache().get2(str(req.url))
+    if png is None:
+        visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
+        filepath = agc_fits_path(visit, frame_id)
+        png = await backgrofund_process_typeunsafe_args(
+            fits2png,
+            (filepath, SizeHint(max_width=width, max_height=height)),
+            dict(hdu_index=hdu_index),
+        )
+        save_cache(png)
+    return Response(content=png, media_type='image/png')
+
+
 def mcs_fits_path(visit: M.pfs_visit, frame_id: int):
     date = visit_date(visit)
     date_dir = data_root / 'raw' / date.strftime(r'%Y-%m-%d')
@@ -162,6 +196,25 @@ def sps_fits_path(visit: M.pfs_visit, camera_id: int):
     arm = camera_id % 4 + 1
     path = date_dir / 'sps' / f'PFSA{visit.pfs_visit_id:06d}{sm:01d}{arm:01d}.fits'
     return path
+
+
+@functools.lru_cache(maxsize=1024)
+def agc_frame_id_to_path(date_dir: Path, frame_id: int):
+    for path in (date_dir / 'agcc').glob('*.fits'):
+        headers = load_fits_headers(str(path), max_hdu=2)
+        if headers[1]['FRAMEID'] == frame_id:
+            return path
+    raise AgcFitsNotFound(f'date_dir={date_dir}, frame_id={frame_id}')
+
+
+class AgcFitsNotFound(RuntimeError):
+    pass
+
+
+def agc_fits_path(visit: M.pfs_visit, frame_id: int):
+    date = visit_date(visit)
+    date_dir = data_root / 'raw' / date.strftime(r'%Y-%m-%d')
+    return agc_frame_id_to_path(date_dir, frame_id)
 
 
 def calexp_fits_path(visit: M.pfs_visit, camera_id: int):

@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from opdb import models as M
+from sqlalchemy.sql.sqltypes import Enum
 from pfs_obslog.server.orm import (OrmConfig, skip_validation,
                                    static_check_init_args)
 from pydantic import BaseModel
@@ -107,6 +108,85 @@ class McsExposure(BaseModel):
 @static_check_init_args
 class McsVisit(BaseModel):
     exposures: list[McsExposure]
+
+
+@static_check_init_args
+class AgcGuideOffset(BaseModel):
+    ra: Optional[float]
+    dec: Optional[float]
+    pa: Optional[float]
+    delta_ra: Optional[float]
+    delta_dec: Optional[float]
+    delta_insrot: Optional[float]
+    delta_az: Optional[float]
+    delta_el: Optional[float]
+    delta_z: Optional[float]
+    delta_z1: Optional[float]
+    delta_z2: Optional[float]
+    delta_z3: Optional[float]
+    delta_z4: Optional[float]
+    delta_z5: Optional[float]
+    delta_z6: Optional[float]
+
+    Config = OrmConfig[M.agc_guide_offset]()(lambda row: (skip_validation(AgcGuideOffset)(
+        ra=row.guide_ra,  # type: ignore
+        dec=row.guide_dec,  # type: ignore
+        pa=row.guide_pa,  # type: ignore
+        delta_ra=row.guide_delta_ra,  # type: ignore
+        delta_dec=row.guide_delta_dec,  # type: ignore
+        delta_insrot=row.guide_delta_insrot,  # type: ignore
+        delta_az=row.guide_delta_az,  # type: ignore
+        delta_el=row.guide_delta_el,  # type: ignore
+        delta_z=row.guide_delta_z,  # type: ignore
+        delta_z1=row.guide_delta_z1,  # type: ignore
+        delta_z2=row.guide_delta_z2,  # type: ignore
+        delta_z3=row.guide_delta_z3,  # type: ignore
+        delta_z4=row.guide_delta_z4,  # type: ignore
+        delta_z5=row.guide_delta_z5,  # type: ignore
+        delta_z6=row.guide_delta_z6,  # type: ignore
+    )))
+
+
+@static_check_init_args
+class AgcExposure(BaseModel):
+    id: int
+    exptime: Optional[float]
+    altitude: Optional[float]
+    azimuth: Optional[float]
+    insrot: Optional[float]
+    adc_pa: Optional[float]
+    m2_pos3: Optional[float]
+    outside_temperature: Optional[float]
+    outside_pressure: Optional[float]
+    outside_humidity: Optional[float]
+    measurement_algorithm: Optional[str]
+    version_actor: Optional[str]
+    version_instdata: Optional[str]
+    taken_at: Optional[datetime]
+    guide_offset: Optional[AgcGuideOffset]
+
+    Config = OrmConfig[M.agc_exposure]()(lambda row: (skip_validation(AgcExposure)(
+        id=row.agc_exposure_id,
+        exptime=row.agc_exptime,  # type: ignore
+        altitude=row.altitude,  # type: ignore
+        azimuth=row.azimuth,  # type: ignore
+        insrot=row.insrot,  # type: ignore
+        adc_pa=row.adc_pa,  # type: ignore
+        m2_pos3=row.m2_pos3,  # type: ignore
+        outside_temperature=row.outside_temperature,  # type: ignore
+        outside_pressure=row.outside_pressure,  # type: ignore
+        outside_humidity=row.outside_humidity,  # type: ignore
+        measurement_algorithm=row.measurement_algorithm,
+        version_actor=row.version_actor,
+        version_instdata=row.version_instdata,
+        taken_at=row.taken_at,
+        guide_offset=row.agc_guide_offset,
+    )))
+
+
+@static_check_init_args
+class AgcVisit(BaseModel):
+    exposure: Optional[AgcExposure]
 
 
 @static_check_init_args

@@ -2,13 +2,13 @@
 
 import io
 import itertools
-from typing import List, Union
+from typing import List, Optional, Union
 
 import astropy.io.fits
 import numpy
 
 
-def load_fits_headers(path: str) -> List[astropy.io.fits.Header]:
+def load_fits_headers(path: str, max_hdu: Optional[int] = None) -> List[astropy.io.fits.Header]:
     """
     Reads only headers of a FITS
 
@@ -19,11 +19,13 @@ def load_fits_headers(path: str) -> List[astropy.io.fits.Header]:
     """
     hs: list[FitsHeader] = []
     with open(path, "rb") as f:
-        while True:
+        for hdu_i in itertools.count(0):
             h = FitsHeader.from_fileobj(f)
             if h is None:
                 break
             hs.append(h)
+            if max_hdu is not None and hdu_i + 1 >= max_hdu:
+                break
             f.seek(h.datasize, io.SEEK_CUR)
     return [astropy.io.fits.Header.fromstring(h.tobytes()) for h in hs]
 
