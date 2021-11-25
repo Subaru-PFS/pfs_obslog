@@ -1,11 +1,13 @@
 import asyncio
 import datetime
 import functools
+import itertools
 from enum import Enum
 from logging import getLogger
 from pathlib import Path
+from typing import cast
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from opdb import models as M
 from pfs_obslog.server.app.context import Context
 from pfs_obslog.server.app.routers.asynctask import (
@@ -53,7 +55,13 @@ async def list_fits_meta(
     visit = ctx.db.query(M.pfs_visit).get(visit_id)
     if visit is None:
         return []
-    return await asyncio.gather(*(background_thread(fits_meta, p) for p in fits_path_for_visit(visit)))
+    return await asyncio.gather(*(
+        background_thread(fits_meta, p) for p in
+        itertools.chain(
+            agc_fits_path_for_visit(visit),
+            sps_mcs_fits_path_for_visit(visit),
+        )
+    ))
 
 
 class FitsType(str, Enum):
@@ -99,12 +107,10 @@ async def show_sps_fits_preview(
 
 
 def mcs_fitspath(
-    db: Session,
-    visit_id: int,
+    visit: M.pfs_visit,
     frame_id: str,
 ):
-    visit = db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
-    return next(p for p in fits_path_for_visit(visit) if p.name == frame_id)
+    return next(p for p in sps_mcs_fits_path_for_visit(visit) if p.name == frame_id)
 
 
 @router.get('/api/fits/visits/{visit_id}/frames/{frame_id}.fits')
@@ -113,7 +119,12 @@ def show_fits_by_frame_id(
     frame_id: str,
     ctx: Context = Depends(),
 ):
-    path = mcs_fitspath(ctx.db, visit_id, frame_id)
+    visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
+    if frame_id.startswith('agcc_'):
+        path = agc_fits_path(visit, cast(M.agc_exposure, visit.agc_exposure).agc_exposure_id)
+    else:
+        path = mcs_fitspath(visit, frame_id)
+    print(path)
     return FileResponse(path, filename=path.name, media_type='image/fits')
 
 
@@ -123,7 +134,8 @@ def show_mcs_fits(
     frame_id: str,
     ctx: Context = Depends(),
 ):
-    path = mcs_fitspath(ctx.db, visit_id, frame_id)
+    visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
+    path = mcs_fitspath(visit, frame_id)
     return FileResponse(path, filename=path.name, media_type='image/fits')
 
 
@@ -170,7 +182,10 @@ async def show_agc_fits_preview(
     png, save_cache = preview_cache().get2(str(req.url))
     if png is None:
         visit = ctx.db.query(M.pfs_visit).filter(M.pfs_visit.pfs_visit_id == visit_id).one()
-        filepath = agc_fits_path(visit, frame_id)
+        try:
+            filepath = agc_fits_path(visit, frame_id)
+        except AgcFitsNotFound:
+            raise  HTTPException(status.HTTP_404_NOT_FOUND)
         png = await backgrofund_process_typeunsafe_args(
             fits2png,
             (filepath, SizeHint(max_width=width, max_height=height)),
@@ -246,10 +261,20 @@ def visit_date(visit: M.pfs_visit) -> datetime.date:
     return (visit.issued_at + datetime.timedelta(hours=10)).date()
 
 
-def fits_path_for_visit(visit: M.pfs_visit):
+def sps_mcs_fits_path_for_visit(visit: M.pfs_visit):
     date = visit_date(visit)
     date_dir = data_root / 'raw' / date.strftime(r'%Y-%m-%d')
     return sorted(list(date_dir.glob(f'*/PFS?{visit.pfs_visit_id:06d}??.fits')))
+
+
+def agc_fits_path_for_visit(visit: M.pfs_visit):
+    if visit.agc_exposure:
+        agc_exposure: M.agc_exposure = visit.agc_exposure
+        frame_id = agc_exposure.agc_exposure_id
+        try:
+            yield agc_fits_path(visit, frame_id)
+        except AgcFitsNotFound:
+            pass
 
 
 @functools.cache
