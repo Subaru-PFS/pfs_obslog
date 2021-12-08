@@ -124,7 +124,6 @@ def show_fits_by_frame_id(
         path = agc_fits_path(visit, cast(M.agc_exposure, visit.agc_exposure).agc_exposure_id)
     else:
         path = mcs_fitspath(visit, frame_id)
-    print(path)
     return FileResponse(path, filename=path.name, media_type='image/fits')
 
 

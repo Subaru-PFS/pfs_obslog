@@ -25,17 +25,22 @@ class FileCache:
     def get(self, id: str):
         try:
             with self.db() as db:
-                id_digest = self._digest(id)
-                cur = db.cursor()
-                cur.execute(
-                    'update entry set last_accessed = ? where id = ?',
-                    (time.time(), id,)
-                )
-                if cur.rowcount > 0:
-                    path = self._path_from_id_digest(id_digest)
-                    return path.read_bytes()
+                with db:
+                    id_digest = self._digest(id)
+                    cur = db.cursor()
+                    cur.execute(
+                        'update entry set last_accessed = ? where id = ?',
+                        (time.time(), id,)
+                    )
+                    if cur.rowcount > 0:
+                        path = self._path_from_id_digest(id_digest)
+                        try:
+                            return path.read_bytes()
+                        except FileNotFoundError:
+                            cur.execute(f'delete from entry where id = ?', (id,))
+                            return None
         except:  # pragma: no cover
-            logger.warning('cache failed: {id}')
+            logger.warning(f'cache failed: {id}')
             logger.warning(traceback.format_exc())
             return None
 
@@ -46,7 +51,7 @@ class FileCache:
             if path.exists():
                 return path.read_bytes()
         except:  # pragma: no cover
-            logger.warning('cache failed: {id}')
+            logger.warning(f'cache failed: {id}')
             logger.warning(traceback.format_exc())
             return None
 
