@@ -1,3 +1,4 @@
+import sqlalchemy
 import csv
 import functools
 import io
@@ -67,7 +68,7 @@ class VisitListEntry(VisitBase):
     visit_set_id: Optional[int]
     n_sps_exposures: int
     n_mcs_exposures: int
-    n_agc_exposures: int # 0 or 1
+    n_agc_exposures: int  # 0 or 1
     avg_exptime: Optional[float]
     avg_azimuth: Optional[float]
     avg_altitude: Optional[float]
@@ -113,9 +114,7 @@ def list_visit(
     sql: Optional[str] = None,
     ctx: Context = Depends(),
 ):
-    vq = visit_q(ctx.db, sql)
-
-    count = vq.count()
+    vq, count = visit_q(ctx.db, sql)
 
     vq = vq\
         .order_by(M.pfs_visit.pfs_visit_id.desc())\
@@ -170,7 +169,11 @@ def visit_q(db: Session, sql: Optional[str]):
         if vq.pfs_visit_ids is not None:
             q = q.filter(M.pfs_visit.pfs_visit_id.in_(vq.pfs_visit_ids))
 
-    return q
+    try:
+        count = q.count()
+    except (sqlalchemy.exc.DataError, sqlalchemy.exc.ProgrammingError) as e:
+        raise HTTPException(HTTP_400_BAD_REQUEST, str(e))
+    return q, count
 
 
 @router.get('/api/visits.csv')
@@ -178,7 +181,7 @@ def list_visit_csv(
     sql: Optional[str] = None,
     ctx: Context = Depends(),
 ):
-    vq = visit_q(ctx.db, sql)
+    vq, count = visit_q(ctx.db, sql)
     batch_size = 512
 
     def g():
