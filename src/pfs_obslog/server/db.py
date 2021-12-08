@@ -1,8 +1,11 @@
-import os
 import contextlib
+import os
 from typing import Callable, Final, Optional
 
-from sqlalchemy import create_engine
+import sqlalchemy
+from opdb.models import Base
+from psycopg2.extensions import connection as PostgresConnection
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
 from .env import PFS_OBSLOG_ENV
@@ -12,7 +15,7 @@ DSN: Final = os.environ.get('PFS_OBSLOG_DSN')
 if not DSN:
     raise RuntimeError("PFS_OBSLOG_DSN must be set")
 
-engine = create_engine(DSN, future=True) # , echo=PFS_OBSLOG_ENV != 'production')
+engine = create_engine(DSN, future=True)  # , echo=PFS_OBSLOG_ENV != 'production')
 
 _DBSession: Callable[..., Session] = sessionmaker(bind=engine, autoflush=False)
 
@@ -55,3 +58,40 @@ class _SandboxedTransaction:
 
 
 sandbox = _SandboxedTransaction()
+
+
+event.listen(
+    Base.metadata,
+    "after_create",
+    sqlalchemy.DDL('''
+        create or replace function try_cast_int(p_in text, p_default int default null)
+                returns int
+            as
+            $$
+            begin
+                begin
+                return $1::int;
+                exception 
+                when others then
+                    return p_default;
+                end;
+            end;
+            $$
+            language plpgsql;
+
+            create or replace function try_cast_float(p_in text, p_default float default null)
+                returns float
+            as
+            $$
+            begin
+                begin
+                return $1::float;
+                exception 
+                when others then
+                    return p_default;
+                end;
+            end;
+            $$
+            language plpgsql;
+    ''')
+)
