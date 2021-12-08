@@ -1,6 +1,6 @@
+import pfs_obslog.server.app.routers.fits
 import pytest
 from opdb import models as M
-from pfs_obslog.server.app.routers.fits import fits_meta, fits_path_for_visit
 
 # @pytest.mark.slow
 # def test_list_fits(db):
