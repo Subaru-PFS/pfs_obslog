@@ -112,10 +112,10 @@ export default defineComponent({
                       <LazyImage
                         // 295 × 287
                         style={{ marginBottom: '0.5em' }}
-                        src={$.previewPath(e, 295, 287)}
+                        src={$.previewPath(e, 274, 279)}
                         scrollTarget={inspector.el}
-                        width={295}
-                        height={287}
+                        width={274}
+                        height={279}
                       /><br />
                       {fitsFileName($.visitId!, e.camera_id)}
                     </td>
