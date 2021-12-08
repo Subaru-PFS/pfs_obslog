@@ -249,11 +249,20 @@ def fits_meta(path: Path) -> FitsMeta:
         hdul=[
             FitsHdu(
                 index=i,
-                header=FitsHeader(cards=[[keyword, value, comment] for keyword, value, comment in header.cards]),
+                header=FitsHeader(cards=[[keyword, header_value_stringify(value), comment]
+                                  for keyword, value, comment in header.cards]),
             )
             for i, header in enumerate(headers)
         ]
     )
+
+
+def header_value_stringify(value):
+    if isinstance(value, float):
+        return str(value)
+    if isinstance(value, bool):
+        return 'T' if value else 'F'
+    return value
 
 
 def visit_date(visit: M.pfs_visit) -> datetime.date:
