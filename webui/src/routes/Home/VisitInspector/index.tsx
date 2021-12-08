@@ -90,13 +90,6 @@ const VisitInspector = defineComponent({
               </Pane>
               <Pane size={20}>
                 <VisitFitsHeader visit={$.visit.id} />
-                {/* <Folder title="FITS Header" key="fits_header" opened={false}>
-                  <VisitFitsHeader visit={$.visit.id} />
-                </Folder> */}
-                {/* <div class="end-h">
-                  <button data-tooltip="Debug Info" onClick={e => $.showJson = !$.showJson}><MI icon='bug_report' /></button>
-                </div>
-                {$.showJson && <pre><code>{JSON.stringify($c.$.visit, null, 2)}</code></pre>} */}
               </Pane>
             </Splitpanes>
           }
