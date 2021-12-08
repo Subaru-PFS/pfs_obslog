@@ -1,9 +1,8 @@
-from dataclasses import dataclass
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Optional, Tuple, Union
 
 from pfs_obslog.server.env import safe_breakpoint
-
 
 node_factories = {}
 
@@ -101,6 +100,16 @@ def _TypeCast(args):
 
 
 @dataclass
+class NullTest(Evaluatable):
+    arg: Evaluatable
+
+
+@node_factory('NullTest')
+def _NullTest(args):
+    return NullTest(arg=build_ast(args['arg']))
+
+
+@dataclass
 class BinaryOperator(Evaluatable):
     lexpr: Evaluatable
     rexpr: Evaluatable
@@ -135,6 +144,7 @@ class NotLike(BinaryOperator):
 class LessEqual(BinaryOperator):
     pass
 
+
 @dataclass
 class LessThan(BinaryOperator):
     pass
@@ -143,6 +153,7 @@ class LessThan(BinaryOperator):
 @dataclass
 class GreaterEqual(BinaryOperator):
     pass
+
 
 @dataclass
 class GreaterThan(BinaryOperator):
@@ -242,6 +253,32 @@ def _BoolExpr(args):
     else:  # pragma: no cover
         safe_breakpoint()
         raise SqlError(f'Unknown boolop {boolop}')
+
+
+@dataclass
+class A_Indirection(Evaluatable):
+    arg: ColumnRef
+    indirection: list[Union['A_Indices', String]]
+
+
+@node_factory('A_Indirection')
+def _A_Indirection(args):
+    return A_Indirection(
+        arg=build_ast(args['arg']),
+        indirection=build_ast_list(args['indirection']),
+    )
+
+
+@dataclass
+class A_Indices(Evaluatable):
+    uidx: A_Const
+
+
+@node_factory('A_Indices')
+def _A_Indices(args):
+    return A_Indices(
+        uidx=build_ast(args['uidx']),
+    )
 
 
 def _first(obj):

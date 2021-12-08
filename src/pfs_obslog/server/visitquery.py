@@ -1,14 +1,15 @@
 from dataclasses import dataclass
-from typing import Any, Final, Optional, Union, cast as type_cast, final
+from typing import Any, Final, Optional, Union
 
-from opdb import models as M
-from pfs_obslog.server.parsesql import ast, parse
-from sqlalchemy import distinct, not_, or_, and_, select, cast, Date, String
-from sqlalchemy.sql.operators import ColumnOperators
-from sqlalchemy.orm import aliased
-
-from pfs_obslog.server.utils.symbol import Symbol
 import psqlparse.exceptions
+import sqlalchemy
+from opdb import models as M
+from sqlalchemy.sql.expression import case
+from pfs_obslog.server.parsesql import ast, parse
+from pfs_obslog.server.utils.symbol import Symbol
+from sqlalchemy import Date, String, and_, cast, distinct, not_, or_, select
+from sqlalchemy.orm import aliased
+from sqlalchemy.sql.operators import ColumnOperators
 
 
 @dataclass
@@ -57,6 +58,7 @@ def query_pfs_visit_ids(where: ast.Evaluatable):
         outerjoin(M.obslog_mcs_exposure_note).\
         outerjoin(mcs_exposure_note_user, M.obslog_mcs_exposure_note.user).\
         outerjoin(M.agc_exposure).\
+        outerjoin(M.obslog_fits_header).\
         filter(where(ctx))  # type: ignore
     return q
 
@@ -94,16 +96,23 @@ class VisitQueryContext(ast.EvaluationContext):
             (ast.String('is_sps_visit'),): M.sps_visit.pfs_visit_id != None,
             (ast.String('is_mcs_visit'),): M.mcs_exposure.mcs_frame_id != None,
             (ast.String('is_agc_visit'),): M.agc_exposure.agc_exposure_id != None,
+            (ast.String('fits_header'),): M.obslog_fits_header.cards_dict,
         }
         if node.fields not in columns:
             raise ast.SqlError(f'Unknown column: {node.fields}')
         return columns[node.fields]
 
     def TypeCast(self, node: ast.TypeCast):
-        if node.typeName.names == [ast.String('pg_catalog'), ast.String('bool')]:
-            return node.arg == ast.A_Const('t')
         if node.typeName.names == [ast.String('date')]:
             return cast(node.arg(self), Date)
+        if node.typeName.names == [ast.String(str='pg_catalog'), ast.String(str='float8')]:
+            return cast(node.arg(self), sqlalchemy.Float)
+        if node.typeName.names == [ast.String(str='pg_catalog'), ast.String(str='int4')]:
+            return cast(node.arg(self), sqlalchemy.Integer)
+        if node.typeName.names == [ast.String(str='safe_float')]:
+            return sqlalchemy.func.try_cast_float(node.arg(self))
+        if node.typeName.names == [ast.String(str='safe_int')]:
+            return sqlalchemy.func.try_cast_int(node.arg(self))
         raise ast.SqlError(f'Unknown type cast: {node}')
 
     def Equal(self, node: ast.Equal):
@@ -176,3 +185,32 @@ class VisitQueryContext(ast.EvaluationContext):
 
     def Between(self, node: ast.Between):
         return node.lexpr(self).between(node.rexpr[0](self), node.rexpr[1](self))
+
+    def A_Indirection(self, node: ast.A_Indirection):
+        '''
+        This evaluator is only for fits header
+        '''
+        if node.arg.fields != (ast.String('fits_header'),):
+            raise ast.SqlError(f'Unknown Column: {node.arg.fields}')
+        if len(node.indirection) == 1:
+            keyword, = node.indirection
+            if (isinstance(keyword, ast.A_Indices) and isinstance(keyword.uidx.value, str)):
+                value = M.obslog_fits_header.cards_dict[keyword.uidx.value]
+                # return case(
+                #     (sqlalchemy.func.jsonb_typeof(value) == 'boolean',
+                #         case(
+                #             (value.astext == 'true', 'T'),  # type: ignore
+                #             else_='F'),
+                #      ),
+                #     else_=value.astext
+                # )
+                return value.astext
+        raise ast.SqlError(
+            f"""accessing FITS header should be something like this:\n"""
+            """  `WHERE fits_header['OBSERVER'] LIKE '%Arthur%'`,\n"""
+            """  `WHERE fits_header['NAXIS']::integer = 2`, or\n"""
+            """  `WHERE fits_header['SIMPLE'] == 'true'`"""
+        )
+
+    def NullTest(self, node: ast.NullTest):
+        return node.arg(self) == None

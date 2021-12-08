@@ -1,6 +1,7 @@
 from typing import Any, cast
 import pytest
 from opdb import models as M
+import sqlalchemy
 from sqlalchemy.orm.session import Session
 from pfs_obslog.server.parsesql import ast, parse
 from pfs_obslog.server.visitquery import VisitQueryContext, visit_query
@@ -18,13 +19,22 @@ def test_visit_query(db: Session):
     apply_filter(db, """ where id between 0 and 3 """)
 
 
+@pytest.mark.focus
+def test_header_search(db: Session):
+    apply_filter(db, """ where fits_header['OBSERVER'] = 'hello' """)
+    apply_filter(db, """ where fits_header['NAXIS']::float between 1 and 3""")
+    apply_filter(db, """ where 'ok'::safe_float is null """)
+    apply_filter(db, """ where 'ok'::safe_int is null """)
+    # apply_filter(db, """ where  """)
+
+
 def apply_filter(db: Session, sql: str):
     vq = visit_query(sql)
     if vq.pfs_visit_ids is not None:
         q = db.query(
             M.pfs_visit,
         ).\
-            filter(M.pfs_visit.pfs_visit_id.in_(vq.pfs_visit_ids)).\
+            filter(sqlalchemy.and_(False, M.pfs_visit.pfs_visit_id.in_(vq.pfs_visit_ids))).\
             limit(10)
         [*q]
 
@@ -39,5 +49,3 @@ def test_build_filter():
         outerjoin(M.visit_set).\
         outerjoin(M.iic_sequence).\
         filter(s.whereClause(ctx))  # type: ignore
-    print(q)
-    print(s.whereClause(ctx))
