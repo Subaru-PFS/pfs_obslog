@@ -1714,6 +1714,36 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
+         * @summary List Pfs Design
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPfsDesign: async (options: any = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/pfs_design`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary List Visit
          * @param {number} [offset] 
          * @param {number} [limit] 
@@ -1794,6 +1824,43 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
+         * @summary Pfs Design Chart
+         * @param {Array<string>} idHex 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        pfsDesignChart: async (idHex: Array<string>, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'idHex' is not null or undefined
+            assertParamExists('pfsDesignChart', 'idHex', idHex)
+            const localVarPath = `/api/pfs_design.png`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (idHex) {
+                localVarQueryParameter['id_hex'] = idHex;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Show Agc Data Chart
          * @param {number} visitId 
          * @param {number} [width] 
@@ -1829,6 +1896,44 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             if (theme !== undefined) {
                 localVarQueryParameter['theme'] = theme;
             }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Show Agc Fits
+         * @param {number} visitId 
+         * @param {number} frameId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        showAgcFits: async (visitId: number, frameId: number, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'visitId' is not null or undefined
+            assertParamExists('showAgcFits', 'visitId', visitId)
+            // verify required parameter 'frameId' is not null or undefined
+            assertParamExists('showAgcFits', 'frameId', frameId)
+            const localVarPath = `/api/fits/visits/{visit_id}/agc/{frame_id}.fits`
+                .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)))
+                .replace(`{${"frame_id"}}`, encodeURIComponent(String(frameId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
 
     
@@ -2553,6 +2658,16 @@ export const DefaultApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary List Pfs Design
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listPfsDesign(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<FitsMeta>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listPfsDesign(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary List Visit
          * @param {number} [offset] 
          * @param {number} [limit] 
@@ -2577,6 +2692,17 @@ export const DefaultApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Pfs Design Chart
+         * @param {Array<string>} idHex 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async pfsDesignChart(idHex: Array<string>, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.pfsDesignChart(idHex, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Show Agc Data Chart
          * @param {number} visitId 
          * @param {number} [width] 
@@ -2587,6 +2713,18 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          */
         async showAgcDataChart(visitId: number, width?: number, height?: number, theme?: ThemeName, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.showAgcDataChart(visitId, width, height, theme, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Show Agc Fits
+         * @param {number} visitId 
+         * @param {number} frameId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async showAgcFits(visitId: number, frameId: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.showAgcFits(visitId, frameId, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -2904,6 +3042,15 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
+         * @summary List Pfs Design
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPfsDesign(options?: any): AxiosPromise<Array<FitsMeta>> {
+            return localVarFp.listPfsDesign(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary List Visit
          * @param {number} [offset] 
          * @param {number} [limit] 
@@ -2926,6 +3073,16 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
+         * @summary Pfs Design Chart
+         * @param {Array<string>} idHex 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        pfsDesignChart(idHex: Array<string>, options?: any): AxiosPromise<any> {
+            return localVarFp.pfsDesignChart(idHex, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Show Agc Data Chart
          * @param {number} visitId 
          * @param {number} [width] 
@@ -2936,6 +3093,17 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          */
         showAgcDataChart(visitId: number, width?: number, height?: number, theme?: ThemeName, options?: any): AxiosPromise<any> {
             return localVarFp.showAgcDataChart(visitId, width, height, theme, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Show Agc Fits
+         * @param {number} visitId 
+         * @param {number} frameId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        showAgcFits(visitId: number, frameId: number, options?: any): AxiosPromise<any> {
+            return localVarFp.showAgcFits(visitId, frameId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3267,6 +3435,17 @@ export class DefaultApi extends BaseAPI {
 
     /**
      * 
+     * @summary List Pfs Design
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public listPfsDesign(options?: any) {
+        return DefaultApiFp(this.configuration).listPfsDesign(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
      * @summary List Visit
      * @param {number} [offset] 
      * @param {number} [limit] 
@@ -3293,6 +3472,18 @@ export class DefaultApi extends BaseAPI {
 
     /**
      * 
+     * @summary Pfs Design Chart
+     * @param {Array<string>} idHex 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public pfsDesignChart(idHex: Array<string>, options?: any) {
+        return DefaultApiFp(this.configuration).pfsDesignChart(idHex, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
      * @summary Show Agc Data Chart
      * @param {number} visitId 
      * @param {number} [width] 
@@ -3304,6 +3495,19 @@ export class DefaultApi extends BaseAPI {
      */
     public showAgcDataChart(visitId: number, width?: number, height?: number, theme?: ThemeName, options?: any) {
         return DefaultApiFp(this.configuration).showAgcDataChart(visitId, width, height, theme, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Show Agc Fits
+     * @param {number} visitId 
+     * @param {number} frameId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public showAgcFits(visitId: number, frameId: number, options?: any) {
+        return DefaultApiFp(this.configuration).showAgcFits(visitId, frameId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

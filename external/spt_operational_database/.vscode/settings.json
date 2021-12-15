@@ -1,0 +1,24 @@
+{
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 15432,
+      "driver": "PostgreSQL",
+      "name": "opdb-local",
+      "username": "postgres",
+      "database": "opdb",
+      "password": ""
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 25432,
+      "driver": "PostgreSQL",
+      "name": "opdb-production",
+      "database": "opdb",
+      "username": "pfs",
+      "password": "2394f4s3d"
+    }
+  ]
+}

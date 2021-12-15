@@ -1,7 +1,4 @@
 from starlette.testclient import TestClient
-import pytest
-
-from spt_operational_database.build.lib.opdb.models import pfs_object
 
 
 def test_visit(client: TestClient):

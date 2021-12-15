@@ -12,6 +12,7 @@ export SECRET_KEY_BASE
 export PFS_OBSLOG_DSN
 export PFS_OBSLOG_DATA_ROOT
 export PFS_OBSLOG_ENV
+export PYTHONPATH=src/pfs_obslog/server/pythonpath
 
 host=127.0.0.1
 port=8000

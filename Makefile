@@ -1,10 +1,12 @@
 python := python
 postgres_home := /usr
 rsync_exclude := {secrets,.venv,node_modules,schemaspy/html,htmlcov,logs,attachments,tmp,__pycache__,'*.sock'}
+PYTHONPATH := src/pfs_obslog/server/pythonpath
 
 .PHONY: schemaspy
 
 test:
+	PYTHONPATH=$(PYTHONPATH) \
 	./.venv/bin/pytest \
 			$(opt) \
 			-v \
@@ -55,7 +57,9 @@ setup:
 	.venv/bin/pip install --upgrade pip
 	.venv/bin/pip install -e .
 	.venv/bin/pip install -e ."[dev]"
-	.venv/bin/pip install -e ./spt_operational_database
+	.venv/bin/pip install -e ./external/spt_operational_database
+	.venv/bin/pip install -e ./external/pfs_utils
+	.venv/bin/pip install -e ./external/datamodel
 
 webui-build:
 	cd webui && npm run build -- --base=./

@@ -1,0 +1,67 @@
+input,
+button {
+  border-style: none;
+  border-radius: 4px;
+}
+
+// body,
+// input,
+// textarea,
+// button,
+// select {
+//   background-color: #222;
+//   color: #aaa;
+// }
+
+// input,
+// button,
+// textarea,
+// select {
+//   box-shadow: 0 0 2px rgba(white, 0.75);
+//   border-style: none;
+//   margin: 2px;
+// }
+
+// input[type="radio"] {
+//   box-shadow: none;
+// }
+
+// button,
+// input[type="submit"] {
+//   border-radius: 4px;
+//   background-color: #222;
+//   &:hover {
+//     background-color: #333;
+//   }
+//   &:active {
+//     background-color: #555;
+//   }
+//   &:disabled {
+//     &:hover,
+//     &:active {
+//       background-color: #222;
+//     }
+//     * {
+//       color: #555;
+//     }
+//   }
+// }
+
+// *:focus {
+//   outline: none;
+//   box-shadow: 0 0 8px cyan;
+// }
+
+// ::placeholder {
+//   color: #555;
+// }
+
+// .lazy-image {
+//   background-color: #333;
+//   box-shadow: 0 0 4pt rgba(white, 0.5);
+//   border-radius: 4px;
+// }
+
+// a {
+//   color: lightblue;
+// }

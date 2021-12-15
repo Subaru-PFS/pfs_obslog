@@ -19,13 +19,11 @@ def test_visit_query(db: Session):
     apply_filter(db, """ where id between 0 and 3 """)
 
 
-@pytest.mark.focus
 def test_header_search(db: Session):
     apply_filter(db, """ where fits_header['OBSERVER'] = 'hello' """)
     apply_filter(db, """ where fits_header['NAXIS']::float between 1 and 3""")
     apply_filter(db, """ where 'ok'::safe_float is null """)
     apply_filter(db, """ where 'ok'::safe_int is null """)
-    # apply_filter(db, """ where  """)
 
 
 def apply_filter(db: Session, sql: str):

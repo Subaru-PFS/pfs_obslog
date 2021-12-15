@@ -14,34 +14,15 @@ from pfs_obslog.server.app.routers.asynctask import (
     backgrofund_process_typeunsafe_args, background_thread)
 from pfs_obslog.server.env import PFS_OBSLOG_DATA_ROOT, PFS_OBSLOG_ENV
 from pfs_obslog.server.filecache import FileCache
+from pfs_obslog.server.fitsmeta import FitsMeta, fits_meta
 from pfs_obslog.server.image import SizeHint, fits2png
-from pfs_obslog.server.orm import static_check_init_args
 from pfs_obslog.server.utils.metafits import load_fits_headers
 from pfs_obslog.server.utils.timeit import timeit
-from pydantic import BaseModel
-from sqlalchemy.orm.session import Session
 from starlette.responses import FileResponse, Response
 
 logger = getLogger(__name__)
 
 data_root = Path(PFS_OBSLOG_DATA_ROOT)
-
-
-@static_check_init_args
-class FitsHeader(BaseModel):
-    cards: list
-
-
-@static_check_init_args
-class FitsHdu(BaseModel):
-    index: int
-    header: FitsHeader
-
-
-@static_check_init_args
-class FitsMeta(BaseModel):
-    frameid: str  # id of the file
-    hdul: list[FitsHdu]
 
 
 router = APIRouter()
@@ -184,7 +165,7 @@ async def show_agc_fits_preview(
         try:
             filepath = agc_fits_path(visit, frame_id)
         except AgcFitsNotFound:
-            raise  HTTPException(status.HTTP_404_NOT_FOUND)
+            raise HTTPException(status.HTTP_404_NOT_FOUND)
         png = await backgrofund_process_typeunsafe_args(
             fits2png,
             (filepath, SizeHint(max_width=width, max_height=height)),
@@ -240,21 +221,6 @@ def calexp_fits_path(visit: M.pfs_visit, camera_id: int):
     arm = 'brnm'[camera_id % 4]
     path = date_dir / f'v{visit_id:06d}' / f'calExp-SA{visit_id:06d}{arm}{sm}.fits'
     return path
-
-
-def fits_meta(path: Path) -> FitsMeta:
-    headers = load_fits_headers(str(path))
-    return FitsMeta(
-        frameid=path.name,
-        hdul=[
-            FitsHdu(
-                index=i,
-                header=FitsHeader(cards=[[keyword, header_value_stringify(value), comment]
-                                  for keyword, value, comment in header.cards]),
-            )
-            for i, header in enumerate(headers)
-        ]
-    )
 
 
 def header_value_stringify(value):

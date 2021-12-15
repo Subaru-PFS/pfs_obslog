@@ -13,6 +13,7 @@ setup(
     python_requires='>=3.9',
     install_requires=[
         'fastapi>=0.63',
+        'orjson',
         'psqlparse',
         'matplotlib',
         'scipy',
@@ -27,6 +28,7 @@ setup(
         'uvloop',
         'httptools',
         'scikit-image',
+        'pytz', # for pfsUtils
         # f'opdb @ file://localhost{HERE.absolute()}/spt_operational_database',
     ],
     extras_require={

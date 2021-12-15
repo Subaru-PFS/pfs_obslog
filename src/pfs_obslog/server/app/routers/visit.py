@@ -3,7 +3,7 @@ import csv
 import functools
 import io
 from logging import getLogger
-from typing import Any, Callable, Generator, Iterable, Optional, TypeVar
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from opdb import models as M

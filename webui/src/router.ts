@@ -10,6 +10,7 @@ export const router = createRouter({
   routes: [
     { path: '/', component: () => import('./routes/Home'), },
     { path: '/attachments', component: () => import('./routes/Attachments'), },
+    { path: '/designs', component: () => import('./routes/Designs'), },
     {
       path: '/login',
       component: () => import('./routes/Login'),
