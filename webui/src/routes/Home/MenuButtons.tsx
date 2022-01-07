@@ -24,7 +24,7 @@ export const MenuButtons = defineComponent({
         onClick={refresh}
       ><MI icon="refresh" /></AsyncButton>
       <button data-tooltip="Attachments" onClick={() => router.push('/attachments')}><MI icon="folder" /></button>
-      <button data-tooltip="pfsDesign" onClick={() => router.push('/designs')}><MI icon="design_services" /></button>
+      {/* <button data-tooltip="pfsDesign" onClick={() => router.push('/designs')}><MI icon="design_services" /></button> */}
       <button data-tooltip="Help" onClick={() => router.push('/help')}><MI icon="help" /></button>
       <AsyncButton data-tooltip="Logout" onClick={logout}><MI icon="exit_to_app" /></AsyncButton>
     </>

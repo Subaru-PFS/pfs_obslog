@@ -58,7 +58,7 @@ class VisitDetail(VisitBase):
         notes=row.obslog_notes,
         sps=row.sps_visit,
         mcs=None if len(row.mcs_exposure) == 0 else McsVisit(exposures=row.mcs_exposure),
-        agc=None if row.agc_exposure is None else AgcVisit(exposure=row.agc_exposure),
+        agc=None if len(row.agc_exposures) == 0 else AgcVisit(exposures=row.agc_exposures),
         sps_sequence=row.visit_set.iic_sequence if row.visit_set else None,
     ))
 

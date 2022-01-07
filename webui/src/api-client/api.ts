@@ -17,8 +17,6 @@ import { Configuration } from './configuration';
 import globalAxios, { AxiosPromise, AxiosInstance } from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from './common';
-// @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } from './base';
 
 /**
@@ -223,10 +221,10 @@ export interface AgcGuideOffset {
 export interface AgcVisit {
     /**
      * 
-     * @type {AgcExposure}
+     * @type {Array<AgcExposure>}
      * @memberof AgcVisit
      */
-    exposure?: AgcExposure;
+    exposures: Array<AgcExposure>;
 }
 /**
  * 
@@ -283,6 +281,19 @@ export interface AttachmentList {
      * @memberof AttachmentList
      */
     entries: Array<AttachmentEntry>;
+}
+/**
+ * 
+ * @export
+ * @interface BodyCreateAttachmentApiAttachmentsPost
+ */
+export interface BodyCreateAttachmentApiAttachmentsPost {
+    /**
+     * 
+     * @type {any}
+     * @memberof BodyCreateAttachmentApiAttachmentsPost
+     */
+    file: any;
 }
 /**
  * 
@@ -1236,10 +1247,12 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         createAttachment: async (file: any, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'file' is not null or undefined
-            assertParamExists('createAttachment', 'file', file)
+            if (file === null || file === undefined) {
+                throw new RequiredError('file','Required parameter file was null or undefined when calling createAttachment.');
+            }
             const localVarPath = `/api/attachments`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1258,13 +1271,20 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
     
             localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = localVarFormParams;
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1277,10 +1297,12 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         createMcsExposureNote: async (mcsExposureNoteCreateRequest: McsExposureNoteCreateRequest, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'mcsExposureNoteCreateRequest' is not null or undefined
-            assertParamExists('createMcsExposureNote', 'mcsExposureNoteCreateRequest', mcsExposureNoteCreateRequest)
+            if (mcsExposureNoteCreateRequest === null || mcsExposureNoteCreateRequest === undefined) {
+                throw new RequiredError('mcsExposureNoteCreateRequest','Required parameter mcsExposureNoteCreateRequest was null or undefined when calling createMcsExposureNote.');
+            }
             const localVarPath = `/api/mcs_exposure_notes`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1294,13 +1316,26 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(mcsExposureNoteCreateRequest, localVarRequestOptions, configuration)
+            const nonString = typeof mcsExposureNoteCreateRequest !== 'string';
+            const needsSerialization = nonString && configuration && configuration.isJsonMime
+                ? configuration.isJsonMime(localVarRequestOptions.headers['Content-Type'])
+                : nonString;
+            localVarRequestOptions.data =  needsSerialization
+                ? JSON.stringify(mcsExposureNoteCreateRequest !== undefined ? mcsExposureNoteCreateRequest : {})
+                : (mcsExposureNoteCreateRequest || "");
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1313,10 +1348,12 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         createSession: async (sessionCreateRequest: SessionCreateRequest, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'sessionCreateRequest' is not null or undefined
-            assertParamExists('createSession', 'sessionCreateRequest', sessionCreateRequest)
+            if (sessionCreateRequest === null || sessionCreateRequest === undefined) {
+                throw new RequiredError('sessionCreateRequest','Required parameter sessionCreateRequest was null or undefined when calling createSession.');
+            }
             const localVarPath = `/api/session`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1330,13 +1367,26 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(sessionCreateRequest, localVarRequestOptions, configuration)
+            const nonString = typeof sessionCreateRequest !== 'string';
+            const needsSerialization = nonString && configuration && configuration.isJsonMime
+                ? configuration.isJsonMime(localVarRequestOptions.headers['Content-Type'])
+                : nonString;
+            localVarRequestOptions.data =  needsSerialization
+                ? JSON.stringify(sessionCreateRequest !== undefined ? sessionCreateRequest : {})
+                : (sessionCreateRequest || "");
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1349,10 +1399,12 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         createVisitNote: async (visitNoteCreateRequest: VisitNoteCreateRequest, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'visitNoteCreateRequest' is not null or undefined
-            assertParamExists('createVisitNote', 'visitNoteCreateRequest', visitNoteCreateRequest)
+            if (visitNoteCreateRequest === null || visitNoteCreateRequest === undefined) {
+                throw new RequiredError('visitNoteCreateRequest','Required parameter visitNoteCreateRequest was null or undefined when calling createVisitNote.');
+            }
             const localVarPath = `/api/visit_notes`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1366,13 +1418,26 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(visitNoteCreateRequest, localVarRequestOptions, configuration)
+            const nonString = typeof visitNoteCreateRequest !== 'string';
+            const needsSerialization = nonString && configuration && configuration.isJsonMime
+                ? configuration.isJsonMime(localVarRequestOptions.headers['Content-Type'])
+                : nonString;
+            localVarRequestOptions.data =  needsSerialization
+                ? JSON.stringify(visitNoteCreateRequest !== undefined ? visitNoteCreateRequest : {})
+                : (visitNoteCreateRequest || "");
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1385,10 +1450,12 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         createVisitSetNote: async (visitSetNoteCreateRequest: VisitSetNoteCreateRequest, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'visitSetNoteCreateRequest' is not null or undefined
-            assertParamExists('createVisitSetNote', 'visitSetNoteCreateRequest', visitSetNoteCreateRequest)
+            if (visitSetNoteCreateRequest === null || visitSetNoteCreateRequest === undefined) {
+                throw new RequiredError('visitSetNoteCreateRequest','Required parameter visitSetNoteCreateRequest was null or undefined when calling createVisitSetNote.');
+            }
             const localVarPath = `/api/visit_set_notes`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1402,13 +1469,26 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(visitSetNoteCreateRequest, localVarRequestOptions, configuration)
+            const nonString = typeof visitSetNoteCreateRequest !== 'string';
+            const needsSerialization = nonString && configuration && configuration.isJsonMime
+                ? configuration.isJsonMime(localVarRequestOptions.headers['Content-Type'])
+                : nonString;
+            localVarRequestOptions.data =  needsSerialization
+                ? JSON.stringify(visitSetNoteCreateRequest !== undefined ? visitSetNoteCreateRequest : {})
+                : (visitSetNoteCreateRequest || "");
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1421,11 +1501,13 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         destroyAttachment: async (fileId: number, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'fileId' is not null or undefined
-            assertParamExists('destroyAttachment', 'fileId', fileId)
+            if (fileId === null || fileId === undefined) {
+                throw new RequiredError('fileId','Required parameter fileId was null or undefined when calling destroyAttachment.');
+            }
             const localVarPath = `/api/attachments/{file_id}`
                 .replace(`{${"file_id"}}`, encodeURIComponent(String(fileId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1437,12 +1519,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1455,11 +1544,13 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         destroyMcsExposureNote: async (id: number, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('destroyMcsExposureNote', 'id', id)
+            if (id === null || id === undefined) {
+                throw new RequiredError('id','Required parameter id was null or undefined when calling destroyMcsExposureNote.');
+            }
             const localVarPath = `/api/mcs_exposure_notes/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1471,12 +1562,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1489,7 +1587,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         destroySession: async (options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/session`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1501,12 +1599,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1519,11 +1624,13 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         destroyVisitNote: async (id: number, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('destroyVisitNote', 'id', id)
+            if (id === null || id === undefined) {
+                throw new RequiredError('id','Required parameter id was null or undefined when calling destroyVisitNote.');
+            }
             const localVarPath = `/api/visit_notes/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1535,12 +1642,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1553,11 +1667,13 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         destroyVisitSetNote: async (id: number, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('destroyVisitSetNote', 'id', id)
+            if (id === null || id === undefined) {
+                throw new RequiredError('id','Required parameter id was null or undefined when calling destroyVisitSetNote.');
+            }
             const localVarPath = `/api/visit_set_notes/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1569,12 +1685,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1587,7 +1710,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         healthz: async (options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/healthz`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1599,42 +1722,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Index
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        index: async (options: any = {}): Promise<RequestArgs> => {
-            const localVarPath = `/`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
             }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1649,7 +1749,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         listAttachment: async (start?: number, perPage?: number, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/attachments`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1669,12 +1769,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1687,11 +1794,13 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         listFitsMeta: async (visitId: number, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'visitId' is not null or undefined
-            assertParamExists('listFitsMeta', 'visitId', visitId)
+            if (visitId === null || visitId === undefined) {
+                throw new RequiredError('visitId','Required parameter visitId was null or undefined when calling listFitsMeta.');
+            }
             const localVarPath = `/api/fits/{visit_id}`
                 .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1703,12 +1812,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1721,7 +1837,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         listPfsDesign: async (options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/pfs_design`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1733,12 +1849,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1754,7 +1877,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         listVisit: async (offset?: number, limit?: number, sql?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/visits`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1778,12 +1901,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1797,7 +1927,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         listVisitCsv: async (sql?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/visits.csv`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1813,12 +1943,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1831,10 +1968,12 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         pfsDesignChart: async (idHex: Array<string>, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'idHex' is not null or undefined
-            assertParamExists('pfsDesignChart', 'idHex', idHex)
+            if (idHex === null || idHex === undefined) {
+                throw new RequiredError('idHex','Required parameter idHex was null or undefined when calling pfsDesignChart.');
+            }
             const localVarPath = `/api/pfs_design.png`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1850,12 +1989,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1871,11 +2017,13 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         showAgcDataChart: async (visitId: number, width?: number, height?: number, theme?: ThemeName, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'visitId' is not null or undefined
-            assertParamExists('showAgcDataChart', 'visitId', visitId)
+            if (visitId === null || visitId === undefined) {
+                throw new RequiredError('visitId','Required parameter visitId was null or undefined when calling showAgcDataChart.');
+            }
             const localVarPath = `/api/agc_data/{visit_id}.png`
                 .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1899,12 +2047,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1918,14 +2073,18 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         showAgcFits: async (visitId: number, frameId: number, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'visitId' is not null or undefined
-            assertParamExists('showAgcFits', 'visitId', visitId)
+            if (visitId === null || visitId === undefined) {
+                throw new RequiredError('visitId','Required parameter visitId was null or undefined when calling showAgcFits.');
+            }
             // verify required parameter 'frameId' is not null or undefined
-            assertParamExists('showAgcFits', 'frameId', frameId)
+            if (frameId === null || frameId === undefined) {
+                throw new RequiredError('frameId','Required parameter frameId was null or undefined when calling showAgcFits.');
+            }
             const localVarPath = `/api/fits/visits/{visit_id}/agc/{frame_id}.fits`
                 .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)))
                 .replace(`{${"frame_id"}}`, encodeURIComponent(String(frameId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1937,12 +2096,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -1959,17 +2125,23 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         showAgcFitsPreview: async (visitId: number, frameId: number, hduIndex: number, width?: number, height?: number, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'visitId' is not null or undefined
-            assertParamExists('showAgcFitsPreview', 'visitId', visitId)
+            if (visitId === null || visitId === undefined) {
+                throw new RequiredError('visitId','Required parameter visitId was null or undefined when calling showAgcFitsPreview.');
+            }
             // verify required parameter 'frameId' is not null or undefined
-            assertParamExists('showAgcFitsPreview', 'frameId', frameId)
+            if (frameId === null || frameId === undefined) {
+                throw new RequiredError('frameId','Required parameter frameId was null or undefined when calling showAgcFitsPreview.');
+            }
             // verify required parameter 'hduIndex' is not null or undefined
-            assertParamExists('showAgcFitsPreview', 'hduIndex', hduIndex)
+            if (hduIndex === null || hduIndex === undefined) {
+                throw new RequiredError('hduIndex','Required parameter hduIndex was null or undefined when calling showAgcFitsPreview.');
+            }
             const localVarPath = `/api/fits/visits/{visit_id}/agc/{frame_id}-{hdu_index}.png`
                 .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)))
                 .replace(`{${"frame_id"}}`, encodeURIComponent(String(frameId)))
                 .replace(`{${"hdu_index"}}`, encodeURIComponent(String(hduIndex)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1989,12 +2161,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -2009,14 +2188,18 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         showAttachment: async (accountName: string, fileId: number, filename?: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'accountName' is not null or undefined
-            assertParamExists('showAttachment', 'accountName', accountName)
+            if (accountName === null || accountName === undefined) {
+                throw new RequiredError('accountName','Required parameter accountName was null or undefined when calling showAttachment.');
+            }
             // verify required parameter 'fileId' is not null or undefined
-            assertParamExists('showAttachment', 'fileId', fileId)
+            if (fileId === null || fileId === undefined) {
+                throw new RequiredError('fileId','Required parameter fileId was null or undefined when calling showAttachment.');
+            }
             const localVarPath = `/api/attachments/{account_name}/{file_id}`
                 .replace(`{${"account_name"}}`, encodeURIComponent(String(accountName)))
                 .replace(`{${"file_id"}}`, encodeURIComponent(String(fileId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2032,12 +2215,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -2051,14 +2241,18 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         showFitsByFrameId: async (visitId: number, frameId: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'visitId' is not null or undefined
-            assertParamExists('showFitsByFrameId', 'visitId', visitId)
+            if (visitId === null || visitId === undefined) {
+                throw new RequiredError('visitId','Required parameter visitId was null or undefined when calling showFitsByFrameId.');
+            }
             // verify required parameter 'frameId' is not null or undefined
-            assertParamExists('showFitsByFrameId', 'frameId', frameId)
+            if (frameId === null || frameId === undefined) {
+                throw new RequiredError('frameId','Required parameter frameId was null or undefined when calling showFitsByFrameId.');
+            }
             const localVarPath = `/api/fits/visits/{visit_id}/frames/{frame_id}.fits`
                 .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)))
                 .replace(`{${"frame_id"}}`, encodeURIComponent(String(frameId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2070,12 +2264,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -2091,11 +2292,13 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         showMcsDataChart: async (frameId: number, width?: number, height?: number, theme?: ThemeName, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'frameId' is not null or undefined
-            assertParamExists('showMcsDataChart', 'frameId', frameId)
+            if (frameId === null || frameId === undefined) {
+                throw new RequiredError('frameId','Required parameter frameId was null or undefined when calling showMcsDataChart.');
+            }
             const localVarPath = `/api/mcs_data/{frame_id}.png`
                 .replace(`{${"frame_id"}}`, encodeURIComponent(String(frameId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2119,12 +2322,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -2138,14 +2348,18 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         showMcsFits: async (visitId: number, frameId: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'visitId' is not null or undefined
-            assertParamExists('showMcsFits', 'visitId', visitId)
+            if (visitId === null || visitId === undefined) {
+                throw new RequiredError('visitId','Required parameter visitId was null or undefined when calling showMcsFits.');
+            }
             // verify required parameter 'frameId' is not null or undefined
-            assertParamExists('showMcsFits', 'frameId', frameId)
+            if (frameId === null || frameId === undefined) {
+                throw new RequiredError('frameId','Required parameter frameId was null or undefined when calling showMcsFits.');
+            }
             const localVarPath = `/api/fits/visits/{visit_id}/mcs/{frame_id}.fits`
                 .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)))
                 .replace(`{${"frame_id"}}`, encodeURIComponent(String(frameId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2157,12 +2371,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -2178,14 +2399,18 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         showMcsFitsPreview: async (visitId: number, frameId: number, width?: number, height?: number, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'visitId' is not null or undefined
-            assertParamExists('showMcsFitsPreview', 'visitId', visitId)
+            if (visitId === null || visitId === undefined) {
+                throw new RequiredError('visitId','Required parameter visitId was null or undefined when calling showMcsFitsPreview.');
+            }
             // verify required parameter 'frameId' is not null or undefined
-            assertParamExists('showMcsFitsPreview', 'frameId', frameId)
+            if (frameId === null || frameId === undefined) {
+                throw new RequiredError('frameId','Required parameter frameId was null or undefined when calling showMcsFitsPreview.');
+            }
             const localVarPath = `/api/fits/visits/{visit_id}/mcs/{frame_id}.png`
                 .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)))
                 .replace(`{${"frame_id"}}`, encodeURIComponent(String(frameId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2205,12 +2430,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -2223,7 +2455,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         showSession: async (options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/session`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2235,12 +2467,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -2255,14 +2494,18 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         showSpsFits: async (visitId: number, cameraId: number, type?: FitsType, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'visitId' is not null or undefined
-            assertParamExists('showSpsFits', 'visitId', visitId)
+            if (visitId === null || visitId === undefined) {
+                throw new RequiredError('visitId','Required parameter visitId was null or undefined when calling showSpsFits.');
+            }
             // verify required parameter 'cameraId' is not null or undefined
-            assertParamExists('showSpsFits', 'cameraId', cameraId)
+            if (cameraId === null || cameraId === undefined) {
+                throw new RequiredError('cameraId','Required parameter cameraId was null or undefined when calling showSpsFits.');
+            }
             const localVarPath = `/api/fits/visits/{visit_id}/sps/{camera_id}.fits`
                 .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)))
                 .replace(`{${"camera_id"}}`, encodeURIComponent(String(cameraId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2278,12 +2521,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -2300,14 +2550,18 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         showSpsFitsPreview: async (visitId: number, cameraId: number, width?: number, height?: number, type?: FitsType, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'visitId' is not null or undefined
-            assertParamExists('showSpsFitsPreview', 'visitId', visitId)
+            if (visitId === null || visitId === undefined) {
+                throw new RequiredError('visitId','Required parameter visitId was null or undefined when calling showSpsFitsPreview.');
+            }
             // verify required parameter 'cameraId' is not null or undefined
-            assertParamExists('showSpsFitsPreview', 'cameraId', cameraId)
+            if (cameraId === null || cameraId === undefined) {
+                throw new RequiredError('cameraId','Required parameter cameraId was null or undefined when calling showSpsFitsPreview.');
+            }
             const localVarPath = `/api/fits/visits/{visit_id}/sps/{camera_id}.png`
                 .replace(`{${"visit_id"}}`, encodeURIComponent(String(visitId)))
                 .replace(`{${"camera_id"}}`, encodeURIComponent(String(cameraId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2331,12 +2585,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -2349,11 +2610,13 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         showVisit: async (id: number, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('showVisit', 'id', id)
+            if (id === null || id === undefined) {
+                throw new RequiredError('id','Required parameter id was null or undefined when calling showVisit.');
+            }
             const localVarPath = `/api/visits/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2365,12 +2628,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -2384,13 +2654,17 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         updateMcsExposureNote: async (id: number, pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest: PfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('updateMcsExposureNote', 'id', id)
+            if (id === null || id === undefined) {
+                throw new RequiredError('id','Required parameter id was null or undefined when calling updateMcsExposureNote.');
+            }
             // verify required parameter 'pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest' is not null or undefined
-            assertParamExists('updateMcsExposureNote', 'pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest', pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest)
+            if (pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest === null || pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest === undefined) {
+                throw new RequiredError('pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest','Required parameter pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest was null or undefined when calling updateMcsExposureNote.');
+            }
             const localVarPath = `/api/mcs_exposure_notes/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2404,13 +2678,26 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, localVarRequestOptions, configuration)
+            const nonString = typeof pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest !== 'string';
+            const needsSerialization = nonString && configuration && configuration.isJsonMime
+                ? configuration.isJsonMime(localVarRequestOptions.headers['Content-Type'])
+                : nonString;
+            localVarRequestOptions.data =  needsSerialization
+                ? JSON.stringify(pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest !== undefined ? pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest : {})
+                : (pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest || "");
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -2424,13 +2711,17 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         updateVisitNote: async (id: number, pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest: PfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('updateVisitNote', 'id', id)
+            if (id === null || id === undefined) {
+                throw new RequiredError('id','Required parameter id was null or undefined when calling updateVisitNote.');
+            }
             // verify required parameter 'pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest' is not null or undefined
-            assertParamExists('updateVisitNote', 'pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest', pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest)
+            if (pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest === null || pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest === undefined) {
+                throw new RequiredError('pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest','Required parameter pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest was null or undefined when calling updateVisitNote.');
+            }
             const localVarPath = `/api/visit_notes/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2444,13 +2735,26 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, localVarRequestOptions, configuration)
+            const nonString = typeof pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest !== 'string';
+            const needsSerialization = nonString && configuration && configuration.isJsonMime
+                ? configuration.isJsonMime(localVarRequestOptions.headers['Content-Type'])
+                : nonString;
+            localVarRequestOptions.data =  needsSerialization
+                ? JSON.stringify(pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest !== undefined ? pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest : {})
+                : (pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest || "");
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -2464,13 +2768,17 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          */
         updateVisitSetNote: async (id: number, visitSetNoteUpdateRequest: VisitSetNoteUpdateRequest, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('updateVisitSetNote', 'id', id)
+            if (id === null || id === undefined) {
+                throw new RequiredError('id','Required parameter id was null or undefined when calling updateVisitSetNote.');
+            }
             // verify required parameter 'visitSetNoteUpdateRequest' is not null or undefined
-            assertParamExists('updateVisitSetNote', 'visitSetNoteUpdateRequest', visitSetNoteUpdateRequest)
+            if (visitSetNoteUpdateRequest === null || visitSetNoteUpdateRequest === undefined) {
+                throw new RequiredError('visitSetNoteUpdateRequest','Required parameter visitSetNoteUpdateRequest was null or undefined when calling updateVisitSetNote.');
+            }
             const localVarPath = `/api/visit_set_notes/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2484,13 +2792,26 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            const queryParameters = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                queryParameters.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.query) {
+                queryParameters.set(key, options.query[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(queryParameters)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(visitSetNoteUpdateRequest, localVarRequestOptions, configuration)
+            const nonString = typeof visitSetNoteUpdateRequest !== 'string';
+            const needsSerialization = nonString && configuration && configuration.isJsonMime
+                ? configuration.isJsonMime(localVarRequestOptions.headers['Content-Type'])
+                : nonString;
+            localVarRequestOptions.data =  needsSerialization
+                ? JSON.stringify(visitSetNoteUpdateRequest !== undefined ? visitSetNoteUpdateRequest : {})
+                : (visitSetNoteUpdateRequest || "");
 
             return {
-                url: toPathString(localVarUrlObj),
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
                 options: localVarRequestOptions,
             };
         },
@@ -2502,7 +2823,6 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
  * @export
  */
 export const DefaultApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = DefaultApiAxiosParamCreator(configuration)
     return {
         /**
          * 
@@ -2512,8 +2832,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async createAttachment(file: any, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateAttachmentResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createAttachment(file, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).createAttachment(file, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2523,8 +2846,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async createMcsExposureNote(mcsExposureNoteCreateRequest: McsExposureNoteCreateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<McsExposureNoteCreateResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createMcsExposureNote(mcsExposureNoteCreateRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).createMcsExposureNote(mcsExposureNoteCreateRequest, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2534,8 +2860,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async createSession(sessionCreateRequest: SessionCreateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Session>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createSession(sessionCreateRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).createSession(sessionCreateRequest, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2545,8 +2874,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async createVisitNote(visitNoteCreateRequest: VisitNoteCreateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitNoteCreateResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createVisitNote(visitNoteCreateRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).createVisitNote(visitNoteCreateRequest, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2556,8 +2888,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async createVisitSetNote(visitSetNoteCreateRequest: VisitSetNoteCreateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitSetNoteCreateResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createVisitSetNote(visitSetNoteCreateRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).createVisitSetNote(visitSetNoteCreateRequest, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2567,8 +2902,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async destroyAttachment(fileId: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.destroyAttachment(fileId, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).destroyAttachment(fileId, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2578,8 +2916,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async destroyMcsExposureNote(id: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.destroyMcsExposureNote(id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).destroyMcsExposureNote(id, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2588,8 +2929,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async destroySession(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.destroySession(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).destroySession(options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2599,8 +2943,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async destroyVisitNote(id: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.destroyVisitNote(id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).destroyVisitNote(id, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2610,8 +2957,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async destroyVisitSetNote(id: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.destroyVisitSetNote(id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).destroyVisitSetNote(id, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2620,18 +2970,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async healthz(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.healthz(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * 
-         * @summary Index
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async index(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.index(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).healthz(options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2642,8 +2985,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async listAttachment(start?: number, perPage?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AttachmentList>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listAttachment(start, perPage, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).listAttachment(start, perPage, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2653,8 +2999,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async listFitsMeta(visitId: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<FitsMeta>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listFitsMeta(visitId, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).listFitsMeta(visitId, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2663,8 +3012,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async listPfsDesign(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<FitsMeta>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listPfsDesign(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).listPfsDesign(options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2676,8 +3028,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async listVisit(offset?: number, limit?: number, sql?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitList>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listVisit(offset, limit, sql, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).listVisit(offset, limit, sql, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2687,8 +3042,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async listVisitCsv(sql?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listVisitCsv(sql, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).listVisitCsv(sql, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2698,8 +3056,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async pfsDesignChart(idHex: Array<string>, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.pfsDesignChart(idHex, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).pfsDesignChart(idHex, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2712,8 +3073,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async showAgcDataChart(visitId: number, width?: number, height?: number, theme?: ThemeName, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.showAgcDataChart(visitId, width, height, theme, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).showAgcDataChart(visitId, width, height, theme, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2724,8 +3088,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async showAgcFits(visitId: number, frameId: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.showAgcFits(visitId, frameId, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).showAgcFits(visitId, frameId, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2739,8 +3106,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async showAgcFitsPreview(visitId: number, frameId: number, hduIndex: number, width?: number, height?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.showAgcFitsPreview(visitId, frameId, hduIndex, width, height, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).showAgcFitsPreview(visitId, frameId, hduIndex, width, height, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2752,8 +3122,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async showAttachment(accountName: string, fileId: number, filename?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.showAttachment(accountName, fileId, filename, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).showAttachment(accountName, fileId, filename, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2764,8 +3137,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async showFitsByFrameId(visitId: number, frameId: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.showFitsByFrameId(visitId, frameId, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).showFitsByFrameId(visitId, frameId, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2778,8 +3154,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async showMcsDataChart(frameId: number, width?: number, height?: number, theme?: ThemeName, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.showMcsDataChart(frameId, width, height, theme, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).showMcsDataChart(frameId, width, height, theme, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2790,8 +3169,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async showMcsFits(visitId: number, frameId: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.showMcsFits(visitId, frameId, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).showMcsFits(visitId, frameId, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2804,8 +3186,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async showMcsFitsPreview(visitId: number, frameId: number, width?: number, height?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.showMcsFitsPreview(visitId, frameId, width, height, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).showMcsFitsPreview(visitId, frameId, width, height, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2814,8 +3199,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async showSession(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Session>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.showSession(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).showSession(options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2827,8 +3215,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async showSpsFits(visitId: number, cameraId: number, type?: FitsType, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.showSpsFits(visitId, cameraId, type, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).showSpsFits(visitId, cameraId, type, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2842,8 +3233,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async showSpsFitsPreview(visitId: number, cameraId: number, width?: number, height?: number, type?: FitsType, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.showSpsFitsPreview(visitId, cameraId, width, height, type, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).showSpsFitsPreview(visitId, cameraId, width, height, type, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2853,8 +3247,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async showVisit(id: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VisitDetail>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.showVisit(id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).showVisit(id, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2865,8 +3262,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async updateMcsExposureNote(id: number, pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest: PfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.updateMcsExposureNote(id, pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).updateMcsExposureNote(id, pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2877,8 +3277,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async updateVisitNote(id: number, pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest: PfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.updateVisitNote(id, pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).updateVisitNote(id, pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
         /**
          * 
@@ -2889,8 +3292,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         async updateVisitSetNote(id: number, visitSetNoteUpdateRequest: VisitSetNoteUpdateRequest, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.updateVisitSetNote(id, visitSetNoteUpdateRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const localVarAxiosArgs = await DefaultApiAxiosParamCreator(configuration).updateVisitSetNote(id, visitSetNoteUpdateRequest, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
         },
     }
 };
@@ -2900,7 +3306,6 @@ export const DefaultApiFp = function(configuration?: Configuration) {
  * @export
  */
 export const DefaultApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = DefaultApiFp(configuration)
     return {
         /**
          * 
@@ -2910,7 +3315,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         createAttachment(file: any, options?: any): AxiosPromise<CreateAttachmentResponse> {
-            return localVarFp.createAttachment(file, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).createAttachment(file, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2920,7 +3325,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         createMcsExposureNote(mcsExposureNoteCreateRequest: McsExposureNoteCreateRequest, options?: any): AxiosPromise<McsExposureNoteCreateResponse> {
-            return localVarFp.createMcsExposureNote(mcsExposureNoteCreateRequest, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).createMcsExposureNote(mcsExposureNoteCreateRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2930,7 +3335,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         createSession(sessionCreateRequest: SessionCreateRequest, options?: any): AxiosPromise<Session> {
-            return localVarFp.createSession(sessionCreateRequest, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).createSession(sessionCreateRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2940,7 +3345,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         createVisitNote(visitNoteCreateRequest: VisitNoteCreateRequest, options?: any): AxiosPromise<VisitNoteCreateResponse> {
-            return localVarFp.createVisitNote(visitNoteCreateRequest, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).createVisitNote(visitNoteCreateRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2950,7 +3355,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         createVisitSetNote(visitSetNoteCreateRequest: VisitSetNoteCreateRequest, options?: any): AxiosPromise<VisitSetNoteCreateResponse> {
-            return localVarFp.createVisitSetNote(visitSetNoteCreateRequest, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).createVisitSetNote(visitSetNoteCreateRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2960,7 +3365,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         destroyAttachment(fileId: number, options?: any): AxiosPromise<any> {
-            return localVarFp.destroyAttachment(fileId, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).destroyAttachment(fileId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2970,7 +3375,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         destroyMcsExposureNote(id: number, options?: any): AxiosPromise<any> {
-            return localVarFp.destroyMcsExposureNote(id, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).destroyMcsExposureNote(id, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2979,7 +3384,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         destroySession(options?: any): AxiosPromise<any> {
-            return localVarFp.destroySession(options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).destroySession(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2989,7 +3394,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         destroyVisitNote(id: number, options?: any): AxiosPromise<any> {
-            return localVarFp.destroyVisitNote(id, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).destroyVisitNote(id, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2999,7 +3404,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         destroyVisitSetNote(id: number, options?: any): AxiosPromise<any> {
-            return localVarFp.destroyVisitSetNote(id, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).destroyVisitSetNote(id, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3008,16 +3413,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         healthz(options?: any): AxiosPromise<any> {
-            return localVarFp.healthz(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Index
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        index(options?: any): AxiosPromise<any> {
-            return localVarFp.index(options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).healthz(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3028,7 +3424,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         listAttachment(start?: number, perPage?: number, options?: any): AxiosPromise<AttachmentList> {
-            return localVarFp.listAttachment(start, perPage, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).listAttachment(start, perPage, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3038,7 +3434,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         listFitsMeta(visitId: number, options?: any): AxiosPromise<Array<FitsMeta>> {
-            return localVarFp.listFitsMeta(visitId, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).listFitsMeta(visitId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3047,7 +3443,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         listPfsDesign(options?: any): AxiosPromise<Array<FitsMeta>> {
-            return localVarFp.listPfsDesign(options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).listPfsDesign(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3059,7 +3455,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         listVisit(offset?: number, limit?: number, sql?: string, options?: any): AxiosPromise<VisitList> {
-            return localVarFp.listVisit(offset, limit, sql, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).listVisit(offset, limit, sql, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3069,7 +3465,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         listVisitCsv(sql?: string, options?: any): AxiosPromise<any> {
-            return localVarFp.listVisitCsv(sql, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).listVisitCsv(sql, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3079,7 +3475,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         pfsDesignChart(idHex: Array<string>, options?: any): AxiosPromise<any> {
-            return localVarFp.pfsDesignChart(idHex, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).pfsDesignChart(idHex, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3092,7 +3488,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         showAgcDataChart(visitId: number, width?: number, height?: number, theme?: ThemeName, options?: any): AxiosPromise<any> {
-            return localVarFp.showAgcDataChart(visitId, width, height, theme, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).showAgcDataChart(visitId, width, height, theme, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3103,7 +3499,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         showAgcFits(visitId: number, frameId: number, options?: any): AxiosPromise<any> {
-            return localVarFp.showAgcFits(visitId, frameId, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).showAgcFits(visitId, frameId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3117,7 +3513,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         showAgcFitsPreview(visitId: number, frameId: number, hduIndex: number, width?: number, height?: number, options?: any): AxiosPromise<any> {
-            return localVarFp.showAgcFitsPreview(visitId, frameId, hduIndex, width, height, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).showAgcFitsPreview(visitId, frameId, hduIndex, width, height, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3129,7 +3525,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         showAttachment(accountName: string, fileId: number, filename?: string, options?: any): AxiosPromise<any> {
-            return localVarFp.showAttachment(accountName, fileId, filename, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).showAttachment(accountName, fileId, filename, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3140,7 +3536,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         showFitsByFrameId(visitId: number, frameId: string, options?: any): AxiosPromise<any> {
-            return localVarFp.showFitsByFrameId(visitId, frameId, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).showFitsByFrameId(visitId, frameId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3153,7 +3549,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         showMcsDataChart(frameId: number, width?: number, height?: number, theme?: ThemeName, options?: any): AxiosPromise<any> {
-            return localVarFp.showMcsDataChart(frameId, width, height, theme, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).showMcsDataChart(frameId, width, height, theme, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3164,7 +3560,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         showMcsFits(visitId: number, frameId: string, options?: any): AxiosPromise<any> {
-            return localVarFp.showMcsFits(visitId, frameId, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).showMcsFits(visitId, frameId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3177,7 +3573,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         showMcsFitsPreview(visitId: number, frameId: number, width?: number, height?: number, options?: any): AxiosPromise<any> {
-            return localVarFp.showMcsFitsPreview(visitId, frameId, width, height, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).showMcsFitsPreview(visitId, frameId, width, height, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3186,7 +3582,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         showSession(options?: any): AxiosPromise<Session> {
-            return localVarFp.showSession(options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).showSession(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3198,7 +3594,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         showSpsFits(visitId: number, cameraId: number, type?: FitsType, options?: any): AxiosPromise<any> {
-            return localVarFp.showSpsFits(visitId, cameraId, type, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).showSpsFits(visitId, cameraId, type, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3212,7 +3608,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         showSpsFitsPreview(visitId: number, cameraId: number, width?: number, height?: number, type?: FitsType, options?: any): AxiosPromise<any> {
-            return localVarFp.showSpsFitsPreview(visitId, cameraId, width, height, type, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).showSpsFitsPreview(visitId, cameraId, width, height, type, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3222,7 +3618,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         showVisit(id: number, options?: any): AxiosPromise<VisitDetail> {
-            return localVarFp.showVisit(id, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).showVisit(id, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3233,7 +3629,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         updateMcsExposureNote(id: number, pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest: PfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, options?: any): AxiosPromise<any> {
-            return localVarFp.updateMcsExposureNote(id, pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).updateMcsExposureNote(id, pfsObslogServerAppRoutersMcsExposureNoteVisitNoteUpdateRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3244,7 +3640,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         updateVisitNote(id: number, pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest: PfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, options?: any): AxiosPromise<any> {
-            return localVarFp.updateVisitNote(id, pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).updateVisitNote(id, pfsObslogServerAppRoutersVisitNoteVisitNoteUpdateRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3255,7 +3651,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         updateVisitSetNote(id: number, visitSetNoteUpdateRequest: VisitSetNoteUpdateRequest, options?: any): AxiosPromise<any> {
-            return localVarFp.updateVisitSetNote(id, visitSetNoteUpdateRequest, options).then((request) => request(axios, basePath));
+            return DefaultApiFp(configuration).updateVisitSetNote(id, visitSetNoteUpdateRequest, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -3395,17 +3791,6 @@ export class DefaultApi extends BaseAPI {
      */
     public healthz(options?: any) {
         return DefaultApiFp(this.configuration).healthz(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Index
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DefaultApi
-     */
-    public index(options?: any) {
-        return DefaultApiFp(this.configuration).index(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

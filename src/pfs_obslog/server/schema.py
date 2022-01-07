@@ -186,7 +186,7 @@ class AgcExposure(BaseModel):
 
 @static_check_init_args
 class AgcVisit(BaseModel):
-    exposure: Optional[AgcExposure]
+    exposures: list[AgcExposure]
 
 
 @static_check_init_args

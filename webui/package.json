@@ -5,7 +5,7 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "serve": "vite preview",
-    "refresh-api-schema": "openapi-generator-cli generate -g typescript-axios -i http://localhost:8000/openapi.json -o ./src/api-client --additional-properties=supportsES6=true",
+    "refresh-api-schema": "docker run --rm -v $PWD:/local openapitools/openapi-generator-cli generate -g typescript-axios -i http://host.docker.internal:8000/openapi.json -o /local/src/api-client --additional-properties=supportsES6=true",
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test-watch": "jest --watch"

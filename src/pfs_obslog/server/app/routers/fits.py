@@ -242,13 +242,14 @@ def sps_mcs_fits_path_for_visit(visit: M.pfs_visit):
 
 
 def agc_fits_path_for_visit(visit: M.pfs_visit):
-    if visit.agc_exposure:
-        agc_exposure: M.agc_exposure = visit.agc_exposure
-        frame_id = agc_exposure.agc_exposure_id
-        try:
-            yield agc_fits_path(visit, frame_id)
-        except AgcFitsNotFound:
-            pass
+    if visit.agc_exposures:
+        agc_exposures: list[M.agc_exposure] = visit.agc_exposures
+        for agc_exposure in agc_exposures:
+            frame_id = agc_exposure.agc_exposure_id
+            try:
+                yield agc_fits_path(visit, frame_id)
+            except AgcFitsNotFound:
+                pass
 
 
 @functools.cache

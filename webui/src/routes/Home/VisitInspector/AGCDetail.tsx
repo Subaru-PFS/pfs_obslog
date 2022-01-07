@@ -19,16 +19,18 @@ export default defineComponent({
     return () =>
       <>
         <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-          {range(6).map(camera_i => (
-            <div style={{ margin: '4px' }}>
-              <div style={{ marginTop: '0.2em', fontFamily: 'monospace', display: 'flex', justifyContent: 'center' }}>[{camera_i + 1}]</div>
-              <LazyImage
-                src={apiUrl(c => c.showAgcFitsPreview($c.$.visit?.id!, $.agc.exposure?.id!, camera_i + 1, 358, 345))}
-                scrollTarget={$c.el}
-                width={358}
-                height={345}
-              />
-            </div>
+          {$.agc.exposures.map(exposure => (
+            range(6).map(camera_i => (
+              <div style={{ margin: '4px' }}>
+                <div style={{ marginTop: '0.2em', fontFamily: 'monospace', display: 'flex', justifyContent: 'center' }}>{exposure.id}[{camera_i + 1}]</div>
+                <LazyImage
+                  src={apiUrl(c => c.showAgcFitsPreview($c.$.visit?.id!, exposure.id, camera_i + 1, 358, 345))}
+                  scrollTarget={$c.el}
+                  width={358}
+                  height={345}
+                />
+              </div>
+            ))
           ))}
         </div>
         <pre>{JSON.stringify($.agc, null, 2)}</pre>
