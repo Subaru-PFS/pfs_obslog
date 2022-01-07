@@ -45,9 +45,9 @@ export default defineComponent({
                 <Folder title={`Frame ID: ${e.frame_id}`}>
                   <div style={{ display: 'inline-block', margin: '0.5em 0' }}>
                     <LazyImage
-                      width={640} height={413}
+                      width={556} height={395}
                       scrollTarget={$c.el}
-                      src={apiUrl(c => c.showMcsFitsPreview($c.$.visit?.id!, e.frame_id, 640, 413))} />
+                      src={apiUrl(c => c.showMcsFitsPreview($c.$.visit?.id!, e.frame_id, 556, 395))} />
                   </div>
                   <div style={{ display: 'inline-block', margin: '0.5em 0' }}>
                     <LazyImage
