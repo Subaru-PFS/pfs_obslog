@@ -18,11 +18,16 @@ test:
 		--cov-config=.coveragerc \
 		--cov=pfs_obslog \
 		--cov-report=html \
-		--cov-branch tests \
-		tests
+		--cov-branch
 
 test/watch:
 	./.venv/bin/ptw --runner "$(MAKE) test"
+
+test/setup-db:
+	$(postgres_home)/bin/dropdb --user=postgres opdb-test || true
+	$(postgres_home)/bin/createdb --user=postgres opdb-test
+	ssh pfs-ics-shell 'pg_dump -h 133.40.164.48 -U pfs opdb --clean --schema-only' | $(postgres_home)/bin/psql --user postgres opdb-test
+	ssh pfs-ics-shell 'pg_dump -h 133.40.164.48 -U pfs opdb --data-only --exclude-table={mcs_data,cobra_target,cobra_match,agc_data,agc_match,obslog_fits_header,pfs_design_fiber}' | $(postgres_home)/bin/psql --user postgres opdb-test
 
 devel/setup:
 	$(python) -m venv .venv
