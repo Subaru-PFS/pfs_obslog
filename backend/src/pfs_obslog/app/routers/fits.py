@@ -1,22 +1,17 @@
 import dataclasses
 import datetime
 import functools
-import itertools
-from concurrent.futures import thread
 from enum import Enum
-from glob import glob
 from logging import getLogger
 from pathlib import Path
 from typing import Any, Literal, Optional, TypeAlias
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from opdb import models as M
-from sqlalchemy.orm import selectinload
 from starlette.responses import FileResponse, Response
 
 from pfs_obslog.app.context import Context
-from pfs_obslog.app.routers.asynctask import (background_process,
-                                              background_thread)
+from pfs_obslog.app.routers.asynctask import background_process
 from pfs_obslog.config import settings
 from pfs_obslog.filecache import FileBackedCache, PickleCache
 from pfs_obslog.fitsmeta import FitsMeta, fits_meta
