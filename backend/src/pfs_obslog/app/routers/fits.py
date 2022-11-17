@@ -155,8 +155,8 @@ def calexp_fits_path(visit: M.pfs_visit, camera_id: int):
     camera_id -= 1
     sm = camera_id // 4 + 1
     arm = 'brnm'[camera_id % 4]
-    for rerun in settings.calexp_ginga_reruns:
-        date_dir = settings.data_root / f'drp/sm1-5.2/rerun/ginga/{rerun}/calExp' / date.strftime(r'%Y-%m-%d')
+    for rerun in settings.calexp_reruns:
+        date_dir = settings.data_root / f'drp/sm1-5.2/rerun/{rerun}/calExp' / date.strftime(r'%Y-%m-%d')
         path = date_dir / f'v{visit_id:06d}' / f'calExp-SA{visit_id:06d}{arm}{sm}.fits'
         if path.exists():
             return path
