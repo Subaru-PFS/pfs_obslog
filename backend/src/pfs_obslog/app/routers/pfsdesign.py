@@ -164,11 +164,17 @@ class PhotometryData(BaseModel):
     filterName: list[str]
 
 
+class GuidestarData(BaseModel):
+    ra: list[float]
+    dec: list[float]
+
+
 class PfsDesignDetail(BaseModel):
     fits_meta: FitsMeta
     date_modified: datetime.datetime
     design_data: DesignData
     photometry_data: PhotometryData
+    guidestar_data: GuidestarData
 
 
 @router.get('/api/pfs_designs/{id_hex}.fits')
@@ -183,7 +189,8 @@ def download_design(
     return FileResponse(str(filepath), media_type='image/fits', filename=filepath.name)
 
 
-@router.get('/api/pfs_designs/{id_hex}', response_model=PfsDesignDetail)
+# @router.get('/api/pfs_designs/{id_hex}', response_model=PfsDesignDetail)
+@router.get('/api/pfs_designs/{id_hex}')
 def show_design(
     id_hex: str,
     ctx: Context = Depends(),
@@ -219,11 +226,16 @@ def show_design(
                 totalFluxErr=hdul[2].data.field('totalFluxErr').tolist(),  # type: ignore
                 filterName=hdul[2].data.field('filterName').tolist(),  # type: ignore
             )
+            guidestar_data = GuidestarData(
+                ra=hdul[3].data.field('ra').tolist(), # type: ignore
+                dec=hdul[3].data.field('dec').tolist(), # type: ignore
+            )
             return PfsDesignDetail(
                 fits_meta=meta,
                 date_modified=datetime.datetime.fromtimestamp(filepath.stat().st_mtime),
                 design_data=design_data,
                 photometry_data=photometry_data,
+                guidestar_data=guidestar_data,
             )
 
     value, set = pfsDesignReadCache.value_and_setter(
