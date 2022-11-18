@@ -153,8 +153,12 @@ function Entry(props: EntryProps) {
           <div class={styles.entryId}>{props.entry.id}</div>
           {/* <div class={styles.entryDate}> {props.entry.date_modified} </div> */}
           <div class={styles.entryDate}>
-            <span use:tippy={{ content: 'Number of Designs' }}>
-              {props.entry.num_design_rows}
+            <span use:tippy={{ content: 'Number of Science Fibers' }}>
+              {props.entry.design_rows.science}
+            </span> / <span use:tippy={{ content: 'Number of Sky Fibers' }}>
+              {props.entry.design_rows.sky}
+            </span> / <span use:tippy={{ content: 'Number of FluxSTD Fibers' }}>
+              {props.entry.design_rows.fluxstd}
             </span> / <span use:tippy={{ content: 'Number of Photometries' }}>
               {props.entry.num_photometry_rows}
             </span> / <span use:tippy={{ content: 'Number of Guide Stars' }}>
