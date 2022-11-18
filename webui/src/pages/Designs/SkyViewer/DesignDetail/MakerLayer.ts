@@ -3,13 +3,14 @@ import { angle, BillboardImage, BillboardImageRef, BillboardRenderer, Globe, Lay
 
 type Options = {
   markers: Marker[]
-  markerImage: BillboardImage
+  markerImages: BillboardImage[]
 }
 
 
 type Marker = {
   coord: V3
   color: V4
+  imageID: number
 }
 
 
@@ -28,18 +29,17 @@ export class MarkerLayer extends Layer {
   }
 
   private rebuild() {
-    const { markers, markerImage } = this.options
+    const { markers, markerImages } = this.options
     if (markers.length > 0) {
       const imageRefs: BillboardImageRef[] = []
-      const marker: BillboardImage = markerImage
-      for (const { color, coord } of markers) {
+      for (const { color, coord, imageID } of markers) {
         imageRefs.push({
-          imageID: 0,
+          imageID,
           position: coord,
           color,
         })
       }
-      this.br.buildArray([marker], imageRefs)
+      this.br.buildArray(markerImages, imageRefs)
       this.globe.requestRefresh()
     }
   }

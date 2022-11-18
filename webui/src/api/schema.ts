@@ -301,6 +301,13 @@ export interface components {
      * @enum {string}
      */
     FitsType: "raw" | "calexp";
+    /** GuidestarData */
+    GuidestarData: {
+      /** Ra */
+      ra: (number)[];
+      /** Dec */
+      dec: (number)[];
+    };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
@@ -399,6 +406,7 @@ export interface components {
       date_modified: string;
       design_data: components["schemas"]["DesignData"];
       photometry_data: components["schemas"]["PhotometryData"];
+      guidestar_data: components["schemas"]["GuidestarData"];
     };
     /** PfsDesignEntry */
     PfsDesignEntry: {
