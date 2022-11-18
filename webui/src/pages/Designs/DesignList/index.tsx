@@ -1,4 +1,4 @@
-import { createDebouncedMemo, createThrottledMemo } from '@solid-primitives/memo'
+import { createDebouncedMemo } from '@solid-primitives/memo'
 import { angle, easing, SkyCoord } from '@stellar-globe/stellar-globe'
 import { createEffect, createMemo, createSignal, For } from "solid-js"
 import { apiUrl } from '~/api'

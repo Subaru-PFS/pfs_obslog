@@ -5,7 +5,7 @@ import { strftime } from "../../../utils/strftime"
 import { useDesignContext } from "../context"
 import { Clock } from "./Clock"
 import { DesignDetail } from "./DesignDetail"
-import { DesignMarkers } from "./DesignMarker"
+import { DesignCircles } from "./DesignCircles"
 import { StellarGlobe } from "./StellarGlobe"
 import styles from './styles.module.scss'
 
@@ -37,7 +37,7 @@ export function SkyViewer() {
         viewOptions={{ fovy: 2, retina: true }}
         ref={globe}
       >
-        <DesignMarkers />
+        <DesignCircles />
         <DesignDetail />
       </StellarGlobe>
       <div class={styles.timeSection}>
