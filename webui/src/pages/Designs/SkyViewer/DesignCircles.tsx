@@ -17,7 +17,7 @@ const FOV = angle.deg2rad(1.4)
 type DesignContext = ReturnType<typeof useDesignContext>
 
 
-export function DesignMarkers() {
+export function DesignCircles() {
   const { globe } = useStellarGlobe()
   const context = useDesignContext()
   const { designs, focusedDesign } = context
