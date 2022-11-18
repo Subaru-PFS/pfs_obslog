@@ -87,11 +87,11 @@ deploy/production-restart:
 
 deploy:
 	$(MAKE) webui/build
-	$(MAKE) deploy/production-sync || true
-	$(MAKE) deploy/production-restart
+	$(MAKE) deploy-only-backend
 
-deploy-backend:
-	$(MAKE) deploy/production-sync
+deploy-only-backend:
+	./runner python -m pfs_obslog.filecache.clear 
+	$(MAKE) deploy/production-sync || true
 	$(MAKE) deploy/production-restart
 
 deploy/install_user_systemd:
