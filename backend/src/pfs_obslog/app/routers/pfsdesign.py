@@ -7,6 +7,7 @@ from logging import getLogger
 from pathlib import Path
 from traceback import format_exc
 
+import numpy
 from astropy.io import fits as afits
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.param_functions import Query
@@ -30,6 +31,36 @@ logger = getLogger(__name__)
 router = APIRouter()
 
 
+class DesignRows(BaseModel):
+    #   SCIENCE = 1: the fiber is intended to be on a science target.
+    #   SKY = 2: the fiber is intended to be on blank sky, and used for sky subtraction.
+    #   FLUXSTD = 3: the fiber is intended to be on a flux standard, and used for flux calibration.
+    #   UNASSIGNED = 4: the fiber is not targeted on anything in particular.
+    #   ENGINEERING = 5: the fiber is an engineering fiber.
+    #   SUNSS_IMAGING = 6: the fiber goes to the SuNSS imaging leg
+    #   SUNSS_DIFFUSE = 7: the fiber goes to the SuNSS diffuse leg
+    science: int
+    sky: int
+    fluxstd: int
+    unassigned: int
+    engineering: int
+    sunss_imaging: int
+    sunss_diffuse: int
+
+    @classmethod
+    def from_hdu(cls, hdu: afits.BinTableHDU):
+        bc = numpy.bincount(numpy.clip(hdu.data.field('targetType'), 0, 8), minlength=8)  # type: ignore
+        return DesignRows(
+            science=bc[1],
+            sky=bc[2],
+            fluxstd=bc[3],
+            unassigned=bc[4],
+            engineering=bc[5],
+            sunss_imaging=bc[6],
+            sunss_diffuse=bc[7],
+        )
+
+
 class PfsDesignEntry(BaseModel):
     id: str
     frameid: str
@@ -41,6 +72,7 @@ class PfsDesignEntry(BaseModel):
     num_design_rows: int
     num_photometry_rows: int
     num_guidestar_rows: int
+    design_rows: DesignRows
 
 
 @router.get('/api/pfs_designs', response_model=list[PfsDesignEntry])
@@ -73,6 +105,7 @@ class DesignEntryTask:
                 num_design_rows=len(hdul[1].data),  # type: ignore
                 num_photometry_rows=len(hdul[2].data),  # type: ignore
                 num_guidestar_rows=len(hdul[3].data),  # type: ignore
+                design_rows=DesignRows.from_hdu(hdul[1]),  # type: ignore
             )
 
     def __call__(self):
