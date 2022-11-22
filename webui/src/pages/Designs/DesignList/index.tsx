@@ -17,6 +17,7 @@ tippy
 export function DesignList() {
   const { designs, zenithSkyCoord, focusedDesign } = useDesignContext()
   const [showOnlyVisibleDesigns, setShowOnlyVisibleDesigns] = useLocalStorage('/DesignList/showOnlyVisibleDesigns', false)
+  const [idFormat, setIdFormat] = useLocalStorage<'decimal' | 'hex'>('/DesignList/idFormat', 'hex')
   const [searchText, setSearchText] = createSignal('')
 
   const throttledZenithSkyCoord = createDebouncedMemo(() => zenithSkyCoord(), 100)
@@ -29,10 +30,14 @@ export function DesignList() {
 
   const saerchRegexp = createMemo(() => safeRegexpCompile(searchText(), 'i'))
 
+  const formattedIds = createMemo(() => new Map(
+    designs.store.list.map(d => [d, formattedId(d, idFormat())])
+  ))
+
   const filteredDesigns = createMemo(() => {
     return designs.store.list.filter(d => {
       return (
-        (saerchRegexp().test(d.name) || saerchRegexp().test(d.id)) &&
+        (saerchRegexp().test(d.name) || saerchRegexp().test(formattedIds().get(d)!)) &&
         (showOnlyVisibleDesigns() ? cosineCenter(d) >= 0 : true)
       )
     })
@@ -78,16 +83,29 @@ export function DesignList() {
   })
 
   return (
-    <FlexColumn>
-      <FlexColumn>
+    <FlexColumn >
+      <FlexColumn class={styles.listHeader}>
         <Flex>
           <input autocomplete='off' type="search" style={{ "flex-grow": 1 }} value={searchText()} onInput={e => setSearchText(e.currentTarget.value)} />
           <IconButton icon='refresh' onClick={designs.refetch} />
         </Flex>
-        <label>
-          <input type="checkbox" checked={showOnlyVisibleDesigns()} onChange={e => setShowOnlyVisibleDesigns(e.currentTarget.checked)} />
-          Show only visible designs
-        </label>
+        <FlexColumn>
+          {/* <label>
+            <input type="checkbox" checked={showOnlyVisibleDesigns()} onChange={e => setShowOnlyVisibleDesigns(e.currentTarget.checked)} />
+            Show only visible designs
+          </label> */}
+          <Flex class={styles.idFormat}>
+            ID Format:&nbsp;
+            <label>
+              <input type="radio" checked={idFormat() === 'hex'} onChange={e => e.currentTarget.checked && setIdFormat('hex')} />
+              Hex
+            </label>
+            <label>
+              <input type="radio" checked={idFormat() === 'decimal'} onChange={e => e.currentTarget.checked && setIdFormat('decimal')} />
+              Decimal
+            </label>
+          </Flex>
+        </FlexColumn>
       </FlexColumn>
       <Block when={designs.loading} style={{ "flex-grow": 1, height: 0 }}>
         <div class={styles.list} style={{ height: '100%', "overflow-y": 'auto' }}>
@@ -95,7 +113,7 @@ export function DesignList() {
             group => (
               <div class={styles.entryGroup}>
                 <For each={group}>{
-                  entry => <Entry entry={entry} zenith={throttledZenithSkyCoord()} />
+                  entry => <Entry entry={entry} zenith={throttledZenithSkyCoord()} idFormat={idFormat()} />
                 }
                 </For>
               </div>
@@ -108,9 +126,15 @@ export function DesignList() {
 }
 
 
+function formattedId(e: PfsDesignEntry, idFormat: 'hex' | 'decimal') {
+  return idFormat === 'hex' ? e.id : String(BigInt(`0x${e.id}`))
+}
+
+
 type EntryProps = {
   entry: PfsDesignEntry
   zenith: SkyCoord
+  idFormat: 'hex' | 'decimal'
 }
 
 
@@ -150,7 +174,7 @@ function Entry(props: EntryProps) {
           data-design-id={props.entry.id}
         >
           <div class={styles.entryName}>{props.entry.name || '-'}</div>
-          <div class={styles.entryId}>{props.entry.id}</div>
+          <div class={styles.entryId}>{formattedId(props.entry, props.idFormat)}</div>
           {/* <div class={styles.entryDate}> {props.entry.date_modified} </div> */}
           <div class={styles.entryDate}>
             <span use:tippy={{ content: 'Number of Science Fibers' }}>
@@ -185,7 +209,7 @@ function Entry(props: EntryProps) {
           tippy={{ content: "Copy ID to Clipboard" }}
           onClick={(e) => {
             e.stopPropagation()
-            navigator.clipboard.writeText(props.entry.id)
+            navigator.clipboard.writeText(formattedId(props.entry, props.idFormat))
           }} />
       </div>
     </Flex>
