@@ -189,8 +189,7 @@ def download_design(
     return FileResponse(str(filepath), media_type='image/fits', filename=filepath.name)
 
 
-# @router.get('/api/pfs_designs/{id_hex}', response_model=PfsDesignDetail)
-@router.get('/api/pfs_designs/{id_hex}')
+@router.get('/api/pfs_designs/{id_hex}', response_model=PfsDesignDetail)
 def show_design(
     id_hex: str,
     ctx: Context = Depends(),
