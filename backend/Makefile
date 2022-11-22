@@ -5,6 +5,7 @@ postgres_home ?= /Applications/Postgres.app/Contents/Versions/latest
 app_server := pfs-obslog
 copy_to := pfs-ics-shell:pfs_obslog/
 
+.PHONY: hotdev
 
 run:
 	BIND_ADDRESS=127.0.0.1:8000 \
@@ -22,6 +23,20 @@ test:
 
 test/watch:
 	./.venv/bin/ptw --runner "$(MAKE) test"
+
+hotdev:
+	PFS_OBSLOG_ENV=test ./runner bash ./entrypoint.bash --only-setup
+	./runner python -m pytest \
+		$(opts) \
+		-v \
+		--cov-config=.coveragerc \
+		--cov=pfs_obslog \
+		--cov-report=html \
+		--cov-branch \
+		hotdev
+
+hotdev/watch:
+	./.venv/bin/ptw --runner "$(MAKE) hotdev"
 
 test/setup-db:
 	$(postgres_home)/bin/dropdb --user=postgres opdb-test || true
