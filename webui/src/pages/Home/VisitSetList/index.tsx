@@ -280,8 +280,10 @@ function Columns() {
           <input
             type="checkbox" checked={columns()[props.column]}
             onInput={e => {
-              setColumns.produce(_ => {
-                _[props.column] = e.currentTarget.checked
+              setColumns(_ => {
+                const draft = { ..._ }
+                draft[props.column] = e.currentTarget.checked
+                return draft
               })
             }}
           />{props.children}
@@ -556,8 +558,8 @@ function VisitTable(props: { visits: VisitResponse[] }) {
                 >
                   {v.n_sps_exposures}/{v.n_mcs_exposures}/{v.n_agc_exposures} </Td>
                 <Td column='exposureTime' style={{ "text-align": 'right' }}> {v.avg_exptime?.toFixed(1)} </Td>
-                <Td column='coord_a' style={{ "text-align": 'right' }}></Td>
-                <Td column='coord_d' style={{ "text-align": 'right' }}></Td>
+                <Td column='coord_a' style={{ "text-align": 'right' }}>{v.avg_ra?.toFixed(2)}</Td>
+                <Td column='coord_d' style={{ "text-align": 'right' }}>{v.avg_dec?.toFixed(2)}</Td>
                 <Td column='azimuth' style={{ "text-align": 'right' }}>{v.avg_azimuth?.toFixed(1)}</Td>
                 <Td column='elevation' style={{ "text-align": 'right' }}>{v.avg_altitude?.toFixed(1)}</Td>
                 <Td column='insturumentRotator' style={{ "text-align": 'right' }}>{v.avg_insrot?.toFixed(1)}</Td>

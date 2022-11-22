@@ -7,6 +7,7 @@ import { useLoading } from "~/components/Loading"
 import { assertNotNull } from "~/utils/assertNotNull"
 import { reconciled } from "~/utils/reconciled"
 import { searchString } from "~/utils/searchString"
+import { useLocalStorage } from "~/utils/useStorage"
 import { createProducibleSignal } from "../../../utils/createProusibleSignal"
 import { useHomeContext } from "../context"
 
@@ -60,7 +61,7 @@ function makeContext() {
     refresh()
   })
 
-  const [columns, setColumns] = createProducibleSignal(defaultColumns())
+  const [columns, setColumns] = useLocalStorage(`/VisitSetList/Context`, defaultColumns())
 
   return {
     queryParams,

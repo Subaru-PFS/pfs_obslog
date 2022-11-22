@@ -3,16 +3,17 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from opdb import models as M
+from pydantic.main import BaseModel
+from sqlalchemy import distinct, func, select, union_all
+from sqlalchemy.orm import selectinload
+from sqlalchemy.orm.session import Session
+
 from pfs_obslog.app.context import Context
 from pfs_obslog.orm import OrmConfig, skip_validation, static_check_init_args
 from pfs_obslog.parsesql.ast import SqlError
 from pfs_obslog.schema import (AgcVisit, IicSequence, McsVisit, SpsSequence,
                                SpsVisit, VisitBase, VisitNote, VisitSetNote)
 from pfs_obslog.visitquery import evaluate_where_clause, extract_where_clause
-from pydantic.main import BaseModel
-from sqlalchemy import distinct, func, select
-from sqlalchemy.orm import selectinload
-from sqlalchemy.orm.session import Session
 
 logger = getLogger(__name__)
 router = APIRouter()
@@ -61,6 +62,8 @@ class VisitListEntry(VisitBase):
     avg_exptime: Optional[float]
     avg_azimuth: Optional[float]
     avg_altitude: Optional[float]
+    avg_ra: Optional[float]
+    avg_dec: Optional[float]
     avg_insrot: Optional[float]
     notes: list[VisitNote]
 
@@ -165,54 +168,109 @@ def list_visits(
             .with_only_columns(func.count(distinct(M.pfs_visit.pfs_visit_id)))
         ).scalar_one()
     else:
-        id_src = db.query(M.pfs_visit.pfs_visit_id)
-        count: int = db.query(M.pfs_visit).count()
+        id_src = select(M.pfs_visit.pfs_visit_id)
+        count: int = db.execute(select(func.count()).select_from(M.pfs_visit)).scalar_one()
 
-    ids = (
+    ids = [id for id, in db.execute(
         id_src
         .order_by(M.pfs_visit.pfs_visit_id.desc())
         .limit(limit)
         .offset(offset)
-    )
+    )]
+    visits = visit_list_entries(db, ids)
+    return visits, count
 
-    q2 = (db.query(
-        M.pfs_visit,
-        M.visit_set.iic_sequence_id,
-        func.count(distinct(M.sps_exposure.sps_camera_id)).label('n_sps_exposures'),
-        func.count(distinct(M.mcs_exposure.mcs_frame_id)).label('n_mcs_exposures'),
-        func.count(distinct(M.agc_exposure.agc_exposure_id)).label('n_agc_exposures'),
-        func.coalesce(
-            func.avg(M.sps_exposure.exptime),
-            func.avg(M.mcs_exposure.mcs_exptime),
-        ).label('avg_exptime'),
-        func.avg(M.mcs_exposure.azimuth).label('avg_azimuth'),
-        func.avg(M.mcs_exposure.altitude).label('avg_altitude'),
-        func.avg(M.mcs_exposure.insrot).label('avg_insrot'),
-    )\
-        .outerjoin(M.mcs_exposure)
-        .outerjoin(M.sps_visit)
-        .outerjoin(M.sps_exposure)
-        .outerjoin(M.visit_set)
-        .outerjoin(M.agc_exposure)
-        .group_by(M.pfs_visit, M.visit_set.iic_sequence_id)
-        .options(selectinload('obslog_notes').selectinload('user'))
+
+def visit_list_entries(db: Session, id_list: list[int]) -> list[VisitListEntry]:
+    ids = select('*').select_from(union_all(*(select(id) for id in id_list)).cte())
+    pfs_visit = (
+        select(M.pfs_visit)
+        .filter(M.pfs_visit.pfs_visit_id.in_(ids))
+        .subquery()
+    )
+    mcs_exposure = (
+        select(
+            M.mcs_exposure.pfs_visit_id,
+            func.avg(M.mcs_exposure.mcs_exptime).label('mcs_exposure_avg_exptime'),
+            func.count().label('mcs_exposure_count'),
+        )
+        .filter(M.mcs_exposure.pfs_visit_id.in_(ids))
+        .group_by(M.mcs_exposure.pfs_visit_id)
+        .subquery('mcs_exposure')
+    )
+    sps_exposure = (
+        select(
+            M.sps_exposure.pfs_visit_id,
+            func.avg(M.sps_exposure.exptime).label('sps_exposure_avg_exptime'),
+            func.count().label('sps_exposure_count'),
+        )
+        .filter(M.sps_exposure.pfs_visit_id.in_(ids))
+        .group_by(M.sps_exposure.pfs_visit_id)
+        .subquery('sps_exposure')
+    )
+    agc_exposure = (
+        select(
+            M.agc_exposure.pfs_visit_id,
+            func.avg(M.agc_exposure.agc_exptime).label('agc_exposure_avg_exptime'),
+            func.count().label('agc_exposure_count'),
+        )
+        .filter(M.agc_exposure.pfs_visit_id.in_(ids))
+        .group_by(M.agc_exposure.pfs_visit_id)
+        .subquery('agc_exposure')
+    )
+    tel_status = (
+        select(
+            M.tel_status.pfs_visit_id,
+            func.avg(M.tel_status.altitude).label('tel_status_altitude'),
+            func.avg(M.tel_status.azimuth).label('tel_status_azimuth'),
+            func.avg(M.tel_status.insrot).label('tel_status_insrot'),
+            func.avg(M.tel_status.tel_ra).label('tel_status_ra'),
+            func.avg(M.tel_status.tel_dec).label('tel_status_dec'),
+        )
+        .filter(M.tel_status.pfs_visit_id.in_(ids))
+        .group_by(M.tel_status.pfs_visit_id)
+        .subquery('tel_status')
+    )
+    q = (
+        db.query(
+            M.pfs_visit,
+            mcs_exposure,
+            sps_exposure,
+            agc_exposure,
+            tel_status,
+            M.sps_visit,
+            M.visit_set,
+        )
         .filter(M.pfs_visit.pfs_visit_id.in_(ids))
         .order_by(M.pfs_visit.pfs_visit_id.desc())
+        .options(selectinload('obslog_notes').selectinload('user'))
+        .outerjoin(mcs_exposure, mcs_exposure.c.pfs_visit_id == M.pfs_visit.pfs_visit_id)
+        .outerjoin(sps_exposure, sps_exposure.c.pfs_visit_id == M.pfs_visit.pfs_visit_id)
+        .outerjoin(agc_exposure, agc_exposure.c.pfs_visit_id == M.pfs_visit.pfs_visit_id)
+        .outerjoin(tel_status, tel_status.c.pfs_visit_id == M.pfs_visit.pfs_visit_id)
+        .outerjoin(M.sps_visit, M.sps_visit.pfs_visit_id == M.pfs_visit.pfs_visit_id)
+        .outerjoin(M.visit_set, M.visit_set.pfs_visit_id == M.pfs_visit.pfs_visit_id)
     )
-
     visits = [
         VisitListEntry(
-            **VisitBase.Config.row_to_model(row.pfs_visit).dict(),  # type: ignore
-            visit_set_id=row.iic_sequence_id,  # type: ignore
-            n_sps_exposures=row.n_sps_exposures,  # type: ignore
-            n_mcs_exposures=row.n_mcs_exposures,  # type: ignore
-            n_agc_exposures=row.n_agc_exposures,  # type: ignore
-            avg_exptime=row.avg_exptime,  # type: ignore
-            avg_azimuth=row.avg_azimuth,  # type: ignore
-            avg_altitude=row.avg_altitude,  # type: ignore
-            avg_insrot=row.avg_insrot,  # type: ignore
+            id=row.pfs_visit.pfs_visit_id,  # type: ignore
+            description=row.pfs_visit.pfs_visit_description,  # type: ignore
+            issued_at=row.pfs_visit.issued_at,  # type: ignore
+            visit_set_id=row.visit_set.iic_sequence_id if row.visit_set else None,  # type: ignore
+            n_sps_exposures=row.sps_exposure_count or 0,  # type: ignore
+            n_mcs_exposures=row.mcs_exposure_count or 0,  # type: ignore
+            n_agc_exposures=row.agc_exposure_count or 0,  # type: ignore
+            avg_exptime=(
+                row.sps_exposure_avg_exptime or  # type: ignore
+                row.mcs_exposure_avg_exptime or  # type: ignore
+                row.agc_exposure_avg_exptime  # type: ignore
+            ),
+            avg_azimuth=row.tel_status_azimuth,  # type: ignore
+            avg_altitude=row.tel_status_altitude,  # type: ignore
+            avg_insrot=row.tel_status_insrot,  # type: ignore
+            avg_ra=row.tel_status_ra,  # type: ignore
+            avg_dec=row.tel_status_dec,  # type: ignore
             notes=row.pfs_visit.obslog_notes,  # type: ignore
-        ) for row in q2
+        ) for row in q
     ]
-
-    return visits, count
+    return visits
