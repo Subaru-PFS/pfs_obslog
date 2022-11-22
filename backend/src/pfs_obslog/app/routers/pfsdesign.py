@@ -51,13 +51,13 @@ class DesignRows(BaseModel):
     def from_hdu(cls, hdu: afits.BinTableHDU):
         bc = numpy.bincount(numpy.clip(hdu.data.field('targetType'), 0, 8), minlength=8)  # type: ignore
         return DesignRows(
-            science=bc[1],
-            sky=bc[2],
-            fluxstd=bc[3],
-            unassigned=bc[4],
-            engineering=bc[5],
-            sunss_imaging=bc[6],
-            sunss_diffuse=bc[7],
+            science=bc[1],  # type: ignore
+            sky=bc[2],  # type: ignore
+            fluxstd=bc[3],  # type: ignore
+            unassigned=bc[4],  # type: ignore
+            engineering=bc[5],  # type: ignore
+            sunss_imaging=bc[6],  # type: ignore
+            sunss_diffuse=bc[7],  # type: ignore
         )
 
 
@@ -226,8 +226,8 @@ def show_design(
                 filterName=hdul[2].data.field('filterName').tolist(),  # type: ignore
             )
             guidestar_data = GuidestarData(
-                ra=hdul[3].data.field('ra').tolist(), # type: ignore
-                dec=hdul[3].data.field('dec').tolist(), # type: ignore
+                ra=hdul[3].data.field('ra').tolist(),  # type: ignore
+                dec=hdul[3].data.field('dec').tolist(),  # type: ignore
             )
             return PfsDesignDetail(
                 fits_meta=meta,
