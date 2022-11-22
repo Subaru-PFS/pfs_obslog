@@ -3,6 +3,14 @@
 .list {
   background-color: #777;
   width: 24em;
+
+  &-header {
+    border-bottom: #777 2px solid;
+  }
+}
+
+.idFormat {
+  padding: 2px 4px;
 }
 
 @mixin bump($baseColor) {
