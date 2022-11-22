@@ -25,7 +25,7 @@ def create_visit_set_note(
     ctx: Context = Depends(),
 ):
     note = M.obslog_visit_set_note(
-        visit_set_id=visit_set_id,
+        iic_sequence_id=visit_set_id,
         user_id=ctx.current_user.id,
         body=params.body,
     )
