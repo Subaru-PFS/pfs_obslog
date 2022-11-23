@@ -609,7 +609,7 @@ function Paginator() {
 
   onMount(() => {
     const interval = setInterval(async () => {
-      if (autoRefresh() && (Number(new Date()) - Number(lastRefresh())) >= refresh_interval) {
+      if (!isRefreshing() && autoRefresh() && (Number(new Date()) - Number(lastRefresh())) >= refresh_interval) {
         await startRefreshing(async () => await refresh(false))
       }
     }, 1_000)
