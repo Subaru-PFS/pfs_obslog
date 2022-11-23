@@ -233,7 +233,8 @@ def agc_fits_path_bisection_search(agc_exposure: M.agc_exposure):
             elif y(x[-1]) == 0:
                 return x[-1]
             raise AgcFitsNotAccessible(f'No FITS file for agc_exposure_id={agc_exposure.agc_exposure_id}')
-        assert y(x[0]) * y(x[-1]) <= 0
+        if y(x[0]) * y(x[-1]) >= 0:
+            raise AgcFitsNotAccessible(f'No FITS file for agc_exposure_id={agc_exposure.agc_exposure_id}')
         m = n // 2
         if y(x[0]) * y(x[m]) <= 0:
             x = x[0:m + 1]
