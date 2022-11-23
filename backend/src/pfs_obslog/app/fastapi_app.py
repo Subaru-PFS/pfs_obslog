@@ -1,5 +1,7 @@
 from fastapi import FastAPI
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.routing import APIRoute
+
 from pfs_obslog.app.orjsonresponse import ORJSONResponse
 from pfs_obslog.app.routers.asynctask import (setup_asynctask,
                                               shutdown_asynctask)
@@ -13,8 +15,8 @@ from .routers.healthz import router as healthz_router
 from .routers.pfsdesign import router as pfsdesign_router
 from .routers.plot import router as plot_router
 from .routers.session import router as session_router
-from .routers.visit.visit import router as visit_router
 from .routers.visit.csv import router as visit_csv_router
+from .routers.visit.visit import router as visit_router
 from .routers.visit_note import router as visit_note_router
 from .routers.visit_set_note import router as visit_set_note_router
 from .staticassets import setup_static_assets
@@ -22,6 +24,7 @@ from .staticassets import setup_static_assets
 setup_debugger()
 
 app = FastAPI(default_response_class=ORJSONResponse)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.include_router(session_router)
 app.include_router(visit_router)
