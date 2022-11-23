@@ -16,7 +16,7 @@ tippy
 
 export function DesignList() {
   const { designs, zenithSkyCoord, focusedDesign } = useDesignContext()
-  const [showOnlyVisibleDesigns, setShowOnlyVisibleDesigns] = useLocalStorage('/DesignList/showOnlyVisibleDesigns', false)
+  // const [showOnlyVisibleDesigns, setShowOnlyVisibleDesigns] = useLocalStorage('/DesignList/showOnlyVisibleDesigns', false)
   const [idFormat, setIdFormat] = useLocalStorage<'decimal' | 'hex'>('/DesignList/idFormat', 'hex')
   const [searchText, setSearchText] = createSignal('')
 
@@ -37,8 +37,8 @@ export function DesignList() {
   const filteredDesigns = createMemo(() => {
     return designs.store.list.filter(d => {
       return (
-        (saerchRegexp().test(d.name) || saerchRegexp().test(formattedIds().get(d)!)) &&
-        (showOnlyVisibleDesigns() ? cosineCenter(d) >= 0 : true)
+        (saerchRegexp().test(d.name) || saerchRegexp().test(formattedIds().get(d)!))
+        // (showOnlyVisibleDesigns() ? cosineCenter(d) >= 0 : true)
       )
     })
   })
