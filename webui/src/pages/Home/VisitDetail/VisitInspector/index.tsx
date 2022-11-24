@@ -57,10 +57,10 @@ export function VisitInspector(props: { visit: VisitDetailType }) {
         activeTabIndex={activeTabIndex()}
         onActiveTabIndexChange={setActiveTabIndex}
         tabs={[
-          { title: 'SpS', contents: props.visit.sps && <SpsInspector visit={props.visit} /> },
-          { title: 'MCS', contents: props.visit.mcs && <McsInspector visit={props.visit} /> },
-          { title: 'AGC', contents: props.visit.agc && <AgcInspector visit={props.visit} /> },
-          { title: 'IIC Sequence', contents: props.visit.sps_sequence && <IicSequence visit={props.visit} /> },
+          { title: 'SpS', contents: props.visit.sps && (() => <SpsInspector visit={props.visit} />) },
+          { title: 'MCS', contents: props.visit.mcs && (() => <McsInspector visit={props.visit} />) },
+          { title: 'AGC', contents: props.visit.agc && (() => <AgcInspector visit={props.visit} />) },
+          { title: 'IIC Sequence', contents: props.visit.sps_sequence && (() => <IicSequence visit={props.visit} />) },
         ]} />
     </div>
   )
