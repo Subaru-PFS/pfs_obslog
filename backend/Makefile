@@ -89,6 +89,9 @@ devel/sync:
 devel/sync-watch:
 	./.venv/bin/watchmedo shell-command -w -c '$(MAKE) devel/sync' -R ./src ../webui/src
 
+devel/type-check:
+	./.venv/bin/pyright
+
 webui/build:
 	cd ../webui && VITE_API_BASE_URL=. npm run build
 
