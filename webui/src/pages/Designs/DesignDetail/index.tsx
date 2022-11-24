@@ -164,7 +164,7 @@ function FiberDetail(props: { design: DesignDetailType, cobra: Cobra }) {
 
 function DesignSummary(props: { design: DesignDetailType }) {
   const pickCard = (key: string, hduIndex: number) => {
-    const value = props.design.fits_meta.hdul[hduIndex].header.cards.find(card => card[0] === key)?.[1]
+    const value = props.design.fits_meta.hdul[hduIndex].header.cards.find(card => card.key === key)?.value
     return value
   }
 

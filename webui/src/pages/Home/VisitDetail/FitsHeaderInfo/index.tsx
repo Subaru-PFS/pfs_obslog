@@ -67,9 +67,9 @@ function FitsMetaViewer(props: FitsMetaViewerProps) {
     }
 
     return props.meta.hdul[hduIndex()].header.cards.filter(card =>
-      keyReg.test(card[0]) &&
-      valueReg.test(String(card[1])) &&
-      commentReg.test(card[2])
+      keyReg.test(card.key) &&
+      valueReg.test(String(card.value)) &&
+      commentReg.test(card.comment)
     )
   })
 
@@ -114,15 +114,15 @@ function FitsMetaViewer(props: FitsMetaViewerProps) {
             <For each={cards()}>
               {card => (
                 <tr>
-                  <Show when={card[0] !== 'COMMENT'} fallback={
+                  <Show when={card.key !== 'COMMENT'} fallback={
                     <>
-                      <th class={styles.comment}>{card[0]}</th>
-                      <td class={styles.comment} colspan={2}>{String(card[1])}</td>
+                      <th class={styles.comment}>{card.key}</th>
+                      <td class={styles.comment} colspan={2}>{String(card.value)}</td>
                     </>
                   }>
-                    <th use:tippy={{ content: card[0] }}>{card[0]}</th>
-                    <td use:tippy={{ content: String(card[1]) }}>{String(card[1])}</td>
-                    <td use:tippy={{ content: String(card[2]) }} class={styles.comment} >{card[2]}</td>
+                    <th use:tippy={{ content: card.key }}>{card.key}</th>
+                    <td use:tippy={{ content: String(card.value) }}>{String(card.value)}</td>
+                    <td use:tippy={{ content: String(card.comment) }} class={styles.comment} >{card.comment}</td>
                   </Show>
                 </tr>
               )}
