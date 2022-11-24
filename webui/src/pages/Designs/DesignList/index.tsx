@@ -16,7 +16,6 @@ tippy
 
 export function DesignList() {
   const { designs, zenithSkyCoord, focusedDesign } = useDesignContext()
-  // const [showOnlyVisibleDesigns, setShowOnlyVisibleDesigns] = useLocalStorage('/DesignList/showOnlyVisibleDesigns', false)
   const [idFormat, setIdFormat] = useLocalStorage<'decimal' | 'hex'>('/DesignList/idFormat', 'hex')
   const [searchText, setSearchText] = createSignal('')
 
@@ -38,7 +37,6 @@ export function DesignList() {
     return designs.store.list.filter(d => {
       return (
         (saerchRegexp().test(d.name) || saerchRegexp().test(formattedIds().get(d)!))
-        // (showOnlyVisibleDesigns() ? cosineCenter(d) >= 0 : true)
       )
     })
   })
@@ -90,10 +88,6 @@ export function DesignList() {
           <IconButton icon='refresh' onClick={designs.refetch} />
         </Flex>
         <FlexColumn>
-          {/* <label>
-            <input type="checkbox" checked={showOnlyVisibleDesigns()} onChange={e => setShowOnlyVisibleDesigns(e.currentTarget.checked)} />
-            Show only visible designs
-          </label> */}
           <Flex class={styles.idFormat}>
             ID Format:&nbsp;
             <label>
