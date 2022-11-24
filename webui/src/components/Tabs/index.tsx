@@ -4,7 +4,7 @@ import styles from './styles.module.scss'
 
 type TabProps = {
   title: JSX.Element
-  contents: JSX.Element
+  contents?: () => JSX.Element
 }
 
 
@@ -40,7 +40,7 @@ export function Tabs(props: TabsProps) {
       </ul>
       <div class={styles.gutter} />
       <div class={styles.tabContents}>
-        {local.tabs[local.activeTabIndex].contents}
+        {local.tabs[local.activeTabIndex].contents?.()}
       </div>
     </div>
   )
