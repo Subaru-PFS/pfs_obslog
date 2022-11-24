@@ -3,88 +3,121 @@
  * Do not make direct changes to the file.
  */
 
+
 export interface paths {
   "/api/session": {
+    /** Show Session */
     get: operations["show_session"];
+    /** Create Session */
     post: operations["create_session"];
+    /** Destroy Session */
     delete: operations["destroy_session"];
   };
   "/api/visits": {
+    /** Index Visits */
     get: operations["index_visits"];
   };
   "/api/visits/{id}": {
+    /** Show Visit */
     get: operations["show_visit"];
   };
   "/api/visits/{id}/rank": {
+    /** Visit Rank */
     get: operations["visit_rank"];
   };
   "/api/visits.csv": {
+    /** List Visit Csv */
     get: operations["list_visit_csv"];
   };
   "/api/visits/{visit_id}/notes": {
+    /** Create Visit Note */
     post: operations["create_visit_note"];
   };
   "/api/visits/{visit_id}/notes/{id}": {
+    /** Update Visit Note */
     put: operations["update_visit_note"];
+    /** Destroy Visit Note */
     delete: operations["destroy_visit_note"];
   };
   "/api/visit_sets/{visit_set_id}/notes": {
+    /** Create Visit Set Note */
     post: operations["create_visit_set_note"];
   };
   "/api/visit_sets/{visit_set_id}/notes/{id}": {
+    /** Update Visit Set Note */
     put: operations["update_visit_set_note"];
+    /** Destroy Visit Set Note */
     delete: operations["destroy_visit_set_note"];
   };
   "/api/mcs_data/{frame_id}.png": {
+    /** Show Mcs Data Chart */
     get: operations["show_mcs_data_chart"];
   };
   "/api/pfs_designs": {
+    /** List Pfs Design */
     get: operations["list_pfs_design"];
   };
   "/api/pfs_designs.png": {
+    /** Pfs Design Chart */
     get: operations["pfs_design_chart"];
   };
   "/api/pfs_designs/{id_hex}.fits": {
+    /** Download Design */
     get: operations["download_design"];
   };
   "/api/pfs_designs/{id_hex}": {
+    /** Show Design */
     get: operations["show_design"];
   };
   "/api/fits/visits/{visit_id}/sps/{camera_id}.fits": {
+    /** Show Sps Fits */
     get: operations["show_sps_fits"];
   };
   "/api/fits/visits/{visit_id}/sps/{camera_id}.png": {
+    /** Show Sps Fits Preview */
     get: operations["show_sps_fits_preview"];
   };
   "/api/fits/visits/{visit_id}/agc/{exposure_id}.fits": {
+    /** Show Agc Fits */
     get: operations["show_agc_fits"];
   };
   "/api/fits/visits/{visit_id}/mcs/{frame_id}.fits": {
+    /** Show Mcs Fits */
     get: operations["show_mcs_fits"];
   };
   "/api/fits/visits/{visit_id}/mcs/{frame_id}.png": {
+    /** Show Mcs Fits Preview */
     get: operations["show_mcs_fits_preview"];
   };
   "/api/fits/visits/{visit_id}/agc/{exposure_id}-{hdu_index}.png": {
+    /** Show Agc Fits Preview */
     get: operations["show_agc_fits_preview"];
   };
   "/api/fits/visits/{visit_id}/{exposure_type}/{fits_id}/meta": {
+    /** Show Fits Meta */
     get: operations["show_fits_meta"];
   };
   "/api/attachments": {
+    /** List Attachment */
     get: operations["list_attachment"];
+    /** Create Attachment */
     post: operations["create_attachment"];
   };
   "/api/attachments/{account_name}/{file_id}": {
+    /** Show Attachment */
     get: operations["show_attachment"];
   };
   "/api/attachments/{file_id}": {
+    /** Destroy Attachment */
     delete: operations["destroy_attachment"];
   };
   "/api/healthz": {
+    /** Healthz */
     get: operations["healthz"];
   };
 }
+
+export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
@@ -117,7 +150,7 @@ export interface components {
       /** Version Instdata */
       version_instdata?: string;
       /**
-       * Taken At
+       * Taken At 
        * Format: date-time
        */
       taken_at?: string;
@@ -159,7 +192,7 @@ export interface components {
     /** AgcVisit */
     AgcVisit: {
       /** Exposures */
-      exposures: components["schemas"]["AgcExposure"][];
+      exposures: (components["schemas"]["AgcExposure"])[];
     };
     /** AttachmentEntry */
     AttachmentEntry: {
@@ -179,15 +212,24 @@ export interface components {
       /** Count */
       count: number;
       /** Entries */
-      entries: components["schemas"]["AttachmentEntry"][];
+      entries: (components["schemas"]["AttachmentEntry"])[];
     };
     /** Body_create_attachment_api_attachments_post */
     Body_create_attachment_api_attachments_post: {
       /**
-       * File
+       * File 
        * Format: binary
        */
       file: string;
+    };
+    /** Card */
+    Card: {
+      /** Key */
+      key: string;
+      /** Value */
+      value?: Record<string, never>;
+      /** Comment */
+      comment: string;
     };
     /** CreateAttachmentResponse */
     CreateAttachmentResponse: {
@@ -204,25 +246,25 @@ export interface components {
     /** DesignData */
     DesignData: {
       /** Fiberid */
-      fiberId: number[];
+      fiberId: (number)[];
       /** Catid */
-      catId: number[];
+      catId: (number)[];
       /** Tract */
-      tract: number[];
+      tract: (number)[];
       /** Patch */
-      patch: string[];
+      patch: (string)[];
       /** Objid */
-      objId: number[];
+      objId: (number)[];
       /** Ra */
-      ra: number[];
+      ra: (number)[];
       /** Dec */
-      dec: number[];
+      dec: (number)[];
       /** Targettype */
-      targetType: number[];
+      targetType: (number)[];
       /** Fiberstatus */
-      fiberStatus: number[];
+      fiberStatus: (number)[];
       /** Pfinominal */
-      pfiNominal: number[][];
+      pfiNominal: ((number)[])[];
     };
     /** DesignRows */
     DesignRows: {
@@ -250,32 +292,32 @@ export interface components {
     /** FitsHeader */
     FitsHeader: {
       /** Cards */
-      cards: [string, unknown, string][];
+      cards: (components["schemas"]["Card"])[];
     };
     /** FitsMeta */
     FitsMeta: {
       /** Filename */
       filename: string;
       /** Hdul */
-      hdul: components["schemas"]["FitsHdu"][];
+      hdul: (components["schemas"]["FitsHdu"])[];
     };
     /**
-     * FitsType
-     * @description An enumeration.
+     * FitsType 
+     * @description An enumeration. 
      * @enum {string}
      */
     FitsType: "raw" | "calexp";
     /** GuidestarData */
     GuidestarData: {
       /** Ra */
-      ra: number[];
+      ra: (number)[];
       /** Dec */
-      dec: number[];
+      dec: (number)[];
     };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
-      detail?: components["schemas"]["ValidationError"][];
+      detail?: (components["schemas"]["ValidationError"])[];
     };
     /** IicSequence */
     IicSequence: {
@@ -291,7 +333,7 @@ export interface components {
       cmd_str?: string;
       status?: components["schemas"]["IicSequenceStatus"];
       /** Notes */
-      notes: components["schemas"]["VisitSetNote"][];
+      notes: (components["schemas"]["VisitSetNote"])[];
     };
     /** IicSequenceStatus */
     IicSequenceStatus: {
@@ -333,12 +375,12 @@ export interface components {
       /** Mcs M1 Temperature */
       mcs_m1_temperature?: number;
       /**
-       * Taken At
+       * Taken At 
        * Format: date-time
        */
       taken_at: string;
       /** Notes */
-      notes: components["schemas"]["McsExposureNote"][];
+      notes: (components["schemas"]["McsExposureNote"])[];
     };
     /** McsExposureNote */
     McsExposureNote: {
@@ -351,7 +393,7 @@ export interface components {
     /** McsVisit */
     McsVisit: {
       /** Exposures */
-      exposures: components["schemas"]["McsExposure"][];
+      exposures: (components["schemas"]["McsExposure"])[];
     };
     /** ObslogUser */
     ObslogUser: {
@@ -364,7 +406,7 @@ export interface components {
     PfsDesignDetail: {
       fits_meta: components["schemas"]["FitsMeta"];
       /**
-       * Date Modified
+       * Date Modified 
        * Format: date-time
        */
       date_modified: string;
@@ -381,7 +423,7 @@ export interface components {
       /** Name */
       name: string;
       /**
-       * Date Modified
+       * Date Modified 
        * Format: date-time
        */
       date_modified: string;
@@ -402,21 +444,21 @@ export interface components {
     /** PhotometryData */
     PhotometryData: {
       /** Fiberid */
-      fiberId: number[];
+      fiberId: (number)[];
       /** Fiberflux */
-      fiberFlux: number[];
+      fiberFlux: (number)[];
       /** Psfflux */
-      psfFlux: number[];
+      psfFlux: (number)[];
       /** Totalflux */
-      totalFlux: number[];
+      totalFlux: (number)[];
       /** Fiberfluxerr */
-      fiberFluxErr: number[];
+      fiberFluxErr: (number)[];
       /** Psffluxerr */
-      psfFluxErr: number[];
+      psfFluxErr: (number)[];
       /** Totalfluxerr */
-      totalFluxErr: number[];
+      totalFluxErr: (number)[];
       /** Filtername */
-      filterName: string[];
+      filterName: (string)[];
     };
     /** Session */
     Session: {
@@ -438,7 +480,7 @@ export interface components {
       /** Annotation Id */
       annotation_id: number;
       /**
-       * Created At
+       * Created At 
        * Format: date-time
        */
       created_at?: string;
@@ -450,17 +492,17 @@ export interface components {
       /** Exptime */
       exptime: number;
       /**
-       * Exp Start
+       * Exp Start 
        * Format: date-time
        */
       exp_start: string;
       /**
-       * Exp End
+       * Exp End 
        * Format: date-time
        */
       exp_end: string;
       /** Annotation */
-      annotation: components["schemas"]["SpsAnnotation"][];
+      annotation: (components["schemas"]["SpsAnnotation"])[];
     };
     /** SpsSequenceDetail */
     SpsSequenceDetail: {
@@ -476,19 +518,19 @@ export interface components {
       cmd_str?: string;
       status?: components["schemas"]["IicSequenceStatus"];
       /** Notes */
-      notes: components["schemas"]["VisitSetNote"][];
+      notes: (components["schemas"]["VisitSetNote"])[];
     };
     /** SpsVisit */
     SpsVisit: {
       /** Exp Type */
       exp_type: string;
       /** Exposures */
-      exposures: components["schemas"]["SpsExposure"][];
+      exposures: (components["schemas"]["SpsExposure"])[];
     };
     /** ValidationError */
     ValidationError: {
       /** Location */
-      loc: (Partial<string> & Partial<number>)[];
+      loc: (string | number)[];
       /** Message */
       msg: string;
       /** Error Type */
@@ -501,12 +543,12 @@ export interface components {
       /** Description */
       description?: string;
       /**
-       * Issued At
+       * Issued At 
        * Format: date-time
        */
       issued_at?: string;
       /** Notes */
-      notes: components["schemas"]["VisitNote"][];
+      notes: (components["schemas"]["VisitNote"])[];
       sps?: components["schemas"]["SpsVisit"];
       mcs?: components["schemas"]["McsVisit"];
       agc?: components["schemas"]["AgcVisit"];
@@ -515,9 +557,9 @@ export interface components {
     /** VisitList */
     VisitList: {
       /** Visits */
-      visits: components["schemas"]["VisitListEntry"][];
+      visits: (components["schemas"]["VisitListEntry"])[];
       /** Iic Sequence */
-      iic_sequence: components["schemas"]["IicSequence"][];
+      iic_sequence: (components["schemas"]["IicSequence"])[];
       /** Count */
       count: number;
     };
@@ -528,7 +570,7 @@ export interface components {
       /** Description */
       description?: string;
       /**
-       * Issued At
+       * Issued At 
        * Format: date-time
        */
       issued_at?: string;
@@ -553,7 +595,7 @@ export interface components {
       /** Avg Insrot */
       avg_insrot?: number;
       /** Notes */
-      notes: components["schemas"]["VisitNote"][];
+      notes: (components["schemas"]["VisitNote"])[];
     };
     /** VisitNote */
     VisitNote: {
@@ -615,12 +657,21 @@ export interface components {
       body: string;
     };
   };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 
+export type external = Record<string, never>;
+
 export interface operations {
+
   show_session: {
+    /** Show Session */
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
           "application/json": components["schemas"]["Session"];
@@ -629,52 +680,55 @@ export interface operations {
     };
   };
   create_session: {
+    /** Create Session */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionCreateRequest"];
+      };
+    };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
           "application/json": components["schemas"]["Session"];
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SessionCreateRequest"];
-      };
-    };
   };
   destroy_session: {
+    /** Destroy Session */
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
     };
   };
   index_visits: {
-    parameters: {
-      query: {
+    /** Index Visits */
+    parameters?: {
+      query?: {
         sql?: string;
         offset?: number;
         limit?: number;
       };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
           "application/json": components["schemas"]["VisitList"];
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -683,19 +737,20 @@ export interface operations {
     };
   };
   show_visit: {
+    /** Show Visit */
     parameters: {
       path: {
         id: number;
       };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
           "application/json": components["schemas"]["VisitDetail"];
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -704,22 +759,23 @@ export interface operations {
     };
   };
   visit_rank: {
+    /** Visit Rank */
     parameters: {
+      query?: {
+        sql?: string;
+      };
       path: {
         id: number;
       };
-      query: {
-        sql?: string;
-      };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
           "application/json": components["schemas"]["VisitRankResponse"];
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -728,19 +784,20 @@ export interface operations {
     };
   };
   list_visit_csv: {
-    parameters: {
-      query: {
+    /** List Visit Csv */
+    parameters?: {
+      query?: {
         sql?: string;
       };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -749,23 +806,10 @@ export interface operations {
     };
   };
   create_visit_note: {
+    /** Create Visit Note */
     parameters: {
       path: {
         visit_id: number;
-      };
-    };
-    responses: {
-      /** Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["VisitNoteCreateResponse"];
-        };
-      };
-      /** Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
       };
     };
     requestBody: {
@@ -773,26 +817,27 @@ export interface operations {
         "application/json": components["schemas"]["VisitNoteCreateRequest"];
       };
     };
-  };
-  update_visit_note: {
-    parameters: {
-      path: {
-        visit_id: number;
-        id: number;
-      };
-    };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["VisitNoteCreateResponse"];
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
+    };
+  };
+  update_visit_note: {
+    /** Update Visit Note */
+    parameters: {
+      path: {
+        visit_id: number;
+        id: number;
       };
     };
     requestBody: {
@@ -800,8 +845,23 @@ export interface operations {
         "application/json": components["schemas"]["VisitNoteUpdateRequest"];
       };
     };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
   };
   destroy_visit_note: {
+    /** Destroy Visit Note */
     parameters: {
       path: {
         visit_id: number;
@@ -809,13 +869,13 @@ export interface operations {
       };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -824,23 +884,10 @@ export interface operations {
     };
   };
   create_visit_set_note: {
+    /** Create Visit Set Note */
     parameters: {
       path: {
         visit_set_id: number;
-      };
-    };
-    responses: {
-      /** Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["VisitSetNoteCreateResponse"];
-        };
-      };
-      /** Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
       };
     };
     requestBody: {
@@ -848,25 +895,26 @@ export interface operations {
         "application/json": components["schemas"]["VisitSetNoteCreateRequest"];
       };
     };
-  };
-  update_visit_set_note: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["VisitSetNoteCreateResponse"];
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
+    };
+  };
+  update_visit_set_note: {
+    /** Update Visit Set Note */
+    parameters: {
+      path: {
+        id: number;
       };
     };
     requestBody: {
@@ -874,21 +922,36 @@ export interface operations {
         "application/json": components["schemas"]["VisitSetNoteUpdateRequest"];
       };
     };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
   };
   destroy_visit_set_note: {
+    /** Destroy Visit Set Note */
     parameters: {
       path: {
         id: number;
       };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -897,23 +960,24 @@ export interface operations {
     };
   };
   show_mcs_data_chart: {
+    /** Show Mcs Data Chart */
     parameters: {
-      path: {
-        frame_id: number;
-      };
-      query: {
+      query?: {
         width?: number;
         height?: number;
       };
+      path: {
+        frame_id: number;
+      };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -922,31 +986,33 @@ export interface operations {
     };
   };
   list_pfs_design: {
+    /** List Pfs Design */
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": components["schemas"]["PfsDesignEntry"][];
+          "application/json": (components["schemas"]["PfsDesignEntry"])[];
         };
       };
     };
   };
   pfs_design_chart: {
+    /** Pfs Design Chart */
     parameters: {
       query: {
-        id_hex: string[];
+        id_hex: (string)[];
         date?: string;
         return_error?: boolean;
       };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -955,19 +1021,20 @@ export interface operations {
     };
   };
   download_design: {
+    /** Download Design */
     parameters: {
       path: {
         id_hex: string;
       };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -976,19 +1043,20 @@ export interface operations {
     };
   };
   show_design: {
+    /** Show Design */
     parameters: {
       path: {
         id_hex: string;
       };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
           "application/json": components["schemas"]["PfsDesignDetail"];
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -997,23 +1065,24 @@ export interface operations {
     };
   };
   show_sps_fits: {
+    /** Show Sps Fits */
     parameters: {
+      query?: {
+        type?: components["schemas"]["FitsType"];
+      };
       path: {
         visit_id: number;
         camera_id: number;
       };
-      query: {
-        type?: components["schemas"]["FitsType"];
-      };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -1022,25 +1091,26 @@ export interface operations {
     };
   };
   show_sps_fits_preview: {
+    /** Show Sps Fits Preview */
     parameters: {
-      path: {
-        visit_id: number;
-        camera_id: number;
-      };
-      query: {
+      query?: {
         width?: number;
         height?: number;
         type?: components["schemas"]["FitsType"];
       };
+      path: {
+        visit_id: number;
+        camera_id: number;
+      };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -1049,6 +1119,7 @@ export interface operations {
     };
   };
   show_agc_fits: {
+    /** Show Agc Fits */
     parameters: {
       path: {
         visit_id: number;
@@ -1056,13 +1127,13 @@ export interface operations {
       };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -1071,6 +1142,7 @@ export interface operations {
     };
   };
   show_mcs_fits: {
+    /** Show Mcs Fits */
     parameters: {
       path: {
         visit_id: number;
@@ -1078,13 +1150,13 @@ export interface operations {
       };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -1093,24 +1165,25 @@ export interface operations {
     };
   };
   show_mcs_fits_preview: {
+    /** Show Mcs Fits Preview */
     parameters: {
+      query?: {
+        width?: number;
+        height?: number;
+      };
       path: {
         visit_id: number;
         frame_id: number;
       };
-      query: {
-        width?: number;
-        height?: number;
-      };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -1119,25 +1192,26 @@ export interface operations {
     };
   };
   show_agc_fits_preview: {
+    /** Show Agc Fits Preview */
     parameters: {
+      query?: {
+        width?: number;
+        height?: number;
+      };
       path: {
         visit_id: number;
         exposure_id: number;
         hdu_index: number;
       };
-      query: {
-        width?: number;
-        height?: number;
-      };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -1146,6 +1220,7 @@ export interface operations {
     };
   };
   show_fits_meta: {
+    /** Show Fits Meta */
     parameters: {
       path: {
         visit_id: number;
@@ -1154,13 +1229,13 @@ export interface operations {
       };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
           "application/json": components["schemas"]["FitsMeta"];
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -1169,20 +1244,21 @@ export interface operations {
     };
   };
   list_attachment: {
-    parameters: {
-      query: {
+    /** List Attachment */
+    parameters?: {
+      query?: {
         start?: number;
         per_page?: number;
       };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
           "application/json": components["schemas"]["AttachmentList"];
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -1191,44 +1267,46 @@ export interface operations {
     };
   };
   create_attachment: {
+    /** Create Attachment */
+    requestBody: {
+      content: {
+        "multipart/form-data": components["schemas"]["Body_create_attachment_api_attachments_post"];
+      };
+    };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
           "application/json": components["schemas"]["CreateAttachmentResponse"];
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
-    requestBody: {
-      content: {
-        "multipart/form-data": components["schemas"]["Body_create_attachment_api_attachments_post"];
-      };
-    };
   };
   show_attachment: {
+    /** Show Attachment */
     parameters: {
+      query?: {
+        filename?: string;
+      };
       path: {
         account_name: string;
         file_id: number;
       };
-      query: {
-        filename?: string;
-      };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -1237,19 +1315,20 @@ export interface operations {
     };
   };
   destroy_attachment: {
+    /** Destroy Attachment */
     parameters: {
       path: {
         file_id: number;
       };
     };
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
-      /** Validation Error */
+      /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
@@ -1258,15 +1337,14 @@ export interface operations {
     };
   };
   healthz: {
+    /** Healthz */
     responses: {
-      /** Successful Response */
+      /** @description Successful Response */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": Record<string, never>;
         };
       };
     };
   };
 }
-
-export interface external {}

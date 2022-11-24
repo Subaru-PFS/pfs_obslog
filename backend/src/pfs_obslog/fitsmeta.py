@@ -8,14 +8,20 @@ from pfs_obslog.orm import static_check_init_args
 from pfs_obslog.utils.metafits import load_fits_headers
 
 
+class Card(BaseModel):
+    key: str
+    value: Any
+    comment: str
+
+
 @static_check_init_args
 class FitsHeader(BaseModel):
-    cards: list[tuple[str, Any, str]]
+    cards: list[Card]
 
     def value(self, key, not_found=None):
         for card in self.cards:
-            if card[0] == key:
-                return card[1]
+            if card.key == key:
+                return card.value
         return not_found
 
 
@@ -39,7 +45,7 @@ def fits_meta(path: Path) -> FitsMeta:
             FitsHdu(
                 index=i,
                 header=FitsHeader(
-                    cards=[(keyword, stringify(value), comment) for keyword, value, comment in header.cards]),
+                    cards=[Card(key=keyword, value=stringify(value), comment=comment) for keyword, value, comment in header.cards]),
             )
             for i, header in enumerate(headers)
         ]
@@ -61,7 +67,7 @@ def fits_meta_from_hdul(frameid: str | Path, hdul: afits.HDUList):
             FitsHdu(
                 index=i,
                 header=FitsHeader(
-                    cards=[(keyword, value, comment) for keyword, value, comment in header.cards]),
+                    cards=[Card(key=keyword, value=value, comment=comment) for keyword, value, comment in header.cards]),
             )
             for i, header in enumerate(hdu.header for hdu in hdul)  # type: ignore
         ]
