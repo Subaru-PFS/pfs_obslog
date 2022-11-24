@@ -17,6 +17,7 @@ tippy
 export function DesignList() {
   const { designs, zenithSkyCoord, focusedDesign } = useDesignContext()
   const [idFormat, setIdFormat] = useLocalStorage<'decimal' | 'hex'>('/DesignList/idFormat', 'hex')
+  const [sortOrder, setSortOrder] = useLocalStorage<'altitude' | 'date_modified'>('/DesignList/sortOrder', 'altitude')
   const [searchText, setSearchText] = createSignal('')
 
   const throttledZenithSkyCoord = createDebouncedMemo(() => zenithSkyCoord(), 100)
@@ -41,26 +42,17 @@ export function DesignList() {
     })
   })
 
-  const designsSortedByAltitude = createMemo(() =>
-    filteredDesigns().slice().sort((aEntry, bEntry) => {
-      const a = cosineCenter(aEntry)
-      const b = cosineCenter(bEntry)
-      if (Number.isNaN(a) && Number.isNaN(b)) {
-        return aEntry.id.localeCompare(bEntry.id)
-      }
-      if (Number.isNaN(a)) {
-        return 1
-      }
-      if (Number.isNaN(b)) {
-        return -1
-      }
-      return b - a
-    })
+  const sortedDesigned = createMemo(() =>
+    filteredDesigns().slice().sort((aEntry, bEntry) =>
+      sortOrder() === 'altitude'
+        ? compareByAltitude(aEntry, bEntry, cosineCenter)
+        : -compareByDateModified(aEntry, bEntry)
+    )
   )
 
   const groupedDesigns = createMemo(() => {
     const groups: PfsDesignEntry[][] = []
-    for (const d of designsSortedByAltitude()) {
+    for (const d of sortedDesigned()) {
       const g: (PfsDesignEntry[] | undefined) = groups[groups.length - 1]
       const d0 = g?.[0]
       if (d0 && SkyCoord.fromDeg(d.ra, d.dec).cosine(SkyCoord.fromDeg(d0.ra, d0.dec)) >= designCrossMatchCosine) {
@@ -88,7 +80,7 @@ export function DesignList() {
           <IconButton icon='refresh' onClick={designs.refetch} />
         </Flex>
         <FlexColumn>
-          <Flex class={styles.idFormat}>
+          <Flex class={styles.sortCondition}>
             ID Format:&nbsp;
             <label>
               <input type="radio" checked={idFormat() === 'hex'} onChange={e => e.currentTarget.checked && setIdFormat('hex')} />
@@ -97,6 +89,17 @@ export function DesignList() {
             <label>
               <input type="radio" checked={idFormat() === 'decimal'} onChange={e => e.currentTarget.checked && setIdFormat('decimal')} />
               Decimal
+            </label>
+          </Flex>
+          <Flex class={styles.sortCondition}>
+            Sort Order:&nbsp;
+            <label>
+              <input type="radio" checked={sortOrder() === 'altitude'} onChange={e => e.currentTarget.checked && setSortOrder('altitude')} />
+              Altitude
+            </label>
+            <label>
+              <input type="radio" checked={sortOrder() === 'date_modified'} onChange={e => e.currentTarget.checked && setSortOrder('date_modified')} />
+              Date Modified
             </label>
           </Flex>
         </FlexColumn>
@@ -169,7 +172,7 @@ function Entry(props: EntryProps) {
         >
           <div class={styles.entryName}>{props.entry.name || '-'}</div>
           <div class={styles.entryId}>{formattedId(props.entry, props.idFormat)}</div>
-          {/* <div class={styles.entryDate}> {props.entry.date_modified} </div> */}
+          <div class={styles.entryDate}> {props.entry.date_modified} </div>
           <div class={styles.entryDate}>
             <span use:tippy={{ content: 'Number of Science Fibers' }}>
               {props.entry.design_rows.science}
@@ -208,4 +211,26 @@ function Entry(props: EntryProps) {
       </div>
     </Flex>
   )
+}
+
+
+function compareByAltitude(aEntry: PfsDesignEntry, bEntry: PfsDesignEntry, cosineCenter: (design: PfsDesignEntry) => number) {
+  const a = cosineCenter(aEntry)
+  const b = cosineCenter(bEntry)
+  if (Number.isNaN(a) && Number.isNaN(b)) {
+    return aEntry.id.localeCompare(bEntry.id)
+  }
+  if (Number.isNaN(a)) {
+    return 1
+  }
+  if (Number.isNaN(b)) {
+    return -1
+  }
+  return b - a
+}
+
+function compareByDateModified(aEntry: PfsDesignEntry, bEntry: PfsDesignEntry) {
+  const a = aEntry.date_modified
+  const b = bEntry.date_modified
+  return a === b ? 0 : (a < b ? -1 : +1)
 }
