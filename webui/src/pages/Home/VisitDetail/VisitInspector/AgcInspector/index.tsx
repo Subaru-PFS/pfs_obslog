@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Index, Show } from 'solid-js'
+import { createEffect, createMemo, createSignal, For, Index, on, Show } from 'solid-js'
 import { apiUrl } from '~/api'
 import { Icon, IconButton } from '~/components/Icon'
 import { Flex, FlexColumn, GridCellGroup, JustifyEnd, TriggerReflow } from '~/components/layout'
@@ -27,6 +27,11 @@ export function AgcInspector(props: AgcInspectorProps) {
   const pagedExposures = createMemo(() => agc().exposures.slice(page() * perPage, (page() + 1) * perPage))
   const [imageScale, setImageScale] = useLocalStorage(`/AgcInspector/imageScale`, 1)
   const scales = [0.5, 0.67, 1]
+  let scrollElement: HTMLDivElement | undefined
+
+  createEffect(on(page, _ => {
+    scrollElement?.scrollTo({ top: 0, left: 0 })
+  }))
 
   return (
     <FlexColumn style={{ height: '100%' }}>
@@ -68,7 +73,7 @@ export function AgcInspector(props: AgcInspectorProps) {
           </TriggerReflow>
         </Show>
         <div style={{ position: 'relative', "flex-grow": 1 }}>
-          <Overflow class={styles.exposures} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}>
+          <Overflow capture={el => scrollElement = el} class={styles.exposures} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}>
             <ul>
               <For each={pagedExposures()}>
                 {exp => (
