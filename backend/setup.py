@@ -45,6 +45,7 @@ setup(
             'requests',
             'Pillow',
             'watchdog[watchmedo]',
+            'pyright',
         ],
     },
 )
