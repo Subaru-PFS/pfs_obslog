@@ -92,6 +92,10 @@ devel/sync-watch:
 devel/type-check:
 	./.venv/bin/pyright
 
+devel/type-check-watch:
+	./.venv/bin/ptw --runner "$(MAKE) devel/type-check"
+
+
 webui/build:
 	cd ../webui && VITE_API_BASE_URL=. npm run build
 
