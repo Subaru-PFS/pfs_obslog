@@ -28,22 +28,3 @@ U = TypeVar('U', bound=Type[BaseModel])
 
 def skip_validation(model: U) -> U:
     return model.construct  # type: ignore
-
-
-# __init__ of class decorated with static_check_init_args will be statically type checked by Pylance.
-# See https://github.com/microsoft/python-language-server/issues/1898
-#
-#
-# @static_check_init_args
-# class X:
-#     id: int
-#
-# # Argument missing for parameter "id"
-# X()
-if TYPE_CHECKING:  # pragma: no cover
-    _static_check_init_args = dataclasses.dataclass
-else:
-    def _static_check_init_args(cls):
-        return cls
-
-static_check_init_args = _static_check_init_args

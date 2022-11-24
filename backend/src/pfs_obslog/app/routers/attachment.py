@@ -12,7 +12,6 @@ from fastapi import Query, UploadFile, status
 from pfs_obslog.app.context import Context
 from pfs_obslog.config import settings
 from pfs_obslog.fileseries import FileSeries
-from pfs_obslog.orm import static_check_init_args
 from pydantic.main import BaseModel
 from starlette.responses import FileResponse
 
@@ -22,7 +21,6 @@ logger = getLogger(__name__)
 router = APIRouter()
 
 
-@static_check_init_args
 class CreateAttachmentResponse(BaseModel):
     path: str
 
@@ -86,7 +84,6 @@ def show_attachment(
         raise HTTPException(status.HTTP_404_NOT_FOUND)
 
 
-@static_check_init_args
 class AttachmentEntry(BaseModel):
     id: int
     name: str
@@ -95,7 +92,6 @@ class AttachmentEntry(BaseModel):
     exists: bool
 
 
-@static_check_init_args
 class AttachmentList(BaseModel):
     count: int
     entries: list[AttachmentEntry]

@@ -9,7 +9,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.orm.session import Session
 
 from pfs_obslog.app.context import Context
-from pfs_obslog.orm import OrmConfig, skip_validation, static_check_init_args
+from pfs_obslog.orm import OrmConfig, skip_validation
 from pfs_obslog.parsesql.ast import SqlError
 from pfs_obslog.schema import (AgcVisit, IicSequence, McsVisit, SpsSequence,
                                SpsVisit, VisitBase, VisitNote, VisitSetNote)
@@ -19,7 +19,6 @@ logger = getLogger(__name__)
 router = APIRouter()
 
 
-@static_check_init_args
 class SpsSequenceDetail(SpsSequence):
     notes: list[VisitSetNote]
 
@@ -34,7 +33,6 @@ class SpsSequenceDetail(SpsSequence):
     ))
 
 
-@static_check_init_args
 class VisitDetail(VisitBase):
     notes: list[VisitNote]
     sps: Optional[SpsVisit]
@@ -68,7 +66,6 @@ class VisitListEntry(VisitBase):
     notes: list[VisitNote]
 
 
-@static_check_init_args
 class VisitSetBase(BaseModel):
     id: int
     visit_id: int
@@ -79,7 +76,6 @@ class VisitSetBase(BaseModel):
     ))
 
 
-@static_check_init_args
 class VisitList(BaseModel):
     visits: list[VisitListEntry]
     iic_sequence: list[IicSequence]

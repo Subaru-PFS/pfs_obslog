@@ -3,12 +3,10 @@ from typing import Optional
 
 from opdb import models as M
 from sqlalchemy.sql.sqltypes import Enum
-from pfs_obslog.orm import (OrmConfig, skip_validation,
-                            static_check_init_args)
+from pfs_obslog.orm import OrmConfig, skip_validation
 from pydantic import BaseModel
 
 
-@static_check_init_args
 class SpsAnnotation(BaseModel):
     data_flag: int
     notes: str
@@ -19,7 +17,6 @@ class SpsAnnotation(BaseModel):
         orm_mode = True
 
 
-@static_check_init_args
 class SpsExposure(BaseModel):
     camera_id: int
     exptime: float
@@ -36,7 +33,6 @@ class SpsExposure(BaseModel):
     ))
 
 
-@static_check_init_args
 class SpsVisit(BaseModel):
     exp_type: str
     exposures: list[SpsExposure]
@@ -47,7 +43,6 @@ class SpsVisit(BaseModel):
     ))
 
 
-@static_check_init_args
 class ObslogUser(BaseModel):
     id: int
     account_name: str
@@ -56,7 +51,6 @@ class ObslogUser(BaseModel):
         orm_mode = True
 
 
-@static_check_init_args
 class McsExposureNote(BaseModel):
     id: int
     body: str
@@ -66,7 +60,6 @@ class McsExposureNote(BaseModel):
         orm_mode = True
 
 
-@static_check_init_args
 class McsExposure(BaseModel):
     frame_id: int
     exptime: Optional[float]
@@ -105,12 +98,10 @@ class McsExposure(BaseModel):
     )))
 
 
-@static_check_init_args
 class McsVisit(BaseModel):
     exposures: list[McsExposure]
 
 
-@static_check_init_args
 class AgcGuideOffset(BaseModel):
     ra: Optional[float]
     dec: Optional[float]
@@ -147,7 +138,6 @@ class AgcGuideOffset(BaseModel):
     )))
 
 
-@static_check_init_args
 class AgcExposure(BaseModel):
     id: int
     exptime: Optional[float]
@@ -184,12 +174,10 @@ class AgcExposure(BaseModel):
     )))
 
 
-@static_check_init_args
 class AgcVisit(BaseModel):
     exposures: list[AgcExposure]
 
 
-@static_check_init_args
 class VisitNote(BaseModel):
     id: int
     user_id: int
@@ -201,7 +189,6 @@ class VisitNote(BaseModel):
         orm_mode = True
 
 
-@static_check_init_args
 class VisitSetNote(BaseModel):
     id: int
     user_id: int
@@ -213,7 +200,6 @@ class VisitSetNote(BaseModel):
         orm_mode = True
 
 
-@static_check_init_args
 class IicSequenceStatus(BaseModel):
     visit_set_id: int
     status_flag: Optional[int]
@@ -226,7 +212,6 @@ class IicSequenceStatus(BaseModel):
     ))
 
 
-@static_check_init_args
 class IicSequence(BaseModel):
     visit_set_id: int
     sequence_type: Optional[str]
@@ -250,7 +235,6 @@ class IicSequence(BaseModel):
 SpsSequence = IicSequence
 
 
-@static_check_init_args
 class VisitSet(BaseModel):
     id: int
     visit_id: int
@@ -263,7 +247,6 @@ class VisitSet(BaseModel):
     ))
 
 
-@static_check_init_args
 class VisitBase(BaseModel):
     id: int
     description: Optional[str]

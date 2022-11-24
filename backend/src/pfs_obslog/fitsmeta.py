@@ -4,7 +4,6 @@ from typing import Any
 import astropy.io.fits as afits
 from pydantic import BaseModel
 
-from pfs_obslog.orm import static_check_init_args
 from pfs_obslog.utils.metafits import load_fits_headers
 
 
@@ -14,7 +13,6 @@ class Card(BaseModel):
     comment: str
 
 
-@static_check_init_args
 class FitsHeader(BaseModel):
     cards: list[Card]
 
@@ -25,13 +23,11 @@ class FitsHeader(BaseModel):
         return not_found
 
 
-@static_check_init_args
 class FitsHdu(BaseModel):
     index: int
     header: FitsHeader
 
 
-@static_check_init_args
 class FitsMeta(BaseModel):
     filename: str  # id of the file
     hdul: list[FitsHdu]
