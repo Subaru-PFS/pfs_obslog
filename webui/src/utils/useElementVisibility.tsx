@@ -44,14 +44,22 @@ function isVisible(ele: HTMLElement, container: HTMLElement) {
 }
 
 
-type OverflowProps = JSX.HTMLAttributes<HTMLDivElement>
+type OverflowProps = {
+  capture?: (el: HTMLDivElement) => unknown
+} & JSX.HTMLAttributes<HTMLDivElement>
 
 
 export function Overflow(props: OverflowProps) {
   let container: HTMLDivElement | undefined
+
+  const capture = (el: HTMLDivElement) => {
+    container = el
+    props.capture?.(el)
+  }
+
   return (
     <OverflowContext.Provider value={{ container: () => container! }} >
-      <div ref={container} {...props} />
+      <div ref={capture} {...props} />
     </OverflowContext.Provider>
   )
 }
