@@ -139,7 +139,7 @@ function compileVisitGroups(res: ListVisitResponse) {
 
 function reconciledVisitGroups(original: VisitGroup[], target: VisitGroup[]) {
   return reconciled(original, target, {
-    key: (g, i) => g.iicSequence?.visit_set_id ?? -i,
+    key: (g, i) => g.iicSequence?.visit_set_id ? `${i}-${g.iicSequence?.visit_set_id}` : `${-i}`,
     children: {
       iicSequence: {
         notes: {

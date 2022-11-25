@@ -78,7 +78,8 @@ function reconciledArray<T>(original: ReadonlyArray<T>, target: T[], key: Key<T[
   const aMap = new Map(a.map((value, i) => [key.key(value, i), value]))
 
   if (aMap.size !== a.length) {
-    throw new Error(`Duplicated keys: ${a}`)
+    console.log(a)
+    throw new Error(`Duplicated keys`)
   }
 
   let only_b = 0, a_and_b = 0, changed = 0
