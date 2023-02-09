@@ -51,7 +51,7 @@ export class MarkerLayer extends Layer {
 
   render(view: View) {
     if (this.enabled && this.options.markers.length > 0) {
-      const { fovy } = this.globe.viewFactory
+      const { fovy } = this.globe.camera
       const lfov = Math.log(fovy)
       this.br.alpha = math.clip(0.5 * (maxFovy - lfov), 0, 1) * math.clip((lfov - minFovy), 0, 1)
       this.br.render(view)
