@@ -7,7 +7,7 @@ import { assertNotNull } from "../../utils/assertNotNull"
 import { PfsDesignEntry } from "./types"
 
 
-type JumpToOptions = Parameters<Globe["viewFactory"]["jumpTo"]>
+type JumpToOptions = Parameters<Globe["camera"]["jumpTo"]>
 
 
 function makeContext() {

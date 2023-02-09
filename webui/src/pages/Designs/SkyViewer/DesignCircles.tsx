@@ -71,7 +71,7 @@ class MarkersLayer extends Layer {
     this.renderer = new path.Renderer(globe.gl)
     this.renderer.blendMode = path.BlendMode.NORMAL
     this.renderer.darkenNarrowLine = false
-    this.renderer.minWidth = 5 * globe.viewFactory.canvasPixels
+    this.renderer.minWidth = 5 * globe.camera.canvasPixels
     this.onRelease(() => this.renderer.release())
   }
 
@@ -89,7 +89,7 @@ class MarkersLayer extends Layer {
   }
 
   render(view: View): void {
-    const alpha = math.clip(4 * (this.globe.viewFactory.fovy - angle.deg2rad(2)), 0.25, 1)
+    const alpha = math.clip(4 * (this.globe.camera.fovy - angle.deg2rad(2)), 0.25, 1)
     this.renderer.render(view, alpha * this.alpha)
   }
 }
@@ -108,7 +108,7 @@ class MarkerMousePicker extends MousePicker {
   }
 
   private nearestDesign(e: GlobePointerEvent): PfsDesignEntry | undefined {
-    const fovy = this.globe.viewFactory.fovy
+    const fovy = this.globe.camera.fovy
     const grow = fovy * 20 / this.globe.canvasELement.clientHeight
     const hit = this.index.nearest(e.coord.xyz, 1, grow + angle.deg2rad(0.7))
     return hit[0]
@@ -136,13 +136,13 @@ class MarkerMousePicker extends MousePicker {
   onPointerDown(e: GlobePointerEvent): void {
     const d = this.nearestDesign(e)
     if (d) {
-      const vf = this.globe.viewFactory
+      const camera = this.globe.camera
       const { ra, dec } = d
       const coord = SkyCoord.fromDeg(ra, dec)
-      if (vf.fovy >= angle.deg2rad(1)) {
+      if (camera.fovy >= angle.deg2rad(1)) {
         this.context.setSelectedDesign(d)
       }
-      if (vf.fovy >= angle.deg2rad(4)) {
+      if (camera.fovy >= angle.deg2rad(4)) {
         this.context.jumpTo({ fovy: angle.deg2rad(0.8) }, { coord })
       }
     }
@@ -159,7 +159,7 @@ class SingleMarker extends Layer {
     super(globe)
     this.renderer = new path.Renderer(globe.gl)
     this.renderer.darkenNarrowLine = false
-    this.renderer.minWidth = 7 * globe.viewFactory.canvasPixels
+    this.renderer.minWidth = 7 * globe.camera.canvasPixels
     this.renderer.setPaths([designPath(SkyCoord.fromRad(0, 0), color, radius)])
     this.renderer.blendMode = path.BlendMode.NORMAL
     this.onRelease(() => this.renderer.release())

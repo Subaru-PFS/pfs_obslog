@@ -18,14 +18,14 @@ export function SkyViewer() {
   let globe: (() => Globe) | undefined
 
   createEffect(on(jumpToSignal, jumpToOptions => {
-    globe?.().viewFactory.jumpTo(...jumpToOptions)
+    globe?.().camera.jumpTo(...jumpToOptions)
   }, { defer: true }))
 
   const hst = createMemo(() => inTimeZone(now(), HstTzOffset))
 
   const centerZenith = () => {
-    const vf = globe?.().viewFactory!
-    vf.jumpTo({ fovy: 2 }, { coord: zenithSkyCoord() })
+    const camera = globe?.().camera!
+    camera.jumpTo({ fovy: 2 }, { coord: zenithSkyCoord() })
   }
 
   return (

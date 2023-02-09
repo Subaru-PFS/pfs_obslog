@@ -37,7 +37,7 @@ export function StellarGlobe(props: StellarGlobeProps) {
     globe.addNewLayer(hips.SimpleImageLayer, baseUrl, { lodBias: -0.25 })
     globe.addNewLayer(GridLayer, o => {
       o.modelMatrix = () => {
-        const { za, zd, zp } = globe.viewFactory
+        const { za, zd, zp } = globe.camera
         return matrixUtils.izenith4(za, zd - tilt, zp)
       }
       o.defaultGridColor = [0, 0.25, 1, 1]
@@ -50,7 +50,7 @@ export function StellarGlobe(props: StellarGlobeProps) {
     })
 
     createEffect(() => {
-      globe.viewFactory.jumpTo(tiltedZenith(), { duration: 0 })
+      globe.camera.jumpTo(tiltedZenith(), { duration: 0 })
     })
   })
 
