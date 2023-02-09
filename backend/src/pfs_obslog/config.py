@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     attachments_dir: Path = Path('./attachments')
     data_root: Path = Path('/data')
     pfs_design_dir: Path = Path('/data/pfsDesign')
-    calexp_reruns: list[str] = ['drpActor/CALIB-20220630', 'ginga/drpActor', 'ginga/sm3', 'ginga/pfi', 'ginga/detrend']
+    calexp_reruns: list[str] = ['drpActor/CALIB', 'drpActor/CALIB-20220630', 'ginga/drpActor', 'ginga/sm3', 'ginga/pfi', 'ginga/detrend']
 
     # auth
     auth_method: Literal['stn_ldap', 'test', 'dev'] = 'stn_ldap'
