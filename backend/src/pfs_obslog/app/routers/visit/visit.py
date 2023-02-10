@@ -11,7 +11,7 @@ from sqlalchemy.orm.session import Session
 from pfs_obslog.app.context import Context
 from pfs_obslog.orm import OrmConfig, skip_validation
 from pfs_obslog.parsesql.ast import SqlError
-from pfs_obslog.schema import (AgcVisit, IicSequence, McsVisit, SpsSequence,
+from pfs_obslog.schema import (AgcVisit, IicSequence, McsVisit, IicSequence,
                                SpsVisit, VisitBase, VisitNote, VisitSetNote)
 from pfs_obslog.visitquery import evaluate_where_clause, extract_where_clause
 
@@ -19,10 +19,10 @@ logger = getLogger(__name__)
 router = APIRouter()
 
 
-class SpsSequenceDetail(SpsSequence):
+class IicSequenceDetail(IicSequence):
     notes: list[VisitSetNote]
 
-    Config = OrmConfig[M.iic_sequence]()(lambda row: skip_validation(SpsSequenceDetail)(
+    Config = OrmConfig[M.iic_sequence]()(lambda row: skip_validation(IicSequenceDetail)(
         visit_set_id=row.iic_sequence_id,  # type: ignore
         sequence_type=row.sequence_type,  # type: ignore
         name=row.name,  # type: ignore
@@ -38,7 +38,7 @@ class VisitDetail(VisitBase):
     sps: Optional[SpsVisit]
     mcs: Optional[McsVisit]
     agc: Optional[AgcVisit]
-    sps_sequence: Optional[SpsSequenceDetail]
+    iic_sequence: Optional[IicSequenceDetail]
 
     Config = OrmConfig[M.pfs_visit]()(lambda row: skip_validation(VisitDetail)(
         id=row.pfs_visit_id,  # type: ignore
@@ -48,7 +48,7 @@ class VisitDetail(VisitBase):
         sps=row.sps_visit,
         mcs=None if len(row.mcs_exposure) == 0 else McsVisit(exposures=row.mcs_exposure),
         agc=None if len(row.agc_exposure) == 0 else AgcVisit(exposures=row.agc_exposure),
-        sps_sequence=row.visit_set.iic_sequence if row.visit_set else None,
+        iic_sequence=row.visit_set.iic_sequence if row.visit_set else None,
     ))
 
 

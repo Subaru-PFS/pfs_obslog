@@ -221,7 +221,7 @@ class IicSequence(BaseModel):
     status: Optional[IicSequenceStatus]
     notes: list[VisitSetNote]
 
-    Config = OrmConfig[M.iic_sequence]()(lambda row: skip_validation(SpsSequence)(
+    Config = OrmConfig[M.iic_sequence]()(lambda row: skip_validation(IicSequence)(
         visit_set_id=row.iic_sequence_id,  # type: ignore
         sequence_type=row.sequence_type,  # type: ignore
         name=row.name,  # type: ignore
@@ -232,18 +232,15 @@ class IicSequence(BaseModel):
     ))
 
 
-SpsSequence = IicSequence
-
-
 class VisitSet(BaseModel):
     id: int
     visit_id: int
-    sps_sequence: SpsSequence
+    iic_sequence: IicSequence
 
     Config = OrmConfig[M.visit_set]()(lambda row: skip_validation(VisitSet)(
         id=row.iic_sequence_id,  # type: ignore
         visit_id=row.pfs_visit_id,  # type: ignore
-        sps_sequence=row.iic_sequence,
+        iic_sequence=row.iic_sequence,
     ))
 
 
