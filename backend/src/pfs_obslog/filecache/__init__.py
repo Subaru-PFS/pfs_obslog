@@ -22,7 +22,6 @@ class FileBackedCache:
         self._root = root
         self._total_size_limit = total_size_limit
         self._auto_vacuum = auto_vauum
-        self._create_table()
 
     def get(self, id: str, valid_after: float | None = None):
         try:
@@ -39,7 +38,7 @@ class FileBackedCache:
                         path = self._path_from_id_digest(id_digest)
                         try:
                             if valid_after and valid_after > path.stat().st_mtime:
-                                path.unlink()
+                                path.unlink(missing_ok=True)
                                 raise FileNotFoundError()
                             return path.read_bytes()
                         except FileNotFoundError:  # pragma: no cover
@@ -81,7 +80,7 @@ class FileBackedCache:
                 )
             except sqlite3.IntegrityError:
                 try:
-                    tmp.unlink()
+                    tmp.unlink(missing_ok=True)
                 except FileNotFoundError:
                     pass
             else:
@@ -100,10 +99,9 @@ class FileBackedCache:
     def _path_from_id_digest(self, id_digest: str):
         return self._root / id_digest[:2] / id_digest
 
-    def _create_table(self):
-        with self.db() as db:
-            db.executescript(schema)
-            db.commit()
+    def _create_table(self, db: sqlite3.Connection):
+        db.executescript(schema)
+        db.commit()
 
     def vacuum(self):
         with self.db() as db:
@@ -129,7 +127,7 @@ class FileBackedCache:
                 try:
                     db.cursor().execute('delete from entry where id = ?', (id,))
                     db.commit()
-                    self._path_from_id_digest(id_digest).unlink()
+                    self._path_from_id_digest(id_digest).unlink(missing_ok=True)
                 except:  # pragma: no cover
                     logging.warning(f'vacuum failed on {id}, {id_digest}')
                     logging.warning(traceback.format_exc())
@@ -139,6 +137,7 @@ class FileBackedCache:
         self._root.mkdir(parents=True, exist_ok=True)
         db = sqlite3.connect(self._root / 'registry.sqlite3', isolation_level='IMMEDIATE')
         db.row_factory = sqlite3.Row
+        self._create_table(db)
         try:
             yield db
         finally:
