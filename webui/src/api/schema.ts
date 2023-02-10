@@ -335,6 +335,22 @@ export interface components {
       /** Notes */
       notes: (components["schemas"]["VisitSetNote"])[];
     };
+    /** IicSequenceDetail */
+    IicSequenceDetail: {
+      /** Visit Set Id */
+      visit_set_id: number;
+      /** Sequence Type */
+      sequence_type?: string;
+      /** Name */
+      name?: string;
+      /** Comments */
+      comments?: string;
+      /** Cmd Str */
+      cmd_str?: string;
+      status?: components["schemas"]["IicSequenceStatus"];
+      /** Notes */
+      notes: (components["schemas"]["VisitSetNote"])[];
+    };
     /** IicSequenceStatus */
     IicSequenceStatus: {
       /** Visit Set Id */
@@ -504,22 +520,6 @@ export interface components {
       /** Annotation */
       annotation: (components["schemas"]["SpsAnnotation"])[];
     };
-    /** SpsSequenceDetail */
-    SpsSequenceDetail: {
-      /** Visit Set Id */
-      visit_set_id: number;
-      /** Sequence Type */
-      sequence_type?: string;
-      /** Name */
-      name?: string;
-      /** Comments */
-      comments?: string;
-      /** Cmd Str */
-      cmd_str?: string;
-      status?: components["schemas"]["IicSequenceStatus"];
-      /** Notes */
-      notes: (components["schemas"]["VisitSetNote"])[];
-    };
     /** SpsVisit */
     SpsVisit: {
       /** Exp Type */
@@ -552,7 +552,7 @@ export interface components {
       sps?: components["schemas"]["SpsVisit"];
       mcs?: components["schemas"]["McsVisit"];
       agc?: components["schemas"]["AgcVisit"];
-      sps_sequence?: components["schemas"]["SpsSequenceDetail"];
+      iic_sequence?: components["schemas"]["IicSequenceDetail"];
     };
     /** VisitList */
     VisitList: {

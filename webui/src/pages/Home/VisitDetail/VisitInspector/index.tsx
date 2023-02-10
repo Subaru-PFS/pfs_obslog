@@ -24,14 +24,14 @@ export function VisitInspector(props: { visit: VisitDetailType }) {
 
   createEffect(() => {
     // change active tab so that the tab display something.
-    const { sps, mcs, agc, sps_sequence } = props.visit
-    const nothingToDisplay = ![sps, mcs, agc, sps_sequence][activeTabIndex()]
+    const { sps, mcs, agc, iic_sequence } = props.visit
+    const nothingToDisplay = ![sps, mcs, agc, iic_sequence][activeTabIndex()]
     if (nothingToDisplay) {
       let tabIndex = 0
       tabIndex === 0 && !props.visit.sps && ++tabIndex
       tabIndex === 1 && !props.visit.mcs && ++tabIndex
       tabIndex === 2 && !props.visit.agc && ++tabIndex
-      tabIndex === 3 && !props.visit.sps_sequence && (tabIndex = activeTabIndex())
+      tabIndex === 3 && !props.visit.iic_sequence && (tabIndex = activeTabIndex())
       setActiveTabIndex(tabIndex)
     }
     // change fits viewer target
@@ -60,7 +60,7 @@ export function VisitInspector(props: { visit: VisitDetailType }) {
           { title: 'SpS', contents: props.visit.sps && (() => <SpsInspector visit={props.visit} />) },
           { title: 'MCS', contents: props.visit.mcs && (() => <McsInspector visit={props.visit} />) },
           { title: 'AGC', contents: props.visit.agc && (() => <AgcInspector visit={props.visit} />) },
-          { title: 'IIC Sequence', contents: props.visit.sps_sequence && (() => <IicSequence visit={props.visit} />) },
+          { title: 'IIC Sequence', contents: props.visit.iic_sequence && (() => <IicSequence visit={props.visit} />) },
         ]} />
     </div>
   )

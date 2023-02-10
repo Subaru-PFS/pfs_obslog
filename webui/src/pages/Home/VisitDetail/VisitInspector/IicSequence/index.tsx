@@ -23,7 +23,7 @@ export function IicSequence(props: { visit: VisitDetail }) {
     refreshHome({ detail: {}, list: {} })
   }
 
-  const iicSequence = createMemo(() => props.visit.sps_sequence!)
+  const iicSequence = createMemo(() => props.visit.iic_sequence!)
 
   return (
     <div>
@@ -37,9 +37,9 @@ export function IicSequence(props: { visit: VisitDetail }) {
         <GridCellGroup class={gridStyles.data}>
           <div>{iicSequence().visit_set_id}</div>
           <div>{iicSequence().name}</div>
-          <div style={sequenceTypeStyle(props.visit.sps_sequence?.sequence_type)} >
+          <div style={sequenceTypeStyle(props.visit.iic_sequence?.sequence_type)} >
             {iicSequence().sequence_type}</div>
-          <div style={statusStyle(props.visit.sps_sequence?.status?.cmd_output)} >
+          <div style={statusStyle(props.visit.iic_sequence?.status?.cmd_output)} >
             {iicSequence().status?.cmd_output}</div>
         </GridCellGroup>
       </div>

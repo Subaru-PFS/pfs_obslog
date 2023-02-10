@@ -2,7 +2,7 @@ import { OpArgType, OpReturnType } from "openapi-typescript-fetch"
 import { paths } from "~/api/schema"
 
 export type VisitDetailType = OpReturnType<paths['/api/visits/{id}']['get']>
-export type IicSequenceResponseType = NonNullable<VisitDetailType["sps_sequence"]>
+export type IicSequenceResponseType = NonNullable<VisitDetailType["iic_sequence"]>
 export type SpsImageType = NonNullable<OpArgType<paths["/api/fits/visits/{visit_id}/sps/{camera_id}.png"]["get"]>["type"]>
 export type SpsExposureType = NonNullable<VisitDetailType["sps"]>["exposures"][number]
 export type McsExposureType = NonNullable<VisitDetailType["mcs"]>["exposures"][number]
