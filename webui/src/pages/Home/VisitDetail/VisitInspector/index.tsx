@@ -13,6 +13,7 @@ import { VisitDetailType } from '../types'
 import { AgcInspector } from './AgcInspector'
 import { IicSequence } from './IicSequence'
 import { McsInspector } from './McsInspector'
+import { SequenceGroup } from './SequenceGroup'
 import { SpsInspector } from './SpsInspector'
 import styles from './styles.module.scss'
 tippy
@@ -25,13 +26,14 @@ export function VisitInspector(props: { visit: VisitDetailType }) {
   createEffect(() => {
     // change active tab so that the tab display something.
     const { sps, mcs, agc, iic_sequence } = props.visit
-    const nothingToDisplay = ![sps, mcs, agc, iic_sequence][activeTabIndex()]
+    const nothingToDisplay = ![sps, mcs, agc, iic_sequence, iic_sequence?.group][activeTabIndex()]
     if (nothingToDisplay) {
       let tabIndex = 0
       tabIndex === 0 && !props.visit.sps && ++tabIndex
       tabIndex === 1 && !props.visit.mcs && ++tabIndex
       tabIndex === 2 && !props.visit.agc && ++tabIndex
-      tabIndex === 3 && !props.visit.iic_sequence && (tabIndex = activeTabIndex())
+      tabIndex === 3 && !props.visit.iic_sequence && ++tabIndex
+      tabIndex === 4 && !props.visit.iic_sequence?.group && (tabIndex = activeTabIndex())
       setActiveTabIndex(tabIndex)
     }
     // change fits viewer target
@@ -61,6 +63,7 @@ export function VisitInspector(props: { visit: VisitDetailType }) {
           { title: 'MCS', contents: props.visit.mcs && (() => <McsInspector visit={props.visit} />) },
           { title: 'AGC', contents: props.visit.agc && (() => <AgcInspector visit={props.visit} />) },
           { title: 'IIC Sequence', contents: props.visit.iic_sequence && (() => <IicSequence visit={props.visit} />) },
+          { title: 'Sequence Group', contents: props.visit.iic_sequence?.group && (() => <SequenceGroup group={props.visit.iic_sequence?.group!} />) },
         ]} />
     </div>
   )

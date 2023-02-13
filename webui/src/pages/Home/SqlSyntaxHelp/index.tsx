@@ -116,6 +116,12 @@ const columns: Column[] = [
     name: 'status', opdb_column: 'iic_sequence_status.cmd_output', doc: 'Status of the visit set',
   },
   {
+    name: 'sequence_group_id', opdb_column: 'sequence_group.group_id', doc: 'Sequence Group ID',
+  },
+  {
+    name: 'sequence_group_name', opdb_column: 'sequence_group.group_name', doc: 'Sequence Group Name',
+  },
+  {
     name: 'fits_header', opdb_column: 'N/A', doc: `Fits headers belonging to the visit. You can access a card by 'fits_header['CARD_NAME']'`,
   },
   {
