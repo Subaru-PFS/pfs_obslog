@@ -334,6 +334,7 @@ export interface components {
       status?: components["schemas"]["IicSequenceStatus"];
       /** Notes */
       notes: (components["schemas"]["VisitSetNote"])[];
+      group?: components["schemas"]["SequenceGroup"];
     };
     /** IicSequenceDetail */
     IicSequenceDetail: {
@@ -350,6 +351,7 @@ export interface components {
       status?: components["schemas"]["IicSequenceStatus"];
       /** Notes */
       notes: (components["schemas"]["VisitSetNote"])[];
+      group?: components["schemas"]["SequenceGroup"];
     };
     /** IicSequenceStatus */
     IicSequenceStatus: {
@@ -475,6 +477,18 @@ export interface components {
       totalFluxErr: (number)[];
       /** Filtername */
       filterName: (string)[];
+    };
+    /** SequenceGroup */
+    SequenceGroup: {
+      /** Group Id */
+      group_id: number;
+      /** Group Name */
+      group_name?: string;
+      /**
+       * Created At 
+       * Format: date-time
+       */
+      created_at?: string;
     };
     /** Session */
     Session: {

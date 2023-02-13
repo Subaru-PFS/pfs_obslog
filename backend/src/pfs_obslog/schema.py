@@ -212,6 +212,18 @@ class IicSequenceStatus(BaseModel):
     ))
 
 
+class SequenceGroup(BaseModel):
+    group_id: int
+    group_name: str | None
+    created_at: datetime | None
+
+    Config = OrmConfig[M.sequence_group]()(lambda row: skip_validation(SequenceGroup)(
+        group_id=row.group_id,  # type: ignore
+        group_name=row.group_name,  # type: ignore
+        created_at=row.created_at,  # type: ignore
+    ))
+
+
 class IicSequence(BaseModel):
     visit_set_id: int
     sequence_type: Optional[str]
@@ -220,6 +232,7 @@ class IicSequence(BaseModel):
     cmd_str: Optional[str]
     status: Optional[IicSequenceStatus]
     notes: list[VisitSetNote]
+    group: SequenceGroup | None
 
     Config = OrmConfig[M.iic_sequence]()(lambda row: skip_validation(IicSequence)(
         visit_set_id=row.iic_sequence_id,  # type: ignore
@@ -229,6 +242,7 @@ class IicSequence(BaseModel):
         cmd_str=row.cmd_str,  # type: ignore
         status=row.iic_sequence_status,
         notes=row.obslog_notes,
+        group=row.sequence_group,
     ))
 
 

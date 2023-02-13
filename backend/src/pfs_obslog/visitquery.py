@@ -45,6 +45,7 @@ def evaluate_where_clause(where: ast.Evaluatable):
            outerjoin(M.obslog_visit_set_note).
            outerjoin(visit_set_note_user, M.obslog_visit_set_note.user).
            outerjoin(M.iic_sequence_status, M.iic_sequence.iic_sequence_status).
+           outerjoin(M.sequence_group).
            # MCS exposure
            outerjoin(M.mcs_exposure).
            outerjoin(M.obslog_mcs_exposure_note).
@@ -101,6 +102,9 @@ class VisitQueryContext(ast.EvaluationContext):
             # (ast.String('n_mcs_exposures'),): func.count(distinct(M.mcs_exposure.mcs_frame_id)).label('n_mcs_exposures'),
             # (ast.String('n_agc_exposures'),): func.count(distinct(M.agc_exposure.agc_exposure_id)).label('n_agc_exposures'),
             (ast.String('fits_header'),): M.obslog_fits_header.cards_dict,
+            (ast.String('visit_set_id'),): M.iic_sequence.iic_sequence_id,
+            (ast.String('sequence_group_id'),): M.sequence_group.group_id,
+            (ast.String('sequence_group_name'),): M.sequence_group.group_name,
         }
         if node.fields not in columns:
             raise ast.SqlError(f'Unknown column: {node.fields}')

@@ -16,3 +16,4 @@ export type VisitGroupType = {
   iicSequence?: IicSequenceResponse
   visits: VisitResponse[]
 }
+export type SequenceGroupType = NonNullable<IicSequenceResponseType["group"]>

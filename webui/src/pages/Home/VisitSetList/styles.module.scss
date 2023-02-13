@@ -1,4 +1,4 @@
-@import '/src/styles/theme.scss';
+@import "/src/styles/theme.scss";
 
 .VisitSetList {
   display: flex;
@@ -30,7 +30,6 @@
   margin: 4px;
 
   @keyframes shake {
-
     10%,
     90% {
       transform: translate3d(-1px, 0, 0);
@@ -62,7 +61,7 @@
   display: flex;
   align-items: center;
 
-  &>input {
+  & > input {
     width: 10ch;
     border-style: none;
     background-color: transparent;
@@ -354,4 +353,8 @@ ul.Columns {
     margin: 0;
     padding: 0;
   }
+}
+
+.sequenceGroupName {
+  margin: 0 1em;
 }

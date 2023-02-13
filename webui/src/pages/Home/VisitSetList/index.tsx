@@ -10,7 +10,7 @@ import { downloadLink } from '~/utils/downloadLink'
 import { shortFormatDate, shortFormatTime } from '~/utils/time'
 import { useHomeContext } from '../context'
 import { NoteList } from '../NoteList'
-import { IicSequenceResponse, VisitGroupType, VisitResponse } from '../VisitDetail/types'
+import { IicSequenceResponse, SequenceGroupType, VisitGroupType, VisitResponse } from '../VisitDetail/types'
 import { numberOfExposuresStyle, sequenceTypeStyle, statusStyle } from './colors'
 import { columnDescription, ColumnKeys, perPage, usePaginator, useVisitSetListContext, VisitSetListContext } from './context'
 import styles from './styles.module.scss'
@@ -443,6 +443,28 @@ function VisitGroup(props: { group: VisitGroupType }) {
 }
 
 
+function SequenceGroupName(props: { group: SequenceGroupType }) {
+  const { setQueryParams, refresh } = useVisitSetListContext()
+  const searchGroup = () => {
+    setQueryParams.produce(_ => {
+      _.limit = 100
+      _.offset = 0
+      _.whereSql = `where sequence_group_id = ${props.group.group_id}`
+    })
+    return refresh()
+  }
+
+  return (
+    <button
+      class={styles.sequenceGroupName} use:tippy={{ content: `ID: ${props.group.group_id}<br />Created at: ${props.group.created_at}`, allowHTML: true }}
+      onClick={searchGroup}
+    >
+      Group={props.group.group_name}
+    </button>
+  )
+}
+
+
 function IicSequence(props: { iicSequence: IicSequenceResponse }) {
   const createNote = fetcher.path('/api/visit_sets/{visit_set_id}/notes').method('post').create()
   const updateNote = fetcher.path('/api/visit_sets/{visit_set_id}/notes/{id}').method('put').create()
@@ -451,7 +473,10 @@ function IicSequence(props: { iicSequence: IicSequenceResponse }) {
 
   return (
     <div class={styles.iicSequence}>
-      <div class={styles.title}>{props.iicSequence.visit_set_id} &#x2013; {props.iicSequence.name}</div>
+      <div class={styles.title}>
+        {props.iicSequence.visit_set_id} &#x2013; {props.iicSequence.name}
+        {props.iicSequence.group && <SequenceGroupName group={props.iicSequence.group} />}
+      </div>
       <table>
         <thead>
           <tr>

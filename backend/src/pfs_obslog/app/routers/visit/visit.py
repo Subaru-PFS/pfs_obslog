@@ -11,7 +11,7 @@ from sqlalchemy.orm.session import Session
 from pfs_obslog.app.context import Context
 from pfs_obslog.orm import OrmConfig, skip_validation
 from pfs_obslog.parsesql.ast import SqlError
-from pfs_obslog.schema import (AgcVisit, IicSequence, McsVisit, IicSequence,
+from pfs_obslog.schema import (AgcVisit, IicSequence, McsVisit, IicSequence, SequenceGroup,
                                SpsVisit, VisitBase, VisitNote, VisitSetNote)
 from pfs_obslog.visitquery import evaluate_where_clause, extract_where_clause
 
@@ -21,6 +21,7 @@ router = APIRouter()
 
 class IicSequenceDetail(IicSequence):
     notes: list[VisitSetNote]
+    group: SequenceGroup | None
 
     Config = OrmConfig[M.iic_sequence]()(lambda row: skip_validation(IicSequenceDetail)(
         visit_set_id=row.iic_sequence_id,  # type: ignore
@@ -30,6 +31,7 @@ class IicSequenceDetail(IicSequence):
         cmd_str=row.cmd_str,  # type: ignore
         status=row.iic_sequence_status,
         notes=row.obslog_notes,
+        group=row.sequence_group,
     ))
 
 
@@ -96,12 +98,15 @@ def index_visits(
         visits, count = list_visits(ctx.db, sql, limit, offset)
     except SqlError as error:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(error))
-    iic_sequence_q = ctx.db.query(M.iic_sequence)\
+    iic_sequence_q = (
+        ctx.db.query(M.iic_sequence)
         .filter(M.iic_sequence.iic_sequence_id.in_(
             ctx.db.query(M.visit_set.iic_sequence_id).filter(M.visit_set.pfs_visit_id.in_(v.id for v in visits))
-        ))\
-        .options(selectinload('obslog_notes'))\
+        ))
+        .options(selectinload('obslog_notes'))
         .options(selectinload('iic_sequence_status'))
+        .options(selectinload('sequence_group'))
+    )
     return VisitList(
         visits=visits,
         iic_sequence=[*iic_sequence_q],
