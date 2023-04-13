@@ -46,6 +46,7 @@ setup(
             'Pillow',
             'watchdog[watchmedo]',
             'pyright',
+            'ipython',
         ],
     },
 )

@@ -1,11 +1,11 @@
 from typing import Final
-from fastapi.param_functions import Header
+
 import pytest
 import time_machine
 from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
-from pfs_obslog.httpsession import TokenOrCookieSession
 
+from pfs_obslog.httpsession import TokenOrCookieSession
 
 app = FastAPI()
 

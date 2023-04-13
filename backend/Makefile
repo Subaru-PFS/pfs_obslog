@@ -95,6 +95,8 @@ devel/type-check:
 devel/type-check-watch:
 	./.venv/bin/ptw --runner "$(MAKE) devel/type-check"
 
+devel/console:
+	./runner ./.venv/bin/ipython
 
 webui/build:
 	cd ../webui && VITE_API_BASE_URL=. npm run build
