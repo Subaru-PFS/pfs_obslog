@@ -28,9 +28,11 @@ setup(
         'uvloop',
         'httptools',
         'scikit-image',
+        'pydantic==1.*',
         'pydantic[dotenv]',
         'pytz', # for pfsUtils
         'astroplan',  # for pfsUtils
+        'SQLAlchemy==1.4.37',
         # f'opdb @ file://localhost{HERE.absolute()}/spt_operational_database',
     ],
     extras_require={
