@@ -1,7 +1,9 @@
+import os
 from optparse import Option
 from pathlib import Path
 from typing import Literal, Optional
 
+from functools import cached_property
 from pydantic import BaseSettings, Field, PostgresDsn
 
 
@@ -29,9 +31,11 @@ class Settings(BaseSettings):
     secret_key_base: bytes
 
     # cache
+    # I want to use cached_property, but it's not available in BaseSettings
     @property
     def cache_dir(self):
-        return Path(f'/tmp/obslog/{self.app_env}')
+        username = os.environ.get('USER', 'unknown_user')
+        return Path(f'/tmp/{username}/obslog/{self.app_env}')
 
     # asynctask
     asynctask_fork: bool = True

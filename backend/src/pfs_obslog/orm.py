@@ -1,7 +1,7 @@
 import dataclasses
-from typing import Any, Callable, Generic, TYPE_CHECKING, Type, TypeVar
+from typing import Any, Callable, Generic, TYPE_CHECKING, Type, TypeVar, ClassVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from pydantic.utils import GetterDict
 
 T = TypeVar('T')
@@ -19,8 +19,11 @@ class OrmConfig(Generic[T]):
                     else:
                         super().__init__(mapper(obj))  # type: ignore
 
-            row_to_model = staticmethod(mapper)
+            row_to_model: ClassVar[Callable[[Any], BaseModel]] = staticmethod(mapper)
+            
         return Config
+
+
 
 
 U = TypeVar('U', bound=Type[BaseModel])

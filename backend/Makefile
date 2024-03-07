@@ -4,6 +4,7 @@ postgres_home ?= /Applications/Postgres.app/Contents/Versions/latest
 
 app_server := pfs-obslog
 copy_to := pfs-ics-shell:pfs_obslog/
+rsync := rsync
 
 .PHONY: hotdev
 
@@ -84,9 +85,10 @@ devel/db/restore:
 	gzip -d < snapshot/dump.sql.gz | $(postgres_home)/bin/psql --user postgres opdb
 
 devel/sync:
-	rsync -av --delete --exclude=$(rsync_exclude) --rsync-path=/home/michitaro/machines/obslog-ics.pfs.sum.subaru.nao.ac.jp/packages/rsync/bin/rsync ../ pfs-obslog:devel/pfs_obslog
+	$(rsync) -av --delete --exclude=$(rsync_exclude) --rsync-path=/home/michitaro/machines/obslog-ics.pfs.sum.subaru.nao.ac.jp/packages/rsync/bin/rsync ../ pfs-obslog:devel/pfs_obslog
 
 devel/sync-watch:
+	$(MAKE) devel/sync
 	./.venv/bin/watchmedo shell-command -w -c '$(MAKE) devel/sync' -R ./src ../webui/src
 
 devel/type-check:
@@ -101,10 +103,10 @@ devel/console:
 webui/build:
 	cd ../webui && VITE_API_BASE_URL=. npm run build
 
-rsync_exclude := {.env,secrets,.venv,.nodeenv,node_modules,schemaspy/html,htmlcov,logs,attachments,tmp,__pycache__,'*.sock',snapshot,sample_data,pfsDesign}
+rsync_exclude := {.env,secrets,.venv,.nodeenv,node_modules,schemaspy/html,htmlcov,logs,attachments,tmp,__pycache__,'*.sock',snapshot,sample_data,pfsDesign,env}
 
 deploy/production-sync:
-	rsync -av --delete --exclude=$(rsync_exclude) ../ $(copy_to)
+	$(rsync) -av --delete --exclude=$(rsync_exclude) --rsync-path=/home/michitaro/machines/obslog-ics.pfs.sum.subaru.nao.ac.jp/packages/rsync/bin/rsync ../ $(copy_to)
 
 deploy/production-restart:
 	ssh $(app_server) systemctl --user restart pfs-obslog

@@ -170,7 +170,7 @@ function Entry(props: EntryProps) {
           class={styles.entryInfo}
           data-design-id={props.entry.id}
         >
-          <div class={styles.entryName}>{props.entry.name || '-'}</div>
+          <div class={styles.entryName} use:tippy={{ content: props.entry.name }}>{props.entry.name || '-'}</div>
           <div class={styles.entryId}>{formattedId(props.entry, props.idFormat)}</div>
           <div class={styles.entryDate}> {props.entry.date_modified} </div>
           <div class={styles.entryDate}>

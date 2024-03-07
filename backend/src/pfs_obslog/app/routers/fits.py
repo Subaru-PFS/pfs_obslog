@@ -143,32 +143,43 @@ def sps_fits_path(visit: M.pfs_visit, camera_id: int):
     date = visit_date(visit)
     date_dir = settings.data_root / 'raw' / date.strftime(r'%Y-%m-%d')
     camera_id -= 1
+    arm_name = 'brnm'[camera_id % 4]
     sm = camera_id // 4 + 1
     arm = camera_id % 4 + 1
-    path = date_dir / 'sps' / f'PFSA{visit.pfs_visit_id:06d}{sm:01d}{arm:01d}.fits'
+    if arm_name == 'n':
+        path = date_dir / 'ramps' / f'PFSB{visit.pfs_visit_id:06d}{sm:01d}{arm:01d}.fits'
+    else:
+        path = date_dir / 'sps' / f'PFSA{visit.pfs_visit_id:06d}{sm:01d}{arm:01d}.fits'
     return path
 
 
 def calexp_fits_path(visit: M.pfs_visit, camera_id: int):
     visit_id = visit.pfs_visit_id
-    date = visit_date(visit)
+    date0 = visit_date(visit)
     camera_id -= 1
     sm = camera_id // 4 + 1
     arm = 'brnm'[camera_id % 4]
     for rerun in settings.calexp_reruns:
-        date_dir = settings.data_root / f'drp/sm1-5.2/rerun/{rerun}/calExp' / date.strftime(r'%Y-%m-%d')
-        path = date_dir / f'v{visit_id:06d}' / f'calExp-SA{visit_id:06d}{arm}{sm}.fits'
-        if path.exists():
-            return path
+        for delta_d in (datetime.timedelta(days=0), datetime.timedelta(days=-1), datetime.timedelta(days=+1)):
+            date = date0 + delta_d
+            date_dir = settings.data_root / f'drp/sm1-5.2/rerun/{rerun}/calExp' / date.strftime(r'%Y-%m-%d')
+            category = 'B' if arm == 'n' else 'A'
+            path = date_dir / f'v{visit_id:06d}' / f'calExp-S{category}{visit_id:06d}{arm}{sm}.fits'
+            if path.exists():
+                return path
     raise FileNotFoundError(f'No such file for calexp visit={visit.pfs_visit_id} camera_id={camera_id}')
 
 
 def mcs_fits_path(visit: M.pfs_visit, frame_id: int):
-    date = visit_date(visit)
-    date_dir = settings.data_root / 'raw' / date.strftime(r'%Y-%m-%d')
-    # PFSC06735159.fits
-    path = date_dir / 'mcs' / f'PFSC{frame_id:08d}.fits'
-    return path
+    date0 = visit_date(visit)
+    for delta_d in (datetime.timedelta(days=0), datetime.timedelta(days=-1), datetime.timedelta(days=+1)):
+        date = date0 + delta_d
+        date_dir = settings.data_root / 'raw' / date.strftime(r'%Y-%m-%d')
+        # PFSC06735159.fits
+        path = date_dir / 'mcs' / f'PFSC{frame_id:08d}.fits'
+        if path.exists():
+            return path
+    raise FileNotFoundError(f'No such file for mcs visit={visit.pfs_visit_id} frame_id={frame_id}')
 
 
 class AgcFitsNotAccessible(FileNotFoundError):

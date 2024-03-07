@@ -12,28 +12,39 @@
 }
 
 .exposures {
-  display: flex;
-  flex-wrap: wrap;
-  list-style: none;
   margin: 0;
-  padding: 1em;
   height: 0;
   flex-grow: 1;
-  overflow: auto;
+  // border: solid 1px red;
+  // box-sizing: border-box;
+  position: relative;
 
-  li {
-    margin: 0;
-    padding: 0;
+  table {
+    border-collapse: collapse;
+  }
+
+  .scroll {
+    padding: 1em 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    // border: solid 2px green;
+    overflow: auto;
   }
 }
 
 .exposure {
+  display: block;
+  margin: 0.5em;
+
   &-table {
     display: grid;
   }
 
-  border-radius: 8px;
-  box-shadow: $medium-shadow;
-  padding: 8px;
-  margin: 8px;
+  // border-radius: 8px;
+  // box-shadow: $medium-shadow;
+  // padding: 8px;
+  // margin: 8px;
 }

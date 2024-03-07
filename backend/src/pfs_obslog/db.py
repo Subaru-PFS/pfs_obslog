@@ -7,7 +7,7 @@ from pfs_obslog.config import settings
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
-engine = create_engine(settings.dsn, future=True, echo=settings.echo_sql)
+engine = create_engine(str(settings.dsn), future=True, echo=settings.echo_sql)
 
 _DBSession: Callable[..., Session] = sessionmaker(bind=engine, autoflush=False)
 

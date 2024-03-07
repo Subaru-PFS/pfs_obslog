@@ -12,6 +12,7 @@ import { useVisitDetailContext } from '../../context'
 import type { SpsExposureType, SpsImageType, VisitDetailType } from '../../types'
 import { selected, settings } from '../styles.module.scss'
 import styles from './styles.module.scss'
+import { range } from '~/utils/range'
 tippy
 
 
@@ -51,7 +52,7 @@ export function SpsInspector(props: { visit: VisitDetailType }) {
         </dl>
       </div>
 
-      <ul class={styles.exposures}>
+      {/* <ul class={styles.exposures}>
         <For each={sps().exposures}>
           {exp => (
             <li>
@@ -59,8 +60,75 @@ export function SpsInspector(props: { visit: VisitDetailType }) {
             </li>
           )}
         </For>
-      </ul>
+      </ul> */}
+
+      <div class={styles.exposures}>
+        <div class={styles.scroll} >
+          <SpsExposureTable
+            exposures={sps().exposures}
+            visit={props.visit}
+            imageType={imageType()}
+            imageScale={imageScale()}
+          />
+        </div>
+      </div>
     </div>
+  )
+}
+
+
+function SpsExposureTable(props: {
+  exposures: SpsExposureType[],
+  visit: VisitDetailType,
+  imageType: SpsImageType,
+  imageScale: number
+}) {
+  const arranged = createMemo(() => {
+    const exps = new Map<string, Map<number, SpsExposureType>>()
+    for (const exp of props.exposures) {
+      const arm = armName(exp.camera_id)
+      const module = decodeCameraId(exp.camera_id).sm
+      if (!exps.has(arm)) {
+        exps.set(arm, new Map())
+      }
+      const armGroup = exps.get(arm)!
+      armGroup.set(module, exp)
+    }
+    return exps
+  })
+
+  return (
+    <table >
+      <thead>
+        <tr>
+          <th ></th>
+          {range(4).map(module => (
+            <th>{module + 1}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {['n', 'r', 'm', 'b'].map(arm => (
+          <Show when={!!arranged().get(arm)}>
+            <tr>
+              <th style={{ width: '2em' }}>{arm}</th>
+              {range(4).map(module => (
+                <td>
+                  <Show when={arranged().get(arm)?.get(module + 1)}>
+                    <SpsExposure
+                      exposure={arranged().get(arm)?.get(module + 1)!}
+                      visit={props.visit}
+                      imageType={props.imageType}
+                      scale={props.imageScale}
+                    />
+                  </Show>
+                </td>
+              ))}
+            </tr>
+          </Show>
+        ))}
+      </tbody>
+    </table>
   )
 }
 
@@ -83,7 +151,7 @@ function SpsExposure(props: { exposure: SpsExposureType, visit: VisitDetailType,
   return (
     <TriggerReflow class={styles.exposure} watch={() => props.scale} >
       <LazyImage src={url()} skeletonHeight={props.scale * height} skeletonWidth={props.scale * width} />
-      <div class={styles.exposureTable} style={{ 'grid-template-columns': 'repeat(3, 1fr)' }}>
+      {/* <div class={styles.exposureTable} style={{ 'grid-template-columns': 'repeat(3, 1fr)' }}>
         <GridCellGroup class={gridStyles.header}>
           <div>ID</div>
           <div>Module</div>
@@ -108,8 +176,9 @@ function SpsExposure(props: { exposure: SpsExposureType, visit: VisitDetailType,
             </ul>
           </GridCellGroup>
         </Show>
-      </div>
+      </div> */}
       <JustifyEnd>
+        <div style={{ "align-self": 'center', "margin-right":"1em" }} >ID={props.exposure.camera_id}</div>
         <IconButton
           classList={{ [selected]: fitsIdSelected() }}
           icon='view_column' tippy={{ content: 'Show FITS Header' }} onClick={() => {
