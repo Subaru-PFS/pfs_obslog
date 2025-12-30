@@ -1,8 +1,11 @@
+@use "../../styles/theme" as *;
+
 .container {
-  padding: 20px;
-  
+  padding: $spacing-xl;
+
   &Title {
-    font-size: 24px;
+    font-size: $font-size-xl;
     font-weight: bold;
+    color: $text-color;
   }
 }

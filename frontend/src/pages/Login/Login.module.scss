@@ -1,38 +1,39 @@
+@use "../../styles/theme" as *;
+
 .loginContainer {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 1rem;
+  padding: $spacing-md;
+  background-color: $background-color;
 }
 
 .form {
   width: 100%;
   max-width: 400px;
-  padding: 2rem;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: $spacing-xl;
+  @include card;
 
   h1 {
-    margin-bottom: 1.5rem;
+    margin-bottom: $spacing-lg;
     text-align: center;
-    font-size: 1.5rem;
-    color: #333;
+    font-size: $font-size-xl;
+    color: $text-color;
   }
 
   dl {
-    margin-bottom: 1rem;
+    margin-bottom: $spacing-md;
 
     dt {
-      margin-bottom: 0.5rem;
+      margin-bottom: $spacing-sm;
       font-weight: 500;
-      color: #555;
+      color: $link-color;
     }
 
     dd {
       margin: 0;
-      margin-bottom: 1rem;
+      margin-bottom: $spacing-md;
     }
   }
 
@@ -40,51 +41,36 @@
   input[type="password"] {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
+    @include rounded-text-input;
+    font-size: $font-size-base;
     box-sizing: border-box;
 
     &:focus {
       outline: none;
-      border-color: #007bff;
-      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      box-shadow: 0 0 0 2px $accent;
     }
   }
 
   .submitContainer {
     display: flex;
     justify-content: flex-end;
-    margin-top: 1.5rem;
+    margin-top: $spacing-lg;
   }
 
   input[type="submit"] {
-    padding: 0.75rem 2rem;
-    background: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.2s;
-
-    &:hover {
-      background: #0056b3;
-    }
-
-    &:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
+    padding: 0.75rem $spacing-xl;
+    @include button-primary;
+    color: $text-color;
+    font-size: $font-size-base;
   }
 }
 
 .error {
   padding: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: $spacing-md;
   background: #f8d7da;
   border: 1px solid #f5c6cb;
-  border-radius: 4px;
+  border-radius: $border-radius-sm;
   color: #721c24;
   text-align: center;
 }

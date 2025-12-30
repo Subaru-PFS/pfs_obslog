@@ -1,42 +1,61 @@
+/* =============================================================================
+   App Layout Styles
+   ============================================================================= */
+
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  min-height: 100vh;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* =============================================================================
+   Loading States
+   ============================================================================= */
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: var(--text-color-hint);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* =============================================================================
+   Error States
+   ============================================================================= */
+
+.error {
+  padding: 1rem;
+  background-color: #fee;
+  border: 1px solid #f88;
+  border-radius: 8px;
+  color: #c00;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* =============================================================================
+   Messages
+   ============================================================================= */
+
+.message {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
 }
 
-.card {
-  padding: 2em;
+.message--info {
+  background-color: var(--selected-background);
+  color: var(--text-color);
 }
 
-.read-the-docs {
-  color: #888;
+.message--success {
+  background-color: #dfd;
+  color: #060;
+}
+
+.message--warning {
+  background-color: #ffd;
+  color: #660;
+}
+
+.message--error {
+  background-color: #fee;
+  color: #c00;
 }
