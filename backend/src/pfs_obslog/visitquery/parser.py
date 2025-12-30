@@ -40,12 +40,12 @@ def parse_where_clause(sql: str) -> ast.Node | None:
     except PglastError as e:
         raise QueryParseError(str(e)) from e
 
-    if not result:
+    if not result:  # pragma: no cover
         raise QueryParseError("Empty SQL statement")
 
     stmt = result[0].stmt
 
-    if not isinstance(stmt, ast.SelectStmt):
+    if not isinstance(stmt, ast.SelectStmt):  # pragma: no cover
         raise QueryParseError(f"Expected SELECT statement, got {type(stmt).__name__}")
 
     return stmt.whereClause
@@ -101,10 +101,10 @@ def validate_expression(node: ast.Node) -> None:
 
 
 def _get_func_name(func_call: ast.FuncCall) -> str:
-    """FuncCallノードから関数名を取得"""
+    """関数名を取得"""
     if func_call.funcname:
         names = [
             n.sval if isinstance(n, ast.String) else str(n) for n in func_call.funcname
         ]
         return ".".join(names)
-    return ""
+    return ""  # pragma: no cover

@@ -5,6 +5,7 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  background-color: $distant-background;
 }
 
 // =============================================================================
@@ -15,17 +16,149 @@
   flex-wrap: wrap;
   gap: 8px;
   padding: 8px;
-  background-color: $header-background-color;
-  border-bottom: 1px solid $border-color;
-  flex-shrink: 0;
+  background-color: $background-color;
+  box-shadow: $medium-shadow;
+  z-index: 2;
+}
+
+.searchBox {
+  display: flex;
+  flex: 1;
+  min-width: 200px;
+  gap: 4px;
 }
 
 .searchInput {
   @include rounded-text-input;
   flex: 1;
-  min-width: 200px;
   padding: 6px 12px;
   font-size: 0.875rem;
+  box-shadow: 0 0 4px inset rgba($shadow-color, 0.5);
+
+  &.sql {
+    color: $sql-text-color;
+    font-family: $font-family-mono;
+    box-shadow: 0 0 4px inset rgba($sql-color, 1);
+  }
+}
+
+.toolbarButton {
+  @include button-base;
+  padding: 4px 8px;
+  font-size: 0.875rem;
+  background-color: $input-background;
+  min-width: 32px;
+
+  &:hover:not(:disabled) {
+    background-color: $hover-background-color;
+  }
+
+  &:disabled {
+    color: $disabled-text-color;
+    cursor: not-allowed;
+  }
+}
+
+.toolbarActions {
+  display: flex;
+  gap: 4px;
+}
+
+// =============================================================================
+// Pagination Controls (Top & Bottom)
+// =============================================================================
+$pagination-border-radius: 12px;
+
+.paginationTop,
+.paginationBottom {
+  display: flex;
+  margin: 0 12px;
+  background-color: $background-color;
+}
+
+.paginationTop {
+  .paginationButton:first-child {
+    border-radius: 0 0 0 $pagination-border-radius;
+  }
+
+  .paginationButton.loadMore {
+    flex-grow: 1;
+    border-radius: 0;
+    margin: 0 4px;
+  }
+
+  .paginationButton:last-child {
+    border-radius: 0 0 $pagination-border-radius 0;
+  }
+}
+
+.paginationBottom {
+  .paginationButton:first-child {
+    border-radius: $pagination-border-radius 0 0 0;
+  }
+
+  .paginationButton.loadMore {
+    flex-grow: 1;
+    border-radius: 0;
+    margin: 0 4px;
+  }
+
+  .paginationButton:last-child {
+    border-radius: 0 $pagination-border-radius 0 0;
+  }
+}
+
+.paginationButton {
+  @include button-base;
+  padding: 4px 12px;
+  font-size: 1rem;
+  background-color: $input-background;
+
+  &:hover:not(:disabled) {
+    background-color: $hover-background-color;
+  }
+
+  &:disabled {
+    color: $disabled-text-color;
+    cursor: not-allowed;
+  }
+}
+
+// =============================================================================
+// Content Area
+// =============================================================================
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  position: relative;
+}
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba($block-background-color, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $text-color;
+  font-size: 1rem;
+  z-index: 10;
+}
+
+// =============================================================================
+// Footer with Pagination
+// =============================================================================
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px;
+  background-color: $background-color;
+  box-shadow: $medium-shadow;
+  z-index: 1;
 }
 
 .pagination {
@@ -54,16 +187,9 @@
     font-size: 0.875rem;
     color: $hint-text-color;
     white-space: nowrap;
+    min-width: 10ch;
+    text-align: center;
   }
-}
-
-// =============================================================================
-// Content Area
-// =============================================================================
-.content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px;
 }
 
 // =============================================================================
@@ -110,6 +236,22 @@
     font-size: 0.75rem;
     font-weight: 500;
     background-color: $selected-background;
+    color: $text-color;
+
+    &.sequenceTypeScience {
+      background-color: #bbdefb;
+      color: #1565c0;
+    }
+
+    &.sequenceTypeArc {
+      background-color: #c8e6c9;
+      color: #2e7d32;
+    }
+
+    &.sequenceTypeFlat {
+      background-color: #fff9c4;
+      color: #f57f17;
+    }
   }
 
   .sequenceGroup {
@@ -148,14 +290,24 @@
     display: block;
     margin-top: 4px;
     padding: 4px 8px;
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: $code-background-color;
     border-radius: 4px;
     font-family: monospace;
     font-size: 0.75rem;
-    color: $code-color;
+    color: $code-text-color;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .comments {
+    margin-top: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: #662222; // darkened brown
+    background-color: floralwhite;
+    box-shadow: 0 0 4px rgba(165, 42, 42, 0.5);
   }
 }
 

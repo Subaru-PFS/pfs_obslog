@@ -1,5 +1,13 @@
 * [ ] Homeの左側ペインのナビゲーション改善
 
-  `old-project/codebase/webui/src/pages/Home/VisitSetList/index.tsx`を参考に
+  `old-project/codebase/webui/src/pages/Home/VisitSetList/index.tsx`のナビゲーション・ページネーションや検索条件のUIを移植してください。
+  必要に応じてバックエンドも修正してください。
+
+  なぜか、ずいぶん表示されるエントリーが少ないです。
+  ページネーションが起きていない理由がレコード数の不足なら、本番DBからテスト用に取り込むレコード数を増やしてください。
+
+* [ ] デザインの微調整
+
+  visit setの一覧の配色を既存プロジェクトのものと合わせてください。
 
 * [ ] 追加のタスクがないか指示者に確認

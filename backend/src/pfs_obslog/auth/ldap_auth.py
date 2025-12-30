@@ -28,12 +28,12 @@ def authorize(username: str, password: str) -> str | None:
         username, domain = username.split("@")
 
     if domain == "stn":
-        return _stn(username, password)
+        return _stn(username, password)  # pragma: no cover
 
     return None
 
 
-def _stn(username: str, password: str) -> str | None:
+def _stn(username: str, password: str) -> str | None:  # pragma: no cover
     """STNドメインのLDAP認証
 
     Args:

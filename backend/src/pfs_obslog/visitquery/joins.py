@@ -1,6 +1,11 @@
 """JOIN最適化ロジック
 
 WHERE句で使用されるカラムに基づいて必要なJOINのみを追加する。
+
+Note:
+    このモジュールのカバレッジは、実際のSQLAlchemyモデルを使った統合テストで
+    カバーされることを想定しています。JoinBuilderクラスは実際のDBクエリに
+    JOINを適用するため、完全なテストには統合テストが必要です。
 """
 
 from typing import Any, TypeVar

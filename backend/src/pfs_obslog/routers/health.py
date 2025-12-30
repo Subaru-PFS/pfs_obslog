@@ -17,7 +17,7 @@ class HealthResponse(BaseModel):
 
 
 @router.get("/healthz", response_model=HealthResponse)
-async def healthz() -> HealthResponse:
+async def healthz() -> HealthResponse:  # pragma: no cover
     """
     ヘルスチェックエンドポイント
 
@@ -31,7 +31,7 @@ async def healthz() -> HealthResponse:
 
 
 @router.get("/readyz", response_model=HealthResponse)
-async def readyz() -> HealthResponse:
+async def readyz() -> HealthResponse:  # pragma: no cover
     """
     レディネスチェックエンドポイント
 

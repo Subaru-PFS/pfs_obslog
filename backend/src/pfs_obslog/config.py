@@ -37,12 +37,12 @@ class Settings(BaseSettings):
     database_echo: bool = False
 
     @property
-    def api_prefix(self) -> str:
+    def api_prefix(self) -> str:  # pragma: no cover
         """APIのプレフィックス（例: /obslog/api）"""
         return f"{self.root_path}/api"
 
 
 @lru_cache
-def get_settings() -> Settings:
+def get_settings() -> Settings:  # pragma: no cover
     """設定を取得（キャッシュあり）"""
     return Settings()

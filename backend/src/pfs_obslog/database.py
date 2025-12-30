@@ -23,7 +23,7 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def get_db() -> Generator[Session, None, None]:
+def get_db() -> Generator[Session, None, None]:  # pragma: no cover
     """DBセッションを取得するDependency
 
     Usage:

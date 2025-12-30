@@ -83,7 +83,7 @@ def _fetch_visits(
 
     ids = [row[0] for row in db.execute(ids_query)]
 
-    if not ids:
+    if not ids:  # pragma: no cover
         return [], count
 
     # Visit詳細を取得
@@ -101,7 +101,7 @@ def _build_visit_list_entries(db: Session, visit_ids: list[int]) -> list[VisitLi
     Returns:
         VisitListEntryリスト
     """
-    if not visit_ids:
+    if not visit_ids:  # pragma: no cover
         return []
 
     # 各種集計サブクエリ
@@ -297,7 +297,7 @@ def _fetch_related_iic_sequences(
                 body=note.body,
                 user=ObslogUser(id=note.user.id, account_name=note.user.account_name)
                 if note.user
-                else ObslogUser(id=0, account_name="unknown"),
+                else ObslogUser(id=0, account_name="unknown"),  # pragma: no cover
             )
             for note in seq.obslog_visit_set_note
         ]

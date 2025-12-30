@@ -1,6 +1,7 @@
 import { useGetMeApiAuthMeGetQuery, useLogoutApiAuthLogoutPostMutation } from '../../store/api/generatedApi'
 import { HomeProvider, useHomeContext } from './context'
 import { VisitList } from './VisitList'
+import { Icon } from '../../components/Icon'
 import styles from './Home.module.scss'
 
 function HomeContent() {
@@ -20,6 +21,7 @@ function HomeContent() {
         <div className={styles.userInfo}>
           {user && <span className={styles.username}>{user.user_id}</span>}
           <button className={styles.logoutButton} onClick={handleLogout}>
+            <Icon name="logout" size={16} />
             Logout
           </button>
         </div>

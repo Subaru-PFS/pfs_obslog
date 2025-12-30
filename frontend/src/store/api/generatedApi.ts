@@ -41,6 +41,18 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: () => ({ url: `/api/auth/status` }),
     }),
+    listVisitsApiVisitsGet: build.query<
+      ListVisitsApiVisitsGetApiResponse,
+      ListVisitsApiVisitsGetApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/visits`,
+        params: {
+          offset: queryArg.offset,
+          limit: queryArg.limit,
+        },
+      }),
+    }),
     rootApiGet: build.query<RootApiGetApiResponse, RootApiGetApiArg>({
       query: () => ({ url: `/api` }),
     }),
@@ -70,6 +82,14 @@ export type GetStatusApiAuthStatusGetApiResponse =
     [key: string]: any;
   };
 export type GetStatusApiAuthStatusGetApiArg = void;
+export type ListVisitsApiVisitsGetApiResponse =
+  /** status 200 Successful Response */ VisitList;
+export type ListVisitsApiVisitsGetApiArg = {
+  /** ページネーションのオフセット */
+  offset?: number;
+  /** 取得件数上限（-1で無制限） */
+  limit?: number;
+};
 export type RootApiGetApiResponse = /** status 200 Successful Response */ any;
 export type RootApiGetApiArg = void;
 export type HealthResponse = {
@@ -101,6 +121,62 @@ export type LogoutResponse = {
 export type UserResponse = {
   user_id: string;
 };
+export type ObslogUser = {
+  id: number;
+  account_name: string;
+};
+export type VisitNote = {
+  id: number;
+  user_id: number;
+  pfs_visit_id: number;
+  body: string;
+  user: ObslogUser;
+};
+export type VisitListEntry = {
+  id: number;
+  description?: string | null;
+  issued_at?: string | null;
+  iic_sequence_id?: number | null;
+  n_sps_exposures?: number;
+  n_mcs_exposures?: number;
+  n_agc_exposures?: number;
+  avg_exptime?: number | null;
+  avg_azimuth?: number | null;
+  avg_altitude?: number | null;
+  avg_ra?: number | null;
+  avg_dec?: number | null;
+  avg_insrot?: number | null;
+  notes?: VisitNote[];
+  pfs_design_id?: string | null;
+};
+export type SequenceGroup = {
+  group_id: number;
+  group_name?: string | null;
+  created_at?: string | null;
+};
+export type VisitSetNote = {
+  id: number;
+  user_id: number;
+  iic_sequence_id: number;
+  body: string;
+  user: ObslogUser;
+};
+export type IicSequence = {
+  iic_sequence_id: number;
+  sequence_type?: string | null;
+  name?: string | null;
+  comments?: string | null;
+  cmd_str?: string | null;
+  group_id?: number | null;
+  created_at?: string | null;
+  group?: SequenceGroup | null;
+  notes?: VisitSetNote[];
+};
+export type VisitList = {
+  visits: VisitListEntry[];
+  iic_sequences: IicSequence[];
+  count: number;
+};
 export const {
   useHealthzApiHealthzGetQuery,
   useReadyzApiReadyzGetQuery,
@@ -108,5 +184,6 @@ export const {
   useLogoutApiAuthLogoutPostMutation,
   useGetMeApiAuthMeGetQuery,
   useGetStatusApiAuthStatusGetQuery,
+  useListVisitsApiVisitsGetQuery,
   useRootApiGetQuery,
 } = injectedRtkApi;

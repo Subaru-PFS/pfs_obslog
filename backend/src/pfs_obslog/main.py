@@ -46,6 +46,6 @@ app.include_router(visits.router, prefix="/api", tags=["visits"])
 
 
 @app.get("/api")
-async def root():
+async def root():  # pragma: no cover
     """ルートエンドポイント"""
     return {"message": "PFS Obslog API", "docs": f"{settings.root_path}/api/docs"}

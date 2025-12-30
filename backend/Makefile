@@ -1,4 +1,4 @@
-.PHONY: dev test openapi-for-frontend clean help
+.PHONY: dev test cov openapi-for-frontend clean help
 
 # 開発サーバーを起動
 dev:
@@ -7,6 +7,10 @@ dev:
 # テストを実行
 test:
 	uv run pytest
+
+# カバレッジ付きテスト（HTML レポート生成）
+cov:
+	uv run pytest --cov=pfs_obslog --cov-branch --cov-report=term-missing --cov-report=html
 
 # フロントエンド用にOpenAPIスキーマを出力（フロントエンドから呼ばれる）
 openapi-for-frontend:
@@ -22,5 +26,6 @@ help:
 	@echo "使用可能なコマンド:"
 	@echo "  make dev              - 開発サーバーを起動"
 	@echo "  make test             - テストを実行"
+	@echo "  make cov              - カバレッジ付きテスト（HTMLレポート生成）"
 	@echo "  make openapi-for-frontend - フロントエンド用にOpenAPIスキーマを出力"
 	@echo "  make clean            - 一時ファイルを削除"

@@ -4,6 +4,7 @@ import { Provider } from 'react-redux'
 import { RouterProvider } from 'react-router-dom'
 import { store } from './store'
 import { router } from './router'
+import 'material-symbols/outlined.css'
 import './index.css'
 
 createRoot(document.getElementById('root')!).render(

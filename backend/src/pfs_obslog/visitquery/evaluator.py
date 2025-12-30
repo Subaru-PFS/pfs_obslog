@@ -1,6 +1,11 @@
 """ASTをSQLAlchemy式に変換する評価器
 
 pglastのASTノードをSQLAlchemyのWHERE句に変換する。
+
+Note:
+    このモジュールのカバレッジは、実際のSQLAlchemyモデルを使った統合テストで
+    カバーされることを想定しています。現状のユニットテストではMockModelsを
+    使用しているため、SQLAlchemy式の評価ロジックはカバーされません。
 """
 
 from typing import Any
