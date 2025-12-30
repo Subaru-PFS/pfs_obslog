@@ -18,7 +18,8 @@ $background-color: #eee;
 $active-background-color: #ccc;
 $active-text-color: white;
 $hover-background-color: #ddd;
-$disabled-text-color: #aaa;
+$disabled-text-color: #999;
+$disabled-background-color: #e8e8e8;
 $hint-text-color: #777;
 $header-background-color: #ddd;
 $input-background: white;
@@ -97,7 +98,8 @@ $light-shadow: 0 0 4px rgba($shadow-color, 0.25);
   }
 
   &:disabled {
-    background-color: $disabled-text-color;
+    background-color: $disabled-background-color;
+    color: $disabled-text-color;
     cursor: not-allowed;
   }
 }
@@ -113,6 +115,7 @@ $light-shadow: 0 0 4px rgba($shadow-color, 0.25);
   }
 
   &:disabled {
+    background-color: $disabled-background-color;
     color: $disabled-text-color;
     cursor: not-allowed;
   }

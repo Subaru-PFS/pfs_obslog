@@ -54,6 +54,7 @@
   }
 
   &:disabled {
+    background-color: $disabled-background-color;
     color: $disabled-text-color;
     cursor: not-allowed;
   }
@@ -139,6 +140,7 @@ $pagination-border-radius: 12px;
   }
 
   &:disabled {
+    background-color: $disabled-background-color;
     color: $disabled-text-color;
     cursor: not-allowed;
   }
@@ -197,6 +199,7 @@ $pagination-border-radius: 12px;
     }
 
     &:disabled {
+      background-color: $disabled-background-color;
       color: $disabled-text-color;
       cursor: not-allowed;
     }
