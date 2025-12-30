@@ -392,35 +392,37 @@ export function VisitList() {
         </div>
       </div>
 
-      <div className={styles.paginationTop}>
-        <button
-          className={styles.paginationButton}
-          onClick={handlePrevPage}
-          disabled={isFirstPage}
-          title="Previous page (newer visits)"
-        >
-          <Icon name="chevron_left" size={20} />
-        </button>
-        <button
-          className={`${styles.paginationButton} ${styles.loadMore}`}
-          onClick={handleLoadMoreNewer}
-          disabled={isFirstPage}
-          title="Load more newer visits"
-        >
-          <Icon name={isFirstPage ? 'refresh' : 'keyboard_arrow_up'} size={20} />
-        </button>
-        <button
-          className={styles.paginationButton}
-          onClick={handleNextPage}
-          disabled={isLastPage}
-          title="Next page (older visits)"
-        >
-          <Icon name="chevron_right" size={20} />
-        </button>
-      </div>
-
       <div className={styles.content} ref={contentRef}>
         {isFetching && <div className={styles.loadingOverlay}>Loading...</div>}
+
+        {/* Navigation at top - scrolls with content */}
+        <div className={styles.paginationTop}>
+          <button
+            className={styles.paginationButton}
+            onClick={handlePrevPage}
+            disabled={isFirstPage}
+            title="Previous page (newer visits)"
+          >
+            <Icon name="chevron_left" size={20} />
+          </button>
+          <button
+            className={`${styles.paginationButton} ${styles.loadMore}`}
+            onClick={handleLoadMoreNewer}
+            disabled={isFirstPage}
+            title="Load more newer visits"
+          >
+            <Icon name={isFirstPage ? 'refresh' : 'keyboard_arrow_up'} size={20} />
+          </button>
+          <button
+            className={styles.paginationButton}
+            onClick={handleNextPage}
+            disabled={isLastPage}
+            title="Next page (older visits)"
+          >
+            <Icon name="chevron_right" size={20} />
+          </button>
+        </div>
+
         {visitGroups.length === 0 ? (
           <div className={styles.empty}>No visits found</div>
         ) : (
@@ -431,33 +433,34 @@ export function VisitList() {
             />
           ))
         )}
-      </div>
 
-      <div className={styles.paginationBottom}>
-        <button
-          className={styles.paginationButton}
-          onClick={handlePrevPage}
-          disabled={isFirstPage}
-          title="Previous page (newer visits)"
-        >
-          <Icon name="chevron_left" size={20} />
-        </button>
-        <button
-          className={`${styles.paginationButton} ${styles.loadMore}`}
-          onClick={handleLoadMoreOlder}
-          disabled={isLastPage}
-          title="Load more older visits"
-        >
-          <Icon name="keyboard_arrow_down" size={20} />
-        </button>
-        <button
-          className={styles.paginationButton}
-          onClick={handleNextPage}
-          disabled={isLastPage}
-          title="Next page (older visits)"
-        >
-          <Icon name="chevron_right" size={20} />
-        </button>
+        {/* Navigation at bottom - scrolls with content */}
+        <div className={styles.paginationBottom}>
+          <button
+            className={styles.paginationButton}
+            onClick={handlePrevPage}
+            disabled={isFirstPage}
+            title="Previous page (newer visits)"
+          >
+            <Icon name="chevron_left" size={20} />
+          </button>
+          <button
+            className={`${styles.paginationButton} ${styles.loadMore}`}
+            onClick={handleLoadMoreOlder}
+            disabled={isLastPage}
+            title="Load more older visits"
+          >
+            <Icon name="keyboard_arrow_down" size={20} />
+          </button>
+          <button
+            className={styles.paginationButton}
+            onClick={handleNextPage}
+            disabled={isLastPage}
+            title="Next page (older visits)"
+          >
+            <Icon name="chevron_right" size={20} />
+          </button>
+        </div>
       </div>
 
       <div className={styles.footer}>

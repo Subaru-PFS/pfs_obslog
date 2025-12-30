@@ -1,0 +1,250 @@
+.inspector {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.headerItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.headerLabel {
+  font-weight: 600;
+  color: #666;
+}
+
+.headerValue {
+  color: #333;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+
+  button {
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: #f5f5f5;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    font-size: 13px;
+    color: #666;
+  }
+}
+
+.content {
+  flex: 1;
+  overflow: auto;
+}
+
+// 露出テーブル（SpS用グリッド）
+.exposureTable {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    border: 1px solid #e0e0e0;
+    padding: 8px 12px;
+    text-align: center;
+  }
+
+  th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .armCell {
+    background-color: #e3f2fd;
+    color: #1565c0;
+    font-weight: 700;
+    width: 60px;
+  }
+
+  .exposureCell {
+    background-color: #e8f5e9;
+  }
+
+  .emptyCell {
+    background-color: #fafafa;
+    color: #999;
+  }
+}
+
+.exposureInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cameraId {
+  font-size: 12px;
+  color: #666;
+}
+
+.exptime {
+  font-weight: 500;
+}
+
+// データテーブル（MCS/AGC用）
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th, td {
+    border: 1px solid #e0e0e0;
+    padding: 6px 10px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+    color: #333;
+    position: sticky;
+    top: 0;
+  }
+
+  tbody tr:hover {
+    background-color: #f5f5f5;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #fafafa;
+  }
+}
+
+// 情報グリッド（IicSequence/SequenceGroup用）
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.infoLabel {
+  font-weight: 600;
+  color: #666;
+  min-width: 100px;
+}
+
+.infoValue {
+  color: #333;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+// コマンドセクション
+.commandSection {
+  margin-bottom: 16px;
+}
+
+.commandLabel {
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.commandCode {
+  display: block;
+  padding: 12px;
+  background-color: #263238;
+  color: #b2ff59;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+// コメントセクション
+.commentsSection {
+  margin-bottom: 16px;
+}
+
+.commentsLabel {
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.commentsText {
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  color: #333;
+  line-height: 1.5;
+}
+
+// ノートセクション
+.notesSection {
+  margin-bottom: 16px;
+}
+
+.notesLabel {
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.noteItem {
+  padding: 8px 12px;
+  background-color: #fff9c4;
+  border-radius: 4px;
+  margin-bottom: 8px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.noteUser {
+  font-weight: 600;
+  color: #5d4037;
+  margin-right: 8px;
+}
+
+.noteBody {
+  color: #333;
+}

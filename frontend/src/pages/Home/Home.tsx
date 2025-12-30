@@ -1,11 +1,11 @@
 import { useGetMeApiAuthMeGetQuery, useLogoutApiAuthLogoutPostMutation } from '../../store/api/generatedApi'
-import { HomeProvider, useHomeContext } from './context'
+import { HomeProvider } from './context'
 import { VisitList } from './VisitList'
+import { VisitDetail } from './VisitDetail'
 import { Icon } from '../../components/Icon'
 import styles from './Home.module.scss'
 
 function HomeContent() {
-  const { selectedVisitId } = useHomeContext()
   const { data: user } = useGetMeApiAuthMeGetQuery()
   const [logout] = useLogoutApiAuthLogoutPostMutation()
 
@@ -35,15 +35,7 @@ function HomeContent() {
         <div className={styles.resizer} />
 
         <div className={styles.rightPane}>
-          {selectedVisitId ? (
-            <div className={styles.placeholder}>
-              Visit #{selectedVisitId} の詳細（未実装）
-            </div>
-          ) : (
-            <div className={styles.placeholder}>
-              左のリストからVisitを選択してください
-            </div>
-          )}
+          <VisitDetail />
         </div>
       </div>
     </div>
@@ -57,3 +49,4 @@ export function Home() {
     </HomeProvider>
   )
 }
+

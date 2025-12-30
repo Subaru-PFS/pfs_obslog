@@ -13,10 +13,13 @@
     "test:coverage": "vitest run --coverage",
     "scss:types": "typed-scss-modules src",
     "scss:watch": "typed-scss-modules src --watch",
-    "generate-api": "cd ../backend && make openapi-for-frontend > ../frontend/openapi.json && cd ../frontend && npx @rtk-query/codegen-openapi openapi-config.cjs"
+    "generate-api": "cd ../backend && make openapi-for-frontend > ../frontend/openapi.json && cd ../frontend && npx @rtk-query/codegen-openapi openapi-config.cjs",
+    "build:stellar-globe": "cd ../external/stellar-globe/stellar-globe && npm install && npm run build && cd ../react-stellar-globe && npm install && npm run build"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
+    "@stellar-globe/stellar-globe": "file:../external/stellar-globe/stellar-globe",
+    "@stellar-globe/react-stellar-globe": "file:../external/stellar-globe/react-stellar-globe",
     "material-symbols": "^0.40.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

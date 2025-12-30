@@ -1,0 +1,3 @@
+[submodule "external/stellar-globe"]
+	path = external/stellar-globe
+	url = https://github.com/michitaro/stellar-globe.git

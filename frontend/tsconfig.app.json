@@ -11,7 +11,9 @@
     /* Path alias */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@stellar-globe/stellar-globe": ["../external/stellar-globe/stellar-globe/types/index.d.ts"],
+      "@stellar-globe/react-stellar-globe": ["../external/stellar-globe/react-stellar-globe/types/index.d.ts"]
     },
 
     /* Bundler mode */
