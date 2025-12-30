@@ -62,14 +62,31 @@ function formatDate(dateStr: string | undefined): { date: string; time: string }
 
 /**
  * 露出数の背景色クラスを取得
+ * Based on old-project colors.ts int2color() using HSV color wheel
+ * bit pattern: (SPS > 0) << 2 | (MCS > 0) << 1 | (AGC > 0) << 0
  */
 function getExposureClass(sps: number, mcs: number, agc: number): string {
-  if (sps === 0 && mcs === 0 && agc === 0) return styles.exposureNone
-  const count = (sps > 0 ? 1 : 0) + (mcs > 0 ? 1 : 0) + (agc > 0 ? 1 : 0)
-  if (count > 1) return styles.exposureMixed
-  if (sps > 0) return styles.exposureSps
-  if (mcs > 0) return styles.exposureMcs
-  return styles.exposureAgc
+  const bits = (sps > 0 ? 4 : 0) | (mcs > 0 ? 2 : 0) | (agc > 0 ? 1 : 0)
+  switch (bits) {
+    case 0:
+      return styles.exposureNone // no exposures
+    case 1:
+      return styles.exposureAgc // AGC only
+    case 2:
+      return styles.exposureMcs // MCS only
+    case 3:
+      return styles.exposureMcsAgc // MCS + AGC
+    case 4:
+      return styles.exposureSps // SPS only
+    case 5:
+      return styles.exposureSpsAgc // SPS + AGC
+    case 6:
+      return styles.exposureSpsMcs // SPS + MCS
+    case 7:
+      return styles.exposureMixed // All three
+    default:
+      return styles.exposureNone
+  }
 }
 
 interface IicSequenceHeaderProps {

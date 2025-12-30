@@ -2,10 +2,8 @@
 
 WHERE句で使用されるカラムに基づいて必要なJOINのみを追加する。
 
-Note:
-    このモジュールのカバレッジは、実際のSQLAlchemyモデルを使った統合テストで
-    カバーされることを想定しています。JoinBuilderクラスは実際のDBクエリに
-    JOINを適用するため、完全なテストには統合テストが必要です。
+このモジュールのテストはtest_evaluator_integration.pyで実際のDBを
+使用して行います。
 """
 
 from typing import Any, TypeVar

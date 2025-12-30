@@ -157,3 +157,142 @@ class TestListVisits:
 
         # 降順でソートされているか
         assert ids == sorted(ids, reverse=True), "VisitがIDの降順でソートされていない"
+
+
+class TestGetVisit:
+    """GET /api/visits/{visit_id} のテスト"""
+
+    def test_get_visit_success(self):
+        """存在するVisitの詳細を取得"""
+        # まずVisit一覧から1件取得
+        list_response = client.get("/api/visits?limit=1")
+        assert list_response.status_code == 200
+        visits = list_response.json()["visits"]
+
+        if len(visits) == 0:
+            pytest.skip("No visits in database")
+
+        visit_id = visits[0]["id"]
+
+        # Visit詳細を取得
+        response = client.get(f"/api/visits/{visit_id}")
+        assert response.status_code == 200
+
+        data = response.json()
+
+        # 基本情報
+        assert data["id"] == visit_id
+        assert "description" in data
+        assert "issued_at" in data
+        assert "notes" in data
+        assert isinstance(data["notes"], list)
+
+        # 露出情報（存在する場合）
+        assert "sps" in data
+        assert "mcs" in data
+        assert "agc" in data
+        assert "iic_sequence" in data
+
+    def test_get_visit_not_found(self):
+        """存在しないVisitの詳細を取得"""
+        response = client.get("/api/visits/999999999")
+        assert response.status_code == 404
+
+    def test_get_visit_sps_structure(self):
+        """SPS露出情報の構造を確認"""
+        # SPS露出があるVisitを探す
+        list_response = client.get("/api/visits?limit=100")
+        visits = list_response.json()["visits"]
+        sps_visit = next((v for v in visits if v["n_sps_exposures"] > 0), None)
+
+        if sps_visit is None:
+            pytest.skip("No visits with SPS exposures")
+
+        response = client.get(f"/api/visits/{sps_visit['id']}")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["sps"] is not None
+        assert "exp_type" in data["sps"]
+        assert "exposures" in data["sps"]
+
+        if len(data["sps"]["exposures"]) > 0:
+            exp = data["sps"]["exposures"][0]
+            assert "camera_id" in exp
+            assert "exptime" in exp
+            assert "exp_start" in exp
+            assert "exp_end" in exp
+            assert "annotations" in exp
+
+    def test_get_visit_mcs_structure(self):
+        """MCS露出情報の構造を確認"""
+        # MCS露出があるVisitを探す
+        list_response = client.get("/api/visits?limit=100")
+        visits = list_response.json()["visits"]
+        mcs_visit = next((v for v in visits if v["n_mcs_exposures"] > 0), None)
+
+        if mcs_visit is None:
+            pytest.skip("No visits with MCS exposures")
+
+        response = client.get(f"/api/visits/{mcs_visit['id']}")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["mcs"] is not None
+        assert "exposures" in data["mcs"]
+
+        if len(data["mcs"]["exposures"]) > 0:
+            exp = data["mcs"]["exposures"][0]
+            assert "frame_id" in exp
+            assert "exptime" in exp
+            assert "altitude" in exp
+            assert "taken_at" in exp
+            assert "notes" in exp
+
+    def test_get_visit_agc_structure(self):
+        """AGC露出情報の構造を確認"""
+        # AGC露出があるVisitを探す
+        list_response = client.get("/api/visits?limit=100")
+        visits = list_response.json()["visits"]
+        agc_visit = next((v for v in visits if v["n_agc_exposures"] > 0), None)
+
+        if agc_visit is None:
+            pytest.skip("No visits with AGC exposures")
+
+        response = client.get(f"/api/visits/{agc_visit['id']}")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["agc"] is not None
+        assert "exposures" in data["agc"]
+
+        if len(data["agc"]["exposures"]) > 0:
+            exp = data["agc"]["exposures"][0]
+            assert "id" in exp
+            assert "exptime" in exp
+            assert "altitude" in exp
+            assert "taken_at" in exp
+            assert "guide_offset" in exp
+
+    def test_get_visit_iic_sequence_structure(self):
+        """IICシーケンス情報の構造を確認"""
+        # IICシーケンスがあるVisitを探す
+        list_response = client.get("/api/visits?limit=100")
+        visits = list_response.json()["visits"]
+        seq_visit = next((v for v in visits if v["iic_sequence_id"] is not None), None)
+
+        if seq_visit is None:
+            pytest.skip("No visits with IIC sequence")
+
+        response = client.get(f"/api/visits/{seq_visit['id']}")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["iic_sequence"] is not None
+        assert "iic_sequence_id" in data["iic_sequence"]
+        assert "sequence_type" in data["iic_sequence"]
+        assert "name" in data["iic_sequence"]
+        assert "cmd_str" in data["iic_sequence"]
+        assert "group" in data["iic_sequence"]
+        assert "notes" in data["iic_sequence"]
+        assert "status" in data["iic_sequence"]

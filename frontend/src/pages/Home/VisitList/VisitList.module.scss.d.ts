@@ -13,9 +13,12 @@ export type Styles = {
   error: string;
   exposureAgc: string;
   exposureMcs: string;
+  exposureMcsAgc: string;
   exposureMixed: string;
   exposureNone: string;
   exposureSps: string;
+  exposureSpsAgc: string;
+  exposureSpsMcs: string;
   footer: string;
   iicSequence: string;
   info: string;

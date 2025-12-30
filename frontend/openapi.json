@@ -222,6 +222,50 @@
         }
       }
     },
+    "/api/visits/{visit_id}": {
+      "get": {
+        "tags": [
+          "visits",
+          "visits"
+        ],
+        "summary": "Get Visit",
+        "description": "Visit\u8a73\u7d30\u3092\u53d6\u5f97\n\n\u6307\u5b9a\u3055\u308c\u305fVisit ID\u306e\u8a73\u7d30\u60c5\u5831\u3092\u53d6\u5f97\u3057\u307e\u3059\u3002\nSPS/MCS/AGC\u9732\u51fa\u60c5\u5831\u3001IIC\u30b7\u30fc\u30b1\u30f3\u30b9\u60c5\u5831\u3001\u30e1\u30e2\u3092\u542b\u307f\u307e\u3059\u3002",
+        "operationId": "get_visit_api_visits__visit_id__get",
+        "parameters": [
+          {
+            "name": "visit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisitDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api": {
       "get": {
         "summary": "Root",
@@ -242,6 +286,361 @@
   },
   "components": {
     "schemas": {
+      "AgcExposure": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "exptime": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exptime"
+          },
+          "altitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Altitude"
+          },
+          "azimuth": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Azimuth"
+          },
+          "insrot": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Insrot"
+          },
+          "adc_pa": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adc Pa"
+          },
+          "m2_pos3": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "M2 Pos3"
+          },
+          "outside_temperature": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outside Temperature"
+          },
+          "outside_pressure": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outside Pressure"
+          },
+          "outside_humidity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outside Humidity"
+          },
+          "measurement_algorithm": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Measurement Algorithm"
+          },
+          "version_actor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Actor"
+          },
+          "version_instdata": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Instdata"
+          },
+          "taken_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taken At"
+          },
+          "guide_offset": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgcGuideOffset"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "AgcExposure",
+        "description": "AGC\u9732\u51fa"
+      },
+      "AgcGuideOffset": {
+        "properties": {
+          "ra": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ra"
+          },
+          "dec": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dec"
+          },
+          "pa": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pa"
+          },
+          "delta_ra": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Ra"
+          },
+          "delta_dec": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Dec"
+          },
+          "delta_insrot": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Insrot"
+          },
+          "delta_az": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Az"
+          },
+          "delta_el": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta El"
+          },
+          "delta_z": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Z"
+          },
+          "delta_z1": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Z1"
+          },
+          "delta_z2": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Z2"
+          },
+          "delta_z3": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Z3"
+          },
+          "delta_z4": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Z4"
+          },
+          "delta_z5": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Z5"
+          },
+          "delta_z6": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Z6"
+          }
+        },
+        "type": "object",
+        "title": "AgcGuideOffset",
+        "description": "AGC\u30ac\u30a4\u30c9\u30aa\u30d5\u30bb\u30c3\u30c8"
+      },
+      "AgcVisitDetail": {
+        "properties": {
+          "exposures": {
+            "items": {
+              "$ref": "#/components/schemas/AgcExposure"
+            },
+            "type": "array",
+            "title": "Exposures",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "AgcVisitDetail",
+        "description": "AGC Visit\u8a73\u7d30"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -378,6 +777,151 @@
         "title": "IicSequence",
         "description": "IIC\u30b7\u30fc\u30b1\u30f3\u30b9\u60c5\u5831"
       },
+      "IicSequenceDetail": {
+        "properties": {
+          "iic_sequence_id": {
+            "type": "integer",
+            "title": "Iic Sequence Id"
+          },
+          "sequence_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sequence Type"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments"
+          },
+          "cmd_str": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cmd Str"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "group": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SequenceGroup"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/VisitSetNote"
+            },
+            "type": "array",
+            "title": "Notes",
+            "default": []
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/IicSequenceStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "iic_sequence_id"
+        ],
+        "title": "IicSequenceDetail",
+        "description": "IIC\u30b7\u30fc\u30b1\u30f3\u30b9\u8a73\u7d30\uff08Visit\u8a73\u7d30\u7528\uff09\n\nstatus\u3092\u8ffd\u52a0"
+      },
+      "IicSequenceStatus": {
+        "properties": {
+          "iic_sequence_id": {
+            "type": "integer",
+            "title": "Iic Sequence Id"
+          },
+          "status_flag": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Flag"
+          },
+          "cmd_output": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cmd Output"
+          }
+        },
+        "type": "object",
+        "required": [
+          "iic_sequence_id"
+        ],
+        "title": "IicSequenceStatus",
+        "description": "\u30b7\u30fc\u30b1\u30f3\u30b9\u306e\u30b9\u30c6\u30fc\u30bf\u30b9"
+      },
       "LoginRequest": {
         "properties": {
           "username": {
@@ -452,6 +996,221 @@
         "title": "LogoutResponse",
         "description": "\u30ed\u30b0\u30a2\u30a6\u30c8\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
+      "McsExposure": {
+        "properties": {
+          "frame_id": {
+            "type": "integer",
+            "title": "Frame Id"
+          },
+          "exptime": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exptime"
+          },
+          "altitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Altitude"
+          },
+          "azimuth": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Azimuth"
+          },
+          "insrot": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Insrot"
+          },
+          "adc_pa": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adc Pa"
+          },
+          "dome_temperature": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dome Temperature"
+          },
+          "dome_pressure": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dome Pressure"
+          },
+          "dome_humidity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dome Humidity"
+          },
+          "outside_temperature": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outside Temperature"
+          },
+          "outside_pressure": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outside Pressure"
+          },
+          "outside_humidity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outside Humidity"
+          },
+          "mcs_cover_temperature": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mcs Cover Temperature"
+          },
+          "mcs_m1_temperature": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mcs M1 Temperature"
+          },
+          "taken_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taken At"
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/McsExposureNote"
+            },
+            "type": "array",
+            "title": "Notes",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "frame_id"
+        ],
+        "title": "McsExposure",
+        "description": "MCS\u9732\u51fa"
+      },
+      "McsExposureNote": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "user": {
+            "$ref": "#/components/schemas/ObslogUser"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "body",
+          "user"
+        ],
+        "title": "McsExposureNote",
+        "description": "MCS\u9732\u51fa\u306b\u7d10\u3065\u304f\u30e1\u30e2"
+      },
+      "McsVisitDetail": {
+        "properties": {
+          "exposures": {
+            "items": {
+              "$ref": "#/components/schemas/McsExposure"
+            },
+            "type": "array",
+            "title": "Exposures",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "McsVisitDetail",
+        "description": "MCS Visit\u8a73\u7d30"
+      },
       "ObslogUser": {
         "properties": {
           "id": {
@@ -508,6 +1267,131 @@
         "title": "SequenceGroup",
         "description": "\u30b7\u30fc\u30b1\u30f3\u30b9\u30b0\u30eb\u30fc\u30d7"
       },
+      "SpsAnnotation": {
+        "properties": {
+          "annotation_id": {
+            "type": "integer",
+            "title": "Annotation Id"
+          },
+          "data_flag": {
+            "type": "integer",
+            "title": "Data Flag"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "annotation_id",
+          "data_flag"
+        ],
+        "title": "SpsAnnotation",
+        "description": "SpS\u9732\u51fa\u306e\u30a2\u30ce\u30c6\u30fc\u30b7\u30e7\u30f3"
+      },
+      "SpsExposure": {
+        "properties": {
+          "camera_id": {
+            "type": "integer",
+            "title": "Camera Id"
+          },
+          "exptime": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exptime"
+          },
+          "exp_start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exp Start"
+          },
+          "exp_end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exp End"
+          },
+          "annotations": {
+            "items": {
+              "$ref": "#/components/schemas/SpsAnnotation"
+            },
+            "type": "array",
+            "title": "Annotations",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "camera_id"
+        ],
+        "title": "SpsExposure",
+        "description": "SpS\u9732\u51fa"
+      },
+      "SpsVisitDetail": {
+        "properties": {
+          "exp_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exp Type"
+          },
+          "exposures": {
+            "items": {
+              "$ref": "#/components/schemas/SpsExposure"
+            },
+            "type": "array",
+            "title": "Exposures",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "SpsVisitDetail",
+        "description": "SpS Visit\u8a73\u7d30"
+      },
       "UserResponse": {
         "properties": {
           "user_id": {
@@ -554,6 +1438,91 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VisitDetail": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "issued_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issued At"
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/VisitNote"
+            },
+            "type": "array",
+            "title": "Notes",
+            "default": []
+          },
+          "sps": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SpsVisitDetail"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mcs": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/McsVisitDetail"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "agc": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgcVisitDetail"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "iic_sequence": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/IicSequenceDetail"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "VisitDetail",
+        "description": "Visit\u8a73\u7d30\u306e\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
       "VisitList": {
         "properties": {

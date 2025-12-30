@@ -5,16 +5,28 @@ Visit一覧の取得APIを提供します。
 
 from typing import Sequence
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from pfs_obslog import models as M
 from pfs_obslog.database import DbSession
 from pfs_obslog.schemas.visits import (
+    AgcExposure,
+    AgcGuideOffset,
+    AgcVisitDetail,
     IicSequence,
+    IicSequenceDetail,
+    IicSequenceStatus,
+    McsExposure,
+    McsExposureNote,
+    McsVisitDetail,
     ObslogUser,
     SequenceGroup,
+    SpsAnnotation,
+    SpsExposure,
+    SpsVisitDetail,
+    VisitDetail,
     VisitList,
     VisitListEntry,
     VisitNote,
@@ -22,6 +34,7 @@ from pfs_obslog.schemas.visits import (
 )
 
 router = APIRouter(prefix="/visits", tags=["visits"])
+
 
 
 @router.get("", response_model=VisitList)
@@ -317,3 +330,303 @@ def _fetch_related_iic_sequences(
         )
 
     return sequences
+
+
+# =============================================================================
+# Visit詳細
+# =============================================================================
+
+
+@router.get("/{visit_id}", response_model=VisitDetail)
+def get_visit(
+    db: DbSession,
+    visit_id: int,
+) -> VisitDetail:
+    """Visit詳細を取得
+
+    指定されたVisit IDの詳細情報を取得します。
+    SPS/MCS/AGC露出情報、IICシーケンス情報、メモを含みます。
+    """
+    return _fetch_visit_detail(db, visit_id)
+
+
+def _fetch_visit_detail(db: Session, visit_id: int) -> VisitDetail:
+    """Visit詳細を取得
+
+    Args:
+        db: DBセッション
+        visit_id: Visit ID
+
+    Returns:
+        Visit詳細
+
+    Raises:
+        HTTPException: Visitが見つからない場合
+    """
+    # PfsVisitを取得
+    pfs_visit = db.execute(
+        select(M.PfsVisit)
+        .where(M.PfsVisit.pfs_visit_id == visit_id)
+        .options(
+            selectinload(M.PfsVisit.obslog_visit_note).selectinload(M.ObslogVisitNote.user)
+        )
+    ).scalar_one_or_none()
+
+    if not pfs_visit:
+        raise HTTPException(status_code=404, detail=f"Visit {visit_id} not found")
+
+    # メモを変換
+    notes = [
+        VisitNote(
+            id=note.id,
+            user_id=note.user_id or 0,
+            pfs_visit_id=note.pfs_visit_id or 0,
+            body=note.body,
+            user=ObslogUser(id=note.user.id, account_name=note.user.account_name)
+            if note.user
+            else ObslogUser(id=0, account_name="unknown"),
+        )
+        for note in pfs_visit.obslog_visit_note
+    ]
+
+    # SpS情報を取得
+    sps = _fetch_sps_detail(db, visit_id)
+
+    # MCS情報を取得
+    mcs = _fetch_mcs_detail(db, visit_id)
+
+    # AGC情報を取得
+    agc = _fetch_agc_detail(db, visit_id)
+
+    # IicSequence情報を取得
+    iic_sequence = _fetch_iic_sequence_detail(db, visit_id)
+
+    return VisitDetail(
+        id=pfs_visit.pfs_visit_id,
+        description=pfs_visit.pfs_visit_description,
+        issued_at=pfs_visit.issued_at,
+        notes=notes,
+        sps=sps,
+        mcs=mcs,
+        agc=agc,
+        iic_sequence=iic_sequence,
+    )
+
+
+def _fetch_sps_detail(db: Session, visit_id: int) -> SpsVisitDetail | None:
+    """SpS露出詳細を取得"""
+    # SpsVisitを取得
+    sps_visit = db.execute(
+        select(M.SpsVisit)
+        .where(M.SpsVisit.pfs_visit_id == visit_id)
+        .options(selectinload(M.SpsVisit.sps_exposure).selectinload(M.SpsExposure.sps_annotation))
+    ).scalar_one_or_none()
+
+    if not sps_visit:
+        return None
+
+    exposures = [
+        SpsExposure(
+            camera_id=exp.sps_camera_id,
+            exptime=exp.exptime,
+            exp_start=exp.time_exp_start,
+            exp_end=exp.time_exp_end,
+            annotations=[
+                SpsAnnotation(
+                    annotation_id=ann.annotation_id,
+                    data_flag=ann.data_flag,
+                    notes=ann.notes,
+                    created_at=ann.created_at,
+                )
+                for ann in exp.sps_annotation
+            ],
+        )
+        for exp in sps_visit.sps_exposure
+    ]
+
+    return SpsVisitDetail(
+        exp_type=sps_visit.exp_type,
+        exposures=exposures,
+    )
+
+
+def _fetch_mcs_detail(db: Session, visit_id: int) -> McsVisitDetail | None:
+    """MCS露出詳細を取得"""
+    mcs_exposures = db.scalars(
+        select(M.McsExposure)
+        .where(M.McsExposure.pfs_visit_id == visit_id)
+        .options(selectinload(M.McsExposure.obslog_mcs_exposure_note).selectinload(M.ObslogMcsExposureNote.user))
+        .order_by(M.McsExposure.mcs_frame_id)
+    ).all()
+
+    if not mcs_exposures:
+        return None
+
+    exposures = [
+        McsExposure(
+            frame_id=exp.mcs_frame_id,
+            exptime=exp.mcs_exptime,
+            altitude=exp.altitude,
+            azimuth=exp.azimuth,
+            insrot=exp.insrot,
+            adc_pa=exp.adc_pa,
+            dome_temperature=exp.dome_temperature,
+            dome_pressure=exp.dome_pressure,
+            dome_humidity=exp.dome_humidity,
+            outside_temperature=exp.outside_temperature,
+            outside_pressure=exp.outside_pressure,
+            outside_humidity=exp.outside_humidity,
+            mcs_cover_temperature=exp.mcs_cover_temperature,
+            mcs_m1_temperature=exp.mcs_m1_temperature,
+            taken_at=exp.taken_at,
+            notes=[
+                McsExposureNote(
+                    id=note.id,
+                    body=note.body,
+                    user=ObslogUser(id=note.user.id, account_name=note.user.account_name)
+                    if note.user
+                    else ObslogUser(id=0, account_name="unknown"),
+                )
+                for note in exp.obslog_mcs_exposure_note
+            ],
+        )
+        for exp in mcs_exposures
+    ]
+
+    return McsVisitDetail(exposures=exposures)
+
+
+def _fetch_agc_detail(db: Session, visit_id: int) -> AgcVisitDetail | None:
+    """AGC露出詳細を取得"""
+    agc_exposures = db.scalars(
+        select(M.AgcExposure)
+        .where(M.AgcExposure.pfs_visit_id == visit_id)
+        .order_by(M.AgcExposure.agc_exposure_id)
+    ).all()
+
+    if not agc_exposures:
+        return None
+
+    # AgcGuideOffsetを一括取得
+    exposure_ids = [exp.agc_exposure_id for exp in agc_exposures]
+    guide_offsets_result = db.scalars(
+        select(M.AgcGuideOffset).where(M.AgcGuideOffset.agc_exposure_id.in_(exposure_ids))
+    ).all()
+    guide_offsets_map = {go.agc_exposure_id: go for go in guide_offsets_result}
+
+    exposures = []
+    for exp in agc_exposures:
+        guide_offset = None
+        if exp.agc_exposure_id in guide_offsets_map:
+            go = guide_offsets_map[exp.agc_exposure_id]
+            guide_offset = AgcGuideOffset(
+                ra=go.guide_ra,
+                dec=go.guide_dec,
+                pa=go.guide_pa,
+                delta_ra=go.guide_delta_ra,
+                delta_dec=go.guide_delta_dec,
+                delta_insrot=go.guide_delta_insrot,
+                delta_az=go.guide_delta_az,
+                delta_el=go.guide_delta_el,
+                delta_z=go.guide_delta_z,
+                delta_z1=go.guide_delta_z1,
+                delta_z2=go.guide_delta_z2,
+                delta_z3=go.guide_delta_z3,
+                delta_z4=go.guide_delta_z4,
+                delta_z5=go.guide_delta_z5,
+                delta_z6=go.guide_delta_z6,
+            )
+
+        exposures.append(
+            AgcExposure(
+                id=exp.agc_exposure_id,
+                exptime=exp.agc_exptime,
+                altitude=exp.altitude,
+                azimuth=exp.azimuth,
+                insrot=exp.insrot,
+                adc_pa=exp.adc_pa,
+                m2_pos3=exp.m2_pos3,
+                outside_temperature=exp.outside_temperature,
+                outside_pressure=exp.outside_pressure,
+                outside_humidity=exp.outside_humidity,
+                measurement_algorithm=exp.measurement_algorithm,
+                version_actor=exp.version_actor,
+                version_instdata=exp.version_instdata,
+                taken_at=exp.taken_at,
+                guide_offset=guide_offset,
+            )
+        )
+
+    return AgcVisitDetail(exposures=exposures)
+
+
+def _fetch_iic_sequence_detail(db: Session, visit_id: int) -> IicSequenceDetail | None:
+    """IICシーケンス詳細を取得"""
+    # visit_setテーブルからiic_sequence_idを取得
+    iic_sequence_id = db.execute(
+        select(M.t_visit_set.c.iic_sequence_id).where(M.t_visit_set.c.pfs_visit_id == visit_id)
+    ).scalar_one_or_none()
+
+    if not iic_sequence_id:
+        return None
+
+    # IicSequenceを取得
+    iic_sequence = db.execute(
+        select(M.IicSequence)
+        .where(M.IicSequence.iic_sequence_id == iic_sequence_id)
+        .options(selectinload(M.IicSequence.group))
+        .options(selectinload(M.IicSequence.obslog_visit_set_note).selectinload(M.ObslogVisitSetNote.user))
+    ).scalar_one_or_none()
+
+    if not iic_sequence:
+        return None
+
+    # IicSequenceStatusを取得
+    status = db.execute(
+        select(M.IicSequenceStatus).where(M.IicSequenceStatus.iic_sequence_id == iic_sequence_id)
+    ).scalar_one_or_none()
+
+    # グループ情報
+    group = None
+    if iic_sequence.group:
+        group = SequenceGroup(
+            group_id=iic_sequence.group.group_id,
+            group_name=iic_sequence.group.group_name,
+            created_at=iic_sequence.group.created_at,
+        )
+
+    # メモ
+    notes = [
+        VisitSetNote(
+            id=note.id,
+            user_id=note.user_id or 0,
+            iic_sequence_id=note.iic_sequence_id or 0,
+            body=note.body,
+            user=ObslogUser(id=note.user.id, account_name=note.user.account_name)
+            if note.user
+            else ObslogUser(id=0, account_name="unknown"),
+        )
+        for note in iic_sequence.obslog_visit_set_note
+    ]
+
+    # ステータス情報
+    status_info = None
+    if status:
+        status_info = IicSequenceStatus(
+            iic_sequence_id=status.iic_sequence_id,
+            status_flag=status.status_flag,
+            cmd_output=status.cmd_output,
+        )
+
+    return IicSequenceDetail(
+        iic_sequence_id=iic_sequence.iic_sequence_id,
+        sequence_type=iic_sequence.sequence_type,
+        name=iic_sequence.name,
+        comments=iic_sequence.comments,
+        cmd_str=iic_sequence.cmd_str,
+        group_id=iic_sequence.group_id,
+        created_at=iic_sequence.created_at,
+        group=group,
+        notes=notes,
+        status=status_info,
+    )

@@ -238,19 +238,25 @@ $pagination-border-radius: 12px;
     background-color: $selected-background;
     color: $text-color;
 
+    // Colors based on old-project colors.ts:
+    // bgColor: baseColor.lighten(0.75), fgColor: baseColor.desaturate(0.25).darken(0.5)
+
+    // scienceObject/scienceTrace: baseColor = #07f (blue)
     &.sequenceTypeScience {
-      background-color: #bbdefb;
-      color: #1565c0;
+      background-color: #aaddff; // #07f lightened
+      color: #003366; // #07f darkened & desaturated
     }
 
+    // scienceArc/ditheredArcs: baseColor = #0f0 (green)
     &.sequenceTypeArc {
-      background-color: #c8e6c9;
-      color: #2e7d32;
+      background-color: #aaffaa; // #0f0 lightened
+      color: #006600; // #0f0 darkened & desaturated
     }
 
+    // flat: no base color defined in old-project, using yellow
     &.sequenceTypeFlat {
-      background-color: #fff9c4;
-      color: #f57f17;
+      background-color: #ffffaa; // yellow lightened
+      color: #666600; // yellow darkened
     }
   }
 
@@ -404,26 +410,57 @@ $pagination-border-radius: 12px;
   }
 }
 
+// =============================================================================
 // Exposure count colors
-.exposureSps {
-  background-color: rgba(255, 0, 0, 0.1);
-}
-
-.exposureMcs {
-  background-color: rgba(0, 255, 0, 0.1);
-}
-
-.exposureAgc {
-  background-color: rgba(0, 0, 255, 0.1);
-}
-
-.exposureMixed {
-  background-color: rgba(128, 128, 128, 0.1);
-}
-
+// Based on old-project colors.ts int2color() using HSV color wheel
+// bit pattern: (SPS > 0) << 2 | (MCS > 0) << 1 | (AGC > 0) << 0
+// =============================================================================
+// No exposures (000): gray
 .exposureNone {
-  background-color: rgba(128, 128, 128, 0.2);
+  background-color: rgba(119, 119, 119, 0.3);
   color: $hint-text-color;
+}
+
+// AGC only (001): HSV(150, 100, 100) = cyan/teal
+.exposureAgc {
+  background-color: #aaffdd; // lightened
+  color: #006644; // darkened
+}
+
+// MCS only (010): HSV(300, 100, 100) = yellow-green
+.exposureMcs {
+  background-color: #ffffaa; // lightened
+  color: #666600; // darkened
+}
+
+// MCS + AGC (011): HSV(450 mod 360 = 90, 100, 100) = chartreuse
+.exposureMcsAgc {
+  background-color: #ddffaa; // lightened
+  color: #446600; // darkened
+}
+
+// SPS only (100): HSV(600 mod 360 = 240, 100, 100) = red
+.exposureSps {
+  background-color: #ffaaaa; // lightened
+  color: #660000; // darkened
+}
+
+// SPS + AGC (101): HSV(750 mod 360 = 30, 100, 100) = orange
+.exposureSpsAgc {
+  background-color: #ffddaa; // lightened
+  color: #664400; // darkened
+}
+
+// SPS + MCS (110): HSV(900 mod 360 = 180, 100, 100) = blue-cyan
+.exposureSpsMcs {
+  background-color: #aaddff; // lightened
+  color: #003366; // darkened
+}
+
+// All three (111): HSV(1050 mod 360 = 330, 100, 100) = magenta-ish
+.exposureMixed {
+  background-color: #ffaadd; // lightened
+  color: #660044; // darkened
 }
 
 // =============================================================================

@@ -2,10 +2,8 @@
 
 pglastのASTノードをSQLAlchemyのWHERE句に変換する。
 
-Note:
-    このモジュールのカバレッジは、実際のSQLAlchemyモデルを使った統合テストで
-    カバーされることを想定しています。現状のユニットテストではMockModelsを
-    使用しているため、SQLAlchemy式の評価ロジックはカバーされません。
+このモジュールのテストはtest_evaluator_integration.pyで実際のDBを
+使用して行います。
 """
 
 from typing import Any
