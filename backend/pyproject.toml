@@ -10,6 +10,7 @@ dependencies = [
     "uvicorn>=0.34.0",
     "ldap3>=2.9.0",
     "itsdangerous>=2.0.0",
+    "pydantic-settings>=2.0.0",
 ]
 
 [project.optional-dependencies]

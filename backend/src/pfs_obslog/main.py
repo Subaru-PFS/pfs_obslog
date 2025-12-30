@@ -1,36 +1,33 @@
 """PFS Obslog API - メインアプリケーション"""
 
-import os
-import secrets
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
+from pfs_obslog.config import get_settings
 from pfs_obslog.routers import auth, health
 
-# セッション用の秘密鍵（環境変数から取得、なければランダム生成）
-# 本番環境では必ず環境変数で設定してください
-SESSION_SECRET_KEY = os.environ.get("SESSION_SECRET_KEY", secrets.token_hex(32))
+settings = get_settings()
 
 app = FastAPI(
     title="PFS Obslog API",
     description="PFS Observation Log System API",
     version="0.1.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json",
+    root_path=settings.root_path,
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
 )
 
 # セッションミドルウェア（クッキーセッション）
 # max_age=None でセッションクッキー（ブラウザを閉じると消える）
 app.add_middleware(
     SessionMiddleware,
-    secret_key=SESSION_SECRET_KEY,
+    secret_key=settings.session_secret_key,
     session_cookie="session",
     max_age=None,  # セッションクッキー
     same_site="lax",
-    https_only=False,  # 開発環境ではFalse、本番ではTrue推奨
+    https_only=settings.session_https_only,
 )
 
 # CORS設定
@@ -42,12 +39,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ルーターを登録
-app.include_router(health.router, tags=["health"])
-app.include_router(auth.router)
+# ルーターを登録（/api配下に配置）
+app.include_router(health.router, prefix="/api", tags=["health"])
+app.include_router(auth.router, prefix="/api")
 
 
-@app.get("/")
+@app.get("/api")
 async def root():
     """ルートエンドポイント"""
-    return {"message": "PFS Obslog API", "docs": "/docs"}
+    return {"message": "PFS Obslog API", "docs": f"{settings.root_path}/api/docs"}

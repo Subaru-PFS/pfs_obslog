@@ -1,40 +1,112 @@
 import { emptyApi as api } from "./emptyApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
-    healthzHealthzGet: build.query<
-      HealthzHealthzGetApiResponse,
-      HealthzHealthzGetApiArg
+    healthzApiHealthzGet: build.query<
+      HealthzApiHealthzGetApiResponse,
+      HealthzApiHealthzGetApiArg
     >({
-      query: () => ({ url: `/healthz` }),
+      query: () => ({ url: `/api/healthz` }),
     }),
-    readyzReadyzGet: build.query<
-      ReadyzReadyzGetApiResponse,
-      ReadyzReadyzGetApiArg
+    readyzApiReadyzGet: build.query<
+      ReadyzApiReadyzGetApiResponse,
+      ReadyzApiReadyzGetApiArg
     >({
-      query: () => ({ url: `/readyz` }),
+      query: () => ({ url: `/api/readyz` }),
     }),
-    rootGet: build.query<RootGetApiResponse, RootGetApiArg>({
-      query: () => ({ url: `/` }),
+    loginApiAuthLoginPost: build.mutation<
+      LoginApiAuthLoginPostApiResponse,
+      LoginApiAuthLoginPostApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/auth/login`,
+        method: "POST",
+        body: queryArg.loginRequest,
+      }),
+    }),
+    logoutApiAuthLogoutPost: build.mutation<
+      LogoutApiAuthLogoutPostApiResponse,
+      LogoutApiAuthLogoutPostApiArg
+    >({
+      query: () => ({ url: `/api/auth/logout`, method: "POST" }),
+    }),
+    getMeApiAuthMeGet: build.query<
+      GetMeApiAuthMeGetApiResponse,
+      GetMeApiAuthMeGetApiArg
+    >({
+      query: () => ({ url: `/api/auth/me` }),
+    }),
+    getStatusApiAuthStatusGet: build.query<
+      GetStatusApiAuthStatusGetApiResponse,
+      GetStatusApiAuthStatusGetApiArg
+    >({
+      query: () => ({ url: `/api/auth/status` }),
+    }),
+    rootApiGet: build.query<RootApiGetApiResponse, RootApiGetApiArg>({
+      query: () => ({ url: `/api` }),
     }),
   }),
   overrideExisting: false,
 });
 export { injectedRtkApi as generatedApi };
-export type HealthzHealthzGetApiResponse =
+export type HealthzApiHealthzGetApiResponse =
   /** status 200 Successful Response */ HealthResponse;
-export type HealthzHealthzGetApiArg = void;
-export type ReadyzReadyzGetApiResponse =
+export type HealthzApiHealthzGetApiArg = void;
+export type ReadyzApiReadyzGetApiResponse =
   /** status 200 Successful Response */ HealthResponse;
-export type ReadyzReadyzGetApiArg = void;
-export type RootGetApiResponse = /** status 200 Successful Response */ any;
-export type RootGetApiArg = void;
+export type ReadyzApiReadyzGetApiArg = void;
+export type LoginApiAuthLoginPostApiResponse =
+  /** status 200 Successful Response */ LoginResponse;
+export type LoginApiAuthLoginPostApiArg = {
+  loginRequest: LoginRequest;
+};
+export type LogoutApiAuthLogoutPostApiResponse =
+  /** status 200 Successful Response */ LogoutResponse;
+export type LogoutApiAuthLogoutPostApiArg = void;
+export type GetMeApiAuthMeGetApiResponse =
+  /** status 200 Successful Response */ UserResponse;
+export type GetMeApiAuthMeGetApiArg = void;
+export type GetStatusApiAuthStatusGetApiResponse =
+  /** status 200 Successful Response */ {
+    [key: string]: any;
+  };
+export type GetStatusApiAuthStatusGetApiArg = void;
+export type RootApiGetApiResponse = /** status 200 Successful Response */ any;
+export type RootApiGetApiArg = void;
 export type HealthResponse = {
   status: string;
   timestamp: string;
   version: string;
 };
+export type LoginResponse = {
+  success: boolean;
+  user_id?: string | null;
+  message?: string | null;
+};
+export type ValidationError = {
+  loc: (string | number)[];
+  msg: string;
+  type: string;
+};
+export type HttpValidationError = {
+  detail?: ValidationError[];
+};
+export type LoginRequest = {
+  username: string;
+  password: string;
+};
+export type LogoutResponse = {
+  success: boolean;
+  message: string;
+};
+export type UserResponse = {
+  user_id: string;
+};
 export const {
-  useHealthzHealthzGetQuery,
-  useReadyzReadyzGetQuery,
-  useRootGetQuery,
+  useHealthzApiHealthzGetQuery,
+  useReadyzApiReadyzGetQuery,
+  useLoginApiAuthLoginPostMutation,
+  useLogoutApiAuthLogoutPostMutation,
+  useGetMeApiAuthMeGetQuery,
+  useGetStatusApiAuthStatusGetQuery,
+  useRootApiGetQuery,
 } = injectedRtkApi;

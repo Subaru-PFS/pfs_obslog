@@ -22,7 +22,7 @@ class TestLogin:
         with patch("pfs_obslog.routers.auth.authorize") as mock_authorize:
             mock_authorize.return_value = "testuser@stn"
             response = client.post(
-                "/auth/login",
+                "/api/auth/login",
                 json={"username": "testuser", "password": "testpass"},
             )
 
@@ -36,7 +36,7 @@ class TestLogin:
         with patch("pfs_obslog.routers.auth.authorize") as mock_authorize:
             mock_authorize.return_value = None
             response = client.post(
-                "/auth/login",
+                "/api/auth/login",
                 json={"username": "testuser", "password": "wrongpass"},
             )
 
@@ -48,7 +48,7 @@ class TestLogin:
         with patch("pfs_obslog.routers.auth.authorize") as mock_authorize:
             mock_authorize.return_value = None
             response = client.post(
-                "/auth/login",
+                "/api/auth/login",
                 json={"username": "testuser", "password": ""},
             )
 
@@ -60,7 +60,7 @@ class TestLogout:
 
     def test_logout(self, client: TestClient):
         """ログアウト"""
-        response = client.post("/auth/logout")
+        response = client.post("/api/auth/logout")
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True
@@ -76,11 +76,11 @@ class TestGetMe:
             mock_authorize.return_value = "testuser@stn"
             # まずログイン
             client.post(
-                "/auth/login",
+                "/api/auth/login",
                 json={"username": "testuser", "password": "testpass"},
             )
             # ユーザー情報取得
-            response = client.get("/auth/me")
+            response = client.get("/api/auth/me")
 
         assert response.status_code == 200
         data = response.json()
@@ -88,7 +88,7 @@ class TestGetMe:
 
     def test_get_me_not_authenticated(self, client: TestClient):
         """未認証でのユーザー情報取得"""
-        response = client.get("/auth/me")
+        response = client.get("/api/auth/me")
         assert response.status_code == 401
         assert response.json()["detail"] == "Not authenticated"
 
@@ -102,11 +102,11 @@ class TestGetStatus:
             mock_authorize.return_value = "testuser@stn"
             # まずログイン
             client.post(
-                "/auth/login",
+                "/api/auth/login",
                 json={"username": "testuser", "password": "testpass"},
             )
             # 状態確認
-            response = client.get("/auth/status")
+            response = client.get("/api/auth/status")
 
         assert response.status_code == 200
         data = response.json()
@@ -115,7 +115,7 @@ class TestGetStatus:
 
     def test_status_not_authenticated(self, client: TestClient):
         """未認証の状態確認"""
-        response = client.get("/auth/status")
+        response = client.get("/api/auth/status")
         assert response.status_code == 200
         data = response.json()
         assert data["authenticated"] is False
@@ -131,12 +131,12 @@ class TestSessionPersistence:
             mock_authorize.return_value = "testuser@stn"
             # ログイン
             client.post(
-                "/auth/login",
+                "/api/auth/login",
                 json={"username": "testuser", "password": "testpass"},
             )
 
         # 別のリクエストでも認証が維持される
-        response = client.get("/auth/status")
+        response = client.get("/api/auth/status")
         assert response.status_code == 200
         data = response.json()
         assert data["authenticated"] is True
@@ -148,15 +148,15 @@ class TestSessionPersistence:
             mock_authorize.return_value = "testuser@stn"
             # ログイン
             client.post(
-                "/auth/login",
+                "/api/auth/login",
                 json={"username": "testuser", "password": "testpass"},
             )
 
         # ログアウト
-        client.post("/auth/logout")
+        client.post("/api/auth/logout")
 
         # セッションがクリアされている
-        response = client.get("/auth/status")
+        response = client.get("/api/auth/status")
         data = response.json()
         assert data["authenticated"] is False
         assert data["user_id"] is None

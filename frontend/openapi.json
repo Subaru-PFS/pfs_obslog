@@ -6,14 +6,14 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/healthz": {
+    "/api/healthz": {
       "get": {
         "tags": [
           "health"
         ],
         "summary": "Healthz",
         "description": "\u30d8\u30eb\u30b9\u30c1\u30a7\u30c3\u30af\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\n\u30b5\u30fc\u30d3\u30b9\u306e\u7a3c\u50cd\u72b6\u614b\u3092\u78ba\u8a8d\u3059\u308b\u305f\u3081\u306b\u4f7f\u7528\u3057\u307e\u3059\u3002",
-        "operationId": "healthz_healthz_get",
+        "operationId": "healthz_api_healthz_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -28,14 +28,14 @@
         }
       }
     },
-    "/readyz": {
+    "/api/readyz": {
       "get": {
         "tags": [
           "health"
         ],
         "summary": "Readyz",
         "description": "\u30ec\u30c7\u30a3\u30cd\u30b9\u30c1\u30a7\u30c3\u30af\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\n\u30b5\u30fc\u30d3\u30b9\u304c\u30ea\u30af\u30a8\u30b9\u30c8\u3092\u53d7\u3051\u4ed8\u3051\u308b\u6e96\u5099\u304c\u3067\u304d\u3066\u3044\u308b\u304b\u78ba\u8a8d\u3057\u307e\u3059\u3002\n\u5c06\u6765\u7684\u306b\u306f\u30c7\u30fc\u30bf\u30d9\u30fc\u30b9\u63a5\u7d9a\u306a\u3069\u306e\u30c1\u30a7\u30c3\u30af\u3092\u8ffd\u52a0\u3067\u304d\u307e\u3059\u3002",
-        "operationId": "readyz_readyz_get",
+        "operationId": "readyz_api_readyz_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -50,11 +50,121 @@
         }
       }
     },
-    "/": {
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login",
+        "description": "\u30ed\u30b0\u30a4\u30f3\n\n\u30e6\u30fc\u30b6\u30fc\u540d\u3068\u30d1\u30b9\u30ef\u30fc\u30c9\u3067LDAP\u8a8d\u8a3c\u3092\u884c\u3044\u3001\u6210\u529f\u3057\u305f\u5834\u5408\u306f\u30bb\u30c3\u30b7\u30e7\u30f3\u3092\u4f5c\u6210\u3057\u307e\u3059\u3002",
+        "operationId": "login_api_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Logout",
+        "description": "\u30ed\u30b0\u30a2\u30a6\u30c8\n\n\u30bb\u30c3\u30b7\u30e7\u30f3\u304b\u3089\u30e6\u30fc\u30b6\u30fc\u60c5\u5831\u3092\u524a\u9664\u3057\u307e\u3059\u3002",
+        "operationId": "logout_api_auth_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Get Me",
+        "description": "\u73fe\u5728\u306e\u30e6\u30fc\u30b6\u30fc\u60c5\u5831\u3092\u53d6\u5f97\n\n\u8a8d\u8a3c\u304c\u5fc5\u8981\u306a\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\u3067\u3059\u3002",
+        "operationId": "get_me_api_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/status": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Get Status",
+        "description": "\u8a8d\u8a3c\u72b6\u614b\u3092\u53d6\u5f97\n\n\u30ed\u30b0\u30a4\u30f3\u4e2d\u304b\u3069\u3046\u304b\u3092\u78ba\u8a8d\u3067\u304d\u307e\u3059\u3002\u8a8d\u8a3c\u306f\u5fc5\u8981\u3042\u308a\u307e\u305b\u3093\u3002",
+        "operationId": "get_status_api_auth_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Status Api Auth Status Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api": {
       "get": {
         "summary": "Root",
         "description": "\u30eb\u30fc\u30c8\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8",
-        "operationId": "root__get",
+        "operationId": "root_api_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -70,6 +180,19 @@
   },
   "components": {
     "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
       "HealthResponse": {
         "properties": {
           "status": {
@@ -93,6 +216,127 @@
         ],
         "title": "HealthResponse",
         "description": "\u30d8\u30eb\u30b9\u30c1\u30a7\u30c3\u30af\u30ec\u30b9\u30dd\u30f3\u30b9"
+      },
+      "LoginRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "LoginRequest",
+        "description": "\u30ed\u30b0\u30a4\u30f3\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "LoginResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "title": "LoginResponse",
+        "description": "\u30ed\u30b0\u30a4\u30f3\u30ec\u30b9\u30dd\u30f3\u30b9"
+      },
+      "LogoutResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "message"
+        ],
+        "title": "LogoutResponse",
+        "description": "\u30ed\u30b0\u30a2\u30a6\u30c8\u30ec\u30b9\u30dd\u30f3\u30b9"
+      },
+      "UserResponse": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id"
+        ],
+        "title": "UserResponse",
+        "description": "\u30e6\u30fc\u30b6\u30fc\u60c5\u5831\u30ec\u30b9\u30dd\u30f3\u30b9"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
       }
     }
   }

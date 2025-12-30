@@ -1,6 +1,8 @@
 export type Styles = {
-  container: string;
-  containerTitle: string;
+  error: string;
+  form: string;
+  loginContainer: string;
+  submitContainer: string;
 };
 
 export type ClassNames = keyof Styles;
