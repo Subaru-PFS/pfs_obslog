@@ -24,7 +24,6 @@ export type Styles = {
   info: string;
   loading: string;
   loadingOverlay: string;
-  loadMore: string;
   noSequence: string;
   notesBadge: string;
   pageInfo: string;

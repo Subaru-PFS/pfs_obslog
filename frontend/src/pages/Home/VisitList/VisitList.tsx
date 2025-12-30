@@ -420,7 +420,7 @@ export function VisitList() {
           </Tooltip>
           <Tooltip content={isFirstPage ? 'Refresh' : 'Load more newer visits'}>
             <button
-              className={`${styles.paginationButton} ${styles.loadMore}`}
+              className={styles.paginationButton}
               onClick={handleLoadMoreNewer}
               disabled={isFirstPage}
             >
@@ -462,7 +462,7 @@ export function VisitList() {
           </Tooltip>
           <Tooltip content="Load more older visits">
             <button
-              className={`${styles.paginationButton} ${styles.loadMore}`}
+              className={styles.paginationButton}
               onClick={handleLoadMoreOlder}
               disabled={isLastPage}
             >

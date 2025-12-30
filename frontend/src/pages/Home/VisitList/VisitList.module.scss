@@ -66,48 +66,63 @@
 
 // =============================================================================
 // Pagination Controls (Top & Bottom)
-// Top nav: round at bottom, flat at top (attached to top)
-// Bottom nav: round at top, flat at bottom (attached to bottom)
+// Top nav: bottom corners rounded (attached to top of viewport)
+// Bottom nav: top corners rounded (attached to bottom of viewport)
 // =============================================================================
-$pagination-border-radius: 6px;
+$pagination-border-radius: 12px;
 
 .paginationTop,
 .paginationBottom {
   display: flex;
   margin: 0 12px;
   background-color: transparent;
+
+  // Target the Tooltip wrapper spans and their buttons
+  > span {
+    display: contents;
+  }
 }
 
-// Top navigation: top edges are 0, bottom edges are rounded
+// Top navigation: only bottom corners are rounded
 .paginationTop {
-  .paginationButton:first-child {
+  > span:nth-child(1) .paginationButton {
     border-radius: 0 0 0 $pagination-border-radius;
   }
 
-  .paginationButton.loadMore {
+  > span:nth-child(2) {
     flex-grow: 1;
-    border-radius: 0;
+    display: flex;
     margin: 0 4px;
+
+    .paginationButton {
+      flex-grow: 1;
+      border-radius: 0;
+    }
   }
 
-  .paginationButton:last-child {
+  > span:nth-child(3) .paginationButton {
     border-radius: 0 0 $pagination-border-radius 0;
   }
 }
 
-// Bottom navigation: bottom edges are 0, top edges are rounded
+// Bottom navigation: only top corners are rounded
 .paginationBottom {
-  .paginationButton:first-child {
+  > span:nth-child(1) .paginationButton {
     border-radius: $pagination-border-radius 0 0 0;
   }
 
-  .paginationButton.loadMore {
+  > span:nth-child(2) {
     flex-grow: 1;
-    border-radius: 0;
+    display: flex;
     margin: 0 4px;
+
+    .paginationButton {
+      flex-grow: 1;
+      border-radius: 0;
+    }
   }
 
-  .paginationButton:last-child {
+  > span:nth-child(3) .paginationButton {
     border-radius: 0 $pagination-border-radius 0 0;
   }
 }
