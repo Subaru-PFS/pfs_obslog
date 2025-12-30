@@ -1,0 +1,29 @@
+.loadingSpinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.spinner {
+  border-radius: 50%;
+  border-style: solid;
+  border-color: var(--color-border, #e0e0e0);
+  border-top-color: var(--color-primary, #1976d2);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.text {
+  color: var(--color-text-secondary, #666);
+  font-size: 14px;
+}

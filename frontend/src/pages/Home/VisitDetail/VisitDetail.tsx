@@ -5,6 +5,7 @@ import {
 } from '../../../store/api/generatedApi'
 import { useHomeContext } from '../context'
 import { Tabs, TabPanel } from '../../../components/Tabs'
+import { LoadingSpinner } from '../../../components/LoadingSpinner'
 import { SpsInspector } from './SpsInspector'
 import { McsInspector } from './McsInspector'
 import { AgcInspector } from './AgcInspector'
@@ -200,7 +201,7 @@ export function VisitDetail() {
   if (isLoading) {
     return (
       <div className={styles.loading}>
-        Loading...
+        <LoadingSpinner />
       </div>
     )
   }

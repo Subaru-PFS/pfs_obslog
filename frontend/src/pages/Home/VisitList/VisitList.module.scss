@@ -5,7 +5,7 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background-color: $distant-background;
+  background-color: $background-color; // Lighter background than distant-background
 }
 
 // =============================================================================
@@ -66,19 +66,20 @@
 
 // =============================================================================
 // Pagination Controls (Top & Bottom)
+// Floating design: transparent background, smaller radius, shadow
 // =============================================================================
-$pagination-border-radius: 12px;
+$pagination-border-radius: 6px;
 
 .paginationTop,
 .paginationBottom {
   display: flex;
   margin: 0 12px;
-  background-color: $background-color;
+  background-color: transparent;
 }
 
 .paginationTop {
   .paginationButton:first-child {
-    border-radius: 0 0 0 $pagination-border-radius;
+    border-radius: $pagination-border-radius 0 0 $pagination-border-radius;
   }
 
   .paginationButton.loadMore {
@@ -88,13 +89,13 @@ $pagination-border-radius: 12px;
   }
 
   .paginationButton:last-child {
-    border-radius: 0 0 $pagination-border-radius 0;
+    border-radius: 0 $pagination-border-radius $pagination-border-radius 0;
   }
 }
 
 .paginationBottom {
   .paginationButton:first-child {
-    border-radius: $pagination-border-radius 0 0 0;
+    border-radius: $pagination-border-radius 0 0 $pagination-border-radius;
   }
 
   .paginationButton.loadMore {
@@ -104,7 +105,7 @@ $pagination-border-radius: 12px;
   }
 
   .paginationButton:last-child {
-    border-radius: 0 $pagination-border-radius 0 0;
+    border-radius: 0 $pagination-border-radius $pagination-border-radius 0;
   }
 }
 
@@ -113,6 +114,7 @@ $pagination-border-radius: 12px;
   padding: 4px 12px;
   font-size: 1rem;
   background-color: $input-background;
+  box-shadow: $light-shadow;
 
   &:hover:not(:disabled) {
     background-color: $hover-background-color;
@@ -196,7 +198,7 @@ $pagination-border-radius: 12px;
 // Visit Group
 // =============================================================================
 .visitGroup {
-  margin-bottom: 12px;
+  margin: 24px 12px;
   @include card;
   overflow: hidden;
 }

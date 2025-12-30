@@ -7,6 +7,7 @@ import {
 } from '../../../store/api/generatedApi'
 import { useHomeContext } from '../context'
 import { Icon } from '../../../components/Icon'
+import { LoadingSpinner } from '../../../components/LoadingSpinner'
 import styles from './VisitList.module.scss'
 
 const PER_PAGE = 200
@@ -333,7 +334,9 @@ export function VisitList() {
   if (isLoading) {
     return (
       <div className={styles.visitList}>
-        <div className={styles.loading}>Loading...</div>
+        <div className={styles.loading}>
+          <LoadingSpinner />
+        </div>
       </div>
     )
   }
@@ -393,7 +396,11 @@ export function VisitList() {
       </div>
 
       <div className={styles.content} ref={contentRef}>
-        {isFetching && <div className={styles.loadingOverlay}>Loading...</div>}
+        {isFetching && (
+          <div className={styles.loadingOverlay}>
+            <LoadingSpinner size={24} showText={false} />
+          </div>
+        )}
 
         {/* Navigation at top - scrolls with content */}
         <div className={styles.paginationTop}>

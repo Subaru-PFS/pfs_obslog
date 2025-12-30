@@ -203,3 +203,92 @@ export function HealthStatus() {
 - 生成された `generatedApi.ts` は直接編集しないでください
 - カスタマイズが必要な場合は、`emptyApi.ts` の `tagTypes` や `baseQuery` を変更してください
 
+## Stellar Globe（天球ビューワー）
+
+このプロジェクトでは [stellar-globe](https://github.com/michitaro/stellar-globe/) を git submodule として利用しています。WebGLベースの天球ビューワーで、React コンポーネントとして使用できます。
+
+### 依存関係
+
+stellar-globe 内のパッケージ間には以下の依存関係があります：
+
+```mermaid
+graph TD
+    react-stellar-globe --> stellar-globe
+```
+
+したがって、ビルドは以下の順序で行う必要があります：
+
+1. `stellar-globe`（コアライブラリ）
+2. `react-stellar-globe`（React ラッパー）
+
+### 初回セットアップ
+
+submodule を初期化し、stellar-globe をビルドします：
+
+```bash
+# リポジトリをクローンした直後の場合、submodule を初期化
+git submodule update --init --recursive
+
+# stellar-globe パッケージをビルド
+npm run build:stellar-globe
+```
+
+または、手動で各パッケージをビルドする場合：
+
+```bash
+# 1. stellar-globe（コアライブラリ）をビルド
+cd ../external/stellar-globe/stellar-globe
+npm install
+npm run build
+
+# 2. react-stellar-globe（React ラッパー）をビルド
+cd ../react-stellar-globe
+npm install
+npm run build
+
+# 3. frontend に戻る
+cd ../../../frontend
+npm install
+```
+
+### 使用例
+
+```tsx
+import { Globe$, GridLayer$, PanLayer$, ZoomLayer$, ConstellationLayer$ } from '@stellar-globe/react-stellar-globe'
+
+export function SkyViewer() {
+  return (
+    <div style={{ width: '100%', height: '500px' }}>
+      <Globe$>
+        <PanLayer$ />
+        <ZoomLayer$ />
+        <GridLayer$ />
+        <ConstellationLayer$ showNames />
+      </Globe$>
+    </div>
+  )
+}
+```
+
+### 主要コンポーネント
+
+- **`Globe$`**: ビューワーのルートコンテナ
+- **`PanLayer$`, `ZoomLayer$`, `RollLayer$`**: 操作系レイヤー
+- **`GridLayer$`**: 座標グリッドレイヤー
+- **`ConstellationLayer$`**: 星座レイヤー
+- **`MarkerLayer$`**: マーカーレイヤー
+- **`TractTileLayer$`**: タイル画像レイヤー
+
+詳細は [react-stellar-globe README](../external/stellar-globe/react-stellar-globe/README.md) を参照してください。
+
+### stellar-globe の更新
+
+submodule を最新に更新する場合：
+
+```bash
+cd ../external/stellar-globe
+git pull origin main
+cd ../../frontend
+npm run build:stellar-globe
+```
+
