@@ -98,6 +98,22 @@ uv run pytest --cov=pfs_obslog --cov-report=html
 - `import pfs_obslog.module` でモジュールをインポート可能
 - `__init__.py` なしでもインポート可能（implicit namespace packages）
 
+### SQLAlchemyモデルの自動生成
+
+DBスキーマからSQLAlchemy 2.0スタイルのモデルを自動生成できます。
+
+```bash
+cd backend
+
+# テスト用DBからモデルを生成
+uv run python devel/generate_models.py --env test
+
+# 本番DBからモデルを生成
+uv run python devel/generate_models.py --env production
+```
+
+詳細は [backend/devel/generate_models.md](backend/devel/generate_models.md) を参照してください。
+
 ## このドキュメントについて
 
 このドキュメント（`.github/copilot-instructions.md`）は、開発環境や手順が変更された場合は随時更新してください。
