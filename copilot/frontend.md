@@ -44,7 +44,9 @@ npm run build
 npm run lint
 
 # テスト
-npm run test
+npm run test:run
+
+# npm run test は対話モード
 
 # カバレッジ付きテスト
 npm run test:coverage

@@ -28,6 +28,14 @@ class Settings(BaseSettings):
     # セッションクッキーの設定
     session_https_only: bool = False  # 本番環境ではTrueを推奨
 
+    # データベース接続設定
+    # 開発用: postgresql://pfs@localhost:15432/opdb
+    # 本番用: 環境変数 PFS_OBSLOG_database_url で設定
+    database_url: str = "postgresql://pfs@localhost:15432/opdb"
+
+    # SQLログ出力（開発用）
+    database_echo: bool = False
+
     @property
     def api_prefix(self) -> str:
         """APIのプレフィックス（例: /obslog/api）"""

@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from pfs_obslog.config import get_settings
-from pfs_obslog.routers import auth, health
+from pfs_obslog.routers import auth, health, visits
 
 settings = get_settings()
 
@@ -42,6 +42,7 @@ app.add_middleware(
 # ルーターを登録（/api配下に配置）
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(auth.router, prefix="/api")
+app.include_router(visits.router, prefix="/api", tags=["visits"])
 
 
 @app.get("/api")
