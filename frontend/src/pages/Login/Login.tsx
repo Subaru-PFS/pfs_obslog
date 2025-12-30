@@ -1,45 +1,52 @@
-import type { FormEvent } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useLoginApiAuthLoginPostMutation } from '../../store/api/generatedApi'
+import { useLoginApiAuthLoginPostMutation } from '../../store/api/apiSlice'
 import styles from './Login.module.scss'
 
+interface LoginFormData {
+  username: string
+  password: string
+}
+
 /**
- * ログインページ
+ * Login page
  */
 export function Login() {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const usernameRef = useRef<HTMLInputElement>(null)
+  const {
+    register,
+    handleSubmit,
+    setFocus,
+    formState: { errors },
+  } = useForm<LoginFormData>()
 
+  const [error, setError] = React.useState<string | null>(null)
   const navigate = useNavigate()
   const location = useLocation()
   const [login, { isLoading }] = useLoginApiAuthLoginPostMutation()
 
-  // ページロード時にユーザー名フィールドにフォーカス
+  // Focus username field on page load
   useEffect(() => {
-    usernameRef.current?.focus()
-  }, [])
+    setFocus('username')
+  }, [setFocus])
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
+  const onSubmit = async (data: LoginFormData) => {
     setError(null)
 
     try {
-      await login({ loginRequest: { username, password } }).unwrap()
-      // ログイン成功後、元のページまたはホームにリダイレクト
+      await login({ loginRequest: data }).unwrap()
+      // Redirect to original page or home after successful login
       const from = (location.state as { from?: string })?.from || '/'
       navigate(from, { replace: true })
     } catch {
-      // APIエラーの場合
-      setError('ユーザー名またはパスワードが正しくありません')
+      // API error
+      setError('Invalid username or password')
     }
   }
 
   return (
     <div className={styles.loginContainer}>
-      <form className={styles.form} onSubmit={handleSubmit}>
+      <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
         <h1>PFS Obslog</h1>
         {error && <div className={styles.error}>{error}</div>}
         <dl>
@@ -47,28 +54,29 @@ export function Login() {
           <dd>
             <input
               type="text"
-              name="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
               autoComplete="username"
-              ref={usernameRef}
               disabled={isLoading}
+              {...register('username', { required: 'Username is required' })}
             />
+            {errors.username && (
+              <span className={styles.fieldError}>{errors.username.message}</span>
+            )}
           </dd>
           <dt>Password:</dt>
           <dd>
             <input
               type="password"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
               disabled={isLoading}
+              {...register('password', { required: 'Password is required' })}
             />
+            {errors.password && (
+              <span className={styles.fieldError}>{errors.password.message}</span>
+            )}
           </dd>
         </dl>
         <div className={styles.submitContainer}>
-          <input type="submit" value={isLoading ? 'ログイン中...' : 'Log In'} disabled={isLoading} />
+          <input type="submit" value={isLoading ? 'Logging in...' : 'Log In'} disabled={isLoading} />
         </div>
       </form>
     </div>

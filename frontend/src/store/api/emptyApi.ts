@@ -9,8 +9,8 @@ export const emptyApi = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: API_BASE_URL,
-    credentials: "include", // セッションクッキーを送信するために必要
+    credentials: "include", // Required to send session cookies
   }),
-  tagTypes: [],
+  tagTypes: ["AuthStatus"],
   endpoints: () => ({}),
 });

@@ -1,5 +1,6 @@
 export type Styles = {
   error: string;
+  fieldError: string;
   form: string;
   loginContainer: string;
   submitContainer: string;

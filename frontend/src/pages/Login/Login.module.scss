@@ -74,3 +74,10 @@
   color: #721c24;
   text-align: center;
 }
+
+.fieldError {
+  display: block;
+  margin-top: $spacing-xs;
+  color: #dc3545;
+  font-size: $font-size-sm;
+}
