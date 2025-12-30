@@ -403,7 +403,7 @@ export function VisitList() {
       <div className={styles.content} ref={contentRef}>
         {isFetching && (
           <div className={styles.loadingOverlay}>
-            <LoadingSpinner size={24} showText={false} />
+            <LoadingSpinner size={64} showText={false} />
           </div>
         )}
 

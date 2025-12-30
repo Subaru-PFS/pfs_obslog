@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useGetStatusApiAuthStatusGetQuery } from '../../store/api/apiSlice'
+import { LoadingSpinner } from '../LoadingSpinner'
 
 interface RequireAuthProps {
   children: ReactNode
@@ -18,7 +19,11 @@ export function RequireAuth({ children }: RequireAuthProps) {
 
   // Checking authentication status
   if (isLoading) {
-    return <div>Loading...</div>
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <LoadingSpinner />
+      </div>
+    )
   }
 
   // Redirect to login page on error or if not authenticated
