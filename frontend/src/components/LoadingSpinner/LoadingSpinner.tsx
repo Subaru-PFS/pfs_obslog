@@ -1,7 +1,7 @@
 import styles from './LoadingSpinner.module.scss'
 
 export interface LoadingSpinnerProps {
-  /** Size in pixels (default: 32) */
+  /** Size in pixels (default: 200) */
   size?: number
   /** Loading text to display (default: 'Loading...') */
   text?: string
@@ -15,7 +15,7 @@ export interface LoadingSpinnerProps {
  * Loading spinner component with optional text
  */
 export function LoadingSpinner({
-  size = 32,
+  size = 200,
   text = 'Loading...',
   showText = true,
   className = '',
