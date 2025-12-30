@@ -22,7 +22,7 @@ export function Tooltip({
   content,
   children,
   placement = 'bottom',
-  delay = 200,
+  delay = 0,
 }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [position, setPosition] = useState({ top: 0, left: 0 })
