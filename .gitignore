@@ -1,1 +1,6 @@
 /old-project/codebase
+
+# Python
+__pycache__/
+*.pyc
+.coverage

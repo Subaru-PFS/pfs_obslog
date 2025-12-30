@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# 開始時刻を記録（ナノ秒）
+start_time=$(date +%s%N)
+
+echo "指示者の入力待ち:"
+
+# 標準入力を全て読み取る
+input=$(cat)
+
+# 終了時刻を記録
+end_time=$(date +%s%N)
+
+# 経過時間を計算（ナノ秒からミリ秒に変換）
+elapsed_ns=$((end_time - start_time))
+elapsed_ms=$((elapsed_ns / 1000000))
+
+# 入力から空白文字を除去して空かどうかチェック
+trimmed_input=$(echo "$input" | tr -d '[:space:]')
+
+if [ -z "$trimmed_input" ]; then
+    # 入力が空（または空白文字のみ）の場合
+    echo "依頼書を更新しました。それに従ってください。"
+else
+    # 入力がある場合はそのまま出力
+    echo "$input"
+fi
+
+# 1秒（1000ミリ秒）以内に完了した場合は警告を出す
+if [ "$elapsed_ms" -lt 1000 ]; then
+    sleep 5
+    echo "このコマンドの標準入力には何も渡さないでください。"
+fi
