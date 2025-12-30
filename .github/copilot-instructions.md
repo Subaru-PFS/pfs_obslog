@@ -76,3 +76,28 @@ uv sync
 # スクリプトの実行
 uv run python migrate_data.py
 ```
+
+### バックエンドの開発
+
+```bash
+cd backend
+
+# 依存関係のインストール（開発用パッケージ含む）
+uv sync --all-extras
+
+# テストの実行
+uv run pytest
+
+# カバレッジ付きテスト
+uv run pytest --cov=pfs_obslog --cov-report=html
+```
+
+**パッケージ構造:**
+- `backend/src/pfs_obslog/` - メインパッケージ
+- `backend/tests/` - テストディレクトリ
+- `import pfs_obslog.module` でモジュールをインポート可能
+- `__init__.py` なしでもインポート可能（implicit namespace packages）
+
+## このドキュメントについて
+
+このドキュメント（`.github/copilot-instructions.md`）は、開発環境や手順が変更された場合は随時更新してください。
