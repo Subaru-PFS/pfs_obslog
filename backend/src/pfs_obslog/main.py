@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from pfs_obslog.config import get_settings
+from pfs_obslog.orjsonresponse import ORJSONResponse
 from pfs_obslog.routers import auth, health, visits
 
 settings = get_settings()
@@ -17,6 +18,7 @@ app = FastAPI(
     docs_url="/api/docs",
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json",
+    default_response_class=ORJSONResponse,
 )
 
 # セッションミドルウェア（クッキーセッション）

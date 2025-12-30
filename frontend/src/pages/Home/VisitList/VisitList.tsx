@@ -8,6 +8,7 @@ import {
 import { useHomeContext } from '../context'
 import { Icon } from '../../../components/Icon'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
+import { Tooltip } from '../../../components/Tooltip'
 import styles from './VisitList.module.scss'
 
 const PER_PAGE = 200
@@ -360,38 +361,42 @@ export function VisitList() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button
-            className={styles.toolbarButton}
-            title="Search"
-            disabled
-          >
-            <Icon name="search" size={18} />
-          </button>
-          <button
-            className={styles.toolbarButton}
-            title="Help"
-            disabled
-          >
-            <Icon name="help" size={18} />
-          </button>
+          <Tooltip content="Search">
+            <button
+              className={styles.toolbarButton}
+              disabled
+            >
+              <Icon name="search" size={18} />
+            </button>
+          </Tooltip>
+          <Tooltip content="Syntax Docs">
+            <button
+              className={styles.toolbarButton}
+              disabled
+            >
+              <Icon name="help" size={18} />
+            </button>
+          </Tooltip>
         </div>
         <div className={styles.toolbarActions}>
-          <button
-            className={styles.toolbarButton}
-            onClick={handleGoToLatest}
-            title="Go to latest visits"
-            disabled={isFirstPage}
-          >
-            <Icon name="vertical_align_top" size={18} />
-          </button>
-          <button
-            className={styles.toolbarButton}
-            onClick={handleRefresh}
-            title="Refresh"
-            disabled={isFetching}
-          >
-            <Icon name={isFetching ? 'hourglass_empty' : 'refresh'} size={18} />
-          </button>
+          <Tooltip content="Go to latest visits">
+            <button
+              className={styles.toolbarButton}
+              onClick={handleGoToLatest}
+              disabled={isFirstPage}
+            >
+              <Icon name="vertical_align_top" size={18} />
+            </button>
+          </Tooltip>
+          <Tooltip content="Refresh">
+            <button
+              className={styles.toolbarButton}
+              onClick={handleRefresh}
+              disabled={isFetching}
+            >
+              <Icon name={isFetching ? 'hourglass_empty' : 'refresh'} size={18} />
+            </button>
+          </Tooltip>
         </div>
       </div>
 
@@ -404,30 +409,33 @@ export function VisitList() {
 
         {/* Navigation at top - scrolls with content */}
         <div className={styles.paginationTop}>
-          <button
-            className={styles.paginationButton}
-            onClick={handlePrevPage}
-            disabled={isFirstPage}
-            title="Previous page (newer visits)"
-          >
-            <Icon name="chevron_left" size={20} />
-          </button>
-          <button
-            className={`${styles.paginationButton} ${styles.loadMore}`}
-            onClick={handleLoadMoreNewer}
-            disabled={isFirstPage}
-            title="Load more newer visits"
-          >
-            <Icon name={isFirstPage ? 'refresh' : 'keyboard_arrow_up'} size={20} />
-          </button>
-          <button
-            className={styles.paginationButton}
-            onClick={handleNextPage}
-            disabled={isLastPage}
-            title="Next page (older visits)"
-          >
-            <Icon name="chevron_right" size={20} />
-          </button>
+          <Tooltip content="Next newer visits">
+            <button
+              className={styles.paginationButton}
+              onClick={handlePrevPage}
+              disabled={isFirstPage}
+            >
+              <Icon name="chevron_left" size={20} />
+            </button>
+          </Tooltip>
+          <Tooltip content={isFirstPage ? 'Refresh' : 'Load more newer visits'}>
+            <button
+              className={`${styles.paginationButton} ${styles.loadMore}`}
+              onClick={handleLoadMoreNewer}
+              disabled={isFirstPage}
+            >
+              <Icon name={isFirstPage ? 'refresh' : 'keyboard_arrow_up'} size={20} />
+            </button>
+          </Tooltip>
+          <Tooltip content="Next older visits">
+            <button
+              className={styles.paginationButton}
+              onClick={handleNextPage}
+              disabled={isLastPage}
+            >
+              <Icon name="chevron_right" size={20} />
+            </button>
+          </Tooltip>
         </div>
 
         {visitGroups.length === 0 ? (
@@ -443,50 +451,61 @@ export function VisitList() {
 
         {/* Navigation at bottom - scrolls with content */}
         <div className={styles.paginationBottom}>
-          <button
-            className={styles.paginationButton}
-            onClick={handlePrevPage}
-            disabled={isFirstPage}
-            title="Previous page (newer visits)"
-          >
-            <Icon name="chevron_left" size={20} />
-          </button>
-          <button
-            className={`${styles.paginationButton} ${styles.loadMore}`}
-            onClick={handleLoadMoreOlder}
-            disabled={isLastPage}
-            title="Load more older visits"
-          >
-            <Icon name="keyboard_arrow_down" size={20} />
-          </button>
-          <button
-            className={styles.paginationButton}
-            onClick={handleNextPage}
-            disabled={isLastPage}
-            title="Next page (older visits)"
-          >
-            <Icon name="chevron_right" size={20} />
-          </button>
+          <Tooltip content="Next newer visits">
+            <button
+              className={styles.paginationButton}
+              onClick={handlePrevPage}
+              disabled={isFirstPage}
+            >
+              <Icon name="chevron_left" size={20} />
+            </button>
+          </Tooltip>
+          <Tooltip content="Load more older visits">
+            <button
+              className={`${styles.paginationButton} ${styles.loadMore}`}
+              onClick={handleLoadMoreOlder}
+              disabled={isLastPage}
+            >
+              <Icon name="keyboard_arrow_down" size={20} />
+            </button>
+          </Tooltip>
+          <Tooltip content="Next older visits">
+            <button
+              className={styles.paginationButton}
+              onClick={handleNextPage}
+              disabled={isLastPage}
+            >
+              <Icon name="chevron_right" size={20} />
+            </button>
+          </Tooltip>
         </div>
       </div>
 
       <div className={styles.footer}>
         <div className={styles.pagination}>
-          <button onClick={handleFirstPage} disabled={isFirstPage} title="First page">
-            <Icon name="first_page" size={18} />
-          </button>
-          <button onClick={handlePrevPage} disabled={isFirstPage} title="Previous page">
-            <Icon name="chevron_left" size={18} />
-          </button>
+          <Tooltip content="First page">
+            <button onClick={handleFirstPage} disabled={isFirstPage}>
+              <Icon name="first_page" size={18} />
+            </button>
+          </Tooltip>
+          <Tooltip content="Previous page">
+            <button onClick={handlePrevPage} disabled={isFirstPage}>
+              <Icon name="chevron_left" size={18} />
+            </button>
+          </Tooltip>
           <span className={styles.pageInfo}>
             {offset + 1} - {Math.min(offset + limit, totalCount)} / {totalCount}
           </span>
-          <button onClick={handleNextPage} disabled={isLastPage} title="Next page">
-            <Icon name="chevron_right" size={18} />
-          </button>
-          <button onClick={handleLastPage} disabled={isLastPage} title="Last page">
-            <Icon name="last_page" size={18} />
-          </button>
+          <Tooltip content="Next page">
+            <button onClick={handleNextPage} disabled={isLastPage}>
+              <Icon name="chevron_right" size={18} />
+            </button>
+          </Tooltip>
+          <Tooltip content="Last page">
+            <button onClick={handleLastPage} disabled={isLastPage}>
+              <Icon name="last_page" size={18} />
+            </button>
+          </Tooltip>
         </div>
       </div>
     </div>
