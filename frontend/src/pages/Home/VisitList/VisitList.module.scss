@@ -1,0 +1,320 @@
+@use '../../../styles/theme' as *;
+
+.visitList {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+// =============================================================================
+// Toolbar
+// =============================================================================
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  background-color: $header-background-color;
+  border-bottom: 1px solid $border-color;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  @include rounded-text-input;
+  flex: 1;
+  min-width: 200px;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  button {
+    @include button-base;
+    padding: 4px 8px;
+    font-size: 0.875rem;
+    background-color: $input-background;
+
+    &:hover:not(:disabled) {
+      background-color: $hover-background-color;
+    }
+
+    &:disabled {
+      color: $disabled-text-color;
+      cursor: not-allowed;
+    }
+  }
+
+  .pageInfo {
+    padding: 0 8px;
+    font-size: 0.875rem;
+    color: $hint-text-color;
+    white-space: nowrap;
+  }
+}
+
+// =============================================================================
+// Content Area
+// =============================================================================
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+// =============================================================================
+// Visit Group
+// =============================================================================
+.visitGroup {
+  margin-bottom: 12px;
+  @include card;
+  overflow: hidden;
+}
+
+// =============================================================================
+// IIC Sequence Header
+// =============================================================================
+.iicSequence {
+  padding: 8px 12px;
+  background-color: $near-background;
+  border-bottom: 1px solid $border-color;
+
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 4px;
+  }
+
+  .sequenceId {
+    color: $accent;
+    font-family: monospace;
+  }
+
+  .sequenceName {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sequenceType {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: $selected-background;
+  }
+
+  .sequenceGroup {
+    font-size: 0.75rem;
+    color: $hint-text-color;
+    padding: 2px 6px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+  }
+
+  .info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: $hint-text-color;
+  }
+
+  .status {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+
+    &.statusOk {
+      background-color: #c8e6c9;
+      color: #2e7d32;
+    }
+
+    &.statusError {
+      background-color: #ffcdd2;
+      color: #c62828;
+    }
+  }
+
+  .command {
+    display: block;
+    margin-top: 4px;
+    padding: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: $code-color;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.noSequence {
+  padding: 8px 12px;
+  background-color: $distant-background;
+  border-bottom: 1px solid $border-color;
+  font-size: 0.875rem;
+  color: $hint-text-color;
+  font-style: italic;
+}
+
+// =============================================================================
+// Visit Table
+// =============================================================================
+.visitTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+
+  th,
+  td {
+    padding: 4px 8px;
+    text-align: left;
+    border-bottom: 1px solid $ruled-line-color;
+  }
+
+  th {
+    background-color: $header-background-color;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: $hint-text-color;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  tr {
+    cursor: pointer;
+    transition: background-color 0.1s;
+
+    &:hover {
+      background-color: $hover-background-color;
+    }
+
+    &.selected {
+      background-color: $selected-background;
+
+      &:hover {
+        background-color: $selected-hover-background;
+      }
+    }
+  }
+
+  // Column widths
+  .colId {
+    width: 70px;
+    font-family: monospace;
+    text-align: right;
+  }
+
+  .colDescription {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .colDate {
+    width: 90px;
+    white-space: nowrap;
+  }
+
+  .colTime {
+    width: 60px;
+    white-space: nowrap;
+  }
+
+  .colExposures {
+    width: 80px;
+    text-align: center;
+    font-family: monospace;
+  }
+
+  .colExptime {
+    width: 60px;
+    text-align: right;
+    font-family: monospace;
+  }
+
+  .colNotes {
+    width: 40px;
+    text-align: center;
+  }
+}
+
+// Exposure count colors
+.exposureSps {
+  background-color: rgba(255, 0, 0, 0.1);
+}
+
+.exposureMcs {
+  background-color: rgba(0, 255, 0, 0.1);
+}
+
+.exposureAgc {
+  background-color: rgba(0, 0, 255, 0.1);
+}
+
+.exposureMixed {
+  background-color: rgba(128, 128, 128, 0.1);
+}
+
+.exposureNone {
+  background-color: rgba(128, 128, 128, 0.2);
+  color: $hint-text-color;
+}
+
+// =============================================================================
+// Loading & Empty States
+// =============================================================================
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: $hint-text-color;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: $hint-text-color;
+  font-style: italic;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: #c62828;
+}
+
+// =============================================================================
+// Notes Badge
+// =============================================================================
+.notesBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background-color: $accent;
+  color: $text-color;
+  font-size: 0.75rem;
+  font-weight: 600;
+}

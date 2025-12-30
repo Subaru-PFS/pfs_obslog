@@ -1,0 +1,89 @@
+@use '../../styles/theme' as *;
+
+.home {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: $background-color;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: $header-background-color;
+  border-bottom: 1px solid $border-color;
+  flex-shrink: 0;
+
+  h1 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: $text-color;
+  }
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.875rem;
+  color: $hint-text-color;
+
+  .username {
+    font-weight: 500;
+    color: $text-color;
+  }
+
+  .logoutButton {
+    padding: 4px 12px;
+    font-size: 0.875rem;
+    @include button-secondary;
+  }
+}
+
+.mainContent {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.leftPane {
+  flex: 1;
+  min-width: 400px;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid $border-color;
+  overflow: hidden;
+}
+
+.resizer {
+  width: 4px;
+  background-color: $border-color;
+  cursor: col-resize;
+  flex-shrink: 0;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: $accent;
+  }
+}
+
+.rightPane {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: $background-color;
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: $hint-text-color;
+  font-size: 1rem;
+}

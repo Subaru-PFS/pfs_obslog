@@ -102,6 +102,22 @@ $light-shadow: 0 0 4px rgba($shadow-color, 0.25);
   }
 }
 
+@mixin button-secondary {
+  @include button-base;
+  background-color: $input-background;
+  color: $text-color;
+  border: 1px solid $border-color;
+
+  &:hover:not(:disabled) {
+    background-color: $hover-background-color;
+  }
+
+  &:disabled {
+    color: $disabled-text-color;
+    cursor: not-allowed;
+  }
+}
+
 // =============================================================================
 // SQL Highlighting
 // =============================================================================

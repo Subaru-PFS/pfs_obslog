@@ -1,6 +1,6 @@
 import { createHashRouter, Navigate, Outlet } from 'react-router-dom'
-import App from '../App'
 import { Login } from '../pages/Login'
+import { Home } from '../pages/Home'
 import { RequireAuth } from '../components/Auth/RequireAuth'
 
 /**
@@ -24,7 +24,7 @@ export const router = createHashRouter([
     children: [
       {
         index: true,
-        element: <App />,
+        element: <Home />,
       },
     ],
   },
