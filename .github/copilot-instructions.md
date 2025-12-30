@@ -2,7 +2,7 @@
 
 ## プロジェクト概要
 
-このプロジェクトは既存のpfs-obslogプロジェクト（`./old-project`へのリンク）のリファクタリングです。
+このプロジェクトは既存のpfs-obslogプロジェクト（`./old-project/codebase`が既存プロジェクトへのリンク）のリファクタリングです。
 
 ### 技術スタック
 
@@ -11,7 +11,12 @@
 - SQLAlchemy
 
 **Frontend:**
-- SolidJS
+- React
+- TypeScript
+- Vite
+- RTK Query
+- React Router
+- typed-scss-modules
 
 ## データベース接続情報
 
@@ -114,6 +119,35 @@ uv run python devel/generate_models.py --env production
 
 詳細は [backend/devel/generate_models.md](backend/devel/generate_models.md) を参照してください。
 
+### フロントエンドの開発
+
+フロントエンドの開発については [frontend/README.md](frontend/README.md) を参照してください。
+
+```bash
+cd frontend
+
+# 依存関係のインストール
+npm install
+
+# 開発サーバーの起動
+npm run dev
+
+# テストの実行
+npm run test
+
+# SCSSモジュールの型生成
+npm run scss:types
+
+# SCSSの型を監視モードで生成（開発中に使用）
+npm run scss:watch
+```
+
+**重要:** SCSSファイルを追加・変更した場合は、必ず `npm run scss:types` を実行して型ファイルを再生成してください。
+
 ## このドキュメントについて
 
 このドキュメント（`.github/copilot-instructions.md`）は、開発環境や手順が変更された場合は随時更新してください。
+
+## 作業について
+
+ひとまとまりの作業が完了したらその作業についてのgit commitを行ってください。

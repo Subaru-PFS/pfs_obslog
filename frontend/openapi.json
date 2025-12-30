@@ -1,0 +1,99 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "PFS Obslog API",
+    "description": "PFS Observation Log System API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/healthz": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Healthz",
+        "description": "\u30d8\u30eb\u30b9\u30c1\u30a7\u30c3\u30af\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\n\u30b5\u30fc\u30d3\u30b9\u306e\u7a3c\u50cd\u72b6\u614b\u3092\u78ba\u8a8d\u3059\u308b\u305f\u3081\u306b\u4f7f\u7528\u3057\u307e\u3059\u3002",
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/readyz": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Readyz",
+        "description": "\u30ec\u30c7\u30a3\u30cd\u30b9\u30c1\u30a7\u30c3\u30af\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\n\u30b5\u30fc\u30d3\u30b9\u304c\u30ea\u30af\u30a8\u30b9\u30c8\u3092\u53d7\u3051\u4ed8\u3051\u308b\u6e96\u5099\u304c\u3067\u304d\u3066\u3044\u308b\u304b\u78ba\u8a8d\u3057\u307e\u3059\u3002\n\u5c06\u6765\u7684\u306b\u306f\u30c7\u30fc\u30bf\u30d9\u30fc\u30b9\u63a5\u7d9a\u306a\u3069\u306e\u30c1\u30a7\u30c3\u30af\u3092\u8ffd\u52a0\u3067\u304d\u307e\u3059\u3002",
+        "operationId": "readyz_readyz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "description": "\u30eb\u30fc\u30c8\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "timestamp",
+          "version"
+        ],
+        "title": "HealthResponse",
+        "description": "\u30d8\u30eb\u30b9\u30c1\u30a7\u30c3\u30af\u30ec\u30b9\u30dd\u30f3\u30b9"
+      }
+    }
+  }
+}

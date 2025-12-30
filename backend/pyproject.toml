@@ -8,6 +8,8 @@ dependencies = [
     "fastapi>=0.115.0",
     "sqlalchemy>=2.0.0",
     "uvicorn>=0.34.0",
+    "ldap3>=2.9.0",
+    "itsdangerous>=2.0.0",
 ]
 
 [project.optional-dependencies]
@@ -17,6 +19,7 @@ dev = [
     "pytest-env>=1.1.0",
     "sqlacodegen>=3.0.0",
     "psycopg2-binary>=2.9.0",
+    "httpx>=0.27.0",
 ]
 
 [build-system]
