@@ -171,92 +171,40 @@ class TestVirtualColumns:
 
 
 # モックモデルを使用したEvaluatorのテスト
-class MockModels:
-    """テスト用のモックモデル"""
-
-    class PfsVisit:
-        pfs_visit_id = "pfs_visit.pfs_visit_id"
-        pfs_visit_description = "pfs_visit.pfs_visit_description"
-        issued_at = "pfs_visit.issued_at"
-        pfs_design_id = "pfs_visit.pfs_design_id"
-
-    class IicSequence:
-        iic_sequence_id = "iic_sequence.iic_sequence_id"
-        sequence_type = "iic_sequence.sequence_type"
-        comments = "iic_sequence.comments"
-        name = "iic_sequence.name"
-        iic_sequence_status = "iic_sequence.iic_sequence_status"
-
-    class IicSequenceStatus:
-        cmd_output = "iic_sequence_status.cmd_output"
-
-    class ObslogVisitNote:
-        body = "obslog_visit_note.body"
-        user = "obslog_visit_note.user"
-
-    class ObslogVisitSetNote:
-        body = "obslog_visit_set_note.body"
-        user = "obslog_visit_set_note.user"
-
-    class SpsVisit:
-        pfs_visit_id = "sps_visit.pfs_visit_id"
-
-    class SpsExposure:
-        pass
-
-    class SpsAnnotation:
-        notes = "sps_annotation.notes"
-
-    class McsExposure:
-        pfs_visit_id = "mcs_exposure.pfs_visit_id"
-
-    class AgcExposure:
-        pfs_visit_id = "agc_exposure.pfs_visit_id"
-
-    class SequenceGroup:
-        group_id = "sequence_group.group_id"
-        group_name = "sequence_group.group_name"
-
-    class ObslogFitsHeader:
-        cards_dict = {"KEY": "value"}
-
-    class PfsDesignFiber:
-        pfs_design_id = "pfs_design_fiber.pfs_design_id"
-        proposal_id = "pfs_design_fiber.proposal_id"
-
-    class ObslogMcsExposureNote:
-        body = "obslog_mcs_exposure_note.body"
-        user = "obslog_mcs_exposure_note.user"
-
-    class ObslogUser:
-        account_name = "obslog_user.account_name"
-
-    class VisitSet:
-        pass
+# Note: evaluator.pyの詳細なテストはtest_evaluator_integration.pyで行います
 
 
 class TestQueryEvaluatorRequiredJoins:
-    """QueryEvaluatorのJOIN依存解析のテスト"""
+    """QueryEvaluatorのJOIN依存解析のテスト
+
+    Note: 詳細なテストはtest_evaluator_integration.pyを参照
+    """
 
     def test_no_join_for_basic_column(self):
         """基本カラムはJOIN不要"""
+        from pfs_obslog import models as M
+
         ast = parse_where_clause("where id = 100")
-        evaluator = QueryEvaluator(MockModels)
+        evaluator = QueryEvaluator(M)
         evaluator.evaluate(ast)
         assert len(evaluator.required_joins) == 0
 
     def test_join_for_sequence_type(self):
         """sequence_typeはiic_sequenceのJOINが必要"""
+        from pfs_obslog import models as M
+
         ast = parse_where_clause("where sequence_type = 'test'")
-        evaluator = QueryEvaluator(MockModels)
+        evaluator = QueryEvaluator(M)
         evaluator.evaluate(ast)
         assert "iic_sequence" in evaluator.required_joins
         assert "visit_set" in evaluator.required_joins
 
     def test_join_for_is_sps_visit(self):
         """is_sps_visitはsps_visitのJOINが必要"""
+        from pfs_obslog import models as M
+
         ast = parse_where_clause("where is_sps_visit")
-        evaluator = QueryEvaluator(MockModels)
+        evaluator = QueryEvaluator(M)
         evaluator.evaluate(ast)
         assert "sps_visit" in evaluator.required_joins
 
@@ -274,8 +222,10 @@ class TestQueryEvaluatorErrors:
 
     def test_unknown_column(self):
         """不明なカラムはエラー"""
+        from pfs_obslog import models as M
+
         ast = parse_where_clause("where unknown_column = 1")
-        evaluator = QueryEvaluator(MockModels)
+        evaluator = QueryEvaluator(M)
         with pytest.raises(QueryParseError, match="Unknown column"):
             evaluator.evaluate(ast)
 

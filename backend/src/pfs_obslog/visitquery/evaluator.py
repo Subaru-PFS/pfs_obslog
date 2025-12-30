@@ -46,7 +46,7 @@ class QueryEvaluator:
             "sequence_group_id": M.SequenceGroup.group_id,
             "sequence_group_name": M.SequenceGroup.group_name,
             "fits_header": M.ObslogFitsHeader.cards_dict,
-            "proposal_id": M.PfsDesignFiber.proposal_id,
+            "proposal_id": M.t_pfs_design_fiber.c.proposal_id,
         }
 
     def _get_computed_column(self, name: str) -> ColumnElement[Any]:
@@ -74,7 +74,7 @@ class QueryEvaluator:
             M.IicSequenceStatus.cmd_output,
             M.SpsAnnotation.notes,
             M.ObslogMcsExposureNote.body,
-            M.PfsDesignFiber.proposal_id,
+            M.t_pfs_design_fiber.c.proposal_id,
         ]
 
     def evaluate(self, node: ast.Node | None) -> ColumnElement[Any] | None:

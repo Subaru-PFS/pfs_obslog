@@ -114,14 +114,21 @@ class JoinBuilder:
             "sps_visit": lambda q: q.outerjoin(M.SpsVisit),
             "sps_exposure": lambda q: q.outerjoin(M.SpsExposure),
             "sps_annotation": lambda q: q.outerjoin(M.SpsAnnotation),
-            "visit_set": lambda q: q.outerjoin(M.VisitSet),
-            "iic_sequence": lambda q: q.outerjoin(M.IicSequence),
+            "visit_set": lambda q: q.outerjoin(
+                M.t_visit_set,
+                M.t_visit_set.c.pfs_visit_id == M.PfsVisit.pfs_visit_id,
+            ),
+            "iic_sequence": lambda q: q.outerjoin(
+                M.IicSequence,
+                M.IicSequence.iic_sequence_id == M.t_visit_set.c.iic_sequence_id,
+            ),
             "obslog_visit_set_note": lambda q: q.outerjoin(M.ObslogVisitSetNote),
             "visit_set_note_user": lambda q: q.outerjoin(
                 self.visit_set_note_user, M.ObslogVisitSetNote.user
             ),
             "iic_sequence_status": lambda q: q.outerjoin(
-                M.IicSequenceStatus, M.IicSequence.iic_sequence_status
+                M.IicSequenceStatus,
+                M.IicSequenceStatus.iic_sequence_id == M.IicSequence.iic_sequence_id,
             ),
             "sequence_group": lambda q: q.outerjoin(M.SequenceGroup),
             "mcs_exposure": lambda q: q.outerjoin(M.McsExposure),
@@ -131,8 +138,8 @@ class JoinBuilder:
             ),
             "agc_exposure": lambda q: q.outerjoin(M.AgcExposure),
             "pfs_design_fiber": lambda q: q.outerjoin(
-                M.PfsDesignFiber,
-                M.PfsDesignFiber.pfs_design_id == M.PfsVisit.pfs_design_id,
+                M.t_pfs_design_fiber,
+                M.t_pfs_design_fiber.c.pfs_design_id == M.PfsVisit.pfs_design_id,
             ),
             "obslog_fits_header": lambda q: q.outerjoin(M.ObslogFitsHeader),
         }
