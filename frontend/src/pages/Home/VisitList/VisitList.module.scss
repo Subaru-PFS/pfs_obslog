@@ -66,7 +66,8 @@
 
 // =============================================================================
 // Pagination Controls (Top & Bottom)
-// Floating design: transparent background, smaller radius, shadow
+// Top nav: round at bottom, flat at top (attached to top)
+// Bottom nav: round at top, flat at bottom (attached to bottom)
 // =============================================================================
 $pagination-border-radius: 6px;
 
@@ -77,9 +78,10 @@ $pagination-border-radius: 6px;
   background-color: transparent;
 }
 
+// Top navigation: top edges are 0, bottom edges are rounded
 .paginationTop {
   .paginationButton:first-child {
-    border-radius: $pagination-border-radius 0 0 $pagination-border-radius;
+    border-radius: 0 0 0 $pagination-border-radius;
   }
 
   .paginationButton.loadMore {
@@ -89,13 +91,14 @@ $pagination-border-radius: 6px;
   }
 
   .paginationButton:last-child {
-    border-radius: 0 $pagination-border-radius $pagination-border-radius 0;
+    border-radius: 0 0 $pagination-border-radius 0;
   }
 }
 
+// Bottom navigation: bottom edges are 0, top edges are rounded
 .paginationBottom {
   .paginationButton:first-child {
-    border-radius: $pagination-border-radius 0 0 $pagination-border-radius;
+    border-radius: $pagination-border-radius 0 0 0;
   }
 
   .paginationButton.loadMore {
@@ -105,7 +108,7 @@ $pagination-border-radius: 6px;
   }
 
   .paginationButton:last-child {
-    border-radius: 0 $pagination-border-radius $pagination-border-radius 0;
+    border-radius: 0 $pagination-border-radius 0 0;
   }
 }
 
