@@ -1,5 +1,6 @@
 export type Styles = {
   active: string;
+  disabled: string;
   tab: string;
   tabList: string;
   tabPanel: string;

@@ -1,13 +1,20 @@
 import { type ReactNode } from 'react'
 import styles from './Tabs.module.scss'
 
+export interface TabItem {
+  /** タブのラベル */
+  label: string
+  /** タブが無効かどうか */
+  disabled?: boolean
+}
+
 interface TabsProps {
   /** アクティブなタブのインデックス */
   activeIndex: number
   /** タブ変更時のコールバック */
   onChange: (index: number) => void
-  /** タブのラベル */
-  tabs: string[]
+  /** タブ情報の配列 */
+  tabs: (string | TabItem)[]
   /** 子要素（TabPanel） */
   children: ReactNode
 }
@@ -19,17 +26,23 @@ export function Tabs({ activeIndex, onChange, tabs, children }: TabsProps) {
   return (
     <div className={styles.tabs}>
       <div className={styles.tabList} role="tablist">
-        {tabs.map((label, index) => (
-          <button
-            key={label}
-            className={`${styles.tab} ${index === activeIndex ? styles.active : ''}`}
-            role="tab"
-            aria-selected={index === activeIndex}
-            onClick={() => onChange(index)}
-          >
-            {label}
-          </button>
-        ))}
+        {tabs.map((tab, index) => {
+          const label = typeof tab === 'string' ? tab : tab.label
+          const disabled = typeof tab === 'string' ? false : (tab.disabled ?? false)
+          return (
+            <button
+              key={label}
+              className={`${styles.tab} ${index === activeIndex ? styles.active : ''} ${disabled ? styles.disabled : ''}`}
+              role="tab"
+              aria-selected={index === activeIndex}
+              aria-disabled={disabled}
+              disabled={disabled}
+              onClick={() => !disabled && onChange(index)}
+            >
+              {label}
+            </button>
+          )
+        })}
       </div>
       <div className={styles.tabPanels}>
         {children}

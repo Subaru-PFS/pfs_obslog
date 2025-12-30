@@ -26,7 +26,7 @@
   border-radius: 4px 4px 0 0;
   transition: all 0.15s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background-color: #e8e8e8;
     color: #333;
   }
@@ -38,6 +38,18 @@
     font-weight: 600;
     margin-bottom: -1px;
     padding-bottom: 9px;
+  }
+
+  &.disabled,
+  &:disabled {
+    color: #bbb;
+    cursor: not-allowed;
+    background-color: transparent;
+
+    &:hover {
+      background-color: transparent;
+      color: #bbb;
+    }
   }
 }
 

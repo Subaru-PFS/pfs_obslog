@@ -1,10 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import {
   useGetVisitApiVisitsVisitIdGetQuery,
   type VisitDetail as VisitDetailType,
 } from '../../../store/api/generatedApi'
 import { useHomeContext } from '../context'
-import { Tabs, TabPanel } from '../../../components/Tabs'
+import { Tabs, TabPanel, type TabItem } from '../../../components/Tabs'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
 import { SpsInspector } from './SpsInspector'
 import { McsInspector } from './McsInspector'
@@ -128,77 +128,62 @@ interface VisitInspectorProps {
   visit: VisitDetailType
 }
 
+/** 固定タブのラベル（常に同じ順序で表示） */
+const TAB_LABELS = ['SpS', 'MCS', 'AGC', 'IIC Sequence', 'Sequence Group'] as const
+
 function VisitInspector({ visit }: VisitInspectorProps) {
   const [activeTabIndex, setActiveTabIndex] = useState(0)
 
-  // 利用可能なタブを構築
-  const tabs = useMemo(() => {
-    const result: { label: string; content: React.ReactNode }[] = []
+  // 各タブが利用可能かどうかを判定
+  const hasSps = (visit.sps?.exposures?.length ?? 0) > 0
+  const hasMcs = (visit.mcs?.exposures?.length ?? 0) > 0
+  const hasAgc = (visit.agc?.exposures?.length ?? 0) > 0
+  const hasIicSequence = !!visit.iic_sequence
+  const hasSequenceGroup = !!visit.iic_sequence?.group
 
-    if (visit.sps && visit.sps.exposures && visit.sps.exposures.length > 0) {
-      result.push({
-        label: 'SpS',
-        content: <SpsInspector sps={visit.sps} />,
-      })
-    }
+  const tabAvailability = [hasSps, hasMcs, hasAgc, hasIicSequence, hasSequenceGroup]
 
-    if (visit.mcs && visit.mcs.exposures && visit.mcs.exposures.length > 0) {
-      result.push({
-        label: 'MCS',
-        content: <McsInspector mcs={visit.mcs} />,
-      })
-    }
-
-    if (visit.agc && visit.agc.exposures && visit.agc.exposures.length > 0) {
-      result.push({
-        label: 'AGC',
-        content: <AgcInspector agc={visit.agc} />,
-      })
-    }
-
-    if (visit.iic_sequence) {
-      result.push({
-        label: 'IIC Sequence',
-        content: <IicSequenceInfo sequence={visit.iic_sequence} />,
-      })
-
-      if (visit.iic_sequence.group) {
-        result.push({
-          label: 'Sequence Group',
-          content: <SequenceGroupInfo group={visit.iic_sequence.group} />,
-        })
+  // 選択されたタブが利用不可の場合、最初の利用可能なタブに切り替え
+  useEffect(() => {
+    if (!tabAvailability[activeTabIndex]) {
+      const firstAvailable = tabAvailability.findIndex((available) => available)
+      if (firstAvailable !== -1 && firstAvailable !== activeTabIndex) {
+        setActiveTabIndex(firstAvailable)
       }
     }
+  }, [visit, activeTabIndex, tabAvailability])
 
-    return result
-  }, [visit])
-
-  // タブがない場合
-  if (tabs.length === 0) {
-    return (
-      <div className={styles.noData}>
-        No exposure data available
-      </div>
-    )
-  }
-
-  // アクティブタブが範囲外の場合は調整
-  const safeActiveIndex = Math.min(activeTabIndex, tabs.length - 1)
-  if (safeActiveIndex !== activeTabIndex) {
-    setActiveTabIndex(safeActiveIndex)
-  }
+  // タブ定義（disabled プロパティ付き）
+  const tabs: TabItem[] = TAB_LABELS.map((label, index) => ({
+    label,
+    disabled: !tabAvailability[index],
+  }))
 
   return (
     <Tabs
-      activeIndex={safeActiveIndex}
+      activeIndex={activeTabIndex}
       onChange={setActiveTabIndex}
-      tabs={tabs.map((t) => t.label)}
+      tabs={tabs}
     >
-      {tabs.map((tab, index) => (
-        <TabPanel key={tab.label} active={index === safeActiveIndex}>
-          {tab.content}
-        </TabPanel>
-      ))}
+      <TabPanel active={activeTabIndex === 0}>
+        {hasSps && visit.sps ? <SpsInspector sps={visit.sps} /> : null}
+      </TabPanel>
+      <TabPanel active={activeTabIndex === 1}>
+        {hasMcs && visit.mcs ? <McsInspector mcs={visit.mcs} /> : null}
+      </TabPanel>
+      <TabPanel active={activeTabIndex === 2}>
+        {hasAgc && visit.agc ? <AgcInspector agc={visit.agc} /> : null}
+      </TabPanel>
+      <TabPanel active={activeTabIndex === 3}>
+        {hasIicSequence && visit.iic_sequence ? (
+          <IicSequenceInfo sequence={visit.iic_sequence} />
+        ) : null}
+      </TabPanel>
+      <TabPanel active={activeTabIndex === 4}>
+        {hasSequenceGroup && visit.iic_sequence?.group ? (
+          <SequenceGroupInfo group={visit.iic_sequence.group} />
+        ) : null}
+      </TabPanel>
     </Tabs>
   )
 }
