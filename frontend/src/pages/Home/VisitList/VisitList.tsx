@@ -1,7 +1,9 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { MaterialSymbol } from 'material-symbols'
 import {
   useListVisitsApiVisitsGetQuery,
+  useLazyGetVisitRankApiVisitsVisitIdRankGetQuery,
   type VisitListEntry,
   type IicSequence,
   type VisitList as VisitListType,
@@ -439,6 +441,9 @@ export function VisitList() {
     sql: effectiveSql,
   })
 
+  // Lazy query for Go to Visit feature
+  const [getVisitRank] = useLazyGetVisitRankApiVisitsVisitIdRankGetQuery()
+
   // Handle API error for search
   useEffect(() => {
     if (isError && error && 'data' in error) {
@@ -554,6 +559,42 @@ export function VisitList() {
     const url = `${API_BASE_URL}/api/visits.csv?${params}`
     window.location.href = url
   }, [appliedSql])
+
+  // Go to Visit by ID
+  const handleGoToVisit = useCallback(async () => {
+    const input = window.prompt('Enter Visit ID:')
+    if (!input) return
+
+    const visitId = parseInt(input.trim(), 10)
+    if (isNaN(visitId)) {
+      alert('Invalid Visit ID. Please enter a number.')
+      return
+    }
+
+    try {
+      const result = await getVisitRank({ visitId, sql: effectiveSql ?? undefined }).unwrap()
+      if (result.rank === null || result.rank === undefined) {
+        alert(`Visit ${visitId} not found${effectiveSql ? ' in current filter' : ''}.`)
+        return
+      }
+
+      // Calculate offset to center the visit in the view
+      // rank is 1-based, so visit at rank 1 should be at offset 0
+      const targetOffset = Math.max(0, result.rank - 1 - Math.floor(PER_PAGE / 2))
+      
+      setOffset(targetOffset)
+      setLimit(PER_PAGE)
+      setSelectedVisitId(visitId)
+      
+      // Scroll to the visit after data loads
+      setTimeout(() => {
+        const element = document.querySelector(`[data-visit-id="${visitId}"]`)
+        element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 500)
+    } catch {
+      alert('Failed to find visit. Please try again.')
+    }
+  }, [effectiveSql, getVisitRank, setSelectedVisitId])
 
   // Check if the query looks like SQL WHERE clause
   const isSqlQuery = useCallback((query: string) => {
@@ -725,6 +766,14 @@ export function VisitList() {
           </Tooltip>
         </div>
         <div className={styles.toolbarActions}>
+          <Tooltip content="Go to Visit">
+            <button
+              className={styles.toolbarButton}
+              onClick={handleGoToVisit}
+            >
+              <Icon name="switch_access_shortcut" size={18} />
+            </button>
+          </Tooltip>
           <Tooltip content="Download as CSV">
             <button
               className={styles.toolbarButton}
@@ -748,7 +797,7 @@ export function VisitList() {
               onClick={handleRefresh}
               disabled={isFetching}
             >
-              <Icon name={isFetching ? 'hourglass_empty' : 'refresh'} size={18} />
+              <Icon name="refresh" size={18} />
             </button>
           </Tooltip>
         </div>
@@ -815,7 +864,7 @@ export function VisitList() {
               onClick={handleLoadMoreNewer}
               disabled={isFirstPage || isFetching}
             >
-              <Icon name={isFetching && !isFirstPage ? 'hourglass_empty' : (isFirstPage ? 'refresh' : 'keyboard_arrow_up')} size={20} />
+              <Icon name={isFirstPage ? 'refresh' : 'keyboard_arrow_up'} size={20} />
             </button>
           </Tooltip>
           <Tooltip content="Next older visits">
@@ -858,7 +907,7 @@ export function VisitList() {
               onClick={handleLoadMoreOlder}
               disabled={isLastPage || isFetching}
             >
-              <Icon name={isFetching ? 'hourglass_empty' : 'keyboard_arrow_down'} size={20} />
+              <Icon name="keyboard_arrow_down" size={20} />
             </button>
           </Tooltip>
           <Tooltip content="Next older visits">
@@ -885,7 +934,7 @@ export function VisitList() {
           </Tooltip>
           <Tooltip content="Refresh">
             <button onClick={handleRefresh} disabled={isFetching}>
-              <Icon name={isFetching ? 'hourglass_empty' : 'refresh'} size={18} />
+              <Icon name="refresh" size={18} />
             </button>
           </Tooltip>
           <Tooltip content="First page">
