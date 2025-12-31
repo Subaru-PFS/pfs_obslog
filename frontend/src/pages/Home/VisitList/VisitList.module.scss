@@ -294,6 +294,7 @@ $pagination-border-radius: 12px;
 // =============================================================================
 .visitGroup {
   margin: 24px 12px;
+  min-width: max-content; // Allow horizontal scroll when content overflows
   background-color: $background-color;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba($shadow-color, 0.5);
@@ -433,7 +434,8 @@ $pagination-border-radius: 12px;
 
 .noSequence {
   padding: 8px 12px;
-  background-color: $distant-background;
+  background: linear-gradient(0, rgba(0, 0, 0, 0.125) 0%, rgba(0, 0, 0, 0) 100%);
+  background-color: $header-background-color;
   border-bottom: 1px solid $border-color;
   font-size: 0.875rem;
   color: $hint-text-color;

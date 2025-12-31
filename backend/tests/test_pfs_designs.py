@@ -54,7 +54,12 @@ class TestPfsDesignDetailAPI:
 class TestPfsDesignChartAPI:
     """PFS Design チャート API のテスト"""
 
-    def test_get_design_chart_not_implemented(self):
-        """チャート機能は未実装"""
+    def test_get_design_chart_invalid_id_format(self):
+        """不正なID形式の場合は400を返す"""
+        response = client.get("/api/pfs_designs.png?id_hex=invalid")
+        assert response.status_code == 400
+
+    def test_get_design_chart_not_found(self):
+        """存在しないDesignの場合は404を返す"""
         response = client.get("/api/pfs_designs.png?id_hex=0000000000000000")
-        assert response.status_code == 501
+        assert response.status_code == 404
