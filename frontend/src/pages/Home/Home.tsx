@@ -3,6 +3,7 @@ import { HomeProvider } from './context'
 import { VisitList } from './VisitList'
 import { VisitDetail } from './VisitDetail'
 import { Icon } from '../../components/Icon'
+import { Tooltip } from '../../components/Tooltip'
 import styles from './Home.module.scss'
 
 function HomeContent() {
@@ -20,10 +21,11 @@ function HomeContent() {
         <h1>PFS Obslog</h1>
         <div className={styles.userInfo}>
           {user && <span className={styles.username}>{user.user_id}</span>}
-          <button className={styles.logoutButton} onClick={handleLogout}>
-            <Icon name="logout" size={16} />
-            Logout
-          </button>
+          <Tooltip content="Logout">
+            <button className={styles.logoutButton} onClick={handleLogout}>
+              <Icon name="logout" size={18} />
+            </button>
+          </Tooltip>
         </div>
       </header>
 
