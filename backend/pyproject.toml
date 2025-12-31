@@ -16,6 +16,7 @@ dependencies = [
     "astropy>=6.0.0",
     "scikit-image>=0.24.0",
     "pillow>=11.0.0",
+    "python-multipart>=0.0.20",
 ]
 
 [project.optional-dependencies]
