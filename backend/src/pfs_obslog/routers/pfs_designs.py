@@ -182,10 +182,10 @@ def _read_design_entry(path: Path) -> PfsDesignEntry:
             ra=float(meta.hdul[0].header.value("RA") or 0.0),
             dec=float(meta.hdul[0].header.value("DEC") or 0.0),
             arms=meta.hdul[0].header.value("ARMS") or "-",
-            num_design_rows=len(hdul[1].data),
-            num_photometry_rows=len(hdul[2].data),
-            num_guidestar_rows=len(hdul[3].data),
-            design_rows=_design_rows_from_hdu(hdul[1]),
+            num_design_rows=len(hdul[1].data),  # type: ignore[arg-type]
+            num_photometry_rows=len(hdul[2].data),  # type: ignore[arg-type]
+            num_guidestar_rows=len(hdul[3].data),  # type: ignore[arg-type]
+            design_rows=_design_rows_from_hdu(hdul[1]),  # type: ignore[arg-type]
         )
 
 
@@ -281,32 +281,32 @@ def get_design(id_hex: str):
             meta = _fits_meta_from_hdul(filepath.name, hdul)
 
             design_data = DesignData(
-                fiberId=hdul[1].data.field("fiberId").tolist(),
-                catId=hdul[1].data.field("catId").tolist(),
-                tract=hdul[1].data.field("tract").tolist(),
-                patch=hdul[1].data.field("patch").tolist(),
-                objId=hdul[1].data.field("objId").tolist(),
-                ra=hdul[1].data.field("ra").tolist(),
-                dec=hdul[1].data.field("dec").tolist(),
-                targetType=hdul[1].data.field("targetType").tolist(),
-                fiberStatus=hdul[1].data.field("fiberStatus").tolist(),
-                pfiNominal=hdul[1].data.field("pfiNominal").tolist(),
+                fiberId=hdul[1].data.field("fiberId").tolist(),  # type: ignore[union-attr]
+                catId=hdul[1].data.field("catId").tolist(),  # type: ignore[union-attr]
+                tract=hdul[1].data.field("tract").tolist(),  # type: ignore[union-attr]
+                patch=hdul[1].data.field("patch").tolist(),  # type: ignore[union-attr]
+                objId=hdul[1].data.field("objId").tolist(),  # type: ignore[union-attr]
+                ra=hdul[1].data.field("ra").tolist(),  # type: ignore[union-attr]
+                dec=hdul[1].data.field("dec").tolist(),  # type: ignore[union-attr]
+                targetType=hdul[1].data.field("targetType").tolist(),  # type: ignore[union-attr]
+                fiberStatus=hdul[1].data.field("fiberStatus").tolist(),  # type: ignore[union-attr]
+                pfiNominal=hdul[1].data.field("pfiNominal").tolist(),  # type: ignore[union-attr]
             )
 
             photometry_data = PhotometryData(
-                fiberId=hdul[2].data.field("fiberId").tolist(),
-                fiberFlux=hdul[2].data.field("fiberFlux").tolist(),
-                psfFlux=hdul[2].data.field("psfFlux").tolist(),
-                totalFlux=hdul[2].data.field("totalFlux").tolist(),
-                fiberFluxErr=hdul[2].data.field("fiberFluxErr").tolist(),
-                psfFluxErr=hdul[2].data.field("psfFluxErr").tolist(),
-                totalFluxErr=hdul[2].data.field("totalFluxErr").tolist(),
-                filterName=hdul[2].data.field("filterName").tolist(),
+                fiberId=hdul[2].data.field("fiberId").tolist(),  # type: ignore[union-attr]
+                fiberFlux=hdul[2].data.field("fiberFlux").tolist(),  # type: ignore[union-attr]
+                psfFlux=hdul[2].data.field("psfFlux").tolist(),  # type: ignore[union-attr]
+                totalFlux=hdul[2].data.field("totalFlux").tolist(),  # type: ignore[union-attr]
+                fiberFluxErr=hdul[2].data.field("fiberFluxErr").tolist(),  # type: ignore[union-attr]
+                psfFluxErr=hdul[2].data.field("psfFluxErr").tolist(),  # type: ignore[union-attr]
+                totalFluxErr=hdul[2].data.field("totalFluxErr").tolist(),  # type: ignore[union-attr]
+                filterName=hdul[2].data.field("filterName").tolist(),  # type: ignore[union-attr]
             )
 
             guidestar_data = GuidestarData(
-                ra=hdul[3].data.field("ra").tolist(),
-                dec=hdul[3].data.field("dec").tolist(),
+                ra=hdul[3].data.field("ra").tolist(),  # type: ignore[union-attr]
+                dec=hdul[3].data.field("dec").tolist(),  # type: ignore[union-attr]
             )
 
             return PfsDesignDetail(
@@ -351,8 +351,8 @@ def get_design_chart(
     Returns:
         PNG画像のレスポンス
     """
-    from pfs.datamodel.pfsConfig import PfsDesign
-    from pfs.utils.pfsDesignUtils import showPfsDesign
+    from pfs.datamodel.pfsConfig import PfsDesign  # type: ignore[import-not-found]
+    from pfs.utils.pfsDesignUtils import showPfsDesign  # type: ignore[import-not-found]
 
     settings = get_settings()
 
@@ -408,7 +408,7 @@ def _create_design_chart(
     Returns:
         PNG画像のバイト列
     """
-    from pfs.utils.pfsDesignUtils import showPfsDesign
+    from pfs.utils.pfsDesignUtils import showPfsDesign  # type: ignore[import-not-found]
 
     DPI = 72
     fig = plt.figure(dpi=DPI, figsize=(width / DPI, height / DPI))

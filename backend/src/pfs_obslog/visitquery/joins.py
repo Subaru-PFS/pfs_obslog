@@ -8,7 +8,8 @@ WHERE句で使用されるカラムに基づいて必要なJOINのみを追加�
 
 from typing import Any, TypeVar
 
-from sqlalchemy.orm import Query, aliased
+from sqlalchemy import Select
+from sqlalchemy.orm import aliased
 
 T = TypeVar("T")
 
@@ -64,7 +65,7 @@ class JoinBuilder:
         self.visit_set_note_user = aliased(models.ObslogUser)
         self.mcs_exposure_note_user = aliased(models.ObslogUser)
 
-    def apply_joins(self, query: Query[T], required_joins: set[str]) -> Query[T]:
+    def apply_joins(self, query: Select[T], required_joins: set[str]) -> Select[T]:
         """
         必要なJOINをクエリに適用
 

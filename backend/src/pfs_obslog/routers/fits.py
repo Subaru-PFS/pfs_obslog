@@ -241,7 +241,7 @@ def _agc_frame_id_from_fits(path: Path) -> Optional[int]:
 
         with afits.open(path) as hdul:
             for hdu in hdul[1:]:
-                frameid = hdu.header.get("FRAMEID")
+                frameid = hdu.header.get("FRAMEID")  # type: ignore[union-attr]
                 if frameid is not None:
                     return int(frameid)
     except Exception:
@@ -303,7 +303,7 @@ def _fits2png(filepath: Path, max_width: int = 1024, max_height: int = 1024, hdu
     from PIL import Image
 
     with afits.open(filepath) as hdul:
-        data = hdul[hdu_index].data[::-1]
+        data = hdul[hdu_index].data[::-1]  # type: ignore[union-attr]
 
     assert len(data.shape) == 2
 

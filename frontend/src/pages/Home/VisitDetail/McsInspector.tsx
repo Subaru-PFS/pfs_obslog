@@ -4,6 +4,7 @@ import { LazyImage } from '../../../components/LazyImage'
 import { IconButton } from '../../../components/Icon'
 import { API_BASE_URL } from '../../../config'
 import { useHomeContext } from '../context'
+import { useVisitDetailContext } from './context'
 import styles from './Inspector.module.scss'
 
 type ImageScale = 0.75 | 1 | 2
@@ -58,6 +59,7 @@ export function McsInspector({ mcs }: McsInspectorProps) {
   const [showPlot, setShowPlot] = useState(true)
   const [showRaw, setShowRaw] = useState(false)
   const [imageScale, setImageScale] = useState<ImageScale>(1)
+  const [headerFitsId, setHeaderFitsId] = useState<FitsId | null>(null)
 
   const plotSize = {
     width: Math.floor(imageScale * PLOT_SIZE.width),
@@ -148,10 +150,23 @@ export function McsInspector({ mcs }: McsInspectorProps) {
               plotSize={plotSize}
               rawSize={rawSize}
               scale={imageScale}
+              onShowHeader={() => setHeaderFitsId({
+                type: 'mcs',
+                visitId: selectedVisitId!,
+                frameId: exp.frame_id,
+              })}
             />
           ))}
         </div>
       </div>
+
+      {/* FITS Header Dialog */}
+      {headerFitsId && (
+        <FitsHeaderDialog
+          fitsId={headerFitsId}
+          onClose={() => setHeaderFitsId(null)}
+        />
+      )}
     </div>
   )
 }
@@ -164,6 +179,7 @@ interface McsExposureCardProps {
   plotSize: { width: number; height: number }
   rawSize: { width: number; height: number }
   scale: ImageScale
+  onShowHeader: () => void
 }
 
 function McsExposureCard({
@@ -174,6 +190,7 @@ function McsExposureCard({
   plotSize,
   rawSize,
   scale,
+  onShowHeader,
 }: McsExposureCardProps) {
   return (
     <div className={styles.exposureCard}>
@@ -205,6 +222,11 @@ function McsExposureCard({
         <span>Az: {exposure.azimuth?.toFixed(2) ?? '-'}°</span>
       </div>
       <div className={styles.exposureCardActions}>
+        <IconButton
+          icon="view_column"
+          tooltip="Show FITS Header"
+          onClick={onShowHeader}
+        />
         <IconButton
           icon="visibility"
           tooltip="Open Large Preview"
