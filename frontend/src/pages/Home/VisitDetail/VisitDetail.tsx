@@ -12,48 +12,14 @@ import { McsInspector } from './McsInspector'
 import { AgcInspector } from './AgcInspector'
 import { IicSequenceInfo } from './IicSequenceInfo'
 import { SequenceGroupInfo } from './SequenceGroupInfo'
+import { getExposureColorStyle } from '../../../utils/exposureColors'
 import styles from './VisitDetail.module.scss'
-
-/**
- * Exposure color definitions matching VisitList
- * Based on old-project colors.ts int2color() using HSV color wheel
- * bit pattern: (SPS > 0) << 2 | (MCS > 0) << 1 | (AGC > 0) << 0
- */
-const exposureColors = {
-  // No exposures (000): gray
-  none: { backgroundColor: 'rgba(119, 119, 119, 0.3)', color: '#777' },
-  // AGC only (001): cyan/teal
-  agc: { backgroundColor: '#aaffdd', color: '#006644' },
-  // MCS only (010): yellow-green
-  mcs: { backgroundColor: '#ffffaa', color: '#666600' },
-  // MCS + AGC (011): chartreuse
-  mcsAgc: { backgroundColor: '#ddffaa', color: '#446600' },
-  // SPS only (100): red
-  sps: { backgroundColor: '#ffaaaa', color: '#660000' },
-  // SPS + AGC (101): orange
-  spsAgc: { backgroundColor: '#ffddaa', color: '#664400' },
-  // SPS + MCS (110): blue-cyan
-  spsMcs: { backgroundColor: '#aaddff', color: '#003366' },
-  // All three (111): magenta-ish
-  mixed: { backgroundColor: '#ffaadd', color: '#660044' },
-} as const
 
 /**
  * 露出数のスタイルを取得
  */
 function getExposureCountStyle(sps: number, mcs: number, agc: number): React.CSSProperties {
-  const bits = (sps > 0 ? 4 : 0) | (mcs > 0 ? 2 : 0) | (agc > 0 ? 1 : 0)
-  const colorMap: { [key: number]: typeof exposureColors[keyof typeof exposureColors] } = {
-    0: exposureColors.none,
-    1: exposureColors.agc,
-    2: exposureColors.mcs,
-    3: exposureColors.mcsAgc,
-    4: exposureColors.sps,
-    5: exposureColors.spsAgc,
-    6: exposureColors.spsMcs,
-    7: exposureColors.mixed,
-  }
-  const { backgroundColor, color } = colorMap[bits] || exposureColors.none
+  const { backgroundColor, color } = getExposureColorStyle(sps, mcs, agc)
   return {
     backgroundColor,
     color,

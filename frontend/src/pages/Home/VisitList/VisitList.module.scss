@@ -294,7 +294,6 @@ $pagination-border-radius: 12px;
 // =============================================================================
 .visitGroup {
   margin: 24px 12px;
-  min-width: max-content; // Allow horizontal scroll when content overflows
   background-color: $background-color;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba($shadow-color, 0.5);
@@ -308,6 +307,11 @@ $pagination-border-radius: 12px;
   &.visitGroupSelected {
     box-shadow: 0 0 0 2px $accent, 0 4px 8px rgba($shadow-color, 0.5);
   }
+}
+
+// Wrapper to enable horizontal scrolling for the table only
+.tableWrapper {
+  overflow-x: auto;
 }
 
 // =============================================================================
@@ -419,6 +423,7 @@ $pagination-border-radius: 12px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    max-width: 100%; // Prevent from expanding parent width
   }
 
   .comments {
@@ -429,6 +434,10 @@ $pagination-border-radius: 12px;
     color: #662222; // darkened brown
     background-color: floralwhite;
     box-shadow: 0 0 4px rgba(165, 42, 42, 0.5);
+    max-width: 100%; // Prevent from expanding parent width
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

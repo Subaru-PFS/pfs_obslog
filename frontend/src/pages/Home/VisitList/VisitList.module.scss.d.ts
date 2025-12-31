@@ -52,6 +52,7 @@ export type Styles = {
   status: string;
   statusError: string;
   statusOk: string;
+  tableWrapper: string;
   title: string;
   toolbar: string;
   toolbarActions: string;

@@ -6,11 +6,13 @@
 
 * [x] visit set listのテーブルの内容の入りきらなかったテキストはマウスオーバーで全文表示されるようにしてください。
 
-* [ ] Homeの左側のペインの横スクロールがまだうまくいっていません。visit setがoverflow: hiddenになっているから？
+* [x] Homeの左側のペインの横スクロールがまだうまくいっていません。visit setがoverflow: hiddenになっているから？
 
-* [ ] visit setがNo Sequenceの場合の背景色が暗すぎます。No sequenceじゃあいときと合わせてください。
+* [x] visit setがNo Sequenceの場合の背景色が暗すぎます。No sequenceじゃないときと合わせてください。
 
 * [ ] visit detailのExposures (S/M/A)の背景色をvisit set listのNumber of {SpS, ...} Exposuresのものと合わせてください。（コードを共用するべきでしょう。）
+
+* [ ] visit set listのcommentやcommandがものによっては非常に長くて、これによって左ペインの横幅が決まると困ります。何とかなりますか？
 
 * [ ] 追加の依頼がないか指示者に確認する
 
