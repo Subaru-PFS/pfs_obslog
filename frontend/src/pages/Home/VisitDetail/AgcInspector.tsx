@@ -200,13 +200,6 @@ function AgcExposureCard({ exposure, visitId, cameraSize, scale }: AgcExposureCa
       </div>
       <div className={styles.exposureCardActions}>
         <IconButton
-          icon="view_column"
-          tooltip="Show FITS Header (not available)"
-          className={isSelected ? styles.selected : ''}
-          onClick={onShowHeader}
-          disabled
-        />
-        <IconButton
           icon="download"
           tooltip="Download FITS File"
           onClick={() => { location.href = getAgcFitsDownloadUrl(visitId, exposure.id) }}

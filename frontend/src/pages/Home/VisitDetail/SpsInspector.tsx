@@ -212,11 +212,11 @@ export function SpsInspector({ sps }: SpsInspectorProps) {
                                 <IconButton
                                   icon="view_column"
                                   tooltip="Show FITS Header"
-                                  className={fitsId?.type === 'sps' && fitsId?.fitsId === exp.camera_id ? styles.selected : ''}
-                                  onClick={() => setFitsId({
+                                  className={headerFitsId?.type === 'sps' && headerFitsId?.cameraId === exp.camera_id ? styles.selected : ''}
+                                  onClick={() => setHeaderFitsId({
                                     type: 'sps',
                                     visitId: selectedVisitId,
-                                    fitsId: exp.camera_id,
+                                    cameraId: exp.camera_id,
                                   })}
                                 />
                                 <IconButton
@@ -242,6 +242,14 @@ export function SpsInspector({ sps }: SpsInspectorProps) {
           </table>
         </div>
       </div>
+
+      {/* FITS Header Dialog */}
+      {headerFitsId && (
+        <FitsHeaderDialog
+          fitsId={headerFitsId}
+          onClose={() => setHeaderFitsId(null)}
+        />
+      )}
     </div>
   )
 }
