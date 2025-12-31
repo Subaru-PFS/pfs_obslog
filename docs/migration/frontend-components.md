@@ -8,13 +8,13 @@
 
 | カテゴリ | 完了 | 一部完了 | 未完了 | 進捗率 |
 |----------|------|----------|--------|--------|
-| ページ・レイアウト | 4 | 0 | 1 | 80% |
-| 共通コンポーネント | 7 | 0 | 1 | 88% |
+| ページ・レイアウト | 5 | 0 | 0 | 100% |
+| 共通コンポーネント | 8 | 0 | 0 | 100% |
 | Home: Visit一覧 | 8 | 0 | 0 | 100% |
 | Home: Visit詳細 | 12 | 0 | 0 | 100% |
 | Home: Note機能 | 4 | 0 | 0 | 100% |
-| Designs機能 | 0 | 0 | 5 | 0% |
-| **合計** | **35** | **0** | **7** | **83%** |
+| Designs機能 | 5 | 0 | 0 | 100% |
+| **合計** | **42** | **0** | **0** | **100%** |
 
 ---
 
@@ -26,7 +26,7 @@
 | Header | `pages/Header` | Header | `components/Header` | ✅ 完了 | ヘッダー（ナビゲーション、ログアウト） |
 | Home | `pages/Home` | Home | `pages/Home` | ✅ 完了 | Visit一覧・詳細ページ |
 | SqlSyntaxHelp | `pages/Home/SqlSyntaxHelp` | SqlSyntaxHelp | `pages/SqlSyntaxHelp` | ✅ 完了 | SQL構文ヘルプページ |
-| Designs | `pages/Designs` | - | - | ⏳ 未実装 | PFS Design一覧・詳細ページ |
+| Designs | `pages/Designs` | Designs | `pages/Designs` | ✅ 完了 | PFS Design一覧・詳細ページ |
 
 ---
 
@@ -41,7 +41,7 @@
 | LazyImage | `components/LazyImage` | LazyImage | `components/LazyImage` | ✅ 完了 | 遅延読み込み画像 |
 | NoteList | `pages/Home/NoteList` | NoteList | `components/NoteList` | ✅ 完了 | メモ一覧（CRUD対応） |
 | DatePicker, DateRangePicker | `components/DatePicker` | DateRangePicker | `components/DateRangePicker` | ✅ 完了 | 日付範囲選択 |
-| FocalPlane | `components/pfs/FocalPlane.tsx` | - | - | ⏳ 未実装 | PFS焦点面可視化 |
+| FocalPlane | `components/pfs/FocalPlane.tsx` | FocalPlane | `components/FocalPlane` | ✅ 完了 | PFS焦点面可視化 |
 
 ---
 
@@ -92,11 +92,11 @@
 
 | 既存機能 | 既存コンポーネント | 新コンポーネント | 状態 | 備考 |
 |---------|------------------|-----------------|------|------|
-| Design一覧 | `DesignList` | - | ⏳ 未実装 | PFS Design一覧表示 |
-| Design詳細 | `DesignDetail` | - | ⏳ 未実装 | Design詳細情報 |
-| Sky Viewer | `SkyViewer` | - | ⏳ 未実装 | 天球可視化メインビュー |
-| Stellar Globe | `SkyViewer/StellarGlobe.tsx` | - | ⏳ 未実装 | WebGLベースの3D天球表示 |
-| Design Circles | `SkyViewer/DesignCircles.tsx` | - | ⏳ 未実装 | Designマーカー描画 |
+| Design一覧 | `DesignList` | `DesignList` | ✅ 完了 | PFS Design一覧表示（検索、ソート、グループ化対応） |
+| Design詳細 | `DesignDetail` | `DesignDetail` | ✅ 完了 | 焦点面可視化、ファイバー/デザイン詳細パネル |
+| Sky Viewer | `SkyViewer` | `SkyViewer` | ✅ 完了 | 天球可視化メインビュー（HiPS、星、星座） |
+| Stellar Globe | `SkyViewer/StellarGlobe.tsx` | `SkyViewer` | ✅ 完了 | stellar-globeライブラリによる3D天球表示 |
+| Design Circles | `SkyViewer/DesignCircles.tsx` | `SkyViewer` (DesignMarkers) | ✅ 完了 | Designマーカー描画（クリック/ホバー対応） |
 
 ---
 
@@ -130,4 +130,5 @@
 | 2024-12-30 | 初版作成 |
 | 2024-12-30 | コンポーネント単位の詳細な機能一覧に更新 |
 | 2024-12-31 | Header, Layout, NoteList, LazyImage, SPS FITS Preview 完了 |
-| 2025-12-31 | Go to Visit, SQLシンタックスヘルプページ完了 |
+| 2024-12-31 | Go to Visit, SQLシンタックスヘルプページ完了 |
+| 2024-12-31 | Design Viewer完了 (FocalPlane, DesignList, SkyViewer, DesignDetail) |
