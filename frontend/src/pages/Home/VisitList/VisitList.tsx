@@ -25,6 +25,12 @@ type ColumnKey =
   | 'time'
   | 'exposures'
   | 'exptime'
+  | 'pfs_design_id'
+  | 'ra'
+  | 'dec'
+  | 'azimuth'
+  | 'altitude'
+  | 'insrot'
   | 'notes'
 
 interface ColumnDef {
@@ -42,6 +48,12 @@ const COLUMN_DEFINITIONS: ColumnDef[] = [
   { key: 'time', label: '', icon: 'schedule', description: 'Time issued at', defaultVisible: true },
   { key: 'exposures', label: '', icon: 'tag', description: 'Number of {SpS | MCS | AGC} Exposures', defaultVisible: true },
   { key: 'exptime', label: '', icon: 'shutter_speed', description: 'Exposure Time [s]', defaultVisible: true },
+  { key: 'pfs_design_id', label: '', icon: 'design_services', description: 'PFS Design ID (HEX)', defaultVisible: false },
+  { key: 'ra', label: 'α', description: 'Right Ascension [°]', defaultVisible: false },
+  { key: 'dec', label: 'δ', description: 'Declination [°]', defaultVisible: false },
+  { key: 'azimuth', label: 'A°', description: 'Azimuth [°]', defaultVisible: false },
+  { key: 'altitude', label: 'E°', description: 'Altitude [°]', defaultVisible: false },
+  { key: 'insrot', label: 'I°', description: 'Instrument Rotator [°]', defaultVisible: false },
   { key: 'notes', label: '', icon: 'notes', description: 'Notes', defaultVisible: true },
 ]
 
@@ -282,6 +294,12 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
             {columns.time && <th className={styles.colTime}><Icon name="schedule" size={14} /></th>}
             {columns.exposures && <th className={styles.colExposures}><Icon name="tag" size={14} /></th>}
             {columns.exptime && <th className={styles.colExptime}><Icon name="shutter_speed" size={14} /></th>}
+            {columns.pfs_design_id && <th className={styles.colDesign}><Icon name="design_services" size={14} /></th>}
+            {columns.ra && <th className={styles.colCoord}>α</th>}
+            {columns.dec && <th className={styles.colCoord}>δ</th>}
+            {columns.azimuth && <th className={styles.colCoord}>A°</th>}
+            {columns.altitude && <th className={styles.colCoord}>E°</th>}
+            {columns.insrot && <th className={styles.colCoord}>I°</th>}
             {columns.notes && <th className={styles.colNotes}><Icon name="notes" size={14} /></th>}
           </tr>
         </thead>
@@ -319,6 +337,36 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
                 {columns.exptime && (
                   <td className={styles.colExptime}>
                     {visit.avg_exptime ? visit.avg_exptime.toFixed(1) : '-'}
+                  </td>
+                )}
+                {columns.pfs_design_id && (
+                  <td className={styles.colDesign} title={visit.pfs_design_id || ''}>
+                    {visit.pfs_design_id ? `0x${visit.pfs_design_id}` : '-'}
+                  </td>
+                )}
+                {columns.ra && (
+                  <td className={styles.colCoord}>
+                    {visit.avg_ra !== null && visit.avg_ra !== undefined ? visit.avg_ra.toFixed(4) : '-'}
+                  </td>
+                )}
+                {columns.dec && (
+                  <td className={styles.colCoord}>
+                    {visit.avg_dec !== null && visit.avg_dec !== undefined ? visit.avg_dec.toFixed(4) : '-'}
+                  </td>
+                )}
+                {columns.azimuth && (
+                  <td className={styles.colCoord}>
+                    {visit.avg_azimuth !== null && visit.avg_azimuth !== undefined ? visit.avg_azimuth.toFixed(2) : '-'}
+                  </td>
+                )}
+                {columns.altitude && (
+                  <td className={styles.colCoord}>
+                    {visit.avg_altitude !== null && visit.avg_altitude !== undefined ? visit.avg_altitude.toFixed(2) : '-'}
+                  </td>
+                )}
+                {columns.insrot && (
+                  <td className={styles.colCoord}>
+                    {visit.avg_insrot !== null && visit.avg_insrot !== undefined ? visit.avg_insrot.toFixed(2) : '-'}
                   </td>
                 )}
                 {columns.notes && (

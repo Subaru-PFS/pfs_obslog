@@ -1,6 +1,8 @@
 export type Styles = {
+  colCoord: string;
   colDate: string;
   colDescription: string;
+  colDesign: string;
   colExposures: string;
   colExptime: string;
   colId: string;
