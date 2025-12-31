@@ -13,19 +13,22 @@ from sqlalchemy import String, and_, cast, not_, or_
 from sqlalchemy.sql.elements import ColumnElement
 
 from .columns import VIRTUAL_COLUMNS
+from .joins import JoinBuilder
 from .parser import QueryParseError
 
 
 class QueryEvaluator:
     """pglast ASTをSQLAlchemy式に変換する評価器"""
 
-    def __init__(self, models: Any):
+    def __init__(self, models: Any, join_builder: JoinBuilder | None = None):
         """
         Args:
             models: SQLAlchemyモデルを含むモジュール
+            join_builder: JoinBuilderインスタンス（エイリアス取得用）
         """
         self.models = models
         self.required_joins: set[str] = set()
+        self._join_builder = join_builder or JoinBuilder(models)
 
         # モデルからカラムマッピングを構築
         self._column_map = self._build_column_map()
@@ -33,6 +36,8 @@ class QueryEvaluator:
     def _build_column_map(self) -> dict[str, ColumnElement[Any]]:
         """モデルからカラムマッピングを構築"""
         M = self.models
+        # エイリアスを使用してテーブル重複警告を回避
+        iic_sequence_status = self._join_builder.get_iic_sequence_status_alias()
         return {
             "visit_id": M.PfsVisit.pfs_visit_id,
             "id": M.PfsVisit.pfs_visit_id,
@@ -42,7 +47,7 @@ class QueryEvaluator:
             "visit_set_id": M.IicSequence.iic_sequence_id,
             "visit_note": M.ObslogVisitNote.body,
             "visit_set_note": M.ObslogVisitSetNote.body,
-            "status": M.IicSequenceStatus.cmd_output,
+            "status": iic_sequence_status.cmd_output,
             "sequence_group_id": M.SequenceGroup.group_id,
             "sequence_group_name": M.SequenceGroup.group_name,
             "fits_header": M.ObslogFitsHeader.cards_dict,
@@ -52,8 +57,10 @@ class QueryEvaluator:
     def _get_computed_column(self, name: str) -> ColumnElement[Any]:
         """計算カラムの式を返す"""
         M = self.models
+        # エイリアスを使用してテーブル重複警告を回避
+        sps_visit = self._join_builder.get_sps_visit_alias()
         computed = {
-            "is_sps_visit": M.SpsVisit.pfs_visit_id != None,  # noqa: E711
+            "is_sps_visit": sps_visit.pfs_visit_id != None,  # noqa: E711
             "is_mcs_visit": M.McsExposure.pfs_visit_id != None,  # noqa: E711
             "is_agc_visit": M.AgcExposure.pfs_visit_id != None,  # noqa: E711
         }
@@ -64,6 +71,8 @@ class QueryEvaluator:
     def _get_any_column_columns(self) -> list[ColumnElement[Any]]:
         """any_columnで検索対象となるカラムのリストを返す"""
         M = self.models
+        # エイリアスを使用してテーブル重複警告を回避
+        iic_sequence_status = self._join_builder.get_iic_sequence_status_alias()
         return [
             cast(M.PfsVisit.pfs_visit_id, String),
             M.PfsVisit.pfs_visit_description,
@@ -71,7 +80,7 @@ class QueryEvaluator:
             M.ObslogVisitSetNote.body,
             M.IicSequence.name,
             M.IicSequence.sequence_type,
-            M.IicSequenceStatus.cmd_output,
+            iic_sequence_status.cmd_output,
             M.SpsAnnotation.notes,
             M.ObslogMcsExposureNote.body,
             M.t_pfs_design_fiber.c.proposal_id,

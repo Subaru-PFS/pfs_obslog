@@ -58,10 +58,16 @@ class JoinBuilder:
         """
         self.models = models
 
-        # エイリアスの作成（同じテーブルを複数回JOINする場合用）
+        # エイリアスの作成（同じテーブルを複数回JOINする場合や重複テーブル対策）
         self.visit_note_user = aliased(models.ObslogUser)
         self.visit_set_note_user = aliased(models.ObslogUser)
         self.mcs_exposure_note_user = aliased(models.ObslogUser)
+
+        # 継承関係によるテーブル重複を回避するためのエイリアス
+        # IicSequenceStatus と SpsVisit は visit_set を経由するため
+        # 明示的なエイリアスが必要（SQLAlchemy警告回避）
+        self.iic_sequence_status = aliased(models.IicSequenceStatus, flat=True)
+        self.sps_visit = aliased(models.SpsVisit, flat=True)
 
     def apply_joins(self, query: Select[Any], required_joins: set[str]) -> Select[Any]:
         """
@@ -110,8 +116,14 @@ class JoinBuilder:
             "visit_note_user": lambda q: q.outerjoin(
                 self.visit_note_user, M.ObslogVisitNote.user
             ),
-            "sps_visit": lambda q: q.outerjoin(M.SpsVisit),
-            "sps_exposure": lambda q: q.outerjoin(M.SpsExposure),
+            "sps_visit": lambda q: q.outerjoin(
+                self.sps_visit,
+                self.sps_visit.pfs_visit_id == M.PfsVisit.pfs_visit_id,
+            ),
+            "sps_exposure": lambda q: q.outerjoin(
+                M.SpsExposure,
+                M.SpsExposure.pfs_visit_id == self.sps_visit.pfs_visit_id,
+            ),
             "sps_annotation": lambda q: q.outerjoin(M.SpsAnnotation),
             "visit_set": lambda q: q.outerjoin(
                 M.t_visit_set,
@@ -126,8 +138,8 @@ class JoinBuilder:
                 self.visit_set_note_user, M.ObslogVisitSetNote.user
             ),
             "iic_sequence_status": lambda q: q.outerjoin(
-                M.IicSequenceStatus,
-                M.IicSequenceStatus.iic_sequence_id == M.IicSequence.iic_sequence_id,
+                self.iic_sequence_status,
+                self.iic_sequence_status.iic_sequence_id == M.IicSequence.iic_sequence_id,
             ),
             "sequence_group": lambda q: q.outerjoin(M.SequenceGroup),
             "mcs_exposure": lambda q: q.outerjoin(M.McsExposure),
@@ -159,3 +171,11 @@ class JoinBuilder:
     def get_mcs_exposure_note_user_alias(self):
         """mcs_exposure_note_user のエイリアスを取得"""
         return self.mcs_exposure_note_user
+
+    def get_iic_sequence_status_alias(self):
+        """iic_sequence_status のエイリアスを取得"""
+        return self.iic_sequence_status
+
+    def get_sps_visit_alias(self):
+        """sps_visit のエイリアスを取得"""
+        return self.sps_visit

@@ -63,10 +63,11 @@ filterwarnings = [
     # 外部ライブラリの非推奨警告は無視
     "ignore:tagMap is deprecated:DeprecationWarning:pyasn1",
     "ignore:typeMap is deprecated:DeprecationWarning:pyasn1",
-    # SQLAlchemy: 継承クラスの同名カラムに関する警告（データベーススキーマの制約）
+    # SQLAlchemy: 継承クラスの同名カラムに関する警告
+    # DBスキーマ上、親子テーブルに同名カラム(flags)が存在するため警告が出る
+    # use_existing_column=Trueを設定済みだが、モジュールインポート時に警告が出る
+    # 実際の問題ではないためフィルタリング
     "ignore:Implicitly combining column.*under attribute 'flags':sqlalchemy.exc.SAWarning",
-    # SQLAlchemy: 継承テーブルの自動エイリアス生成に関する警告（JOINクエリの仕様上必要）
-    "ignore:An alias is being generated automatically against joined entity:sqlalchemy.exc.SAWarning",
 ]
 
 [tool.pytest_env]

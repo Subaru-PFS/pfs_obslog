@@ -11,6 +11,16 @@ from pfs_obslog.visitquery import parse_where_clause, QueryEvaluator, QueryParse
 from pfs_obslog.visitquery.joins import JoinBuilder
 
 
+def _create_evaluator_with_join_builder():
+    """JoinBuilderとQueryEvaluatorをペアで作成
+
+    エイリアスの一貫性を保つため、同じJoinBuilderインスタンスを使用する。
+    """
+    join_builder = JoinBuilder(M)
+    evaluator = QueryEvaluator(M, join_builder)
+    return evaluator, join_builder
+
+
 class TestQueryEvaluatorIntegration:
     """QueryEvaluatorの統合テスト（実際のDBを使用）"""
 
@@ -85,14 +95,13 @@ class TestQueryEvaluatorIntegration:
     def test_like_pattern(self, db_session_readonly):
         """LIKE式"""
         ast = parse_where_clause("where sequence_type like '%flat%'")
-        evaluator = QueryEvaluator(M)
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
         # JOINが必要
         assert "iic_sequence" in evaluator.required_joins
 
         # JOINを適用してクエリ実行
-        join_builder = JoinBuilder(M)
         query = select(M.PfsVisit.pfs_visit_id)
         query = join_builder.apply_joins(query, evaluator.required_joins)
         query = query.where(where_clause).limit(10)
@@ -101,10 +110,9 @@ class TestQueryEvaluatorIntegration:
     def test_ilike_pattern(self, db_session_readonly):
         """ILIKE式（大文字小文字を区別しない）"""
         ast = parse_where_clause("where sequence_type ilike '%FLAT%'")
-        evaluator = QueryEvaluator(M)
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
-        join_builder = JoinBuilder(M)
         query = select(M.PfsVisit.pfs_visit_id)
         query = join_builder.apply_joins(query, evaluator.required_joins)
         query = query.where(where_clause).limit(10)
@@ -113,10 +121,9 @@ class TestQueryEvaluatorIntegration:
     def test_is_null(self, db_session_readonly):
         """IS NULL"""
         ast = parse_where_clause("where status is null")
-        evaluator = QueryEvaluator(M)
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
-        join_builder = JoinBuilder(M)
         query = select(M.PfsVisit.pfs_visit_id)
         query = join_builder.apply_joins(query, evaluator.required_joins)
         query = query.where(where_clause).limit(10)
@@ -125,10 +132,9 @@ class TestQueryEvaluatorIntegration:
     def test_is_not_null(self, db_session_readonly):
         """IS NOT NULL"""
         ast = parse_where_clause("where status is not null")
-        evaluator = QueryEvaluator(M)
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
-        join_builder = JoinBuilder(M)
         query = select(M.PfsVisit.pfs_visit_id)
         query = join_builder.apply_joins(query, evaluator.required_joins)
         query = query.where(where_clause).limit(10)
@@ -177,12 +183,11 @@ class TestComputedColumns:
     def test_is_sps_visit(self, db_session_readonly):
         """is_sps_visit計算カラム"""
         ast = parse_where_clause("where is_sps_visit")
-        evaluator = QueryEvaluator(M)
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
         assert "sps_visit" in evaluator.required_joins
 
-        join_builder = JoinBuilder(M)
         query = select(M.PfsVisit.pfs_visit_id)
         query = join_builder.apply_joins(query, evaluator.required_joins)
         query = query.where(where_clause).limit(10)
@@ -191,12 +196,11 @@ class TestComputedColumns:
     def test_is_mcs_visit(self, db_session_readonly):
         """is_mcs_visit計算カラム"""
         ast = parse_where_clause("where is_mcs_visit")
-        evaluator = QueryEvaluator(M)
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
         assert "mcs_exposure" in evaluator.required_joins
 
-        join_builder = JoinBuilder(M)
         query = select(M.PfsVisit.pfs_visit_id)
         query = join_builder.apply_joins(query, evaluator.required_joins)
         query = query.where(where_clause).limit(10)
@@ -205,12 +209,11 @@ class TestComputedColumns:
     def test_is_agc_visit(self, db_session_readonly):
         """is_agc_visit計算カラム"""
         ast = parse_where_clause("where is_agc_visit")
-        evaluator = QueryEvaluator(M)
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
         assert "agc_exposure" in evaluator.required_joins
 
-        join_builder = JoinBuilder(M)
         query = select(M.PfsVisit.pfs_visit_id)
         query = join_builder.apply_joins(query, evaluator.required_joins)
         query = query.where(where_clause).limit(10)
@@ -219,10 +222,9 @@ class TestComputedColumns:
     def test_not_is_sps_visit(self, db_session_readonly):
         """NOT is_sps_visit"""
         ast = parse_where_clause("where not is_sps_visit")
-        evaluator = QueryEvaluator(M)
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
-        join_builder = JoinBuilder(M)
         query = select(M.PfsVisit.pfs_visit_id)
         query = join_builder.apply_joins(query, evaluator.required_joins)
         query = query.where(where_clause).limit(10)
@@ -273,12 +275,11 @@ class TestFitsHeader:
     def test_fits_header_access(self, db_session_readonly):
         """fits_header['KEY']アクセス"""
         ast = parse_where_clause("where fits_header['OBSERVER'] = 'test'")
-        evaluator = QueryEvaluator(M)
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
         assert "obslog_fits_header" in evaluator.required_joins
 
-        join_builder = JoinBuilder(M)
         query = select(M.PfsVisit.pfs_visit_id)
         query = join_builder.apply_joins(query, evaluator.required_joins)
         query = query.where(where_clause).limit(10)
@@ -287,10 +288,9 @@ class TestFitsHeader:
     def test_fits_header_like(self, db_session_readonly):
         """fits_header LIKEパターン"""
         ast = parse_where_clause("where fits_header['OBSERVER'] like '%test%'")
-        evaluator = QueryEvaluator(M)
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
-        join_builder = JoinBuilder(M)
         query = select(M.PfsVisit.pfs_visit_id)
         query = join_builder.apply_joins(query, evaluator.required_joins)
         query = query.where(where_clause).limit(10)
@@ -361,10 +361,9 @@ class TestConstantValues:
     def test_string_constant(self, db_session_readonly):
         """文字列定数"""
         ast = parse_where_clause("where sequence_type = 'domeflat'")
-        evaluator = QueryEvaluator(M)
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
-        join_builder = JoinBuilder(M)
         query = select(M.PfsVisit.pfs_visit_id)
         query = join_builder.apply_joins(query, evaluator.required_joins)
         query = query.where(where_clause).limit(10)
@@ -426,13 +425,12 @@ class TestJoinBuilder:
         """複数のJOINを適用"""
         # sequence_typeとstatusを両方使う
         ast = parse_where_clause("where sequence_type = 'test' and status is not null")
-        evaluator = QueryEvaluator(M)
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
         assert "iic_sequence" in evaluator.required_joins
         assert "iic_sequence_status" in evaluator.required_joins
 
-        join_builder = JoinBuilder(M)
         query = select(M.PfsVisit.pfs_visit_id)
         query = join_builder.apply_joins(query, evaluator.required_joins)
         query = query.where(where_clause).limit(10)
@@ -442,10 +440,9 @@ class TestJoinBuilder:
         """JOIN依存関係の解決"""
         # iic_sequence_statusはiic_sequenceに依存
         ast = parse_where_clause("where status = 'ok'")
-        evaluator = QueryEvaluator(M)
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
-        join_builder = JoinBuilder(M)
         query = select(M.PfsVisit.pfs_visit_id)
         query = join_builder.apply_joins(query, evaluator.required_joins)
         query = query.where(where_clause).limit(10)
@@ -454,10 +451,9 @@ class TestJoinBuilder:
     def test_sps_annotation_join(self, db_session_readonly):
         """sps_annotation関連のJOIN"""
         ast = parse_where_clause("where is_sps_visit")
-        evaluator = QueryEvaluator(M)
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
-        join_builder = JoinBuilder(M)
         query = select(M.PfsVisit.pfs_visit_id)
         query = join_builder.apply_joins(query, evaluator.required_joins)
         query = query.where(where_clause).limit(10)

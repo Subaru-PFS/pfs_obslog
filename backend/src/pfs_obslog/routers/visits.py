@@ -66,19 +66,21 @@ async def list_visits(
     # SQLフィルタリング条件をパース
     where_condition: ColumnElement | None = None
     required_joins: set[str] = set()
+    join_builder: JoinBuilder | None = None
 
     if sql:
         try:
             where_ast = parse_where_clause(sql)
             if where_ast:
-                evaluator = QueryEvaluator(M)
+                join_builder = JoinBuilder(M)
+                evaluator = QueryEvaluator(M, join_builder)
                 where_condition = evaluator.evaluate(where_ast)
                 required_joins = evaluator.required_joins
         except QueryParseError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
 
     # Visit一覧を取得
-    visits, count = await _fetch_visits(db, effective_limit, offset, where_condition, required_joins)
+    visits, count = await _fetch_visits(db, effective_limit, offset, where_condition, required_joins, join_builder)
 
     # 関連するIicSequenceを取得
     iic_sequences = await _fetch_related_iic_sequences(db, visits)
@@ -96,6 +98,7 @@ async def _fetch_visits(
     offset: int,
     where_condition: ColumnElement | None = None,
     required_joins: set[str] | None = None,
+    join_builder: JoinBuilder | None = None,
 ) -> tuple[list[VisitListEntry], int]:
     """Visit一覧を取得
 
@@ -105,6 +108,7 @@ async def _fetch_visits(
         offset: オフセット
         where_condition: SQLAlchemy WHERE条件（オプション）
         required_joins: 必要なJOINの名前のセット（オプション）
+        join_builder: JoinBuilderインスタンス（オプション、エイリアス参照用）
 
     Returns:
         (Visit一覧, 総件数)
@@ -117,7 +121,9 @@ async def _fetch_visits(
 
     # フィルタリング条件がある場合、必要なJOINを適用
     if where_condition is not None:
-        join_builder = JoinBuilder(M)
+        # 渡されたjoin_builderを使用（エイリアスの一貫性を保つため）
+        if join_builder is None:
+            join_builder = JoinBuilder(M)
         base_query = join_builder.apply_joins(base_query, required_joins)
         base_query = base_query.where(where_condition)
         # フィルタリング時はDISTINCTが必要（JOIN で重複が生じる可能性）
@@ -709,12 +715,14 @@ async def get_visit_rank(
     # SQLフィルタリング条件をパース
     where_condition: ColumnElement | None = None
     required_joins: set[str] = set()
+    join_builder: JoinBuilder | None = None
 
     if sql:
         try:
             where_ast = parse_where_clause(sql)
             if where_ast:
-                evaluator = QueryEvaluator(M)
+                join_builder = JoinBuilder(M)
+                evaluator = QueryEvaluator(M, join_builder)
                 where_condition = evaluator.evaluate(where_ast)
                 required_joins = evaluator.required_joins
         except QueryParseError as e:
@@ -725,7 +733,8 @@ async def get_visit_rank(
 
     # フィルタリング条件がある場合、必要なJOINを適用
     if where_condition is not None:
-        join_builder = JoinBuilder(M)
+        if join_builder is None:
+            join_builder = JoinBuilder(M)
         base_query = join_builder.apply_joins(base_query, required_joins)
         base_query = base_query.where(where_condition)
         base_query = base_query.distinct()
@@ -741,7 +750,8 @@ async def get_visit_rank(
 
     # フィルタ条件がある場合はJOINとWHEREを適用
     if where_condition is not None:
-        join_builder = JoinBuilder(M)
+        if join_builder is None:
+            join_builder = JoinBuilder(M)
         ranked_subquery = join_builder.apply_joins(ranked_subquery, required_joins)
         ranked_subquery = ranked_subquery.where(where_condition)
 
@@ -787,19 +797,21 @@ async def export_visits_csv(
     # SQLフィルタリング条件をパース
     where_condition: ColumnElement | None = None
     required_joins: set[str] = set()
+    join_builder: JoinBuilder | None = None
 
     if sql:
         try:
             where_ast = parse_where_clause(sql)
             if where_ast:
-                evaluator = QueryEvaluator(M)
+                join_builder = JoinBuilder(M)
+                evaluator = QueryEvaluator(M, join_builder)
                 where_condition = evaluator.evaluate(where_ast)
                 required_joins = evaluator.required_joins
         except QueryParseError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
 
     # Visit一覧を取得
-    visits, _count = await _fetch_visits(db, effective_limit, offset, where_condition, required_joins)
+    visits, _count = await _fetch_visits(db, effective_limit, offset, where_condition, required_joins, join_builder)
 
     # 関連するIicSequenceを取得
     iic_sequences = await _fetch_related_iic_sequences(db, visits)
