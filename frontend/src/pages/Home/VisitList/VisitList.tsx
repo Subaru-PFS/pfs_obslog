@@ -240,6 +240,8 @@ export function VisitList() {
   const [offset, setOffset] = useState(0)
   const [limit, setLimit] = useState(PER_PAGE)
   const contentRef = useRef<HTMLDivElement>(null)
+  const scrollHeightBeforeLoadRef = useRef<number | null>(null)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
 
   // RTK Query API
   const { data, isLoading, isFetching, isError, refetch } = useListVisitsApiVisitsGetQuery({
@@ -287,14 +289,35 @@ export function VisitList() {
   const handleLoadMoreNewer = useCallback(() => {
     const newOffset = Math.max(0, offset - (PER_PAGE >> 1))
     const increase = offset - newOffset
+    if (increase === 0) return
+    
+    // Save current scroll height before loading
+    if (contentRef.current) {
+      scrollHeightBeforeLoadRef.current = contentRef.current.scrollHeight
+    }
+    setIsLoadingMore(true)
     setOffset(newOffset)
     setLimit((prev) => prev + increase)
   }, [offset])
 
   // Load more: older visits
   const handleLoadMoreOlder = useCallback(() => {
+    setIsLoadingMore(true)
     setLimit((prev) => prev + (PER_PAGE >> 1))
   }, [])
+
+  // Adjust scroll position after loading more newer visits
+  useEffect(() => {
+    if (!isFetching && isLoadingMore) {
+      setIsLoadingMore(false)
+      if (scrollHeightBeforeLoadRef.current !== null && contentRef.current) {
+        const newScrollHeight = contentRef.current.scrollHeight
+        const scrollDiff = newScrollHeight - scrollHeightBeforeLoadRef.current
+        contentRef.current.scrollTop += scrollDiff
+        scrollHeightBeforeLoadRef.current = null
+      }
+    }
+  }, [isFetching, isLoadingMore])
 
   // Go to latest visits
   const handleGoToLatest = useCallback(() => {
@@ -424,7 +447,7 @@ export function VisitList() {
       </div>
 
       <div className={styles.content} ref={contentRef}>
-        {isFetching && (
+        {isLoadingMore && (
           <div className={styles.loadingOverlay}>
             <LoadingSpinner size={64} showText={false} />
           </div>
