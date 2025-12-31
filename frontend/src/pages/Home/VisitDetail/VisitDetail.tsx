@@ -145,10 +145,12 @@ function VisitInspector({ visit }: VisitInspectorProps) {
   const tabAvailability = [hasSps, hasMcs, hasAgc, hasIicSequence, hasSequenceGroup]
 
   // 選択されたタブが利用不可の場合、最初の利用可能なタブに切り替え
+  // すべてのタブが利用不可の場合は-1（選択なし）にする
   useEffect(() => {
-    if (!tabAvailability[activeTabIndex]) {
+    if (activeTabIndex < 0 || !tabAvailability[activeTabIndex]) {
       const firstAvailable = tabAvailability.findIndex((available) => available)
-      if (firstAvailable !== -1 && firstAvailable !== activeTabIndex) {
+      // firstAvailable is -1 if no tabs are available, which means no tab is selected
+      if (firstAvailable !== activeTabIndex) {
         setActiveTabIndex(firstAvailable)
       }
     }
