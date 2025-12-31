@@ -4,7 +4,7 @@ import { LazyImage } from '../../../components/LazyImage'
 import { IconButton } from '../../../components/Icon'
 import { API_BASE_URL } from '../../../config'
 import { useHomeContext } from '../context'
-import { useVisitDetailContext } from './context'
+import { FitsHeaderDialog, type FitsId } from './FitsHeaderInfo'
 import styles from './Inspector.module.scss'
 
 type ImageScale = 0.75 | 1 | 2
@@ -150,23 +150,16 @@ export function McsInspector({ mcs }: McsInspectorProps) {
               plotSize={plotSize}
               rawSize={rawSize}
               scale={imageScale}
-              onShowHeader={() => setHeaderFitsId({
+              isSelected={fitsId?.type === 'mcs' && fitsId?.fitsId === exp.frame_id}
+              onShowHeader={() => setFitsId({
                 type: 'mcs',
                 visitId: selectedVisitId!,
-                frameId: exp.frame_id,
+                fitsId: exp.frame_id,
               })}
             />
           ))}
         </div>
       </div>
-
-      {/* FITS Header Dialog */}
-      {headerFitsId && (
-        <FitsHeaderDialog
-          fitsId={headerFitsId}
-          onClose={() => setHeaderFitsId(null)}
-        />
-      )}
     </div>
   )
 }
@@ -179,6 +172,7 @@ interface McsExposureCardProps {
   plotSize: { width: number; height: number }
   rawSize: { width: number; height: number }
   scale: ImageScale
+  isSelected: boolean
   onShowHeader: () => void
 }
 
@@ -190,6 +184,7 @@ function McsExposureCard({
   plotSize,
   rawSize,
   scale,
+  isSelected,
   onShowHeader,
 }: McsExposureCardProps) {
   return (
@@ -225,6 +220,7 @@ function McsExposureCard({
         <IconButton
           icon="view_column"
           tooltip="Show FITS Header"
+          className={isSelected ? styles.selected : ''}
           onClick={onShowHeader}
         />
         <IconButton

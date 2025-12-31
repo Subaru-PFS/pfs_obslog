@@ -137,7 +137,7 @@ class SpsAnnotation(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     annotation_id: int
-    data_flag: int
+    data_flag: int | None = None
     notes: str | None = None
     created_at: datetime | None = None
 

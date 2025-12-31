@@ -69,7 +69,7 @@ def get_user_id(
 
     if user is None:
         # ユーザーが存在しない場合は自動作成
-        user = M.ObslogUser(account_name=account_name)
+        user = M.ObslogUser(account_name=account_name)  # type: ignore[call-arg]
         db.add(user)
         db.commit()
         db.refresh(user)
@@ -107,7 +107,7 @@ def create_visit_note(
             detail=f"Visit {visit_id} not found",
         )
 
-    note = M.ObslogVisitNote(
+    note = M.ObslogVisitNote(  # type: ignore[call-arg]
         user_id=user_id,
         pfs_visit_id=visit_id,
         body=request.body,
@@ -212,7 +212,7 @@ def create_visit_set_note(
             detail=f"Visit set {visit_set_id} not found",
         )
 
-    note = M.ObslogVisitSetNote(
+    note = M.ObslogVisitSetNote(  # type: ignore[call-arg]
         user_id=user_id,
         iic_sequence_id=visit_set_id,
         body=request.body,

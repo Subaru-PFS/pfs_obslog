@@ -797,7 +797,7 @@ def export_visits_csv(
     writer = csv.writer(buf)
 
     for i, visit in enumerate(visits):
-        iic_sequence = iic_sequence_map.get(visit.iic_sequence_id)
+        iic_sequence = iic_sequence_map.get(visit.iic_sequence_id)  # type: ignore[arg-type]
         row_dict = _visit_to_csv_dict(visit, iic_sequence)
         if i == 0:
             # ヘッダー行（最初の列に#を付ける）

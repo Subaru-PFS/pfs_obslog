@@ -99,7 +99,7 @@ class QueryEvaluator:
         if isinstance(val, ast.Integer):
             return val.ival
         elif isinstance(val, ast.Float):
-            return float(val.fval)
+            return float(val.fval)  # type: ignore[arg-type]
         elif isinstance(val, ast.String):
             return val.sval
         else:
@@ -107,14 +107,14 @@ class QueryEvaluator:
 
     def eval_ColumnRef(self, node: ast.ColumnRef) -> ColumnElement[Any] | str:
         """カラム参照"""
-        if len(node.fields) != 1:
+        if len(node.fields) != 1:  # type: ignore[arg-type]
             raise QueryParseError(f"Invalid column reference: {node.fields}")
 
-        field = node.fields[0]
+        field = node.fields[0]  # type: ignore[index]
         if not isinstance(field, ast.String):
             raise QueryParseError(f"Invalid column name: {field}")
 
-        col_name = field.sval.lower()
+        col_name = field.sval.lower()  # type: ignore[union-attr]
 
         # カラム定義を確認
         if col_name not in VIRTUAL_COLUMNS:
@@ -163,9 +163,9 @@ class QueryEvaluator:
         if not isinstance(op_node, ast.String):
             raise QueryParseError(f"Invalid operator: {op_node}")
 
-        op = op_node.sval
-        left = self.evaluate(node.lexpr)
-        right = self.evaluate(node.rexpr)
+        op = op_node.sval  # type: ignore[union-attr]
+        left = self.evaluate(node.lexpr)  # type: ignore[arg-type]
+        right = self.evaluate(node.rexpr)  # type: ignore[arg-type]
 
         # any_column の特殊処理
         if self._is_any_column_value(left) or self._is_any_column_value(right):
@@ -190,8 +190,8 @@ class QueryEvaluator:
         self, node: ast.A_Expr, negate: bool = False
     ) -> ColumnElement[Any]:
         """LIKE式"""
-        left = self.evaluate(node.lexpr)
-        right = self.evaluate(node.rexpr)
+        left = self.evaluate(node.lexpr)  # type: ignore[arg-type]
+        right = self.evaluate(node.rexpr)  # type: ignore[arg-type]
 
         # any_column の特殊処理
         if self._is_any_column_value(left):
@@ -200,15 +200,15 @@ class QueryEvaluator:
         if not isinstance(right, str):
             raise QueryParseError("LIKE pattern must be a string")
 
-        result = left.like(right)
+        result = left.like(right)  # type: ignore[union-attr]
         return not_(result) if negate else result
 
     def _eval_ilike_expr(
         self, node: ast.A_Expr, negate: bool = False
     ) -> ColumnElement[Any]:
         """ILIKE式（大文字小文字を区別しない）"""
-        left = self.evaluate(node.lexpr)
-        right = self.evaluate(node.rexpr)
+        left = self.evaluate(node.lexpr)  # type: ignore[arg-type]
+        right = self.evaluate(node.rexpr)  # type: ignore[arg-type]
 
         # any_column の特殊処理
         if self._is_any_column_value(left):
@@ -217,22 +217,22 @@ class QueryEvaluator:
         if not isinstance(right, str):
             raise QueryParseError("ILIKE pattern must be a string")
 
-        result = left.ilike(right)
+        result = left.ilike(right)  # type: ignore[union-attr]
         return not_(result) if negate else result
 
     def _eval_between_expr(
         self, node: ast.A_Expr, negate: bool = False
     ) -> ColumnElement[Any]:
         """BETWEEN式"""
-        left = self.evaluate(node.lexpr)
+        left = self.evaluate(node.lexpr)  # type: ignore[arg-type]
 
-        if not isinstance(node.rexpr, (list, tuple)) or len(node.rexpr) != 2:
+        if not isinstance(node.rexpr, (list, tuple)) or len(node.rexpr) != 2:  # type: ignore[arg-type]
             raise QueryParseError("BETWEEN requires two boundary values")
 
-        low = self.evaluate(node.rexpr[0])
-        high = self.evaluate(node.rexpr[1])
+        low = self.evaluate(node.rexpr[0])  # type: ignore[index]
+        high = self.evaluate(node.rexpr[1])  # type: ignore[index]
 
-        result = left.between(low, high)
+        result = left.between(low, high)  # type: ignore[union-attr]
         return not_(result) if negate else result
 
     def _is_any_column(self, node: ast.Node | None) -> bool:
