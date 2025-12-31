@@ -1,0 +1,79 @@
+@use "../../../styles/theme" as *;
+
+$button-background: rgba(black, 0.75);
+
+.skyViewerContainer {
+  flex-grow: 1;
+  position: relative;
+  min-height: 300px;
+}
+
+.globeWrapper {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.timeSection {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  gap: 4px;
+  padding: 4px;
+  z-index: 10;
+
+  button {
+    background-color: $button-background;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: rgba(#033, 0.75);
+    }
+
+    &:active {
+      background-color: rgba(#077, 0.75);
+    }
+  }
+
+  label {
+    color: white;
+    border-radius: 8px;
+    background-color: $button-background;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 4px 8px;
+    user-select: none;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      margin: 0;
+    }
+  }
+}
+
+.datepicker {
+  background-color: rgba(black, 0.75);
+  color: white;
+  text-align: center;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  width: 120px;
+}
+
+.clock {
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}

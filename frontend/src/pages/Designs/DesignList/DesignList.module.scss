@@ -1,0 +1,132 @@
+@use "../../../styles/theme" as *;
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.listHeader {
+  border-bottom: #777 2px solid;
+  padding: 8px;
+}
+
+.searchRow {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+
+  input[type="search"] {
+    flex-grow: 1;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+}
+
+.sortCondition {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px;
+  font-size: small;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+  }
+}
+
+.list {
+  position: relative;
+  background-color: #777;
+  width: 24em;
+  flex-grow: 1;
+  height: 0;
+  overflow-y: auto;
+}
+
+@mixin bump($baseColor) {
+  $top: lighten($baseColor, 15%);
+  $bottom: darken($baseColor, 15%);
+  background: linear-gradient(to bottom, $top, $bottom);
+}
+
+.entryGroup {
+  margin: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: $medium-shadow;
+}
+
+.entry {
+  display: flex;
+  transition: transform 0.4s;
+  width: 100%;
+  overflow-x: hidden;
+  cursor: pointer;
+
+  @include bump(#eee);
+
+  &:hover {
+    @include bump(#ddd);
+  }
+}
+
+.entrySelected {
+  &,
+  &:hover {
+    @include bump(#0ff);
+  }
+}
+
+.entryHover {
+  &,
+  &:hover {
+    @include bump(#cac);
+  }
+}
+
+.entrySelectedHover {
+  &,
+  &:hover {
+    @include bump(#aff);
+  }
+}
+
+.entryId {
+  font-family: monospace;
+  font-size: x-small;
+  white-space: nowrap;
+}
+
+.entryName {
+  color: #007;
+  font-weight: bold;
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+.entryButtons {
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  flex-shrink: 0;
+
+  button {
+    margin: 0 2px;
+  }
+}
+
+.entryInfo {
+  padding: 4px;
+  width: 0;
+  flex-grow: 1;
+}
+
+.entryDate {
+  font-size: x-small;
+  font-family: monospace;
+}

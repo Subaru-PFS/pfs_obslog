@@ -2,6 +2,7 @@ import { createHashRouter, Navigate } from 'react-router-dom'
 import { Login } from '../pages/Login'
 import { Home } from '../pages/Home'
 import { SqlSyntaxHelp } from '../pages/SqlSyntaxHelp'
+import { Designs } from '../pages/Designs'
 import { RequireAuth } from '../components/Auth/RequireAuth'
 import { Layout } from '../components/Layout'
 
@@ -34,7 +35,11 @@ export const router = createHashRouter([
       },
       {
         path: 'designs',
-        element: <div>Designs page (coming soon)</div>,
+        element: <Designs />,
+      },
+      {
+        path: 'designs/:designId',
+        element: <Designs />,
       },
     ],
   },

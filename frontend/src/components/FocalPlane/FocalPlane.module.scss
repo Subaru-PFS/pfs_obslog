@@ -1,0 +1,18 @@
+@use "../../styles/theme" as *;
+
+.focalPlaneContainer {
+  position: relative;
+}
+
+.baseCanvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.focusCanvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}

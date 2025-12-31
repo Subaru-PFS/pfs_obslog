@@ -1,0 +1,1 @@
+export { DesignDetail } from './DesignDetail'

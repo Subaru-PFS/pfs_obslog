@@ -1,0 +1,14 @@
+@use "../../styles/theme" as *;
+
+.designsPage {
+  display: flex;
+  flex-grow: 1;
+  height: 100%;
+}
+
+.mainArea {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: hidden;
+}

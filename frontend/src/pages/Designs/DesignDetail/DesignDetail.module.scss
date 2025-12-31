@@ -1,0 +1,87 @@
+@use "../../../styles/theme" as *;
+
+@mixin shadow() {
+  box-shadow: 0 0 4px black;
+}
+
+.designDetailContainer {
+  position: relative;
+  display: flex;
+  padding: 8px;
+  gap: 16px;
+  background: #f0f0f0;
+  border-top: 1px solid #ccc;
+  min-height: 280px;
+}
+
+.focalPlaneSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.colorModeSelect {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.legendEntries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  .legendEntry {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    @include shadow();
+    cursor: help;
+  }
+}
+
+.detailTable {
+  font-size: x-small;
+  max-height: 250px;
+  overflow-y: auto;
+
+  summary {
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+
+  details {
+    margin-left: 1em;
+    margin-bottom: 8px;
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  th {
+    text-align: right;
+    padding-right: 8px;
+    white-space: nowrap;
+  }
+
+  td {
+    font-family: monospace;
+    white-space: nowrap;
+  }
+}
+
+.summaryTable {
+  align-self: flex-start;
+
+  th {
+    text-align: right;
+    padding-right: 8px;
+    white-space: nowrap;
+  }
+
+  td {
+    font-family: monospace;
+  }
+}
