@@ -1,0 +1,14 @@
+[Unit]
+Description=PFS Obslog 2
+
+[Service]
+Environment=BIND_ADDRESS=0.0.0.0:5000
+Environment=PFS_OBSLOG_app_env=production
+Environment=PFS_OBSLOG_database_url=postgresql://pfs@133.40.164.48/opdb
+ExecStart=/bin/bash %h/pfs-obslog2/backend/scripts/entrypoint.bash
+WorkingDirectory=%h/pfs-obslog2/backend
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=default.target

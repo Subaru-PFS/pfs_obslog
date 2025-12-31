@@ -1,9 +1,20 @@
-.PHONY: dev test test-all cov typecheck openapi-for-frontend clean help
+.PHONY: dev production setup test test-all cov typecheck openapi-for-frontend clean help
 
 # 開発サーバーを起動
 dev:
 	PFS_OBSLOG_session_secret_key='???' \
 	uv run uvicorn pfs_obslog.main:app --reload --host 0.0.0.0 --port 8000
+
+# プロダクションサーバーを起動
+production:
+	BIND_ADDRESS=0.0.0.0:5000 \
+	PFS_OBSLOG_app_env=production \
+	PFS_OBSLOG_database_url=postgresql://pfs@133.40.164.48/opdb \
+	bash scripts/entrypoint.bash
+
+# 初期セットアップ（シークレットキー生成など）
+setup:
+	bash scripts/entrypoint.bash --setup
 
 # テストを実行（遅いテストをスキップ）
 test:
@@ -34,6 +45,8 @@ clean:
 help:
 	@echo "使用可能なコマンド:"
 	@echo "  make dev              - 開発サーバーを起動"
+	@echo "  make production       - プロダクションサーバーを起動"
+	@echo "  make setup            - 初期セットアップ（シークレットキー生成など）"
 	@echo "  make test             - テストを実行（遅いテストをスキップ）"
 	@echo "  make test-all         - 全テストを実行（遅いテスト含む）"
 	@echo "  make cov              - カバレッジ付きテスト（HTMLレポート生成）"
