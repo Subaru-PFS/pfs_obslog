@@ -27,6 +27,8 @@ export type Styles = {
   noSequence: string;
   notesBadge: string;
   pageInfo: string;
+  pageRange: string;
+  pageTotal: string;
   pagination: string;
   paginationBottom: string;
   paginationButton: string;

@@ -147,11 +147,25 @@ interface VisitGroupComponentProps {
 
 function VisitGroupComponent({ group }: VisitGroupComponentProps) {
   const { selectedVisitId, setSelectedVisitId } = useHomeContext()
+  
+  // Check if any visit in this group is selected
+  const hasSelectedVisit = group.visits.some(v => v.id === selectedVisitId)
+  
+  // Handle click on the group background (header area)
+  const handleGroupClick = (e: React.MouseEvent) => {
+    // Only handle clicks on the group container itself, not on child elements
+    if (e.target === e.currentTarget && group.visits.length > 0) {
+      setSelectedVisitId(group.visits[0].id)
+    }
+  }
 
   return (
-    <div className={styles.visitGroup}>
+    <div 
+      className={`${styles.visitGroup} ${hasSelectedVisit ? styles.visitGroupSelected : ''}`}
+      onClick={handleGroupClick}
+    >
       {group.iicSequence ? (
-        <IicSequenceHeader iicSequence={group.iicSequence} />
+        <IicSequenceHeader iicSequence={group.iicSequence} visitId={group.visits[0]?.id} />
       ) : (
         <div className={styles.noSequence}>No sequence</div>
       )}
@@ -483,6 +497,19 @@ export function VisitList() {
 
       <div className={styles.footer}>
         <div className={styles.pagination}>
+          <Tooltip content="Go to latest visits">
+            <button
+              onClick={handleGoToLatest}
+              disabled={isFirstPage || isFetching}
+            >
+              <Icon name="vertical_align_top" size={18} />
+            </button>
+          </Tooltip>
+          <Tooltip content="Refresh">
+            <button onClick={handleRefresh} disabled={isFetching}>
+              <Icon name={isFetching ? 'hourglass_empty' : 'refresh'} size={18} />
+            </button>
+          </Tooltip>
           <Tooltip content="First page">
             <button onClick={handleFirstPage} disabled={isFirstPage || isFetching}>
               <Icon name="first_page" size={18} />
@@ -493,9 +520,12 @@ export function VisitList() {
               <Icon name="chevron_left" size={18} />
             </button>
           </Tooltip>
-          <span className={styles.pageInfo}>
-            {offset + 1} - {Math.min(offset + limit, totalCount)} / {totalCount}
-          </span>
+          <Tooltip content={`Displaying ${offset + 1} – ${Math.min(offset + limit, totalCount)} of ${totalCount} visits`}>
+            <span className={styles.pageInfo}>
+              <span className={styles.pageRange}>{offset + 1} – {Math.min(offset + limit, totalCount)}</span>
+              <span className={styles.pageTotal}>{totalCount}</span>
+            </span>
+          </Tooltip>
           <Tooltip content="Next page">
             <button onClick={handleNextPage} disabled={isLastPage || isFetching}>
               <Icon name="chevron_right" size={18} />
