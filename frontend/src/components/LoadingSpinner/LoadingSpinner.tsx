@@ -17,7 +17,7 @@ export interface LoadingSpinnerProps {
 export function LoadingSpinner({
   size = 200,
   text = 'Loading...',
-  showText = true,
+  showText = false,
   className = '',
 }: LoadingSpinnerProps) {
   return (

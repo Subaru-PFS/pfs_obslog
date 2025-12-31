@@ -637,7 +637,7 @@ export function VisitList() {
       </div>
 
       <div className={styles.content} ref={contentRef}>
-        <LoadingOverlay isLoading={isFetching} />
+        <LoadingOverlay isLoading={isFetching || isLoadingMore} />
 
         {/* Navigation at top - scrolls with content */}
         <div className={styles.paginationTop}>
