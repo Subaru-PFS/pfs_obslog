@@ -194,6 +194,7 @@ export function VisitDetail() {
   const {
     data: visit,
     isLoading,
+    isFetching,
     error,
   } = useGetVisitApiVisitsVisitIdGetQuery(
     { visitId: selectedVisitId! },
@@ -208,7 +209,8 @@ export function VisitDetail() {
     )
   }
 
-  if (isLoading) {
+  // isLoading は初回ロード時、isFetching はリフェッチや再取得時
+  if (isLoading || isFetching) {
     return (
       <div className={styles.loading}>
         <LoadingSpinner />

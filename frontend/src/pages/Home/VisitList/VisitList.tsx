@@ -413,7 +413,7 @@ export function VisitList() {
             <button
               className={styles.paginationButton}
               onClick={handlePrevPage}
-              disabled={isFirstPage}
+              disabled={isFirstPage || isFetching}
             >
               <Icon name="chevron_left" size={20} />
             </button>
@@ -422,16 +422,16 @@ export function VisitList() {
             <button
               className={styles.paginationButton}
               onClick={handleLoadMoreNewer}
-              disabled={isFirstPage}
+              disabled={isFirstPage || isFetching}
             >
-              <Icon name={isFirstPage ? 'refresh' : 'keyboard_arrow_up'} size={20} />
+              <Icon name={isFetching && !isFirstPage ? 'hourglass_empty' : (isFirstPage ? 'refresh' : 'keyboard_arrow_up')} size={20} />
             </button>
           </Tooltip>
           <Tooltip content="Next older visits">
             <button
               className={styles.paginationButton}
               onClick={handleNextPage}
-              disabled={isLastPage}
+              disabled={isLastPage || isFetching}
             >
               <Icon name="chevron_right" size={20} />
             </button>
@@ -455,7 +455,7 @@ export function VisitList() {
             <button
               className={styles.paginationButton}
               onClick={handlePrevPage}
-              disabled={isFirstPage}
+              disabled={isFirstPage || isFetching}
             >
               <Icon name="chevron_left" size={20} />
             </button>
@@ -464,16 +464,16 @@ export function VisitList() {
             <button
               className={styles.paginationButton}
               onClick={handleLoadMoreOlder}
-              disabled={isLastPage}
+              disabled={isLastPage || isFetching}
             >
-              <Icon name="keyboard_arrow_down" size={20} />
+              <Icon name={isFetching ? 'hourglass_empty' : 'keyboard_arrow_down'} size={20} />
             </button>
           </Tooltip>
           <Tooltip content="Next older visits">
             <button
               className={styles.paginationButton}
               onClick={handleNextPage}
-              disabled={isLastPage}
+              disabled={isLastPage || isFetching}
             >
               <Icon name="chevron_right" size={20} />
             </button>
@@ -484,12 +484,12 @@ export function VisitList() {
       <div className={styles.footer}>
         <div className={styles.pagination}>
           <Tooltip content="First page">
-            <button onClick={handleFirstPage} disabled={isFirstPage}>
+            <button onClick={handleFirstPage} disabled={isFirstPage || isFetching}>
               <Icon name="first_page" size={18} />
             </button>
           </Tooltip>
           <Tooltip content="Previous page">
-            <button onClick={handlePrevPage} disabled={isFirstPage}>
+            <button onClick={handlePrevPage} disabled={isFirstPage || isFetching}>
               <Icon name="chevron_left" size={18} />
             </button>
           </Tooltip>
@@ -497,12 +497,12 @@ export function VisitList() {
             {offset + 1} - {Math.min(offset + limit, totalCount)} / {totalCount}
           </span>
           <Tooltip content="Next page">
-            <button onClick={handleNextPage} disabled={isLastPage}>
+            <button onClick={handleNextPage} disabled={isLastPage || isFetching}>
               <Icon name="chevron_right" size={18} />
             </button>
           </Tooltip>
           <Tooltip content="Last page">
-            <button onClick={handleLastPage} disabled={isLastPage}>
+            <button onClick={handleLastPage} disabled={isLastPage || isFetching}>
               <Icon name="last_page" size={18} />
             </button>
           </Tooltip>
