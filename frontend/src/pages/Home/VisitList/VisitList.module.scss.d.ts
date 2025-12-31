@@ -52,6 +52,7 @@ export type Styles = {
   toolbarActions: string;
   toolbarButton: string;
   visitGroup: string;
+  visitGroupSelected: string;
   visitList: string;
   visitTable: string;
 };

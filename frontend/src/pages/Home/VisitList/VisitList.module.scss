@@ -234,6 +234,10 @@ $pagination-border-radius: 12px;
   margin: 24px 12px;
   @include card;
   overflow: hidden;
+  
+  &.visitGroupSelected {
+    box-shadow: 0 0 0 2px $accent, 0 2px 10px rgba($shadow-color, 0.2);
+  }
 }
 
 // =============================================================================
@@ -243,6 +247,11 @@ $pagination-border-radius: 12px;
   padding: 8px 12px;
   background-color: $near-background;
   border-bottom: 1px solid $border-color;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $hover-background-color;
+  }
 
   .title {
     display: flex;

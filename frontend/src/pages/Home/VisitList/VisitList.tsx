@@ -93,11 +93,20 @@ function getExposureClass(sps: number, mcs: number, agc: number): string {
 
 interface IicSequenceHeaderProps {
   iicSequence: IicSequence
+  visitId?: number
 }
 
-function IicSequenceHeader({ iicSequence }: IicSequenceHeaderProps) {
+function IicSequenceHeader({ iicSequence, visitId }: IicSequenceHeaderProps) {
+  const { setSelectedVisitId } = useHomeContext()
+  
+  const handleClick = () => {
+    if (visitId !== undefined) {
+      setSelectedVisitId(visitId)
+    }
+  }
+
   return (
-    <div className={styles.iicSequence}>
+    <div className={styles.iicSequence} onClick={handleClick}>
       <div className={styles.title}>
         <span className={styles.sequenceId}>{iicSequence.iic_sequence_id}</span>
         <span className={styles.sequenceName}>{iicSequence.name || '(unnamed)'}</span>
