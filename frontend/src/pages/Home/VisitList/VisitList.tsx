@@ -10,7 +10,7 @@ import { useHomeContext } from '../context'
 import { Icon } from '../../../components/Icon'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
-import { Tooltip } from '../../../components/Tooltip'
+import { Tooltip, TruncatedCell, TruncatedText } from '../../../components/Tooltip'
 import styles from './VisitList.module.scss'
 
 const PER_PAGE = 200
@@ -228,9 +228,9 @@ function IicSequenceHeader({ iicSequence, visitId }: IicSequenceHeaderProps) {
         <div className={styles.comments}>{iicSequence.comments}</div>
       )}
       {iicSequence.cmd_str && (
-        <code className={styles.command} title={iicSequence.cmd_str}>
+        <TruncatedText as="code" className={styles.command} content={iicSequence.cmd_str}>
           {iicSequence.cmd_str}
-        </code>
+        </TruncatedText>
       )}
     </div>
   )
@@ -318,65 +318,65 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
               >
                 {columns.id && <td className={styles.colId}>{visit.id}</td>}
                 {columns.description && (
-                  <td className={styles.colDescription} title={visit.description || ''}>
+                  <TruncatedCell content={visit.description || ''} className={styles.colDescription}>
                     {visit.description || '-'}
-                  </td>
+                  </TruncatedCell>
                 )}
-                {columns.date && <td className={styles.colDate} title={date}>{date}</td>}
-                {columns.time && <td className={styles.colTime} title={time}>{time}</td>}
+                {columns.date && <TruncatedCell content={date} className={styles.colDate}>{date}</TruncatedCell>}
+                {columns.time && <TruncatedCell content={time} className={styles.colTime}>{time}</TruncatedCell>}
                 {columns.exposures && (
-                  <td
+                  <TruncatedCell
                     className={`${styles.colExposures} ${getExposureClass(
                       visit.n_sps_exposures ?? 0,
                       visit.n_mcs_exposures ?? 0,
                       visit.n_agc_exposures ?? 0
                     )}`}
-                    title={`SPS: ${visit.n_sps_exposures ?? 0}, MCS: ${visit.n_mcs_exposures ?? 0}, AGC: ${visit.n_agc_exposures ?? 0}`}
+                    content={`SPS: ${visit.n_sps_exposures ?? 0}, MCS: ${visit.n_mcs_exposures ?? 0}, AGC: ${visit.n_agc_exposures ?? 0}`}
                   >
                     {visit.n_sps_exposures ?? 0}/{visit.n_mcs_exposures ?? 0}/{visit.n_agc_exposures ?? 0}
-                  </td>
+                  </TruncatedCell>
                 )}
                 {columns.exptime && (
-                  <td className={styles.colExptime} title={visit.avg_exptime ? `${visit.avg_exptime.toFixed(3)} s` : ''}>
+                  <TruncatedCell content={visit.avg_exptime ? `${visit.avg_exptime.toFixed(3)} s` : ''} className={styles.colExptime}>
                     {visit.avg_exptime ? visit.avg_exptime.toFixed(1) : '-'}
-                  </td>
+                  </TruncatedCell>
                 )}
                 {columns.pfs_design_id && (
-                  <td className={styles.colDesign} title={visit.pfs_design_id ? `0x${visit.pfs_design_id}` : ''}>
+                  <TruncatedCell content={visit.pfs_design_id ? `0x${visit.pfs_design_id}` : ''} className={styles.colDesign}>
                     {visit.pfs_design_id ? `0x${visit.pfs_design_id}` : '-'}
-                  </td>
+                  </TruncatedCell>
                 )}
                 {columns.ra && (
-                  <td className={styles.colCoord} title={visit.avg_ra !== null && visit.avg_ra !== undefined ? `RA: ${visit.avg_ra.toFixed(6)}°` : ''}>
+                  <TruncatedCell content={visit.avg_ra !== null && visit.avg_ra !== undefined ? `RA: ${visit.avg_ra.toFixed(6)}°` : ''} className={styles.colCoord}>
                     {visit.avg_ra !== null && visit.avg_ra !== undefined ? visit.avg_ra.toFixed(1) : '-'}
-                  </td>
+                  </TruncatedCell>
                 )}
                 {columns.dec && (
-                  <td className={styles.colCoord} title={visit.avg_dec !== null && visit.avg_dec !== undefined ? `Dec: ${visit.avg_dec.toFixed(6)}°` : ''}>
+                  <TruncatedCell content={visit.avg_dec !== null && visit.avg_dec !== undefined ? `Dec: ${visit.avg_dec.toFixed(6)}°` : ''} className={styles.colCoord}>
                     {visit.avg_dec !== null && visit.avg_dec !== undefined ? visit.avg_dec.toFixed(1) : '-'}
-                  </td>
+                  </TruncatedCell>
                 )}
                 {columns.azimuth && (
-                  <td className={styles.colCoord} title={visit.avg_azimuth !== null && visit.avg_azimuth !== undefined ? `Az: ${visit.avg_azimuth.toFixed(4)}°` : ''}>
+                  <TruncatedCell content={visit.avg_azimuth !== null && visit.avg_azimuth !== undefined ? `Az: ${visit.avg_azimuth.toFixed(4)}°` : ''} className={styles.colCoord}>
                     {visit.avg_azimuth !== null && visit.avg_azimuth !== undefined ? visit.avg_azimuth.toFixed(2) : '-'}
-                  </td>
+                  </TruncatedCell>
                 )}
                 {columns.altitude && (
-                  <td className={styles.colCoord} title={visit.avg_altitude !== null && visit.avg_altitude !== undefined ? `Alt: ${visit.avg_altitude.toFixed(4)}°` : ''}>
+                  <TruncatedCell content={visit.avg_altitude !== null && visit.avg_altitude !== undefined ? `Alt: ${visit.avg_altitude.toFixed(4)}°` : ''} className={styles.colCoord}>
                     {visit.avg_altitude !== null && visit.avg_altitude !== undefined ? visit.avg_altitude.toFixed(2) : '-'}
-                  </td>
+                  </TruncatedCell>
                 )}
                 {columns.insrot && (
-                  <td className={styles.colCoord} title={visit.avg_insrot !== null && visit.avg_insrot !== undefined ? `InsRot: ${visit.avg_insrot.toFixed(4)}°` : ''}>
+                  <TruncatedCell content={visit.avg_insrot !== null && visit.avg_insrot !== undefined ? `InsRot: ${visit.avg_insrot.toFixed(4)}°` : ''} className={styles.colCoord}>
                     {visit.avg_insrot !== null && visit.avg_insrot !== undefined ? visit.avg_insrot.toFixed(2) : '-'}
-                  </td>
+                  </TruncatedCell>
                 )}
                 {columns.notes && (
-                  <td className={styles.colNotes} title={visit.notes && visit.notes.length > 0 ? `${visit.notes.length} note(s)` : ''}>
+                  <TruncatedCell content={visit.notes && visit.notes.length > 0 ? `${visit.notes.length} note(s)` : ''} className={styles.colNotes}>
                     {(visit.notes?.length ?? 0) > 0 && (
                       <span className={styles.notesBadge}>{visit.notes?.length}</span>
                     )}
-                  </td>
+                  </TruncatedCell>
                 )}
               </tr>
             )

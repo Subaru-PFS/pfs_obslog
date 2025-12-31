@@ -1,0 +1,35 @@
+@use '/src/styles/theme.scss' as *;
+
+.header {
+  display: flex;
+  align-items: center;
+  box-shadow: $medium-shadow;
+  padding: 0.25em 0.5em;
+  z-index: 2;
+  background-color: $background-color;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+
+  &:hover {
+    color: $accent;
+  }
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+.buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.user {
+  padding: 0 1em;
+  color: $hint-text-color;
+  font-size: 0.9rem;
+}
