@@ -22,7 +22,7 @@ router = APIRouter(prefix="/mcs_data", tags=["plot"])
 
 
 @router.get("/{frame_id}.png")
-def show_mcs_data_chart(
+async def show_mcs_data_chart(
     db: DbSession,
     frame_id: int,
     width: int = Query(default=640, le=1280, description="画像幅（px）"),
@@ -46,9 +46,10 @@ def show_mcs_data_chart(
         HTTPException: データが見つからない場合は204を返す
     """
     # MCSデータを取得
-    rows = db.scalars(
+    result = await db.scalars(
         select(M.McsData).where(M.McsData.mcs_frame_id == frame_id)
-    ).all()
+    )
+    rows = result.all()
 
     if not rows:
         raise HTTPException(status_code=204, detail="No data found")

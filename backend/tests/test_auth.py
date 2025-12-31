@@ -5,14 +5,6 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
 
-from pfs_obslog.main import app
-
-
-@pytest.fixture
-def client():
-    """テスト用クライアント"""
-    return TestClient(app)
-
 
 class TestLogin:
     """ログインAPIのテスト"""

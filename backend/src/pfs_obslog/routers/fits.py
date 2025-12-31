@@ -353,16 +353,17 @@ def _cached_response(content: bytes, media_type: str) -> Response:
     summary="Download SPS FITS file",
     description="Download a raw or processed SPS FITS file for a specific visit and camera.",
 )
-def download_sps_fits(
+async def download_sps_fits(
     visit_id: int,
     camera_id: int,
     type: FitsType = FitsType.raw,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """SPS FITSファイルをダウンロード"""
-    visit = db.execute(
+    result = await db.execute(
         select(M.PfsVisit).where(M.PfsVisit.pfs_visit_id == visit_id)
-    ).scalar_one_or_none()
+    )
+    visit = result.scalar_one_or_none()
 
     if visit is None:
         raise HTTPException(
@@ -395,18 +396,19 @@ def download_sps_fits(
     summary="Get SPS FITS preview image",
     description="Get a PNG preview image of an SPS FITS file.",
 )
-def get_sps_fits_preview(
+async def get_sps_fits_preview(
     visit_id: int,
     camera_id: int,
     width: int = Query(default=1024, le=4096),
     height: int = Query(default=1024, le=4096),
     type: FitsType = FitsType.raw,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """SPS FITSファイルのプレビュー画像を取得"""
-    visit = db.execute(
+    result = await db.execute(
         select(M.PfsVisit).where(M.PfsVisit.pfs_visit_id == visit_id)
-    ).scalar_one_or_none()
+    )
+    visit = result.scalar_one_or_none()
 
     if visit is None:
         raise HTTPException(
@@ -447,16 +449,17 @@ def get_sps_fits_preview(
     summary="Get SPS FITS headers",
     description="Get the headers from an SPS FITS file.",
 )
-def get_sps_fits_headers(
+async def get_sps_fits_headers(
     visit_id: int,
     camera_id: int,
     type: FitsType = FitsType.raw,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """SPS FITSファイルのヘッダーを取得"""
-    visit = db.execute(
+    result = await db.execute(
         select(M.PfsVisit).where(M.PfsVisit.pfs_visit_id == visit_id)
-    ).scalar_one_or_none()
+    )
+    visit = result.scalar_one_or_none()
 
     if visit is None:
         raise HTTPException(
@@ -494,15 +497,16 @@ def get_sps_fits_headers(
     summary="Download MCS FITS file",
     description="Download an MCS FITS file for a specific visit and frame.",
 )
-def download_mcs_fits(
+async def download_mcs_fits(
     visit_id: int,
     frame_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """MCS FITSファイルをダウンロード"""
-    visit = db.execute(
+    result = await db.execute(
         select(M.PfsVisit).where(M.PfsVisit.pfs_visit_id == visit_id)
-    ).scalar_one_or_none()
+    )
+    visit = result.scalar_one_or_none()
 
     if visit is None:
         raise HTTPException(
@@ -526,17 +530,18 @@ def download_mcs_fits(
     summary="Get MCS FITS preview image",
     description="Get a PNG preview image of an MCS FITS file.",
 )
-def get_mcs_fits_preview(
+async def get_mcs_fits_preview(
     visit_id: int,
     frame_id: int,
     width: int = Query(default=1024, le=4096),
     height: int = Query(default=1024, le=4096),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """MCS FITSファイルのプレビュー画像を取得"""
-    visit = db.execute(
+    result = await db.execute(
         select(M.PfsVisit).where(M.PfsVisit.pfs_visit_id == visit_id)
-    ).scalar_one_or_none()
+    )
+    visit = result.scalar_one_or_none()
 
     if visit is None:
         raise HTTPException(
@@ -568,15 +573,16 @@ def get_mcs_fits_preview(
     summary="Get MCS FITS headers",
     description="Get the headers from an MCS FITS file.",
 )
-def get_mcs_fits_headers(
+async def get_mcs_fits_headers(
     visit_id: int,
     frame_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """MCS FITSファイルのヘッダーを取得"""
-    visit = db.execute(
+    result = await db.execute(
         select(M.PfsVisit).where(M.PfsVisit.pfs_visit_id == visit_id)
-    ).scalar_one_or_none()
+    )
+    visit = result.scalar_one_or_none()
 
     if visit is None:
         raise HTTPException(
@@ -605,15 +611,16 @@ def get_mcs_fits_headers(
     summary="Download AGC FITS file",
     description="Download an AGC FITS file for a specific exposure.",
 )
-def download_agc_fits(
+async def download_agc_fits(
     visit_id: int,
     exposure_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """AGC FITSファイルをダウンロード"""
-    agc_exposure = db.execute(
+    result = await db.execute(
         select(M.AgcExposure).where(M.AgcExposure.agc_exposure_id == exposure_id)
-    ).scalar_one_or_none()
+    )
+    agc_exposure = result.scalar_one_or_none()
 
     if agc_exposure is None:
         raise HTTPException(
@@ -638,18 +645,19 @@ def download_agc_fits(
     summary="Get AGC FITS preview image",
     description="Get a PNG preview image of a specific HDU in an AGC FITS file.",
 )
-def get_agc_fits_preview(
+async def get_agc_fits_preview(
     visit_id: int,
     exposure_id: int,
     hdu_index: int,
     width: int = Query(default=512, le=4096),
     height: int = Query(default=512, le=4096),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """AGC FITSファイルのプレビュー画像を取得"""
-    agc_exposure = db.execute(
+    result = await db.execute(
         select(M.AgcExposure).where(M.AgcExposure.agc_exposure_id == exposure_id)
-    ).scalar_one_or_none()
+    )
+    agc_exposure = result.scalar_one_or_none()
 
     if agc_exposure is None:
         raise HTTPException(

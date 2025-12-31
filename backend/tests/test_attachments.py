@@ -7,16 +7,11 @@ import io
 import pytest
 from fastapi.testclient import TestClient
 
-from pfs_obslog.main import app
-
-
-client = TestClient(app)
-
 
 class TestAttachmentUploadAPI:
     """添付ファイルアップロード API のテスト"""
 
-    def test_upload_requires_auth(self):
+    def test_upload_requires_auth(self, client: TestClient):
         """アップロードには認証が必要"""
         response = client.post(
             "/api/attachments",
@@ -24,7 +19,7 @@ class TestAttachmentUploadAPI:
         )
         assert response.status_code == 401
 
-    def test_upload_blocked_extension(self):
+    def test_upload_blocked_extension(self, client: TestClient):
         """ブロックされた拡張子のファイルはアップロードできない"""
         # 認証が先に必要なので、401が返る
         response = client.post(
@@ -37,7 +32,7 @@ class TestAttachmentUploadAPI:
 class TestAttachmentListAPI:
     """添付ファイル一覧 API のテスト"""
 
-    def test_list_requires_auth(self):
+    def test_list_requires_auth(self, client: TestClient):
         """一覧取得には認証が必要"""
         response = client.get("/api/attachments")
         assert response.status_code == 401
@@ -46,12 +41,12 @@ class TestAttachmentListAPI:
 class TestAttachmentDownloadAPI:
     """添付ファイルダウンロード API のテスト"""
 
-    def test_download_not_found(self):
+    def test_download_not_found(self, client: TestClient):
         """存在しないファイルへのアクセスは404を返す"""
         response = client.get("/api/attachments/testuser/999999")
         assert response.status_code == 404
 
-    def test_download_invalid_account_name(self):
+    def test_download_invalid_account_name(self, client: TestClient):
         """無効なアカウント名はエラーを返す"""
         response = client.get("/api/attachments/invalid;user/1")
         assert response.status_code == 422
@@ -60,7 +55,7 @@ class TestAttachmentDownloadAPI:
 class TestAttachmentDeleteAPI:
     """添付ファイル削除 API のテスト"""
 
-    def test_delete_requires_auth(self):
+    def test_delete_requires_auth(self, client: TestClient):
         """削除には認証が必要"""
         response = client.delete("/api/attachments/1")
         assert response.status_code == 401
