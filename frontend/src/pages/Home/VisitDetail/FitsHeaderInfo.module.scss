@@ -234,3 +234,68 @@ table.cards {
     font-style: italic;
   }
 }
+
+// パネル用スタイル（VisitDetail下部に表示）
+.panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-top: 1px solid #e0e0e0;
+  background-color: #fff;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.panelTitle {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.panelInfo {
+  flex: 1;
+  font-size: 12px;
+  color: #666;
+  font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.panelCloseButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: #666;
+
+  &:hover {
+    background-color: #e0e0e0;
+    color: #333;
+  }
+}
+
+.panelContent {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.panelPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+  font-size: 13px;
+  font-style: italic;
+}

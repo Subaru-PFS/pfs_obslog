@@ -1,5 +1,7 @@
 export type Styles = {
+  bottomPane: string;
   error: string;
+  gutter: string;
   inspector: string;
   loading: string;
   noData: string;
@@ -7,10 +9,12 @@ export type Styles = {
   noteBody: string;
   noteUser: string;
   placeholder: string;
+  splitContainer: string;
   summary: string;
   summaryLabel: string;
   summaryRow: string;
   summaryValue: string;
+  topPane: string;
   visitDetail: string;
 };
 

@@ -82,3 +82,39 @@
 .error {
   color: #d32f2f;
 }
+
+// スプリットパネル
+.splitContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.topPane {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 100px;
+}
+
+.gutter {
+  height: 6px;
+  background-color: #e0e0e0;
+  cursor: row-resize;
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: #ccc;
+  }
+
+  &:active {
+    background-color: #1976d2;
+  }
+}
+
+.bottomPane {
+  flex: 1;
+  overflow: hidden;
+  min-height: 100px;
+}

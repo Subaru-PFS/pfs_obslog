@@ -4,7 +4,7 @@ import { LazyImage } from '../../../components/LazyImage'
 import { IconButton } from '../../../components/Icon'
 import { API_BASE_URL } from '../../../config'
 import { useHomeContext } from '../context'
-import { FitsHeaderDialog, type FitsId } from './FitsHeaderInfo'
+import { useVisitDetailContext } from './context'
 import styles from './Inspector.module.scss'
 
 type ImageScale = 0.75 | 1 | 2
@@ -53,13 +53,13 @@ function getMcsFitsDownloadUrl(visitId: number, frameId: number): string {
 
 export function McsInspector({ mcs }: McsInspectorProps) {
   const { selectedVisitId } = useHomeContext()
+  const { selectedFitsId, setSelectedFitsId } = useVisitDetailContext()
   const exposures = mcs.exposures ?? []
   const avgExptime = useMemo(() => calculateAverageExptime(exposures), [exposures])
 
   const [showPlot, setShowPlot] = useState(true)
   const [showRaw, setShowRaw] = useState(false)
   const [imageScale, setImageScale] = useState<ImageScale>(1)
-  const [headerFitsId, setHeaderFitsId] = useState<FitsId | null>(null)
 
   const plotSize = {
     width: Math.floor(imageScale * PLOT_SIZE.width),
@@ -150,8 +150,8 @@ export function McsInspector({ mcs }: McsInspectorProps) {
               plotSize={plotSize}
               rawSize={rawSize}
               scale={imageScale}
-              isSelected={headerFitsId?.type === 'mcs' && headerFitsId?.frameId === exp.frame_id}
-              onShowHeader={() => setHeaderFitsId({
+              isSelected={selectedFitsId?.type === 'mcs' && selectedFitsId?.frameId === exp.frame_id}
+              onShowHeader={() => setSelectedFitsId({
                 type: 'mcs',
                 visitId: selectedVisitId!,
                 frameId: exp.frame_id,
@@ -160,14 +160,6 @@ export function McsInspector({ mcs }: McsInspectorProps) {
           ))}
         </div>
       </div>
-
-      {/* FITS Header Dialog */}
-      {headerFitsId && (
-        <FitsHeaderDialog
-          fitsId={headerFitsId}
-          onClose={() => setHeaderFitsId(null)}
-        />
-      )}
     </div>
   )
 }

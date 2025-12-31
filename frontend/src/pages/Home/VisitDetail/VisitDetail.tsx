@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   useGetVisitApiVisitsVisitIdGetQuery,
   type VisitDetail as VisitDetailType,
@@ -9,6 +9,7 @@ import {
   useDeleteVisitNoteApiVisitsVisitIdNotesNoteIdDeleteMutation,
 } from '../../../store/api/enhancedApi'
 import { useHomeContext } from '../context'
+import { VisitDetailProvider } from './context'
 import { Tabs, TabPanel, type TabItem } from '../../../components/Tabs'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
@@ -18,6 +19,7 @@ import { McsInspector } from './McsInspector'
 import { AgcInspector } from './AgcInspector'
 import { IicSequenceInfo } from './IicSequenceInfo'
 import { SequenceGroupInfo } from './SequenceGroupInfo'
+import { FitsHeaderPanel } from './FitsHeaderInfo'
 import { getExposureColorStyle } from '../../../utils/exposureColors'
 import styles from './VisitDetail.module.scss'
 
@@ -228,12 +230,89 @@ export function VisitDetail() {
   }
 
   return (
-    <div className={styles.visitDetail}>
-      {/* 再取得中（前のデータを表示しながら）はオーバーレイ表示 */}
-      <LoadingOverlay isLoading={isFetching} />
-      <Summary visit={visit} />
-      <div className={styles.inspector}>
-        <VisitInspector visit={visit} />
+    <VisitDetailProvider>
+      <div className={styles.visitDetail}>
+        {/* 再取得中（前のデータを表示しながら）はオーバーレイ表示 */}
+        <LoadingOverlay isLoading={isFetching} />
+        <VisitDetailContent visit={visit} />
+      </div>
+    </VisitDetailProvider>
+  )
+}
+
+interface VisitDetailContentProps {
+  visit: VisitDetailType
+}
+
+function VisitDetailContent({ visit }: VisitDetailContentProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const gutterRef = useRef<HTMLDivElement>(null)
+  const [topHeight, setTopHeight] = useState<number | null>(null)
+
+  // リサイズ可能なスプリットパネルの実装
+  useEffect(() => {
+    const container = containerRef.current
+    const gutter = gutterRef.current
+    if (!container || !gutter) return
+
+    let isDragging = false
+    let startY = 0
+    let startHeight = 0
+
+    const handleMouseDown = (e: MouseEvent) => {
+      isDragging = true
+      startY = e.clientY
+      startHeight = topHeight ?? container.offsetHeight * 0.6
+      document.body.style.cursor = 'row-resize'
+      document.body.style.userSelect = 'none'
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return
+      const delta = e.clientY - startY
+      const containerHeight = container.offsetHeight
+      const newHeight = Math.max(100, Math.min(containerHeight - 100, startHeight + delta))
+      setTopHeight(newHeight)
+    }
+
+    const handleMouseUp = () => {
+      isDragging = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    gutter.addEventListener('mousedown', handleMouseDown)
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      gutter.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [topHeight])
+
+  // 初期高さを設定（コンテナの60%）
+  useEffect(() => {
+    if (topHeight === null && containerRef.current) {
+      setTopHeight(containerRef.current.offsetHeight * 0.65)
+    }
+  }, [topHeight])
+
+  return (
+    <div className={styles.splitContainer} ref={containerRef}>
+      <div
+        className={styles.topPane}
+        style={topHeight ? { height: `${topHeight}px` } : { flex: '1 1 65%' }}
+      >
+        <Summary visit={visit} />
+        <div className={styles.inspector}>
+          <VisitInspector visit={visit} />
+        </div>
+      </div>
+      <div className={styles.gutter} ref={gutterRef} />
+      <div className={styles.bottomPane}>
+        <FitsHeaderPanel />
       </div>
     </div>
   )

@@ -8,6 +8,7 @@ import {
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
 import { Tooltip } from '../../../components/Tooltip'
 import { Icon } from '../../../components/Icon'
+import { useVisitDetailContext } from './context'
 import styles from './FitsHeaderInfo.module.scss'
 
 /**
@@ -264,3 +265,55 @@ function CardRow({ card }: CardRowProps) {
     </tr>
   )
 }
+
+/**
+ * FITSヘッダー表示パネル（VisitDetail下部に表示）
+ * contextからselectedFitsIdを読み取って表示
+ */
+export function FitsHeaderPanel() {
+  const { selectedFitsId, setSelectedFitsId } = useVisitDetailContext()
+
+  if (!selectedFitsId) {
+    return (
+      <div className={styles.panel}>
+        <div className={styles.panelPlaceholder}>
+          Click on an exposure preview to view FITS header
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={styles.panel}>
+      <div className={styles.panelHeader}>
+        <span className={styles.panelTitle}>FITS Header</span>
+        <span className={styles.panelInfo}>
+          {selectedFitsId.type === 'sps' && `Visit ${selectedFitsId.visitId} / Camera ${selectedFitsId.cameraId}`}
+          {selectedFitsId.type === 'mcs' && `Visit ${selectedFitsId.visitId} / Frame ${selectedFitsId.frameId}`}
+          {selectedFitsId.type === 'agc' && `Visit ${selectedFitsId.visitId} / Exposure ${selectedFitsId.exposureId}`}
+        </span>
+        <button
+          className={styles.panelCloseButton}
+          onClick={() => setSelectedFitsId(null)}
+          title="Close"
+        >
+          <Icon name="close" size={18} />
+        </button>
+      </div>
+      <div className={styles.panelContent}>
+        {selectedFitsId.type === 'sps' && (
+          <SpsFitsHeader visitId={selectedFitsId.visitId} cameraId={selectedFitsId.cameraId} />
+        )}
+        {selectedFitsId.type === 'mcs' && (
+          <McsFitsHeader visitId={selectedFitsId.visitId} frameId={selectedFitsId.frameId} />
+        )}
+        {selectedFitsId.type === 'agc' && (
+          <div className={styles.placeholder}>
+            AGC FITS headers are not yet supported
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+

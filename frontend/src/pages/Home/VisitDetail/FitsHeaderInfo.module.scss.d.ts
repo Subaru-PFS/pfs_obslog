@@ -15,6 +15,13 @@ export type Styles = {
   hduButtons: string;
   info: string;
   loading: string;
+  panel: string;
+  panelCloseButton: string;
+  panelContent: string;
+  panelHeader: string;
+  panelInfo: string;
+  panelPlaceholder: string;
+  panelTitle: string;
   placeholder: string;
   scrollable: string;
   selected: string;

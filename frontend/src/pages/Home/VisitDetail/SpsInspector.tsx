@@ -4,7 +4,7 @@ import { LazyImage } from '../../../components/LazyImage'
 import { IconButton } from '../../../components/Icon'
 import { API_BASE_URL } from '../../../config'
 import { useHomeContext } from '../context'
-import { FitsHeaderDialog, type FitsId } from './FitsHeaderInfo'
+import { useVisitDetailContext } from './context'
 import styles from './Inspector.module.scss'
 
 type SpsImageType = 'raw' | 'postISRCCD'
@@ -76,11 +76,11 @@ function getSpsFitsDownloadUrl(visitId: number, cameraId: number): string {
 
 export function SpsInspector({ sps }: SpsInspectorProps) {
   const { selectedVisitId } = useHomeContext()
+  const { selectedFitsId, setSelectedFitsId } = useVisitDetailContext()
   const exposures = sps.exposures ?? []
   const avgExptime = useMemo(() => calculateAverageExptime(exposures), [exposures])
   const [imageType, setImageType] = useState<SpsImageType>('raw')
   const [imageScale, setImageScale] = useState<ImageScale>(1)
-  const [headerFitsId, setHeaderFitsId] = useState<FitsId | null>(null)
 
   // カメラIDでグループ化（arm x module）
   const exposureGrid = useMemo(() => {
@@ -212,8 +212,8 @@ export function SpsInspector({ sps }: SpsInspectorProps) {
                                 <IconButton
                                   icon="view_column"
                                   tooltip="Show FITS Header"
-                                  className={headerFitsId?.type === 'sps' && headerFitsId?.cameraId === exp.camera_id ? styles.selected : ''}
-                                  onClick={() => setHeaderFitsId({
+                                  className={selectedFitsId?.type === 'sps' && selectedFitsId?.cameraId === exp.camera_id ? styles.selected : ''}
+                                  onClick={() => setSelectedFitsId({
                                     type: 'sps',
                                     visitId: selectedVisitId,
                                     cameraId: exp.camera_id,
@@ -242,14 +242,6 @@ export function SpsInspector({ sps }: SpsInspectorProps) {
           </table>
         </div>
       </div>
-
-      {/* FITS Header Dialog */}
-      {headerFitsId && (
-        <FitsHeaderDialog
-          fitsId={headerFitsId}
-          onClose={() => setHeaderFitsId(null)}
-        />
-      )}
     </div>
   )
 }
