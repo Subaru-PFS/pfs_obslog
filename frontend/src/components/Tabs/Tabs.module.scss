@@ -1,3 +1,5 @@
+@use '../../styles/theme' as *;
+
 .tabs {
   display: flex;
   flex-direction: column;
@@ -12,50 +14,50 @@
   flex-wrap: wrap;
   gap: 2px;
   padding: 8px 12px 0;
-  background-color: #e0e0e0;
+  background-color: $distant-background;
   flex-shrink: 0;
 }
 
 // Individual tab: looks like a paper index tab
 .tab {
   padding: 8px 16px;
-  background-color: #d0d0d0;
+  background-color: $near-background;
   cursor: pointer;
   font-size: 14px;
-  color: #555;
+  color: $hint-text-color;
 
   // Tab shape: rounded top corners, square bottom
-  border: 1px solid #bbb;
+  border: 1px solid $border-color;
   border-bottom: none;
   border-radius: 6px 6px 0 0;
 
   position: relative;
 
   &:hover:not(:disabled) {
-    background-color: #e8e8e8;
-    color: #333;
+    background-color: $hover-background-color;
+    color: $text-color;
   }
 
   // Active tab: connected to the content area (paper sheet)
   &.active {
-    background-color: #fff;
-    border-color: #bbb;
-    color: #1976d2;
+    background-color: $background-color;
+    border-color: $border-color;
+    color: $link-color;
     font-weight: 600;
-    // White bottom border covers the tabPanels top border, creating connection
-    border-bottom: 1px solid #fff;
+    // Background-colored bottom border covers the tabPanels top border, creating connection
+    border-bottom: 1px solid $background-color;
     z-index: 1;
   }
 
   &.disabled,
   &:disabled {
-    color: #aaa;
+    color: $disabled-text-color;
     cursor: not-allowed;
-    background-color: #ccc;
+    background-color: $near-background;
 
     &:hover {
-      background-color: #ccc;
-      color: #aaa;
+      background-color: $near-background;
+      color: $disabled-text-color;
     }
   }
 }
@@ -64,9 +66,9 @@
 .tabPanels {
   flex: 1;
   overflow: auto;
-  background-color: #fff;
-  border: 1px solid #bbb;
-  border-top: 1px solid #bbb;
+  background-color: $background-color;
+  border: 1px solid $border-color;
+  border-top: 1px solid $border-color;
   margin-top: -1px;
   // min-height: 0 is required for flex children to shrink below their content size
   min-height: 0;

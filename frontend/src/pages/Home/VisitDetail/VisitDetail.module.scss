@@ -10,8 +10,8 @@
 
 .summary {
   padding: 12px 16px;
-  background-color: #fafafa;
-  border-bottom: 1px solid #e0e0e0;
+  background-color: $background-color;
+  border-bottom: 1px solid $border-color;
   flex-shrink: 0;
 }
 
@@ -28,7 +28,7 @@
 .summaryLabel {
   width: 140px;
   font-weight: 600;
-  color: #666;
+  color: $hint-text-color;
   flex-shrink: 0;
 }
 
