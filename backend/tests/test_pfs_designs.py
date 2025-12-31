@@ -1,19 +1,12 @@
 """PFS Design API テスト
 
 PFS Design APIの基本的なテスト。
-Note: FITSファイル読み込みやpfs.datamodelを使うテストは
-      テスト環境によってはスキップされます。
+Note: pfs.datamodel が必要です。インストールされていない場合はエラーになります。
+      セットアップ方法は backend/README.md を参照してください。
 """
 
 import pytest
 from fastapi.testclient import TestClient
-
-# pfs.datamodelが利用可能かチェック
-try:
-    from pfs.datamodel.pfsConfig import PfsDesign  # type: ignore[import-not-found]
-    HAS_PFS_DATAMODEL = True
-except ImportError:
-    HAS_PFS_DATAMODEL = False
 
 
 class TestPfsDesignListAPI:
@@ -58,20 +51,14 @@ class TestPfsDesignDetailAPI:
 
 
 class TestPfsDesignChartAPI:
-    """PFS Design チャート API のテスト
+    """PFS Design チャート API のテスト"""
 
-    Note: これらのテストはpfs.datamodelがインストールされている
-    環境でのみ正常に動作します。
-    """
-
-    @pytest.mark.skipif(not HAS_PFS_DATAMODEL, reason="pfs.datamodel not installed")
     @pytest.mark.timeout(10)
     def test_get_design_chart_invalid_id_format(self, client: TestClient):
         """不正なID形式の場合は400を返す"""
         response = client.get("/api/pfs_designs.png?id_hex=invalid")
         assert response.status_code == 400
 
-    @pytest.mark.skipif(not HAS_PFS_DATAMODEL, reason="pfs.datamodel not installed")
     @pytest.mark.timeout(10)
     def test_get_design_chart_not_found(self, client: TestClient):
         """存在しないDesignの場合は404を返す"""

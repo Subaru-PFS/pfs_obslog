@@ -9,7 +9,7 @@
 | テスト名 | タイムアウト | 原因 |
 |---------|-------------|------|
 | `test_list_pfs_designs` | 60秒（120秒でもタイムアウト） | NFS経由のFITSファイル一括読み込み |
-| `test_get_design_chart_*` | 10秒 | `pfs.datamodel` モジュール未インストール |
+| `test_get_design_chart_*` | 10秒 | `pfs.datamodel` を使用したチャート生成処理 |
 
 ## 詳細分析: `test_list_pfs_designs`
 

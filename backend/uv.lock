@@ -2,6 +2,9 @@ version = 1
 revision = 3
 requires-python = ">=3.13"
 
+[manifest]
+overrides = [{ name = "pfs-datamodel", editable = "../external/pfs-datamodel" }]
+
 [[package]]
 name = "annotated-doc"
 version = "0.0.4"
@@ -737,6 +740,44 @@ wheels = [
 ]
 
 [[package]]
+name = "pfs-datamodel"
+source = { editable = "../external/pfs-datamodel" }
+dependencies = [
+    { name = "astroplan" },
+    { name = "astropy" },
+    { name = "lsst-utils" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "pytz" },
+    { name = "pyyaml" },
+    { name = "scipy" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "astroplan" },
+    { name = "astropy" },
+    { name = "black", marker = "extra == 'dev'" },
+    { name = "isort", marker = "extra == 'dev'" },
+    { name = "lsst-utils" },
+    { name = "lsst-versions", marker = "extra == 'dev'" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pytz" },
+    { name = "pyyaml" },
+    { name = "scipy" },
+]
+provides-extras = ["dev"]
+
+[[package]]
+name = "pfs-instdata"
+version = "1.8.64"
+source = { git = "https://github.com/Subaru-PFS/pfs_instdata.git#1633ee44266415aa7f3949371e535b16db63df1b" }
+
+[[package]]
 name = "pfs-obslog"
 version = "0.1.0"
 source = { editable = "." }
@@ -752,6 +793,8 @@ dependencies = [
     { name = "numpy" },
     { name = "orjson" },
     { name = "pandas" },
+    { name = "pfs-datamodel" },
+    { name = "pfs-utils" },
     { name = "pglast" },
     { name = "pillow" },
     { name = "psycopg", extra = ["binary"] },
@@ -790,6 +833,8 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.0.0" },
     { name = "orjson", specifier = ">=3.10.0" },
     { name = "pandas", specifier = ">=2.0.0" },
+    { name = "pfs-datamodel", editable = "../external/pfs-datamodel" },
+    { name = "pfs-utils", editable = "../external/pfs_utils" },
     { name = "pglast", specifier = ">=7.11" },
     { name = "pillow", specifier = ">=11.0.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2.0" },
@@ -807,6 +852,41 @@ requires-dist = [
     { name = "sqlacodegen", marker = "extra == 'dev'", specifier = ">=3.0.0" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.0" },
     { name = "uvicorn", specifier = ">=0.34.0" },
+]
+provides-extras = ["dev"]
+
+[[package]]
+name = "pfs-utils"
+source = { editable = "../external/pfs_utils" }
+dependencies = [
+    { name = "astroplan" },
+    { name = "astropy" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "pfs-datamodel" },
+    { name = "pfs-instdata" },
+    { name = "psycopg", extra = ["binary"] },
+    { name = "pytz" },
+    { name = "scipy" },
+    { name = "sqlalchemy" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "astroplan" },
+    { name = "astropy" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "pfs-datamodel", git = "https://github.com/Subaru-PFS/datamodel.git" },
+    { name = "pfs-instdata", git = "https://github.com/Subaru-PFS/pfs_instdata.git" },
+    { name = "psycopg", extras = ["binary"] },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pytz" },
+    { name = "ruff", marker = "extra == 'dev'" },
+    { name = "scipy" },
+    { name = "sqlalchemy" },
 ]
 provides-extras = ["dev"]
 

@@ -66,6 +66,7 @@ cd backend/devel/make_test_db
 cd backend
 
 # 依存関係のインストール（開発用パッケージ含む）
+# pfs-datamodel と pfs-utils も external/ から自動インストールされる
 uv sync --all-extras
 
 # 開発サーバーの起動
