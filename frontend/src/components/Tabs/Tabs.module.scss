@@ -30,9 +30,7 @@
   border-bottom: none;
   border-radius: 6px 6px 0 0;
 
-  // Inactive tabs appear slightly behind
   position: relative;
-  top: 2px;
 
   &:hover:not(:disabled) {
     background-color: #e8e8e8;
@@ -45,7 +43,6 @@
     border-color: #bbb;
     color: #1976d2;
     font-weight: 600;
-    top: 0;
     // White bottom border covers the tabPanels top border, creating connection
     border-bottom: 1px solid #fff;
     z-index: 1;
