@@ -1083,7 +1083,7 @@ class AgcMatch(AgcData):
     agc_nominal_y_mm: Mapped[Optional[float]] = mapped_column(REAL, comment='Nominal designed y-position on the AGC [PFI mm]')
     agc_center_x_mm: Mapped[Optional[float]] = mapped_column(REAL, comment='Center measured x-position on the AGC [PFI mm]')
     agc_center_y_mm: Mapped[Optional[float]] = mapped_column(REAL, comment='Center measured y-position on the AGC [PFI mm]')
-    flags: Mapped[Optional[int]] = mapped_column(Integer, comment='Flags')
+    flags: Mapped[Optional[int]] = mapped_column(Integer, comment='Flags', use_existing_column=True)
 
 
 class CobraMatch(CobraTarget):
@@ -1103,7 +1103,7 @@ class CobraMatch(CobraTarget):
     spot_id: Mapped[Optional[int]] = mapped_column(Integer, comment='Corresponding MCS image spot identifier ')
     pfi_center_x_mm: Mapped[Optional[float]] = mapped_column(REAL, comment='Actual x-position on the PFI [mm]')
     pfi_center_y_mm: Mapped[Optional[float]] = mapped_column(REAL, comment='Actual y-position on the PFI [mm]')
-    flags: Mapped[Optional[int]] = mapped_column(Integer, comment='flags for movement etc.')
+    flags: Mapped[Optional[int]] = mapped_column(Integer, comment='flags for movement etc.', use_existing_column=True)
 
     mcs_data: Mapped[Optional['McsData']] = relationship('McsData', back_populates='cobra_match')
 
@@ -1181,4 +1181,4 @@ class CobraMove(CobraMatch):
     motor_target_phi: Mapped[Optional[float]] = mapped_column(REAL, comment='the target angle of the phi motor')
     motor_num_step_phi: Mapped[Optional[int]] = mapped_column(Integer, comment='the number of steps the phi motor has undertaken')
     motor_on_time_phi: Mapped[Optional[float]] = mapped_column(REAL, comment='the phi motor ontime value')
-    flags: Mapped[Optional[int]] = mapped_column(Integer, comment='flags for movement etc.')
+    flags: Mapped[Optional[int]] = mapped_column(Integer, comment='flags for movement etc.', use_existing_column=True)

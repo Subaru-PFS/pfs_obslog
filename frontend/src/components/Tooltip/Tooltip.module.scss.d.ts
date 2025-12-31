@@ -1,4 +1,5 @@
 export type Styles = {
+  arrow: string;
   fadeIn: string;
   tooltip: string;
   trigger: string;

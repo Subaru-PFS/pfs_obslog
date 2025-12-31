@@ -5,12 +5,14 @@ import {
   offset,
   flip,
   shift,
+  arrow,
   useHover,
   useFocus,
   useDismiss,
   useRole,
   useInteractions,
   FloatingPortal,
+  FloatingArrow,
   type Placement,
 } from '@floating-ui/react'
 import styles from './Tooltip.module.scss'
@@ -21,6 +23,9 @@ interface TooltipProps {
   placement?: Placement
   delay?: number
 }
+
+const ARROW_HEIGHT = 6
+const ARROW_WIDTH = 12
 
 /**
  * Tooltip component that displays content on hover.
@@ -38,6 +43,7 @@ export function Tooltip({
   delay = 0,
 }: TooltipProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const arrowRef = useRef<SVGSVGElement>(null)
   const timeoutRef = useRef<number | null>(null)
 
   const { refs, floatingStyles, context } = useFloating({
@@ -45,9 +51,10 @@ export function Tooltip({
     onOpenChange: setIsOpen,
     placement,
     middleware: [
-      offset(8),
+      offset(ARROW_HEIGHT + 2),
       flip({ fallbackAxisSideDirection: 'start' }),
       shift({ padding: 8 }),
+      arrow({ element: arrowRef }),
     ],
     whileElementsMounted: autoUpdate,
   })
@@ -107,6 +114,13 @@ export function Tooltip({
             className={styles.tooltip}
           >
             {content}
+            <FloatingArrow
+              ref={arrowRef}
+              context={context}
+              width={ARROW_WIDTH}
+              height={ARROW_HEIGHT}
+              className={styles.arrow}
+            />
           </div>
         </FloatingPortal>
       )}

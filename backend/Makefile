@@ -2,6 +2,7 @@
 
 # 開発サーバーを起動
 dev:
+	PFS_OBSLOG_session_secret_key='???' \
 	uv run uvicorn pfs_obslog.main:app --reload --host 0.0.0.0 --port 8000
 
 # テストを実行

@@ -21,6 +21,10 @@
   word-wrap: break-word;
 }
 
+.arrow {
+  fill: rgba(0, 0, 0, 0.85);
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
