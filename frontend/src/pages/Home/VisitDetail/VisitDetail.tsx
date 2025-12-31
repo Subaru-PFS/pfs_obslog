@@ -209,8 +209,8 @@ export function VisitDetail() {
     )
   }
 
-  // isLoading は初回ロード時、isFetching はリフェッチや再取得時
-  if (isLoading || isFetching) {
+  // 初回ロード中（データがまだない）
+  if (isLoading) {
     return (
       <div className={styles.loading}>
         <LoadingSpinner />
@@ -236,6 +236,12 @@ export function VisitDetail() {
 
   return (
     <div className={styles.visitDetail}>
+      {/* 再取得中（前のデータを表示しながら）はオーバーレイ表示 */}
+      {isFetching && (
+        <div className={styles.loadingOverlay}>
+          <LoadingSpinner size={48} showText={false} />
+        </div>
+      )}
       <Summary visit={visit} />
       <div className={styles.inspector}>
         <VisitInspector visit={visit} />

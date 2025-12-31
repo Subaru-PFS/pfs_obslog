@@ -6,4 +6,7 @@
   まだ直ってないですね。
   Load more older visitsはうまく動いているので不思議です。
   
+  Next newer visitsボタンのtooltipの位置がまだおかしいですね。
+  
+
 * [ ] 追加のタスクがないか指示者に確認
