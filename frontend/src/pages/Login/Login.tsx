@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useLoginApiAuthLoginPostMutation } from '../../store/api/apiSlice'
+import { LoadingOverlay } from '../../components/LoadingOverlay'
 import styles from './Login.module.scss'
 
 interface LoginFormData {
@@ -46,6 +47,7 @@ export function Login() {
 
   return (
     <div className={styles.loginContainer}>
+      <LoadingOverlay isLoading={isLoading} fullScreen />
       <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
         <h1>PFS Obslog</h1>
         {error && <div className={styles.error}>{error}</div>}

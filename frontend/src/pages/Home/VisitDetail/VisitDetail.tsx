@@ -238,7 +238,7 @@ export function VisitDetail() {
   return (
     <div className={styles.visitDetail}>
       {/* 再取得中（前のデータを表示しながら）はオーバーレイ表示 */}
-      <LoadingOverlay isLoading={isFetching} size={48} />
+      <LoadingOverlay isLoading={isFetching} />
       <Summary visit={visit} />
       <div className={styles.inspector}>
         <VisitInspector visit={visit} />

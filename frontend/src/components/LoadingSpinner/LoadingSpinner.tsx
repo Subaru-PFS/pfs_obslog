@@ -15,7 +15,7 @@ export interface LoadingSpinnerProps {
  * Loading spinner component with optional text
  */
 export function LoadingSpinner({
-  size = 200,
+  size = 100,
   text = 'Loading...',
   showText = false,
   className = '',
