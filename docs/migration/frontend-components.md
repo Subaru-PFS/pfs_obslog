@@ -11,10 +11,10 @@
 | ページ・レイアウト | 3 | 0 | 1 | 75% |
 | 共通コンポーネント | 6 | 0 | 2 | 75% |
 | Home: Visit一覧 | 4 | 1 | 3 | 56% |
-| Home: Visit詳細 | 11 | 0 | 1 | 92% |
+| Home: Visit詳細 | 12 | 0 | 0 | 100% |
 | Home: Note機能 | 4 | 0 | 0 | 100% |
 | Designs機能 | 0 | 0 | 5 | 0% |
-| **合計** | **28** | **1** | **12** | **71%** |
+| **合計** | **29** | **1** | **11** | **73%** |
 
 ---
 
@@ -72,7 +72,7 @@
 | Visit Notes | `VisitDetail` (notes部分) | `VisitDetail` + `NoteList` | ✅ 完了 | メモのCRUD機能付き |
 | FITS Preview画像 | `SpsInspector` (LazyImage) | `SpsInspector` + `LazyImage` | ✅ 完了 | SPS FITSプレビュー画像表示 |
 | Image Type/Size選択 | `SpsInspector` (settings) | `SpsInspector` | ✅ 完了 | raw/postISRCCD、サイズ選択 |
-| FITS Header Info | `FitsHeaderInfo` | - | ⏳ 未実装 | FITSヘッダー表示（HDU選択、検索機能付き） |
+| FITS Header Info | `FitsHeaderInfo` | `FitsHeaderDialog` | ✅ 完了 | FITSヘッダー表示（HDU選択、検索機能付き）、ダイアログ形式 |
 | FITS Download | `SpsInspector` (downloadRawExposures) | `SpsInspector`, `McsInspector`, `AgcInspector` | ✅ 完了 | FITSファイルダウンロード |
 | MCS/AGC Preview画像 | `McsInspector`, `AgcInspector` | `McsInspector`, `AgcInspector` | ✅ 完了 | MCS/AGC FITSプレビュー画像表示 |
 
