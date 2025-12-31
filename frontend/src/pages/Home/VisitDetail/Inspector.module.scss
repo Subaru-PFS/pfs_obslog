@@ -370,3 +370,72 @@
     text-decoration: underline;
   }
 }
+
+// FITS Header Panel
+.headerPanel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.headerPanelTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  font-weight: 600;
+  color: #333;
+}
+
+.headerPanelContent {
+  flex: 1;
+  overflow: hidden;
+}
+
+.headerLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 32px;
+}
+
+.headerError {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 32px;
+  color: #d32f2f;
+}
+
+.headerPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 32px;
+  color: #666;
+  text-align: center;
+}
+
+.headerHint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #999;
+}
+
+.headerIcon {
+  font-family: 'Material Symbols Outlined';
+  font-size: 16px;
+  vertical-align: middle;
+}
+
+// Selected state for FITS header button
+.selected {
+  background-color: #1976d2 !important;
+  color: white !important;
+}

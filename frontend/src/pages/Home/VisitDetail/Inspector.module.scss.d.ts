@@ -24,8 +24,16 @@ export type Styles = {
   exposureTable: string;
   exptime: string;
   header: string;
+  headerError: string;
+  headerHint: string;
+  headerIcon: string;
   headerItem: string;
   headerLabel: string;
+  headerLoading: string;
+  headerPanel: string;
+  headerPanelContent: string;
+  headerPanelTitle: string;
+  headerPlaceholder: string;
   headerValue: string;
   infoGrid: string;
   infoLabel: string;
@@ -43,6 +51,7 @@ export type Styles = {
   previewContainer: string;
   previewInfo: string;
   scrollable: string;
+  selected: string;
   settings: string;
   settingsGroup: string;
   settingsLabel: string;

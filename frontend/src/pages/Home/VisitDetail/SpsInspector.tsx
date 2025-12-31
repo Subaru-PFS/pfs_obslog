@@ -4,6 +4,7 @@ import { LazyImage } from '../../../components/LazyImage'
 import { IconButton } from '../../../components/Icon'
 import { API_BASE_URL } from '../../../config'
 import { useHomeContext } from '../context'
+import { FitsHeaderDialog, type FitsId } from './FitsHeaderInfo'
 import styles from './Inspector.module.scss'
 
 type SpsImageType = 'raw' | 'postISRCCD'
@@ -78,6 +79,8 @@ export function SpsInspector({ sps }: SpsInspectorProps) {
   const exposures = sps.exposures ?? []
   const avgExptime = useMemo(() => calculateAverageExptime(exposures), [exposures])
   const [imageType, setImageType] = useState<SpsImageType>('raw')
+  const [imageScale, setImageScale] = useState<ImageScale>(1)
+  const [headerFitsId, setHeaderFitsId] = useState<FitsId | null>(null)
   const [imageScale, setImageScale] = useState<ImageScale>(1)
 
   // カメラIDでグループ化（arm x module）
@@ -208,6 +211,15 @@ export function SpsInspector({ sps }: SpsInspectorProps) {
                               </div>
                               <div className={styles.previewActions}>
                                 <IconButton
+                                  icon="view_column"
+                                  tooltip="Show FITS Header"
+                                  onClick={() => setHeaderFitsId({
+                                    type: 'sps',
+                                    visitId: selectedVisitId,
+                                    cameraId: exp.camera_id,
+                                  })}
+                                />
+                                <IconButton
                                   icon="visibility"
                                   tooltip="Open Large Preview"
                                   onClick={() => window.open(getSpsLargePreviewUrl(selectedVisitId, exp.camera_id))}
@@ -230,6 +242,14 @@ export function SpsInspector({ sps }: SpsInspectorProps) {
           </table>
         </div>
       </div>
+
+      {/* FITS Header Dialog */}
+      {headerFitsId && (
+        <FitsHeaderDialog
+          fitsId={headerFitsId}
+          onClose={() => setHeaderFitsId(null)}
+        />
+      )}
     </div>
   )
 }

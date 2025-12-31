@@ -9,6 +9,7 @@ import {
   useDeleteVisitNoteApiVisitsVisitIdNotesNoteIdDeleteMutation,
 } from '../../../store/api/enhancedApi'
 import { useHomeContext } from '../context'
+import { VisitDetailProvider, useVisitDetailContext } from './context'
 import { Tabs, TabPanel, type TabItem } from '../../../components/Tabs'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
@@ -18,6 +19,7 @@ import { McsInspector } from './McsInspector'
 import { AgcInspector } from './AgcInspector'
 import { IicSequenceInfo } from './IicSequenceInfo'
 import { SequenceGroupInfo } from './SequenceGroupInfo'
+import { FitsHeaderPanel } from './FitsHeaderPanel'
 import { getExposureColorStyle } from '../../../utils/exposureColors'
 import styles from './VisitDetail.module.scss'
 
@@ -120,10 +122,11 @@ interface VisitInspectorProps {
 }
 
 /** 固定タブのラベル（常に同じ順序で表示） */
-const TAB_LABELS = ['SpS', 'MCS', 'AGC', 'IIC Sequence', 'Sequence Group'] as const
+const TAB_LABELS = ['SpS', 'MCS', 'AGC', 'IIC Sequence', 'Sequence Group', 'FITS Header'] as const
 
 function VisitInspector({ visit }: VisitInspectorProps) {
   const [activeTabIndex, setActiveTabIndex] = useState(0)
+  const { fitsId } = useVisitDetailContext()
 
   // 各タブが利用可能かどうかを判定
   const hasSps = (visit.sps?.exposures?.length ?? 0) > 0
@@ -131,8 +134,16 @@ function VisitInspector({ visit }: VisitInspectorProps) {
   const hasAgc = (visit.agc?.exposures?.length ?? 0) > 0
   const hasIicSequence = !!visit.iic_sequence
   const hasSequenceGroup = !!visit.iic_sequence?.group
+  const hasFitsHeader = fitsId !== null // FITS Headerタブはfits選択時のみ有効
 
-  const tabAvailability = [hasSps, hasMcs, hasAgc, hasIicSequence, hasSequenceGroup]
+  const tabAvailability = [hasSps, hasMcs, hasAgc, hasIicSequence, hasSequenceGroup, hasFitsHeader]
+
+  // FITS Headerが選択されたら自動的にそのタブに切り替え
+  useEffect(() => {
+    if (fitsId !== null) {
+      setActiveTabIndex(5) // FITS Header tab
+    }
+  }, [fitsId])
 
   // 選択されたタブが利用不可の場合、最初の利用可能なタブに切り替え
   // すべてのタブが利用不可の場合は-1（選択なし）にする
@@ -176,6 +187,9 @@ function VisitInspector({ visit }: VisitInspectorProps) {
         {hasSequenceGroup && visit.iic_sequence?.group ? (
           <SequenceGroupInfo group={visit.iic_sequence.group} />
         ) : null}
+      </TabPanel>
+      <TabPanel active={activeTabIndex === 5}>
+        <FitsHeaderPanel />
       </TabPanel>
     </Tabs>
   )
@@ -228,13 +242,15 @@ export function VisitDetail() {
   }
 
   return (
-    <div className={styles.visitDetail}>
-      {/* 再取得中（前のデータを表示しながら）はオーバーレイ表示 */}
-      <LoadingOverlay isLoading={isFetching} />
-      <Summary visit={visit} />
-      <div className={styles.inspector}>
-        <VisitInspector visit={visit} />
+    <VisitDetailProvider>
+      <div className={styles.visitDetail}>
+        {/* 再取得中（前のデータを表示しながら）はオーバーレイ表示 */}
+        <LoadingOverlay isLoading={isFetching} />
+        <Summary visit={visit} />
+        <div className={styles.inspector}>
+          <VisitInspector visit={visit} />
+        </div>
       </div>
-    </div>
+    </VisitDetailProvider>
   )
 }

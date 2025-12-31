@@ -1,11 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { useGetMeApiAuthMeGetQuery, useLogoutApiAuthLogoutPostMutation } from '../../store/api/generatedApi'
 import { HomeProvider } from './context'
 import { VisitList } from './VisitList'
 import { VisitDetail } from './VisitDetail'
-import { Icon } from '../../components/Icon'
-import { Tooltip } from '../../components/Tooltip'
-import { LoadingOverlay } from '../../components/LoadingOverlay'
 import styles from './Home.module.scss'
 
 const DEFAULT_LEFT_PANE_WIDTH = 500
@@ -14,9 +10,6 @@ const MAX_LEFT_PANE_WIDTH = 1200
 const STORAGE_KEY = 'pfs-obslog:home:leftPaneWidth'
 
 function HomeContent() {
-  const { data: user } = useGetMeApiAuthMeGetQuery()
-  const [logout] = useLogoutApiAuthLogoutPostMutation()
-  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [leftPaneWidth, setLeftPaneWidth] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
     return saved ? parseInt(saved, 10) : DEFAULT_LEFT_PANE_WIDTH
@@ -54,40 +47,19 @@ function HomeContent() {
     }
   }, [isResizing, leftPaneWidth])
 
-  const handleLogout = async () => {
-    setIsLoggingOut(true)
-    await logout()
-    window.location.reload()
-  }
-
   return (
-    <div className={styles.home}>
-      <LoadingOverlay isLoading={isLoggingOut} fullScreen />
-      <header className={styles.header}>
-        <h1>PFS Obslog</h1>
-        <div className={styles.userInfo}>
-          {user && <span className={styles.username}>{user.user_id}</span>}
-          <Tooltip content="Logout">
-            <button className={styles.logoutButton} onClick={handleLogout}>
-              <Icon name="logout" size={18} />
-            </button>
-          </Tooltip>
-        </div>
-      </header>
+    <div className={styles.home} ref={containerRef}>
+      <div className={styles.leftPane} style={{ width: leftPaneWidth }}>
+        <VisitList />
+      </div>
 
-      <div className={styles.mainContent} ref={containerRef}>
-        <div className={styles.leftPane} style={{ width: leftPaneWidth }}>
-          <VisitList />
-        </div>
+      <div 
+        className={`${styles.resizer} ${isResizing ? styles.resizerActive : ''}`}
+        onMouseDown={handleMouseDown}
+      />
 
-        <div 
-          className={`${styles.resizer} ${isResizing ? styles.resizerActive : ''}`}
-          onMouseDown={handleMouseDown}
-        />
-
-        <div className={styles.rightPane}>
-          <VisitDetail />
-        </div>
+      <div className={styles.rightPane}>
+        <VisitDetail />
       </div>
     </div>
   )

@@ -2,55 +2,8 @@
 
 .home {
   display: flex;
-  flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background-color: $background-color;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 16px;
-  background-color: $header-background-color;
-  border-bottom: 1px solid $border-color;
-  flex-shrink: 0;
-
-  h1 {
-    margin: 0;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: $text-color;
-  }
-}
-
-.userInfo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.875rem;
-  color: $hint-text-color;
-
-  .username {
-    font-weight: 500;
-    color: $text-color;
-  }
-
-  .logoutButton {
-    padding: 6px;
-    font-size: 1rem;
-    @include button-secondary;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-.mainContent {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
 }
 
 .leftPane {
