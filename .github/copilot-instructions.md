@@ -90,3 +90,26 @@
 
 5. **サマリーテーブルの更新**
    - コンポーネントの状態を変更した際は、ページ上部のサマリーテーブルも更新
+
+### フィルター言語仕様書の更新ルール
+
+フィルター言語の仕様は [docs/filter-language.md](../docs/filter-language.md) で管理しています。
+
+以下のファイルを編集した場合は、必ず `docs/filter-language.md` も更新してください：
+
+1. **`backend/src/pfs_obslog/visitquery/columns.py`**
+   - 新しい仮想カラムを追加した場合 → 該当セクションにカラム定義を追加
+   - カラム定義を変更した場合 → 対応する説明を更新
+   - 集約カラムを追加した場合 → 「集約カラム」セクションを更新
+
+2. **`backend/src/pfs_obslog/visitquery/evaluator.py`**
+   - 新しい構文をサポートした場合 → 「サポートされる構文」セクションを更新
+   - `_get_any_column_columns()` を変更した場合 → `any_column` の検索対象カラムを更新
+   - 型キャストを追加した場合 → 「型キャスト」セクションを更新
+
+3. **`backend/src/pfs_obslog/visitquery/parser.py`**
+   - 許可する関数を変更した場合 → 「許可される関数」セクションを更新
+   - セキュリティ制限を変更した場合 → 「セキュリティ制限」セクションを更新
+
+4. **`backend/src/pfs_obslog/visitquery/joins.py`**
+   - JOIN依存関係を変更した場合 → 「JOIN依存関係」セクションを更新
