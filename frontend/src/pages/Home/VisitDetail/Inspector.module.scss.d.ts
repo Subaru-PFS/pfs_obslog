@@ -11,7 +11,6 @@ export type Styles = {
   content: string;
   dataTable: string;
   emptyCell: string;
-  exposureCell: string;
   exposureInfo: string;
   exposureTable: string;
   exptime: string;
@@ -30,6 +29,13 @@ export type Styles = {
   notesSection: string;
   noteUser: string;
   pagination: string;
+  previewCell: string;
+  previewContainer: string;
+  previewInfo: string;
+  scrollable: string;
+  settings: string;
+  settingsGroup: string;
+  settingsLabel: string;
 };
 
 export type ClassNames = keyof Styles;

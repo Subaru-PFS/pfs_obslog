@@ -1,0 +1,46 @@
+@use '../../styles/theme' as *;
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: $distant-background;
+  padding: 2px;
+  transition: background-color 0.2s;
+
+  &.transparent {
+    background-color: transparent;
+  }
+}
+
+.image {
+  opacity: 0;
+  transition: opacity 0.2s;
+
+  &.ready {
+    opacity: 1;
+  }
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.errorActions {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
