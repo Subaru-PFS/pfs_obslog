@@ -184,9 +184,9 @@ class ObslogUser(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     account_name: Mapped[str] = mapped_column(String, nullable=False)
 
-    obslog_visit_note: Mapped[list['ObslogVisitNote']] = relationship('ObslogVisitNote', back_populates='user')
-    obslog_mcs_exposure_note: Mapped[list['ObslogMcsExposureNote']] = relationship('ObslogMcsExposureNote', back_populates='user')
-    obslog_visit_set_note: Mapped[list['ObslogVisitSetNote']] = relationship('ObslogVisitSetNote', back_populates='user')
+    obslog_visit_note: Mapped[list['ObslogVisitNote']] = relationship('ObslogVisitNote', back_populates='user', default_factory=list)
+    obslog_mcs_exposure_note: Mapped[list['ObslogMcsExposureNote']] = relationship('ObslogMcsExposureNote', back_populates='user', default_factory=list)
+    obslog_visit_set_note: Mapped[list['ObslogVisitSetNote']] = relationship('ObslogVisitSetNote', back_populates='user', default_factory=list)
 
 
 class PfsDesign(Base):

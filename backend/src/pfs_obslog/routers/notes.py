@@ -69,7 +69,7 @@ def get_user_id(
 
     if user is None:
         # ユーザーが存在しない場合は自動作成
-        user = M.ObslogUser(account_name=account_name)  # type: ignore[call-arg]
+        user = M.ObslogUser(account_name=account_name)
         db.add(user)
         db.commit()
         db.refresh(user)

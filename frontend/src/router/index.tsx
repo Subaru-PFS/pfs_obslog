@@ -1,6 +1,7 @@
 import { createHashRouter, Navigate } from 'react-router-dom'
 import { Login } from '../pages/Login'
 import { Home } from '../pages/Home'
+import { SqlSyntaxHelp } from '../pages/SqlSyntaxHelp'
 import { RequireAuth } from '../components/Auth/RequireAuth'
 import { Layout } from '../components/Layout'
 
@@ -26,6 +27,10 @@ export const router = createHashRouter([
       {
         index: true,
         element: <Home />,
+      },
+      {
+        path: 'sql-syntax-help',
+        element: <SqlSyntaxHelp />,
       },
       {
         path: 'designs',

@@ -1,5 +1,4 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
 import type { MaterialSymbol } from 'material-symbols'
 import {
   useListVisitsApiVisitsGetQuery,
@@ -393,6 +392,8 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
 }
 
 export function VisitList() {
+  const { selectedVisitId, setSelectedVisitId } = useHomeContext()
+  
   const [searchQuery, setSearchQuery] = useState('')
   const [appliedSql, setAppliedSql] = useState<string | null>(null)
   const [dateRange, setDateRange] = useState<DateRange>([undefined, undefined])
@@ -651,8 +652,6 @@ export function VisitList() {
   }, [])
 
   // キーボードナビゲーション
-  const { selectedVisitId, setSelectedVisitId } = useHomeContext()
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!data || data.visits.length === 0) return
@@ -759,7 +758,7 @@ export function VisitList() {
           <Tooltip content="Syntax Docs">
             <button
               className={styles.toolbarButton}
-              onClick={() => window.open('/visits/sql-syntax-help', '_blank')}
+              onClick={() => window.open('/#/sql-syntax-help', '_blank')}
             >
               <Icon name="help" size={18} />
             </button>

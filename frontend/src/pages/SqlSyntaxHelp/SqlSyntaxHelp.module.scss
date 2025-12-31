@@ -1,0 +1,119 @@
+@use '/src/styles/theme.scss' as *;
+
+.root {
+  padding: 1em;
+  overflow: auto;
+  max-width: 1000px;
+  margin: 0 auto;
+
+  h1 {
+    color: $text-color;
+    margin-bottom: 1em;
+  }
+
+  h2 {
+    color: $text-color;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  p {
+    margin-bottom: 1em;
+    line-height: 1.6;
+  }
+
+  a {
+    color: $link-color;
+    text-decoration: underline;
+
+    &:hover {
+      color: $text-color;
+    }
+  }
+}
+
+.virtualTable {
+  border-radius: $border-radius-md;
+  box-shadow: $medium-shadow;
+  overflow: hidden;
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 1em;
+
+  td,
+  th {
+    padding: 0.5em 1em;
+    text-align: left;
+  }
+
+  th {
+    background-color: $header-background-color;
+    font-weight: bold;
+  }
+
+  tr:not(:last-child) {
+    td,
+    th {
+      border: 1px $ruled-line-color solid;
+      border-width: 1px 0;
+    }
+  }
+
+  tbody {
+    td:nth-child(1),
+    td:nth-child(2) {
+      font-family: $font-family-mono;
+      font-size: $font-size-sm;
+    }
+
+    td:nth-child(3) {
+      white-space: pre-wrap;
+    }
+  }
+}
+
+.examples {
+  display: block;
+
+  dt {
+    font-weight: bold;
+    margin-top: 1em;
+  }
+
+  dd {
+    margin-bottom: 1.5em;
+    margin-left: 0;
+
+    p {
+      margin-bottom: 0.5em;
+      color: $hint-text-color;
+    }
+  }
+
+  pre {
+    border-radius: $border-radius-md;
+    padding: $spacing-sm $spacing-md;
+    background-color: $sql-background-color;
+    color: $sql-text-color;
+    box-shadow: 0 0 4px $sql-color;
+    cursor: pointer;
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    overflow-x: auto;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px $sql-color;
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    code {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  }
+}
