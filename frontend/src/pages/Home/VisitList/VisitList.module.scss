@@ -78,9 +78,9 @@ $pagination-border-radius: 12px;
   margin: 0 12px;
   background-color: transparent;
 
-  // Target the Tooltip wrapper spans and their buttons
+  // Tooltip wrapper spans should be flex items
   > span {
-    display: contents;
+    display: flex;
   }
 }
 
@@ -92,7 +92,6 @@ $pagination-border-radius: 12px;
 
   > span:nth-child(2) {
     flex-grow: 1;
-    display: flex;
     margin: 0 4px;
 
     .paginationButton {
@@ -114,7 +113,6 @@ $pagination-border-radius: 12px;
 
   > span:nth-child(2) {
     flex-grow: 1;
-    display: flex;
     margin: 0 4px;
 
     .paginationButton {
