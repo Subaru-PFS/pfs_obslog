@@ -6,12 +6,10 @@ WHERE句で使用されるカラムに基づいて必要なJOINのみを追加�
 使用して行います。
 """
 
-from typing import Any, TypeVar
+from typing import Any
 
 from sqlalchemy import Select
 from sqlalchemy.orm import aliased
-
-T = TypeVar("T")
 
 
 # JOINの依存関係（順序が重要）
@@ -65,7 +63,7 @@ class JoinBuilder:
         self.visit_set_note_user = aliased(models.ObslogUser)
         self.mcs_exposure_note_user = aliased(models.ObslogUser)
 
-    def apply_joins(self, query: Select[T], required_joins: set[str]) -> Select[T]:
+    def apply_joins(self, query: Select[Any], required_joins: set[str]) -> Select[Any]:
         """
         必要なJOINをクエリに適用
 
@@ -103,7 +101,7 @@ class JoinBuilder:
 
         return all_joins
 
-    def _apply_single_join(self, query: Query[T], join_name: str) -> Query[T]:
+    def _apply_single_join(self, query: Select[Any], join_name: str) -> Select[Any]:
         """単一のJOINを適用"""
         M = self.models
 

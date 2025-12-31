@@ -32,6 +32,7 @@ export type Styles = {
   headerLoading: string;
   headerPanel: string;
   headerPanelContent: string;
+  headerPanelPlaceholder: string;
   headerPanelTitle: string;
   headerPlaceholder: string;
   headerValue: string;

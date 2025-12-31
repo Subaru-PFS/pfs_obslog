@@ -4,7 +4,6 @@ import { LazyImage } from '../../../components/LazyImage'
 import { IconButton } from '../../../components/Icon'
 import { API_BASE_URL } from '../../../config'
 import { useHomeContext } from '../context'
-import { useVisitDetailContext } from './context'
 import styles from './Inspector.module.scss'
 
 type ImageScale = 0.5 | 0.67 | 1
@@ -46,7 +45,6 @@ function getAgcFitsDownloadUrl(visitId: number, exposureId: number): string {
 
 export function AgcInspector({ agc }: AgcInspectorProps) {
   const { selectedVisitId } = useHomeContext()
-  const { fitsId, setFitsId } = useVisitDetailContext()
   const exposures = agc.exposures ?? []
   const avgExptime = useMemo(() => calculateAverageExptime(exposures), [exposures])
   const [page, setPage] = useState(0)
@@ -146,12 +144,6 @@ export function AgcInspector({ agc }: AgcInspectorProps) {
               visitId={selectedVisitId!}
               cameraSize={cameraSize}
               scale={imageScale}
-              isSelected={fitsId?.type === 'agc' && fitsId?.fitsId === exp.id}
-              onShowHeader={() => setFitsId({
-                type: 'agc',
-                visitId: selectedVisitId!,
-                fitsId: exp.id,
-              })}
             />
           ))}
         </div>
@@ -165,11 +157,9 @@ interface AgcExposureCardProps {
   visitId: number
   cameraSize: { width: number; height: number }
   scale: ImageScale
-  isSelected: boolean
-  onShowHeader: () => void
 }
 
-function AgcExposureCard({ exposure, visitId, cameraSize, scale, isSelected, onShowHeader }: AgcExposureCardProps) {
+function AgcExposureCard({ exposure, visitId, cameraSize, scale }: AgcExposureCardProps) {
   const guideOffset = exposure.guide_offset
 
   return (

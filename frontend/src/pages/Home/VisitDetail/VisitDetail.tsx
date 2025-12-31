@@ -120,7 +120,7 @@ interface VisitInspectorProps {
 }
 
 /** 固定タブのラベル（常に同じ順序で表示） */
-const TAB_LABELS = ['SpS', 'MCS', 'AGC', 'IIC Sequence', 'Sequence Group'] as const
+const TAB_LABELS = ['SpS', 'MCS', 'AGC', 'IIC Sequence', 'Sequence Group', 'FITS Header'] as const
 
 function VisitInspector({ visit }: VisitInspectorProps) {
   const [activeTabIndex, setActiveTabIndex] = useState(0)
@@ -131,8 +131,10 @@ function VisitInspector({ visit }: VisitInspectorProps) {
   const hasAgc = (visit.agc?.exposures?.length ?? 0) > 0
   const hasIicSequence = !!visit.iic_sequence
   const hasSequenceGroup = !!visit.iic_sequence?.group
+  // FITS Header tab is always available when there are any exposures
+  const hasFitsHeader = hasSps || hasMcs || hasAgc
 
-  const tabAvailability = [hasSps, hasMcs, hasAgc, hasIicSequence, hasSequenceGroup]
+  const tabAvailability = [hasSps, hasMcs, hasAgc, hasIicSequence, hasSequenceGroup, hasFitsHeader]
 
   // 選択されたタブが利用不可の場合、最初の利用可能なタブに切り替え
   // すべてのタブが利用不可の場合は-1（選択なし）にする
@@ -178,7 +180,7 @@ function VisitInspector({ visit }: VisitInspectorProps) {
         ) : null}
       </TabPanel>
       <TabPanel active={activeTabIndex === 5}>
-        <FitsHeaderPanel />
+        {hasFitsHeader ? <FitsHeaderPanel /> : null}
       </TabPanel>
     </Tabs>
   )

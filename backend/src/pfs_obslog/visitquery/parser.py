@@ -103,8 +103,8 @@ def validate_expression(node: ast.Node) -> None:
 def _get_func_name(func_call: ast.FuncCall) -> str:
     """関数名を取得"""
     if func_call.funcname:
-        names = [
-            n.sval if isinstance(n, ast.String) else str(n) for n in func_call.funcname
+        names: list[str] = [
+            n.sval if isinstance(n, ast.String) else str(n) for n in func_call.funcname  # type: ignore[union-attr]
         ]
         return ".".join(names)
     return ""  # pragma: no cover

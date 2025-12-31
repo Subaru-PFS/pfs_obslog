@@ -169,7 +169,7 @@ class QueryEvaluator:
 
         # any_column の特殊処理
         if self._is_any_column_value(left) or self._is_any_column_value(right):
-            return self._eval_any_column_op(op, left, right, node)
+            return self._eval_any_column_op(op, left, right, node)  # type: ignore[arg-type]
 
         ops = {
             "=": lambda l, r: l == r,
@@ -239,10 +239,10 @@ class QueryEvaluator:
         """any_columnカラムかどうかを判定"""
         if not isinstance(node, ast.ColumnRef):
             return False
-        if len(node.fields) != 1:
+        if len(node.fields) != 1:  # type: ignore[arg-type]
             return False
-        field = node.fields[0]
-        return isinstance(field, ast.String) and field.sval.lower() == "any_column"
+        field = node.fields[0]  # type: ignore[index]
+        return isinstance(field, ast.String) and field.sval.lower() == "any_column"  # type: ignore[union-attr]
 
     def _is_any_column_value(self, value: Any) -> bool:
         """評価結果がany_columnマーカーかどうかを判定"""
@@ -278,23 +278,23 @@ class QueryEvaluator:
         boolop = node.boolop
 
         if boolop == enums.BoolExprType.AND_EXPR:
-            return and_(*[self.evaluate(arg) for arg in node.args])
+            return and_(*[self.evaluate(arg) for arg in node.args])  # type: ignore[union-attr, misc]
         elif boolop == enums.BoolExprType.OR_EXPR:
-            return or_(*[self.evaluate(arg) for arg in node.args])
+            return or_(*[self.evaluate(arg) for arg in node.args])  # type: ignore[union-attr, misc]
         elif boolop == enums.BoolExprType.NOT_EXPR:
-            if len(node.args) != 1:
+            if len(node.args) != 1:  # type: ignore[arg-type]
                 raise QueryParseError("NOT expression requires exactly one argument")
-            inner = self.evaluate(node.args[0])
+            inner = self.evaluate(node.args[0])  # type: ignore[index]
             # NOT NULL の場合の特殊処理
             # not_(x) は x が NULL の場合 NULL を返すが、
             # 実用上は NULL も false として扱いたい
-            return not_(inner) | (inner == None)  # noqa: E711
+            return not_(inner) | (inner == None)  # type: ignore[arg-type]  # noqa: E711
         else:
             raise QueryParseError(f"Unsupported boolean operator: {boolop}")
 
     def eval_NullTest(self, node: ast.NullTest) -> ColumnElement[Any]:
         """IS NULL / IS NOT NULL"""
-        arg = self.evaluate(node.arg)
+        arg = self.evaluate(node.arg)  # type: ignore[arg-type]
 
         if node.nulltesttype == enums.NullTestType.IS_NULL:
             return arg == None  # noqa: E711
@@ -311,9 +311,9 @@ class QueryEvaluator:
 
         arg = node.arg
         if (
-            len(arg.fields) != 1
-            or not isinstance(arg.fields[0], ast.String)
-            or arg.fields[0].sval.lower() != "fits_header"
+            len(arg.fields) != 1  # type: ignore[arg-type]
+            or not isinstance(arg.fields[0], ast.String)  # type: ignore[index]
+            or arg.fields[0].sval.lower() != "fits_header"  # type: ignore[index, union-attr]
         ):
             raise QueryParseError("Indirection is only supported for fits_header")
 
@@ -321,10 +321,10 @@ class QueryEvaluator:
         self.required_joins.update(VIRTUAL_COLUMNS["fits_header"].required_joins)
 
         # インデックスを取得
-        if len(node.indirection) != 1:
+        if len(node.indirection) != 1:  # type: ignore[arg-type]
             raise QueryParseError("fits_header requires exactly one key access")
 
-        idx = node.indirection[0]
+        idx = node.indirection[0]  # type: ignore[index]
         if not isinstance(idx, ast.A_Indices):
             raise QueryParseError(f"Invalid indirection type: {type(idx).__name__}")
 
@@ -343,12 +343,12 @@ class QueryEvaluator:
 
     def eval_TypeCast(self, node: ast.TypeCast) -> ColumnElement[Any]:
         """型キャスト"""
-        arg = self.evaluate(node.arg)
+        arg = self.evaluate(node.arg)  # type: ignore[arg-type]
 
         type_names = [
-            n.sval if isinstance(n, ast.String) else str(n) for n in node.typeName.names
+            n.sval if isinstance(n, ast.String) else str(n) for n in node.typeName.names  # type: ignore[union-attr]
         ]
-        type_str = ".".join(type_names).lower()
+        type_str = ".".join(type_names).lower()  # type: ignore[arg-type]
 
         if type_str == "date":
             from sqlalchemy import Date
