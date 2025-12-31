@@ -55,6 +55,16 @@ timeout = 1  # デフォルト1秒タイムアウト
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
 ]
+filterwarnings = [
+    "error",  # 警告をエラーとして扱う
+    # 外部ライブラリの非推奨警告は無視
+    "ignore:tagMap is deprecated:DeprecationWarning:pyasn1",
+    "ignore:typeMap is deprecated:DeprecationWarning:pyasn1",
+    # SQLAlchemy: 継承クラスの同名カラムに関する警告（データベーススキーマの制約）
+    "ignore:Implicitly combining column.*under attribute 'flags':sqlalchemy.exc.SAWarning",
+    # SQLAlchemy: 継承テーブルの自動エイリアス生成に関する警告（JOINクエリの仕様上必要）
+    "ignore:An alias is being generated automatically against joined entity:sqlalchemy.exc.SAWarning",
+]
 
 [tool.pytest_env]
 # 環境変数を設定する場合はここに追加

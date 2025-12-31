@@ -23,6 +23,13 @@
 - **バックエンド（エラーメッセージ）:** ユーザーに伝わるエラーメッセージは英語を使用してください
 - **コード内のコメント・ドキュメント:** 日本語でも英語でも可
 
+## 自動生成ファイル
+
+以下のファイルは自動生成されるため、直接編集しないでください：
+
+- **`backend/src/pfs_obslog/models.py`**: `backend/devel/generate_models.py` によりDBスキーマから自動生成
+- **`frontend/src/store/api/generatedApi.ts`**: OpenAPIスキーマから自動生成
+
 ## 作業について
 
 以下を守ってください。
