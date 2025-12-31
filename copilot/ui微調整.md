@@ -1,18 +1,8 @@
-* [x] Homeの左側ペインの幅が足りないときは横スクロースできるようにしてください。
+* [ ] visit set listのテーブルの各列の余白(padding)が広すぎます。もっと詰めてください。
 
-* [x] `Search or enter ...`を含む行の要素の高さが揃うようにしてください。
+* [ ] visit set listのテーブルの各セルの内容が長すぎる場合、tooltipで全文を表示するようにしてください。
 
-* [x] visit set listのテーブルの各列の余白？が広すぎます。
-
-* [x] visit set listのテーブルの内容の入りきらなかったテキストはマウスオーバーで全文表示されるようにしてください。
-
-* [x] Homeの左側のペインの横スクロールがまだうまくいっていません。visit setがoverflow: hiddenになっているから？
-
-* [x] visit setがNo Sequenceの場合の背景色が暗すぎます。No sequenceじゃないときと合わせてください。
-
-* [ ] visit detailのExposures (S/M/A)の背景色をvisit set listのNumber of {SpS, ...} Exposuresのものと合わせてください。（コードを共用するべきでしょう。）
-
-* [ ] visit set listのcommentやcommandがものによっては非常に長くて、これによって左ペインの横幅が決まると困ります。何とかなりますか？
+* [ ] visit set listのNext {newer, older} visitsをクリックした時にvist set listがスクロールします。このスクロールのタイミングをデータのロード完了後に変更してください。
 
 * [ ] 追加の依頼がないか指示者に確認する
 

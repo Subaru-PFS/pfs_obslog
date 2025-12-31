@@ -5,6 +5,10 @@
 ```bash
 cd backend
 uv sync --all-extras
+
+# PFS datamodel と pfs_utils のインストール（external/ からのサブモジュール）
+uv pip install -e ../external/pfs-datamodel
+uv pip install --no-deps -e ../external/pfs_utils
 ```
 
 ## 開発

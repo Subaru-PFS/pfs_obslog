@@ -322,8 +322,8 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
                     {visit.description || '-'}
                   </td>
                 )}
-                {columns.date && <td className={styles.colDate}>{date}</td>}
-                {columns.time && <td className={styles.colTime}>{time}</td>}
+                {columns.date && <td className={styles.colDate} title={date}>{date}</td>}
+                {columns.time && <td className={styles.colTime} title={time}>{time}</td>}
                 {columns.exposures && (
                   <td
                     className={`${styles.colExposures} ${getExposureClass(
@@ -331,47 +331,48 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
                       visit.n_mcs_exposures ?? 0,
                       visit.n_agc_exposures ?? 0
                     )}`}
+                    title={`SPS: ${visit.n_sps_exposures ?? 0}, MCS: ${visit.n_mcs_exposures ?? 0}, AGC: ${visit.n_agc_exposures ?? 0}`}
                   >
                     {visit.n_sps_exposures ?? 0}/{visit.n_mcs_exposures ?? 0}/{visit.n_agc_exposures ?? 0}
                   </td>
                 )}
                 {columns.exptime && (
-                  <td className={styles.colExptime}>
+                  <td className={styles.colExptime} title={visit.avg_exptime ? `${visit.avg_exptime.toFixed(3)} s` : ''}>
                     {visit.avg_exptime ? visit.avg_exptime.toFixed(1) : '-'}
                   </td>
                 )}
                 {columns.pfs_design_id && (
-                  <td className={styles.colDesign} title={visit.pfs_design_id || ''}>
+                  <td className={styles.colDesign} title={visit.pfs_design_id ? `0x${visit.pfs_design_id}` : ''}>
                     {visit.pfs_design_id ? `0x${visit.pfs_design_id}` : '-'}
                   </td>
                 )}
                 {columns.ra && (
-                  <td className={styles.colCoord}>
+                  <td className={styles.colCoord} title={visit.avg_ra !== null && visit.avg_ra !== undefined ? `RA: ${visit.avg_ra.toFixed(6)}°` : ''}>
                     {visit.avg_ra !== null && visit.avg_ra !== undefined ? visit.avg_ra.toFixed(1) : '-'}
                   </td>
                 )}
                 {columns.dec && (
-                  <td className={styles.colCoord}>
+                  <td className={styles.colCoord} title={visit.avg_dec !== null && visit.avg_dec !== undefined ? `Dec: ${visit.avg_dec.toFixed(6)}°` : ''}>
                     {visit.avg_dec !== null && visit.avg_dec !== undefined ? visit.avg_dec.toFixed(1) : '-'}
                   </td>
                 )}
                 {columns.azimuth && (
-                  <td className={styles.colCoord}>
+                  <td className={styles.colCoord} title={visit.avg_azimuth !== null && visit.avg_azimuth !== undefined ? `Az: ${visit.avg_azimuth.toFixed(4)}°` : ''}>
                     {visit.avg_azimuth !== null && visit.avg_azimuth !== undefined ? visit.avg_azimuth.toFixed(2) : '-'}
                   </td>
                 )}
                 {columns.altitude && (
-                  <td className={styles.colCoord}>
+                  <td className={styles.colCoord} title={visit.avg_altitude !== null && visit.avg_altitude !== undefined ? `Alt: ${visit.avg_altitude.toFixed(4)}°` : ''}>
                     {visit.avg_altitude !== null && visit.avg_altitude !== undefined ? visit.avg_altitude.toFixed(2) : '-'}
                   </td>
                 )}
                 {columns.insrot && (
-                  <td className={styles.colCoord}>
+                  <td className={styles.colCoord} title={visit.avg_insrot !== null && visit.avg_insrot !== undefined ? `InsRot: ${visit.avg_insrot.toFixed(4)}°` : ''}>
                     {visit.avg_insrot !== null && visit.avg_insrot !== undefined ? visit.avg_insrot.toFixed(2) : '-'}
                   </td>
                 )}
                 {columns.notes && (
-                  <td className={styles.colNotes}>
+                  <td className={styles.colNotes} title={visit.notes && visit.notes.length > 0 ? `${visit.notes.length} note(s)` : ''}>
                     {(visit.notes?.length ?? 0) > 0 && (
                       <span className={styles.notesBadge}>{visit.notes?.length}</span>
                     )}
