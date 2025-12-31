@@ -1,6 +1,9 @@
 export type Styles = {
-  icon: string;
-  iconButton: string;
+  buttons: string;
+  header: string;
+  logo: string;
+  spacer: string;
+  user: string;
 };
 
 export type ClassNames = keyof Styles;

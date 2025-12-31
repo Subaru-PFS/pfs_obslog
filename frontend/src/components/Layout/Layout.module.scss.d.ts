@@ -1,6 +1,6 @@
 export type Styles = {
-  icon: string;
-  iconButton: string;
+  layout: string;
+  main: string;
 };
 
 export type ClassNames = keyof Styles;

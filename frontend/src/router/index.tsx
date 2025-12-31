@@ -1,7 +1,8 @@
-import { createHashRouter, Navigate, Outlet } from 'react-router-dom'
+import { createHashRouter, Navigate } from 'react-router-dom'
 import { Login } from '../pages/Login'
 import { Home } from '../pages/Home'
 import { RequireAuth } from '../components/Auth/RequireAuth'
+import { Layout } from '../components/Layout'
 
 /**
  * ルート設定
@@ -18,13 +19,17 @@ export const router = createHashRouter([
     path: '/',
     element: (
       <RequireAuth>
-        <Outlet />
+        <Layout />
       </RequireAuth>
     ),
     children: [
       {
         index: true,
         element: <Home />,
+      },
+      {
+        path: 'designs',
+        element: <div>Designs page (coming soon)</div>,
       },
     ],
   },
