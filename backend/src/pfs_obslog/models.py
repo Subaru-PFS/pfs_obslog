@@ -601,8 +601,8 @@ class ObslogVisitNote(Base):
     user_id: Mapped[Optional[int]] = mapped_column(Integer)
     pfs_visit_id: Mapped[Optional[int]] = mapped_column(Integer)
 
-    pfs_visit: Mapped[Optional['PfsVisit']] = relationship('PfsVisit', back_populates='obslog_visit_note')
-    user: Mapped[Optional['ObslogUser']] = relationship('ObslogUser', back_populates='obslog_visit_note')
+    pfs_visit: Mapped[Optional['PfsVisit']] = relationship('PfsVisit', back_populates='obslog_visit_note', default=None)
+    user: Mapped[Optional['ObslogUser']] = relationship('ObslogUser', back_populates='obslog_visit_note', default=None)
 
 
 t_pfs_config = Table(
@@ -956,8 +956,8 @@ class ObslogMcsExposureNote(Base):
     user_id: Mapped[Optional[int]] = mapped_column(Integer)
     mcs_exposure_frame_id: Mapped[Optional[int]] = mapped_column(Integer)
 
-    mcs_exposure_frame: Mapped[Optional['McsExposure']] = relationship('McsExposure', back_populates='obslog_mcs_exposure_note')
-    user: Mapped[Optional['ObslogUser']] = relationship('ObslogUser', back_populates='obslog_mcs_exposure_note')
+    mcs_exposure_frame: Mapped[Optional['McsExposure']] = relationship('McsExposure', back_populates='obslog_mcs_exposure_note', default=None)
+    user: Mapped[Optional['ObslogUser']] = relationship('ObslogUser', back_populates='obslog_mcs_exposure_note', default=None)
 
 
 class ObslogVisitSetNote(Base):
@@ -973,8 +973,8 @@ class ObslogVisitSetNote(Base):
     user_id: Mapped[Optional[int]] = mapped_column(Integer)
     iic_sequence_id: Mapped[Optional[int]] = mapped_column(Integer)
 
-    iic_sequence: Mapped[Optional['IicSequence']] = relationship('IicSequence', back_populates='obslog_visit_set_note')
-    user: Mapped[Optional['ObslogUser']] = relationship('ObslogUser', back_populates='obslog_visit_set_note')
+    iic_sequence: Mapped[Optional['IicSequence']] = relationship('IicSequence', back_populates='obslog_visit_set_note', default=None)
+    user: Mapped[Optional['ObslogUser']] = relationship('ObslogUser', back_populates='obslog_visit_set_note', default=None)
 
 
 class PfsConfigAgc(Base):

@@ -8,13 +8,13 @@
 
 | カテゴリ | 完了 | 一部完了 | 未完了 | 進捗率 |
 |----------|------|----------|--------|--------|
-| ページ・レイアウト | 3 | 0 | 1 | 75% |
+| ページ・レイアウト | 4 | 0 | 1 | 80% |
 | 共通コンポーネント | 7 | 0 | 1 | 88% |
-| Home: Visit一覧 | 6 | 1 | 1 | 81% |
+| Home: Visit一覧 | 8 | 0 | 0 | 100% |
 | Home: Visit詳細 | 12 | 0 | 0 | 100% |
 | Home: Note機能 | 4 | 0 | 0 | 100% |
 | Designs機能 | 0 | 0 | 5 | 0% |
-| **合計** | **32** | **1** | **8** | **80%** |
+| **合計** | **35** | **0** | **7** | **83%** |
 
 ---
 
@@ -25,6 +25,7 @@
 | Login | `pages/Login` | Login | `pages/Login` | ✅ 完了 | ログインフォーム |
 | Header | `pages/Header` | Header | `components/Header` | ✅ 完了 | ヘッダー（ナビゲーション、ログアウト） |
 | Home | `pages/Home` | Home | `pages/Home` | ✅ 完了 | Visit一覧・詳細ページ |
+| SqlSyntaxHelp | `pages/Home/SqlSyntaxHelp` | SqlSyntaxHelp | `pages/SqlSyntaxHelp` | ✅ 完了 | SQL構文ヘルプページ |
 | Designs | `pages/Designs` | - | - | ⏳ 未実装 | PFS Design一覧・詳細ページ |
 
 ---
@@ -54,10 +55,10 @@
 | 列表示の切り替え | `VisitSetList/Columns` | `VisitList` (ColumnSelector) | ✅ 完了 | 表示列選択UI |
 | SQLフィルタリング | `VisitSetList/SearchTextBox` | `VisitList` (SearchBar) | ✅ 完了 | WHERE句による検索 |
 | ページネーション | `VisitSetList/Paginator` | `VisitList` (Paginator) | ✅ 完了 | オフセット/リミット |
-| Go to Visit | `VisitSetList/ToolBar` (goToVisit) | `VisitList` | 🔶 一部完了 | UI実装済み、バックエンドAPI未実装 |
+| Go to Visit | `VisitSetList/ToolBar` (goToVisit) | `VisitList` | ✅ 完了 | Visit IDで直接ジャンプ |
 | CSVダウンロード | `VisitSetList/ToolBar` (downloadCsv) | `VisitList` | ✅ 完了 | 一覧のCSVエクスポート |
 | 日付範囲フィルター | `VisitSetList/SearchConditions` | `VisitList` + `DateRangePicker` | ✅ 完了 | issued_atによる日付絞り込み |
-| SQLシンタックスヘルプ | `SqlSyntaxHelp` | - | ⏳ 未実装 | SQL構文のヘルプダイアログ |
+| SQLシンタックスヘルプ | `SqlSyntaxHelp` | `SqlSyntaxHelp` | ✅ 完了 | SQL構文のヘルプページ |
 
 ### Visit詳細 (VisitDetail)
 
@@ -129,3 +130,4 @@
 | 2024-12-30 | 初版作成 |
 | 2024-12-30 | コンポーネント単位の詳細な機能一覧に更新 |
 | 2024-12-31 | Header, Layout, NoteList, LazyImage, SPS FITS Preview 完了 |
+| 2025-12-31 | Go to Visit, SQLシンタックスヘルプページ完了 |
