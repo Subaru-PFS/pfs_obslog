@@ -288,19 +288,19 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
       <table className={styles.visitTable}>
         <thead>
           <tr>
-            {columns.id && <Tooltip content="Visit ID"><th className={styles.colId}>ID</th></Tooltip>}
-            {columns.description && <Tooltip content="Description"><th className={styles.colDescription}><Icon name="description" size={14} /></th></Tooltip>}
-            {columns.date && <Tooltip content="Date issued at"><th className={styles.colDate}><Icon name="event" size={14} /></th></Tooltip>}
-            {columns.time && <Tooltip content="Time issued at"><th className={styles.colTime}><Icon name="schedule" size={14} /></th></Tooltip>}
-            {columns.exposures && <Tooltip content="Number of {SpS | MCS | AGC} Exposures"><th className={styles.colExposures}><Icon name="tag" size={14} /></th></Tooltip>}
-            {columns.exptime && <Tooltip content="Exposure Time [s]"><th className={styles.colExptime}><Icon name="shutter_speed" size={14} /></th></Tooltip>}
-            {columns.pfs_design_id && <Tooltip content="PFS Design ID (HEX)"><th className={styles.colDesign}><Icon name="design_services" size={14} /></th></Tooltip>}
-            {columns.ra && <Tooltip content="Right Ascension [°]"><th className={styles.colCoord}>α</th></Tooltip>}
-            {columns.dec && <Tooltip content="Declination [°]"><th className={styles.colCoord}>δ</th></Tooltip>}
-            {columns.azimuth && <Tooltip content="Azimuth [°]"><th className={styles.colCoord}>A°</th></Tooltip>}
-            {columns.altitude && <Tooltip content="Altitude [°]"><th className={styles.colCoord}>E°</th></Tooltip>}
-            {columns.insrot && <Tooltip content="Instrument Rotator [°]"><th className={styles.colCoord}>I°</th></Tooltip>}
-            {columns.notes && <Tooltip content="Notes"><th className={styles.colNotes}><Icon name="notes" size={14} /></th></Tooltip>}
+            {columns.id && <Tooltip content="Visit ID" as="th" className={styles.colId}>ID</Tooltip>}
+            {columns.description && <Tooltip content="Description" as="th" className={styles.colDescription}><Icon name="description" size={14} /></Tooltip>}
+            {columns.date && <Tooltip content="Date issued at" as="th" className={styles.colDate}><Icon name="event" size={14} /></Tooltip>}
+            {columns.time && <Tooltip content="Time issued at" as="th" className={styles.colTime}><Icon name="schedule" size={14} /></Tooltip>}
+            {columns.exposures && <Tooltip content="Number of {SpS | MCS | AGC} Exposures" as="th" className={styles.colExposures}><Icon name="tag" size={14} /></Tooltip>}
+            {columns.exptime && <Tooltip content="Exposure Time [s]" as="th" className={styles.colExptime}><Icon name="shutter_speed" size={14} /></Tooltip>}
+            {columns.pfs_design_id && <Tooltip content="PFS Design ID (HEX)" as="th" className={styles.colDesign}><Icon name="design_services" size={14} /></Tooltip>}
+            {columns.ra && <Tooltip content="Right Ascension [°]" as="th" className={styles.colCoord}>α</Tooltip>}
+            {columns.dec && <Tooltip content="Declination [°]" as="th" className={styles.colCoord}>δ</Tooltip>}
+            {columns.azimuth && <Tooltip content="Azimuth [°]" as="th" className={styles.colCoord}>A°</Tooltip>}
+            {columns.altitude && <Tooltip content="Altitude [°]" as="th" className={styles.colCoord}>E°</Tooltip>}
+            {columns.insrot && <Tooltip content="Instrument Rotator [°]" as="th" className={styles.colCoord}>I°</Tooltip>}
+            {columns.notes && <Tooltip content="Notes" as="th" className={styles.colNotes}><Icon name="notes" size={14} /></Tooltip>}
           </tr>
         </thead>
         <tbody>

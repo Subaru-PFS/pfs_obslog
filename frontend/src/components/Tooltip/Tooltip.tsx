@@ -1,4 +1,4 @@
-import { type ReactNode, useState, useRef, useCallback } from 'react'
+import { type ReactNode, type ElementType, type ComponentPropsWithoutRef, useState, useRef, useCallback } from 'react'
 import {
   useFloating,
   autoUpdate,
@@ -17,12 +17,14 @@ import {
 } from '@floating-ui/react'
 import styles from './Tooltip.module.scss'
 
-interface TooltipProps {
+type TooltipProps<T extends ElementType = 'span'> = {
   content: ReactNode
   children: ReactNode
   placement?: Placement
   delay?: number
-}
+  /** The element type to render as the trigger wrapper. Defaults to 'span'. */
+  as?: T
+} & Omit<ComponentPropsWithoutRef<T>, 'content' | 'children' | 'placement' | 'delay' | 'as'>
 
 const ARROW_HEIGHT = 6
 const ARROW_WIDTH = 12
@@ -35,13 +37,22 @@ const ARROW_WIDTH = 12
  * <Tooltip content="Click to submit">
  *   <button>Submit</button>
  * </Tooltip>
+ * 
+ * @example
+ * // Render as a different element
+ * <Tooltip content="Column description" as="th" className={styles.colId}>
+ *   ID
+ * </Tooltip>
  */
-export function Tooltip({
+export function Tooltip<T extends ElementType = 'span'>({
   content,
   children,
   placement = 'bottom',
   delay = 0,
-}: TooltipProps) {
+  as,
+  ...restProps
+}: TooltipProps<T>) {
+  const Component = as || 'span'
   const [isOpen, setIsOpen] = useState(false)
   const arrowRef = useRef<SVGSVGElement>(null)
   const timeoutRef = useRef<number | null>(null)
@@ -93,7 +104,7 @@ export function Tooltip({
 
   return (
     <>
-      <span
+      <Component
         ref={refs.setReference}
         {...getReferenceProps({
           onMouseEnter: showTooltip,
@@ -101,10 +112,10 @@ export function Tooltip({
           onFocus: showTooltip,
           onBlur: hideTooltip,
         })}
-        className={styles.trigger}
+        {...restProps}
       >
         {children}
-      </span>
+      </Component>
       {isOpen && content && (
         <FloatingPortal>
           <div
