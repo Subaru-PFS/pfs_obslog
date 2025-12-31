@@ -17,9 +17,10 @@
     "build:stellar-globe": "cd ../external/stellar-globe/stellar-globe && npm install && npm run build && cd ../react-stellar-globe && npm install && npm run build"
   },
   "dependencies": {
+    "@floating-ui/react": "^0.27.16",
     "@reduxjs/toolkit": "^2.11.2",
-    "@stellar-globe/stellar-globe": "file:../external/stellar-globe/stellar-globe",
     "@stellar-globe/react-stellar-globe": "file:../external/stellar-globe/react-stellar-globe",
+    "@stellar-globe/stellar-globe": "file:../external/stellar-globe/stellar-globe",
     "material-symbols": "^0.40.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

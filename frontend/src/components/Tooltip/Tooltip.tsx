@@ -1,17 +1,30 @@
-import { type ReactNode, useState, useRef, useLayoutEffect, useCallback } from 'react'
-import { createPortal } from 'react-dom'
+import { type ReactNode, useState, useRef, useCallback } from 'react'
+import {
+  useFloating,
+  autoUpdate,
+  offset,
+  flip,
+  shift,
+  useHover,
+  useFocus,
+  useDismiss,
+  useRole,
+  useInteractions,
+  FloatingPortal,
+  type Placement,
+} from '@floating-ui/react'
 import styles from './Tooltip.module.scss'
 
 interface TooltipProps {
   content: ReactNode
   children: ReactNode
-  placement?: 'top' | 'bottom' | 'left' | 'right'
+  placement?: Placement
   delay?: number
 }
 
 /**
  * Tooltip component that displays content on hover.
- * Uses portal to render tooltip at document body level to avoid overflow issues.
+ * Uses floating-ui for automatic positioning and viewport boundary handling.
  *
  * @example
  * <Tooltip content="Click to submit">
@@ -24,16 +37,29 @@ export function Tooltip({
   placement = 'bottom',
   delay = 0,
 }: TooltipProps) {
-  const [isVisible, setIsVisible] = useState(false)
-  const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
-  const triggerRef = useRef<HTMLSpanElement>(null)
-  const tooltipRef = useRef<HTMLDivElement>(null)
+  const [isOpen, setIsOpen] = useState(false)
   const timeoutRef = useRef<number | null>(null)
 
+  const { refs, floatingStyles, context } = useFloating({
+    open: isOpen,
+    onOpenChange: setIsOpen,
+    placement,
+    middleware: [
+      offset(8),
+      flip({ fallbackAxisSideDirection: 'start' }),
+      shift({ padding: 8 }),
+    ],
+    whileElementsMounted: autoUpdate,
+  })
+
   const showTooltip = useCallback(() => {
-    timeoutRef.current = window.setTimeout(() => {
-      setIsVisible(true)
-    }, delay)
+    if (delay > 0) {
+      timeoutRef.current = window.setTimeout(() => {
+        setIsOpen(true)
+      }, delay)
+    } else {
+      setIsOpen(true)
+    }
   }, [delay])
 
   const hideTooltip = useCallback(() => {
@@ -41,84 +67,49 @@ export function Tooltip({
       clearTimeout(timeoutRef.current)
       timeoutRef.current = null
     }
-    setIsVisible(false)
-    setPosition(null)
+    setIsOpen(false)
   }, [])
 
-  // Calculate position synchronously after DOM update
-  useLayoutEffect(() => {
-    if (isVisible && triggerRef.current && tooltipRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect()
-      const tooltipRect = tooltipRef.current.getBoundingClientRect()
-      const tooltipWidth = tooltipRect.width
-      const tooltipHeight = tooltipRect.height
+  const hover = useHover(context, {
+    delay: delay > 0 ? { open: delay, close: 0 } : undefined,
+  })
+  const focus = useFocus(context)
+  const dismiss = useDismiss(context)
+  const role = useRole(context, { role: 'tooltip' })
 
-      let top = 0
-      let left = 0
-
-      switch (placement) {
-        case 'top':
-          top = rect.top - tooltipHeight - 8
-          left = rect.left + rect.width / 2 - tooltipWidth / 2
-          break
-        case 'bottom':
-          top = rect.bottom + 8
-          left = rect.left + rect.width / 2 - tooltipWidth / 2
-          break
-        case 'left':
-          top = rect.top + rect.height / 2 - tooltipHeight / 2
-          left = rect.left - tooltipWidth - 8
-          break
-        case 'right':
-          top = rect.top + rect.height / 2 - tooltipHeight / 2
-          left = rect.right + 8
-          break
-      }
-
-      // Keep tooltip within viewport
-      const padding = 8
-      left = Math.max(padding, Math.min(left, window.innerWidth - tooltipWidth - padding))
-      top = Math.max(padding, Math.min(top, window.innerHeight - tooltipHeight - padding))
-
-      setPosition({ top, left })
-    }
-  }, [isVisible, placement])
-
-  // Cleanup timeout on unmount
-  useLayoutEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
-    }
-  }, [])
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    hover,
+    focus,
+    dismiss,
+    role,
+  ])
 
   return (
     <>
       <span
-        ref={triggerRef}
-        onMouseEnter={showTooltip}
-        onMouseLeave={hideTooltip}
-        onFocus={showTooltip}
-        onBlur={hideTooltip}
+        ref={refs.setReference}
+        {...getReferenceProps({
+          onMouseEnter: showTooltip,
+          onMouseLeave: hideTooltip,
+          onFocus: showTooltip,
+          onBlur: hideTooltip,
+        })}
         className={styles.trigger}
       >
         {children}
       </span>
-      {isVisible &&
-        content &&
-        createPortal(
+      {isOpen && content && (
+        <FloatingPortal>
           <div
-            ref={tooltipRef}
-            className={`${styles.tooltip} ${styles[placement]}`}
-            style={position ? { top: position.top, left: position.left } : { visibility: 'hidden' }}
-            role="tooltip"
+            ref={refs.setFloating}
+            style={floatingStyles}
+            {...getFloatingProps()}
+            className={styles.tooltip}
           >
             {content}
-            <div className={styles.arrow} />
-          </div>,
-          document.body
-        )}
+          </div>
+        </FloatingPortal>
+      )}
     </>
   )
 }

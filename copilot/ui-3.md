@@ -1,12 +1,6 @@
-* [ ] デザインの微調整
+* [ ] tooltipの表示位置調整
 
-  `Next {newer, older} visits`ボタンのツールチップの表示場所がおかしい（画面左上はしに表示される）です。
-  直してください。
-
-  まだ直ってないですね。
-  Load more older visitsはうまく動いているので不思議です。
-  
-  Next newer visitsボタンのtooltipの位置がまだおかしいですね。
-  
+  画面下部ではtooltipを対象要素の下に表示すると対処要素に重なってしまいます。
+  tooltipは https://floating-ui.com を利用したものに置き換えてください。
 
 * [ ] 追加のタスクがないか指示者に確認
