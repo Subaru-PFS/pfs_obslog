@@ -7,15 +7,15 @@
 | カテゴリ | 完了 | 未完了 | 進捗率 |
 |----------|------|--------|--------|
 | 認証 | 4 | 0 | 100% |
-| ヘルスチェック | 1 | 0 | 100% |
-| Visit | 3 | 1 | 75% |
+| ヘルスチェック | 2 | 0 | 100% |
+| Visit | 2 | 2 | 50% |
 | Visit Note | 3 | 0 | 100% |
 | Visit Set Note | 3 | 0 | 100% |
-| FITS | 0 | 8 | 0% |
-| PFS Design | 0 | 4 | 0% |
-| Attachment | 0 | 4 | 0% |
+| FITS | 8 | 0 | 100% |
+| PFS Design | 3 | 1 | 75% |
+| Attachment | 4 | 0 | 100% |
 | Plot | 0 | 1 | 0% |
-| **合計** | **14** | **18** | **44%** |
+| **合計** | **29** | **4** | **88%** |
 
 ---
 
@@ -66,32 +66,32 @@
 
 | メソッド | 既存エンドポイント | 新エンドポイント | 状態 | 備考 |
 |----------|-------------------|-----------------|------|------|
-| GET | `/api/fits/visits/{visit_id}/sps/{camera_id}.fits` | - | ⏳ 未実装 | SPS FITSファイルダウンロード |
-| GET | `/api/fits/visits/{visit_id}/sps/{camera_id}.png` | - | ⏳ 未実装 | SPS FITSプレビュー画像 |
-| GET | `/api/fits/visits/{visit_id}/agc/{exposure_id}.fits` | - | ⏳ 未実装 | AGC FITSファイルダウンロード |
-| GET | `/api/fits/visits/{visit_id}/agc/{exposure_id}-{hdu_index}.png` | - | ⏳ 未実装 | AGC FITSプレビュー画像 |
-| GET | `/api/fits/visits/{visit_id}/mcs/{frame_id}.fits` | - | ⏳ 未実装 | MCS FITSファイルダウンロード |
-| GET | `/api/fits/visits/{visit_id}/mcs/{frame_id}.png` | - | ⏳ 未実装 | MCS FITSプレビュー画像 |
-| GET | `/api/fits/visits/{visit_id}/sps/{camera_id}/headers` | - | ⏳ 未実装 | FITSヘッダー取得（存在する場合） |
-| GET | `/api/fits/visits/{visit_id}/mcs/{frame_id}/headers` | - | ⏳ 未実装 | FITSヘッダー取得（存在する場合） |
+| GET | `/api/fits/visits/{visit_id}/sps/{camera_id}.fits` | `/api/fits/visits/{visit_id}/sps/{camera_id}.fits` | ✅ 完了 | SPS FITSファイルダウンロード |
+| GET | `/api/fits/visits/{visit_id}/sps/{camera_id}.png` | `/api/fits/visits/{visit_id}/sps/{camera_id}.png` | ✅ 完了 | SPS FITSプレビュー画像 |
+| GET | `/api/fits/visits/{visit_id}/agc/{exposure_id}.fits` | `/api/fits/visits/{visit_id}/agc/{agc_exposure_id}.fits` | ✅ 完了 | AGC FITSファイルダウンロード |
+| GET | `/api/fits/visits/{visit_id}/agc/{exposure_id}-{hdu_index}.png` | `/api/fits/visits/{visit_id}/agc/{agc_exposure_id}.png` | ✅ 完了 | AGC FITSプレビュー画像（hdu_index省略、HDU 1使用） |
+| GET | `/api/fits/visits/{visit_id}/mcs/{frame_id}.fits` | `/api/fits/visits/{visit_id}/mcs/{frame_id}.fits` | ✅ 完了 | MCS FITSファイルダウンロード |
+| GET | `/api/fits/visits/{visit_id}/mcs/{frame_id}.png` | `/api/fits/visits/{visit_id}/mcs/{frame_id}.png` | ✅ 完了 | MCS FITSプレビュー画像 |
+| GET | `/api/fits/visits/{visit_id}/sps/{camera_id}/headers` | `/api/fits/visits/{visit_id}/sps/{camera_id}/headers` | ✅ 完了 | FITSヘッダー取得 |
+| GET | `/api/fits/visits/{visit_id}/mcs/{frame_id}/headers` | `/api/fits/visits/{visit_id}/mcs/{frame_id}/headers` | ✅ 完了 | FITSヘッダー取得 |
 
 ### PFS Design
 
 | メソッド | 既存エンドポイント | 新エンドポイント | 状態 | 備考 |
 |----------|-------------------|-----------------|------|------|
-| GET | `/api/pfs_designs` | - | ⏳ 未実装 | PFS Design一覧 |
-| GET | `/api/pfs_designs/{id_hex}` | - | ⏳ 未実装 | PFS Design詳細 |
-| GET | `/api/pfs_designs/{id_hex}.fits` | - | ⏳ 未実装 | PFS Design FITSダウンロード |
-| GET | `/api/pfs_designs.png` | - | ⏳ 未実装 | PFS Designチャート画像 |
+| GET | `/api/pfs_designs` | `/api/pfs_designs` | ✅ 完了 | PFS Design一覧 |
+| GET | `/api/pfs_designs/{id_hex}` | `/api/pfs_designs/{id_hex}` | ✅ 完了 | PFS Design詳細 |
+| GET | `/api/pfs_designs/{id_hex}.fits` | `/api/pfs_designs/{id_hex}.fits` | ✅ 完了 | PFS Design FITSダウンロード |
+| GET | `/api/pfs_designs.png` | - | ⏳ 未実装 | PFS Designチャート画像（pfs.datamodel必要） |
 
 ### Attachment（添付ファイル）
 
 | メソッド | 既存エンドポイント | 新エンドポイント | 状態 | 備考 |
 |----------|-------------------|-----------------|------|------|
-| POST | `/api/attachments` | - | ⏳ 未実装 | 添付ファイルアップロード（要認証） |
-| GET | `/api/attachments` | - | ⏳ 未実装 | 添付ファイル一覧（自分のファイル） |
-| GET | `/api/attachments/{account_name}/{file_id}` | - | ⏳ 未実装 | 添付ファイルダウンロード |
-| DELETE | `/api/attachments/{file_id}` | - | ⏳ 未実装 | 添付ファイル削除（自分のファイルのみ） |
+| POST | `/api/attachments` | `/api/attachments` | ✅ 完了 | 添付ファイルアップロード（要認証） |
+| GET | `/api/attachments` | `/api/attachments` | ✅ 完了 | 添付ファイル一覧（自分のファイル） |
+| GET | `/api/attachments/{account_name}/{file_id}` | `/api/attachments/{account_name}/{file_id}` | ✅ 完了 | 添付ファイルダウンロード |
+| DELETE | `/api/attachments/{file_id}` | `/api/attachments/{file_id}` | ✅ 完了 | 添付ファイル削除（自分のファイルのみ） |
 
 ### Plot（チャート）
 
@@ -115,3 +115,4 @@
 | 日付 | 内容 |
 |------|------|
 | 2024-12-30 | 初版作成 |
+| 2025-01-XX | Visit Note, Visit Set Note, FITS, PFS Design, Attachment API完了 |
