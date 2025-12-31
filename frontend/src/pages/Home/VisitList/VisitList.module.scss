@@ -216,7 +216,7 @@ $pagination-border-radius: 12px;
 // =============================================================================
 .content {
   flex: 1;
-  overflow-y: auto;
+  overflow: auto;
   padding: 0;
   position: relative;
 }
@@ -435,6 +435,7 @@ $pagination-border-radius: 12px;
 // =============================================================================
 .visitTable {
   width: 100%;
+  min-width: max-content; // Prevent columns from shrinking; enable horizontal scroll
   border-collapse: collapse;
   font-size: 0.8125rem;
 

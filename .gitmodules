@@ -1,3 +1,6 @@
 [submodule "external/stellar-globe"]
 	path = external/stellar-globe
 	url = https://github.com/michitaro/stellar-globe.git
+[submodule "external/pfs-datamodel"]
+	path = external/pfs-datamodel
+	url = https://github.com/Subaru-PFS/datamodel
