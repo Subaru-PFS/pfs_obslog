@@ -72,7 +72,7 @@
 | Visit Notes | `VisitDetail` (notes部分) | `VisitDetail` + `NoteList` | ✅ 完了 | メモのCRUD機能付き |
 | FITS Preview画像 | `SpsInspector` (LazyImage) | `SpsInspector` + `LazyImage` | ✅ 完了 | SPS FITSプレビュー画像表示 |
 | Image Type/Size選択 | `SpsInspector` (settings) | `SpsInspector` | ✅ 完了 | raw/postISRCCD、サイズ選択 |
-| FITS Header Info | `FitsHeaderInfo` | `FitsHeaderDialog` | ✅ 完了 | FITSヘッダー表示（HDU選択、検索機能付き）、ダイアログ形式 |
+| FITS Header Info | `FitsHeaderInfo` | `FitsHeaderDialog` | ✅ 完了 | FITSヘッダー表示（SPS/MCS対応、HDU選択、検索機能付き）、ダイアログ形式 |
 | FITS Download | `SpsInspector` (downloadRawExposures) | `SpsInspector`, `McsInspector`, `AgcInspector` | ✅ 完了 | FITSファイルダウンロード |
 | MCS/AGC Preview画像 | `McsInspector`, `AgcInspector` | `McsInspector`, `AgcInspector` | ✅ 完了 | MCS/AGC FITSプレビュー画像表示 |
 
