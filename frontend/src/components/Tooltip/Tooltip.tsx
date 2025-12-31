@@ -1,4 +1,4 @@
-import { type ReactNode, useState, useRef, useEffect, useCallback } from 'react'
+import { type ReactNode, useState, useRef, useLayoutEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import styles from './Tooltip.module.scss'
 
@@ -25,7 +25,7 @@ export function Tooltip({
   delay = 0,
 }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false)
-  const [position, setPosition] = useState({ top: 0, left: 0 })
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
   const triggerRef = useRef<HTMLSpanElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const timeoutRef = useRef<number | null>(null)
@@ -42,14 +42,16 @@ export function Tooltip({
       timeoutRef.current = null
     }
     setIsVisible(false)
+    setPosition(null)
   }, [])
 
-  useEffect(() => {
-    if (isVisible && triggerRef.current) {
+  // Calculate position synchronously after DOM update
+  useLayoutEffect(() => {
+    if (isVisible && triggerRef.current && tooltipRef.current) {
       const rect = triggerRef.current.getBoundingClientRect()
-      const tooltipRect = tooltipRef.current?.getBoundingClientRect()
-      const tooltipWidth = tooltipRect?.width ?? 0
-      const tooltipHeight = tooltipRect?.height ?? 0
+      const tooltipRect = tooltipRef.current.getBoundingClientRect()
+      const tooltipWidth = tooltipRect.width
+      const tooltipHeight = tooltipRect.height
 
       let top = 0
       let left = 0
@@ -80,13 +82,16 @@ export function Tooltip({
 
       setPosition({ top, left })
     }
+  }, [isVisible, placement])
 
+  // Cleanup timeout on unmount
+  useLayoutEffect(() => {
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
       }
     }
-  }, [isVisible, placement])
+  }, [])
 
   return (
     <>
@@ -106,7 +111,7 @@ export function Tooltip({
           <div
             ref={tooltipRef}
             className={`${styles.tooltip} ${styles[placement]}`}
-            style={{ top: position.top, left: position.left }}
+            style={position ? { top: position.top, left: position.left } : { visibility: 'hidden' }}
             role="tooltip"
           >
             {content}
