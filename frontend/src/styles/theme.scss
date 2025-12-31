@@ -85,7 +85,6 @@ $light-shadow: 0 0 4px rgba($shadow-color, 0.25);
   border: none;
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.2s, box-shadow 0.2s;
 }
 
 @mixin button-primary {
