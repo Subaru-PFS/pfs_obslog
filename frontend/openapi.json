@@ -284,6 +284,1453 @@
         }
       }
     },
+    "/api/visits/{visit_id}/rank": {
+      "get": {
+        "tags": [
+          "visits",
+          "visits"
+        ],
+        "summary": "Get Visit Rank",
+        "description": "\u6307\u5b9a\u3057\u305fVisit\u306e\u30d5\u30a3\u30eb\u30bf\u30ea\u30f3\u30b0\u7d50\u679c\u5185\u3067\u306e\u9806\u4f4d\u3092\u53d6\u5f97\n\nArgs:\n    db: DB\u30bb\u30c3\u30b7\u30e7\u30f3\n    visit_id: VisitID\n    sql: SQL\u30e9\u30a4\u30af\u306a\u30d5\u30a3\u30eb\u30bf\u6761\u4ef6\n\nReturns:\n    \u9806\u4f4d\uff081\u304b\u3089\u59cb\u307e\u308b\uff09\u3002Visit\u304c\u898b\u3064\u304b\u3089\u306a\u3044\u5834\u5408\u306fNone",
+        "operationId": "get_visit_rank_api_visits__visit_id__rank_get",
+        "parameters": [
+          {
+            "name": "visit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Id"
+            }
+          },
+          {
+            "name": "sql",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "SQL\u30e9\u30a4\u30af\u306a\u30d5\u30a3\u30eb\u30bf\u6761\u4ef6\uff08\u4f8b: where id > 100\uff09",
+              "title": "Sql"
+            },
+            "description": "SQL\u30e9\u30a4\u30af\u306a\u30d5\u30a3\u30eb\u30bf\u6761\u4ef6\uff08\u4f8b: where id > 100\uff09"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisitRankResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/visits.csv": {
+      "get": {
+        "tags": [
+          "visits",
+          "visits"
+        ],
+        "summary": "Export Visits Csv",
+        "description": "Visit\u4e00\u89a7\u3092CSV\u5f62\u5f0f\u3067\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\n\nArgs:\n    db: DB\u30bb\u30c3\u30b7\u30e7\u30f3\n    offset: \u30aa\u30d5\u30bb\u30c3\u30c8\n    limit: \u53d6\u5f97\u4ef6\u6570\u4e0a\u9650\n    sql: SQL\u30e9\u30a4\u30af\u306a\u30d5\u30a3\u30eb\u30bf\u6761\u4ef6\n\nReturns:\n    CSV\u5f62\u5f0f\u306e\u30ec\u30b9\u30dd\u30f3\u30b9",
+        "operationId": "export_visits_csv_api_visits_csv_get",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "\u30da\u30fc\u30b8\u30cd\u30fc\u30b7\u30e7\u30f3\u306e\u30aa\u30d5\u30bb\u30c3\u30c8",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "\u30da\u30fc\u30b8\u30cd\u30fc\u30b7\u30e7\u30f3\u306e\u30aa\u30d5\u30bb\u30c3\u30c8"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100000,
+              "minimum": -1,
+              "description": "\u53d6\u5f97\u4ef6\u6570\u4e0a\u9650\uff08-1\u3067\u7121\u5236\u9650\uff09",
+              "default": 10000,
+              "title": "Limit"
+            },
+            "description": "\u53d6\u5f97\u4ef6\u6570\u4e0a\u9650\uff08-1\u3067\u7121\u5236\u9650\uff09"
+          },
+          {
+            "name": "sql",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "SQL\u30e9\u30a4\u30af\u306a\u30d5\u30a3\u30eb\u30bf\u6761\u4ef6\uff08\u4f8b: where id > 100\uff09",
+              "title": "Sql"
+            },
+            "description": "SQL\u30e9\u30a4\u30af\u306a\u30d5\u30a3\u30eb\u30bf\u6761\u4ef6\uff08\u4f8b: where id > 100\uff09"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/visits/{visit_id}/notes": {
+      "post": {
+        "tags": [
+          "notes",
+          "notes"
+        ],
+        "summary": "Create a visit note",
+        "description": "Create a new note for a visit. Requires authentication.",
+        "operationId": "create_visit_note_api_visits__visit_id__notes_post",
+        "parameters": [
+          {
+            "name": "visit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/visits/{visit_id}/notes/{note_id}": {
+      "put": {
+        "tags": [
+          "notes",
+          "notes"
+        ],
+        "summary": "Update a visit note",
+        "description": "Update an existing visit note. Only the author can update their own notes.",
+        "operationId": "update_visit_note_api_visits__visit_id__notes__note_id__put",
+        "parameters": [
+          {
+            "name": "visit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Id"
+            }
+          },
+          {
+            "name": "note_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Note Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "notes",
+          "notes"
+        ],
+        "summary": "Delete a visit note",
+        "description": "Delete a visit note. Only the author can delete their own notes.",
+        "operationId": "delete_visit_note_api_visits__visit_id__notes__note_id__delete",
+        "parameters": [
+          {
+            "name": "visit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Id"
+            }
+          },
+          {
+            "name": "note_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Note Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/visit_sets/{visit_set_id}/notes": {
+      "post": {
+        "tags": [
+          "notes",
+          "notes"
+        ],
+        "summary": "Create a visit set note",
+        "description": "Create a new note for a visit set (IIC sequence). Requires authentication.",
+        "operationId": "create_visit_set_note_api_visit_sets__visit_set_id__notes_post",
+        "parameters": [
+          {
+            "name": "visit_set_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Set Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/visit_sets/{visit_set_id}/notes/{note_id}": {
+      "put": {
+        "tags": [
+          "notes",
+          "notes"
+        ],
+        "summary": "Update a visit set note",
+        "description": "Update an existing visit set note. Only the author can update their own notes.",
+        "operationId": "update_visit_set_note_api_visit_sets__visit_set_id__notes__note_id__put",
+        "parameters": [
+          {
+            "name": "visit_set_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Set Id"
+            }
+          },
+          {
+            "name": "note_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Note Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "notes",
+          "notes"
+        ],
+        "summary": "Delete a visit set note",
+        "description": "Delete a visit set note. Only the author can delete their own notes.",
+        "operationId": "delete_visit_set_note_api_visit_sets__visit_set_id__notes__note_id__delete",
+        "parameters": [
+          {
+            "name": "visit_set_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Set Id"
+            }
+          },
+          {
+            "name": "note_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Note Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fits/visits/{visit_id}/sps/{camera_id}.fits": {
+      "get": {
+        "tags": [
+          "fits",
+          "fits"
+        ],
+        "summary": "Download SPS FITS file",
+        "description": "Download a raw or processed SPS FITS file for a specific visit and camera.",
+        "operationId": "download_sps_fits_api_fits_visits__visit_id__sps__camera_id__fits_get",
+        "parameters": [
+          {
+            "name": "visit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Id"
+            }
+          },
+          {
+            "name": "camera_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Camera Id"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/FitsType",
+              "default": "raw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fits/visits/{visit_id}/sps/{camera_id}.png": {
+      "get": {
+        "tags": [
+          "fits",
+          "fits"
+        ],
+        "summary": "Get SPS FITS preview image",
+        "description": "Get a PNG preview image of an SPS FITS file.",
+        "operationId": "get_sps_fits_preview_api_fits_visits__visit_id__sps__camera_id__png_get",
+        "parameters": [
+          {
+            "name": "visit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Id"
+            }
+          },
+          {
+            "name": "camera_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Camera Id"
+            }
+          },
+          {
+            "name": "width",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 4096,
+              "default": 1024,
+              "title": "Width"
+            }
+          },
+          {
+            "name": "height",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 4096,
+              "default": 1024,
+              "title": "Height"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/FitsType",
+              "default": "raw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fits/visits/{visit_id}/sps/{camera_id}/headers": {
+      "get": {
+        "tags": [
+          "fits",
+          "fits"
+        ],
+        "summary": "Get SPS FITS headers",
+        "description": "Get the headers from an SPS FITS file.",
+        "operationId": "get_sps_fits_headers_api_fits_visits__visit_id__sps__camera_id__headers_get",
+        "parameters": [
+          {
+            "name": "visit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Id"
+            }
+          },
+          {
+            "name": "camera_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Camera Id"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/FitsType",
+              "default": "raw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FitsMeta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fits/visits/{visit_id}/mcs/{frame_id}.fits": {
+      "get": {
+        "tags": [
+          "fits",
+          "fits"
+        ],
+        "summary": "Download MCS FITS file",
+        "description": "Download an MCS FITS file for a specific visit and frame.",
+        "operationId": "download_mcs_fits_api_fits_visits__visit_id__mcs__frame_id__fits_get",
+        "parameters": [
+          {
+            "name": "visit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Id"
+            }
+          },
+          {
+            "name": "frame_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Frame Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fits/visits/{visit_id}/mcs/{frame_id}.png": {
+      "get": {
+        "tags": [
+          "fits",
+          "fits"
+        ],
+        "summary": "Get MCS FITS preview image",
+        "description": "Get a PNG preview image of an MCS FITS file.",
+        "operationId": "get_mcs_fits_preview_api_fits_visits__visit_id__mcs__frame_id__png_get",
+        "parameters": [
+          {
+            "name": "visit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Id"
+            }
+          },
+          {
+            "name": "frame_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Frame Id"
+            }
+          },
+          {
+            "name": "width",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 4096,
+              "default": 1024,
+              "title": "Width"
+            }
+          },
+          {
+            "name": "height",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 4096,
+              "default": 1024,
+              "title": "Height"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fits/visits/{visit_id}/mcs/{frame_id}/headers": {
+      "get": {
+        "tags": [
+          "fits",
+          "fits"
+        ],
+        "summary": "Get MCS FITS headers",
+        "description": "Get the headers from an MCS FITS file.",
+        "operationId": "get_mcs_fits_headers_api_fits_visits__visit_id__mcs__frame_id__headers_get",
+        "parameters": [
+          {
+            "name": "visit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Id"
+            }
+          },
+          {
+            "name": "frame_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Frame Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FitsMeta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fits/visits/{visit_id}/agc/{exposure_id}.fits": {
+      "get": {
+        "tags": [
+          "fits",
+          "fits"
+        ],
+        "summary": "Download AGC FITS file",
+        "description": "Download an AGC FITS file for a specific exposure.",
+        "operationId": "download_agc_fits_api_fits_visits__visit_id__agc__exposure_id__fits_get",
+        "parameters": [
+          {
+            "name": "visit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Id"
+            }
+          },
+          {
+            "name": "exposure_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Exposure Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fits/visits/{visit_id}/agc/{exposure_id}-{hdu_index}.png": {
+      "get": {
+        "tags": [
+          "fits",
+          "fits"
+        ],
+        "summary": "Get AGC FITS preview image",
+        "description": "Get a PNG preview image of a specific HDU in an AGC FITS file.",
+        "operationId": "get_agc_fits_preview_api_fits_visits__visit_id__agc__exposure_id___hdu_index__png_get",
+        "parameters": [
+          {
+            "name": "visit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Visit Id"
+            }
+          },
+          {
+            "name": "exposure_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Exposure Id"
+            }
+          },
+          {
+            "name": "hdu_index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Hdu Index"
+            }
+          },
+          {
+            "name": "width",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 4096,
+              "default": 512,
+              "title": "Width"
+            }
+          },
+          {
+            "name": "height",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 4096,
+              "default": 512,
+              "title": "Height"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pfs_designs": {
+      "get": {
+        "tags": [
+          "pfs_designs",
+          "pfs_designs"
+        ],
+        "summary": "List PFS Designs",
+        "description": "Get a list of all available PFS Design files.",
+        "operationId": "list_pfs_designs_api_pfs_designs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PfsDesignEntry"
+                  },
+                  "type": "array",
+                  "title": "Response List Pfs Designs Api Pfs Designs Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pfs_designs/{id_hex}.fits": {
+      "get": {
+        "tags": [
+          "pfs_designs",
+          "pfs_designs"
+        ],
+        "summary": "Download PFS Design FITS",
+        "description": "Download the FITS file for a specific PFS Design.",
+        "operationId": "download_design_api_pfs_designs__id_hex__fits_get",
+        "parameters": [
+          {
+            "name": "id_hex",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id Hex"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pfs_designs/{id_hex}": {
+      "get": {
+        "tags": [
+          "pfs_designs",
+          "pfs_designs"
+        ],
+        "summary": "Get PFS Design details",
+        "description": "Get detailed information about a specific PFS Design.",
+        "operationId": "get_design_api_pfs_designs__id_hex__get",
+        "parameters": [
+          {
+            "name": "id_hex",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id Hex"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PfsDesignDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pfs_designs.png": {
+      "get": {
+        "tags": [
+          "pfs_designs",
+          "pfs_designs"
+        ],
+        "summary": "Get PFS Design chart",
+        "description": "Generate a chart image for one or more PFS Designs.",
+        "operationId": "get_design_chart_api_pfs_designs_png_get",
+        "parameters": [
+          {
+            "name": "id_hex",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Design IDs to include in the chart",
+              "title": "Id Hex"
+            },
+            "description": "Design IDs to include in the chart"
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Date for the chart (for visibility calculations)",
+              "title": "Date"
+            },
+            "description": "Date for the chart (for visibility calculations)"
+          },
+          {
+            "name": "width",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1200,
+              "description": "Image width in pixels",
+              "default": 600,
+              "title": "Width"
+            },
+            "description": "Image width in pixels"
+          },
+          {
+            "name": "height",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "description": "Image height in pixels",
+              "default": 250,
+              "title": "Height"
+            },
+            "description": "Image height in pixels"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/attachments": {
+      "post": {
+        "tags": [
+          "attachments",
+          "attachments"
+        ],
+        "summary": "Upload attachment",
+        "description": "Upload a new attachment file. Requires authentication.",
+        "operationId": "create_attachment_api_attachments_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_attachment_api_attachments_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAttachmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "attachments",
+          "attachments"
+        ],
+        "summary": "List attachments",
+        "description": "List attachments for the authenticated user.",
+        "operationId": "list_attachments_api_attachments_get",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Start position",
+              "default": 1,
+              "title": "Start"
+            },
+            "description": "Start position"
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "description": "Items per page",
+              "default": 100,
+              "title": "Per Page"
+            },
+            "description": "Items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/attachments/{account_name}/{file_id}": {
+      "get": {
+        "tags": [
+          "attachments",
+          "attachments"
+        ],
+        "summary": "Download attachment",
+        "description": "Download an attachment file.",
+        "operationId": "get_attachment_api_attachments__account_name___file_id__get",
+        "parameters": [
+          {
+            "name": "account_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(\\w+|\\w+@\\w+)$",
+              "title": "Account Name"
+            }
+          },
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "File Id"
+            }
+          },
+          {
+            "name": "filename",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Override filename in response",
+              "title": "Filename"
+            },
+            "description": "Override filename in response"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/attachments/{file_id}": {
+      "delete": {
+        "tags": [
+          "attachments",
+          "attachments"
+        ],
+        "summary": "Delete attachment",
+        "description": "Delete an attachment. Only the owner can delete their own files.",
+        "operationId": "delete_attachment_api_attachments__file_id__delete",
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "File Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/mcs_data/{frame_id}.png": {
+      "get": {
+        "tags": [
+          "plot",
+          "plot"
+        ],
+        "summary": "Show Mcs Data Chart",
+        "description": "MCS\u30c7\u30fc\u30bf\u30c1\u30e3\u30fc\u30c8\u3092\u53d6\u5f97\n\n\u6307\u5b9a\u3055\u308c\u305fframe_id\u306eMCS\u30c7\u30fc\u30bf\u3092\u30ab\u30e9\u30fc\u6563\u5e03\u56f3\u3068\u3057\u3066\u8868\u793a\u3057\u307e\u3059\u3002\n\u8272\u306fpeakvalue\u306b\u57fa\u3065\u304d\u307e\u3059\u3002\n\nArgs:\n    db: DB\u30bb\u30c3\u30b7\u30e7\u30f3\n    frame_id: MCS\u30d5\u30ec\u30fc\u30e0ID\n    width: \u753b\u50cf\u5e45\uff08px\uff09\n    height: \u753b\u50cf\u9ad8\u3055\uff08px\uff09\n\nReturns:\n    PNG\u753b\u50cf\u306e\u30ec\u30b9\u30dd\u30f3\u30b9\n\nRaises:\n    HTTPException: \u30c7\u30fc\u30bf\u304c\u898b\u3064\u304b\u3089\u306a\u3044\u5834\u5408\u306f204\u3092\u8fd4\u3059",
+        "operationId": "show_mcs_data_chart_api_mcs_data__frame_id__png_get",
+        "parameters": [
+          {
+            "name": "frame_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Frame Id"
+            }
+          },
+          {
+            "name": "width",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1280,
+              "description": "\u753b\u50cf\u5e45\uff08px\uff09",
+              "default": 640,
+              "title": "Width"
+            },
+            "description": "\u753b\u50cf\u5e45\uff08px\uff09"
+          },
+          {
+            "name": "height",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 960,
+              "description": "\u753b\u50cf\u9ad8\u3055\uff08px\uff09",
+              "default": 480,
+              "title": "Height"
+            },
+            "description": "\u753b\u50cf\u9ad8\u3055\uff08px\uff09"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api": {
       "get": {
         "summary": "Root",
@@ -658,6 +2105,341 @@
         "type": "object",
         "title": "AgcVisitDetail",
         "description": "AGC Visit\u8a73\u7d30"
+      },
+      "AttachmentEntry": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "account_name": {
+            "type": "string",
+            "title": "Account Name"
+          },
+          "media_type": {
+            "type": "string",
+            "title": "Media Type"
+          },
+          "exists": {
+            "type": "boolean",
+            "title": "Exists"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "account_name",
+          "media_type",
+          "exists"
+        ],
+        "title": "AttachmentEntry",
+        "description": "\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30eb\u30a8\u30f3\u30c8\u30ea"
+      },
+      "AttachmentList": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/AttachmentEntry"
+            },
+            "type": "array",
+            "title": "Entries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "entries"
+        ],
+        "title": "AttachmentList",
+        "description": "\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30eb\u4e00\u89a7"
+      },
+      "Body_create_attachment_api_attachments_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_create_attachment_api_attachments_post"
+      },
+      "Card": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "value": {
+            "title": "Value"
+          },
+          "comment": {
+            "type": "string",
+            "title": "Comment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "value",
+          "comment"
+        ],
+        "title": "Card",
+        "description": "FITS\u30d8\u30c3\u30c0\u30fc\u30ab\u30fc\u30c9"
+      },
+      "CreateAttachmentResponse": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "title": "CreateAttachmentResponse",
+        "description": "\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30eb\u4f5c\u6210\u30ec\u30b9\u30dd\u30f3\u30b9"
+      },
+      "DesignData": {
+        "properties": {
+          "fiberId": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Fiberid"
+          },
+          "catId": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Catid"
+          },
+          "tract": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Tract"
+          },
+          "patch": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Patch"
+          },
+          "objId": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Objid"
+          },
+          "ra": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Ra"
+          },
+          "dec": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Dec"
+          },
+          "targetType": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Targettype"
+          },
+          "fiberStatus": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Fiberstatus"
+          },
+          "pfiNominal": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Pfinominal"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fiberId",
+          "catId",
+          "tract",
+          "patch",
+          "objId",
+          "ra",
+          "dec",
+          "targetType",
+          "fiberStatus",
+          "pfiNominal"
+        ],
+        "title": "DesignData",
+        "description": "Design HDU \u30c7\u30fc\u30bf"
+      },
+      "DesignRows": {
+        "properties": {
+          "science": {
+            "type": "integer",
+            "title": "Science"
+          },
+          "sky": {
+            "type": "integer",
+            "title": "Sky"
+          },
+          "fluxstd": {
+            "type": "integer",
+            "title": "Fluxstd"
+          },
+          "unassigned": {
+            "type": "integer",
+            "title": "Unassigned"
+          },
+          "engineering": {
+            "type": "integer",
+            "title": "Engineering"
+          },
+          "sunss_imaging": {
+            "type": "integer",
+            "title": "Sunss Imaging"
+          },
+          "sunss_diffuse": {
+            "type": "integer",
+            "title": "Sunss Diffuse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "science",
+          "sky",
+          "fluxstd",
+          "unassigned",
+          "engineering",
+          "sunss_imaging",
+          "sunss_diffuse"
+        ],
+        "title": "DesignRows",
+        "description": "Design \u30d5\u30a1\u30a4\u30eb\u5185\u306e\u30bf\u30fc\u30b2\u30c3\u30c8\u30bf\u30a4\u30d7\u5225\u884c\u6570"
+      },
+      "FitsHdu": {
+        "properties": {
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "header": {
+            "$ref": "#/components/schemas/FitsHeader"
+          }
+        },
+        "type": "object",
+        "required": [
+          "index",
+          "header"
+        ],
+        "title": "FitsHdu",
+        "description": "FITS HDU\uff08Header Data Unit\uff09"
+      },
+      "FitsHeader": {
+        "properties": {
+          "cards": {
+            "items": {
+              "$ref": "#/components/schemas/Card"
+            },
+            "type": "array",
+            "title": "Cards"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cards"
+        ],
+        "title": "FitsHeader",
+        "description": "FITS\u30d8\u30c3\u30c0\u30fc"
+      },
+      "FitsMeta": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "hdul": {
+            "items": {
+              "$ref": "#/components/schemas/FitsHdu"
+            },
+            "type": "array",
+            "title": "Hdul"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename",
+          "hdul"
+        ],
+        "title": "FitsMeta",
+        "description": "FITS\u30d5\u30a1\u30a4\u30eb\u306e\u30e1\u30bf\u30c7\u30fc\u30bf"
+      },
+      "FitsType": {
+        "type": "string",
+        "enum": [
+          "raw",
+          "calexp",
+          "postISRCCD"
+        ],
+        "title": "FitsType",
+        "description": "FITS\u30d5\u30a1\u30a4\u30eb\u306e\u30bf\u30a4\u30d7"
+      },
+      "GuidestarData": {
+        "properties": {
+          "ra": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Ra"
+          },
+          "dec": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Dec"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ra",
+          "dec"
+        ],
+        "title": "GuidestarData",
+        "description": "\u30ac\u30a4\u30c9\u661f\u30c7\u30fc\u30bf"
       },
       "HTTPValidationError": {
         "properties": {
@@ -1229,6 +3011,48 @@
         "title": "McsVisitDetail",
         "description": "MCS Visit\u8a73\u7d30"
       },
+      "NoteCreateRequest": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "NoteCreateRequest",
+        "description": "\u30e1\u30e2\u4f5c\u6210\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "NoteCreateResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "NoteCreateResponse",
+        "description": "\u30e1\u30e2\u4f5c\u6210\u30ec\u30b9\u30dd\u30f3\u30b9"
+      },
+      "NoteUpdateRequest": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "NoteUpdateRequest",
+        "description": "\u30e1\u30e2\u66f4\u65b0\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
       "ObslogUser": {
         "properties": {
           "id": {
@@ -1247,6 +3071,174 @@
         ],
         "title": "ObslogUser",
         "description": "\u30e6\u30fc\u30b6\u30fc\u60c5\u5831"
+      },
+      "PfsDesignDetail": {
+        "properties": {
+          "fits_meta": {
+            "$ref": "#/components/schemas/FitsMeta"
+          },
+          "date_modified": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Date Modified"
+          },
+          "design_data": {
+            "$ref": "#/components/schemas/DesignData"
+          },
+          "photometry_data": {
+            "$ref": "#/components/schemas/PhotometryData"
+          },
+          "guidestar_data": {
+            "$ref": "#/components/schemas/GuidestarData"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fits_meta",
+          "date_modified",
+          "design_data",
+          "photometry_data",
+          "guidestar_data"
+        ],
+        "title": "PfsDesignDetail",
+        "description": "PFS Design \u8a73\u7d30"
+      },
+      "PfsDesignEntry": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "frameid": {
+            "type": "string",
+            "title": "Frameid"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "date_modified": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Date Modified"
+          },
+          "ra": {
+            "type": "number",
+            "title": "Ra"
+          },
+          "dec": {
+            "type": "number",
+            "title": "Dec"
+          },
+          "arms": {
+            "type": "string",
+            "title": "Arms"
+          },
+          "num_design_rows": {
+            "type": "integer",
+            "title": "Num Design Rows"
+          },
+          "num_photometry_rows": {
+            "type": "integer",
+            "title": "Num Photometry Rows"
+          },
+          "num_guidestar_rows": {
+            "type": "integer",
+            "title": "Num Guidestar Rows"
+          },
+          "design_rows": {
+            "$ref": "#/components/schemas/DesignRows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "frameid",
+          "name",
+          "date_modified",
+          "ra",
+          "dec",
+          "arms",
+          "num_design_rows",
+          "num_photometry_rows",
+          "num_guidestar_rows",
+          "design_rows"
+        ],
+        "title": "PfsDesignEntry",
+        "description": "PFS Design \u30a8\u30f3\u30c8\u30ea\uff08\u4e00\u89a7\u7528\uff09"
+      },
+      "PhotometryData": {
+        "properties": {
+          "fiberId": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Fiberid"
+          },
+          "fiberFlux": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Fiberflux"
+          },
+          "psfFlux": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Psfflux"
+          },
+          "totalFlux": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Totalflux"
+          },
+          "fiberFluxErr": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Fiberfluxerr"
+          },
+          "psfFluxErr": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Psffluxerr"
+          },
+          "totalFluxErr": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Totalfluxerr"
+          },
+          "filterName": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Filtername"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fiberId",
+          "fiberFlux",
+          "psfFlux",
+          "totalFlux",
+          "fiberFluxErr",
+          "psfFluxErr",
+          "totalFluxErr",
+          "filterName"
+        ],
+        "title": "PhotometryData",
+        "description": "\u6e2c\u5149\u30c7\u30fc\u30bf"
       },
       "SequenceGroup": {
         "properties": {
@@ -1752,6 +3744,24 @@
         ],
         "title": "VisitNote",
         "description": "Visit\u306b\u7d10\u3065\u304f\u30e1\u30e2"
+      },
+      "VisitRankResponse": {
+        "properties": {
+          "rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank"
+          }
+        },
+        "type": "object",
+        "title": "VisitRankResponse",
+        "description": "Visit\u9806\u4f4d\u306e\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
       "VisitSetNote": {
         "properties": {

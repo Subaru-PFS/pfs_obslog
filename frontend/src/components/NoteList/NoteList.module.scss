@@ -1,0 +1,47 @@
+@use '../../styles/theme' as *;
+
+.noteList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.noteItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+
+  &:hover {
+    background-color: $hover-background-color;
+  }
+}
+
+.noteBody {
+  flex-grow: 1;
+  padding: 4px;
+  text-align: left;
+  word-break: break-word;
+}
+
+.noteUser {
+  color: $hint-text-color;
+  padding: 4px;
+  white-space: nowrap;
+}
+
+.noteForm {
+  display: flex;
+  flex-grow: 1;
+  gap: 4px;
+}
+
+.noteInput {
+  @include rounded-text-input;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.addButton {
+  margin-left: auto;
+}

@@ -3,10 +3,16 @@ import {
   useGetVisitApiVisitsVisitIdGetQuery,
   type VisitDetail as VisitDetailType,
 } from '../../../store/api/generatedApi'
+import {
+  useCreateVisitNoteApiVisitsVisitIdNotesPostMutation,
+  useUpdateVisitNoteApiVisitsVisitIdNotesNoteIdPutMutation,
+  useDeleteVisitNoteApiVisitsVisitIdNotesNoteIdDeleteMutation,
+} from '../../../store/api/enhancedApi'
 import { useHomeContext } from '../context'
 import { Tabs, TabPanel, type TabItem } from '../../../components/Tabs'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
+import { NoteList } from '../../../components/NoteList'
 import { SpsInspector } from './SpsInspector'
 import { McsInspector } from './McsInspector'
 import { AgcInspector } from './AgcInspector'
@@ -52,6 +58,26 @@ function Summary({ visit }: SummaryProps) {
   const mcsCount = visit.mcs?.exposures?.length ?? 0
   const agcCount = visit.agc?.exposures?.length ?? 0
 
+  const [createNote] = useCreateVisitNoteApiVisitsVisitIdNotesPostMutation()
+  const [updateNote] = useUpdateVisitNoteApiVisitsVisitIdNotesNoteIdPutMutation()
+  const [deleteNote] = useDeleteVisitNoteApiVisitsVisitIdNotesNoteIdDeleteMutation()
+
+  const handleCreateNote = async (body: string) => {
+    await createNote({ visitId: visit.id, noteCreateRequest: { body } }).unwrap()
+  }
+
+  const handleUpdateNote = async (noteId: number, body: string) => {
+    await updateNote({
+      visitId: visit.id,
+      noteId,
+      noteUpdateRequest: { body },
+    }).unwrap()
+  }
+
+  const handleDeleteNote = async (noteId: number) => {
+    await deleteNote({ visitId: visit.id, noteId }).unwrap()
+  }
+
   return (
     <div className={styles.summary}>
       <div className={styles.summaryRow}>
@@ -74,19 +100,17 @@ function Summary({ visit }: SummaryProps) {
           </span>
         </div>
       </div>
-      {visit.notes && visit.notes.length > 0 && (
-        <div className={styles.summaryRow}>
-          <div className={styles.summaryLabel}>Notes</div>
-          <div className={styles.summaryValue}>
-            {visit.notes.map((note) => (
-              <div key={note.id} className={styles.note}>
-                <span className={styles.noteUser}>{note.user.account_name}:</span>
-                <span className={styles.noteBody}>{note.body}</span>
-              </div>
-            ))}
-          </div>
+      <div className={styles.summaryRow}>
+        <div className={styles.summaryLabel}>Notes</div>
+        <div className={styles.summaryValue}>
+          <NoteList
+            notes={visit.notes ?? []}
+            createNote={handleCreateNote}
+            updateNote={handleUpdateNote}
+            deleteNote={handleDeleteNote}
+          />
         </div>
-      )}
+      </div>
     </div>
   )
 }

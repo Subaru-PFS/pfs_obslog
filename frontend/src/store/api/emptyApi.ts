@@ -11,6 +11,6 @@ export const emptyApi = createApi({
     baseUrl: API_BASE_URL,
     credentials: "include", // Required to send session cookies
   }),
-  tagTypes: ["AuthStatus"],
+  tagTypes: ["AuthStatus", "VisitDetail", "VisitList"],
   endpoints: () => ({}),
 });
