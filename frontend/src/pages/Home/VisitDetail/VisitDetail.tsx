@@ -6,6 +6,7 @@ import {
 import { useHomeContext } from '../context'
 import { Tabs, TabPanel, type TabItem } from '../../../components/Tabs'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
+import { LoadingOverlay } from '../../../components/LoadingOverlay'
 import { SpsInspector } from './SpsInspector'
 import { McsInspector } from './McsInspector'
 import { AgcInspector } from './AgcInspector'
@@ -237,11 +238,7 @@ export function VisitDetail() {
   return (
     <div className={styles.visitDetail}>
       {/* 再取得中（前のデータを表示しながら）はオーバーレイ表示 */}
-      {isFetching && (
-        <div className={styles.loadingOverlay}>
-          <LoadingSpinner size={48} showText={false} />
-        </div>
-      )}
+      <LoadingOverlay isLoading={isFetching} size={48} />
       <Summary visit={visit} />
       <div className={styles.inspector}>
         <VisitInspector visit={visit} />

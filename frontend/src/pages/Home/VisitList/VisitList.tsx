@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import type { MaterialSymbol } from 'material-symbols'
 import {
   useListVisitsApiVisitsGetQuery,
   type VisitListEntry,
@@ -8,10 +9,102 @@ import {
 import { useHomeContext } from '../context'
 import { Icon } from '../../../components/Icon'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
+import { LoadingOverlay } from '../../../components/LoadingOverlay'
 import { Tooltip } from '../../../components/Tooltip'
 import styles from './VisitList.module.scss'
 
 const PER_PAGE = 200
+
+// =============================================================================
+// Column definitions
+// =============================================================================
+type ColumnKey =
+  | 'id'
+  | 'description'
+  | 'date'
+  | 'time'
+  | 'exposures'
+  | 'exptime'
+  | 'notes'
+
+interface ColumnDef {
+  key: ColumnKey
+  label: string
+  icon?: MaterialSymbol
+  description: string
+  defaultVisible: boolean
+}
+
+const COLUMN_DEFINITIONS: ColumnDef[] = [
+  { key: 'id', label: 'ID', description: 'Visit ID', defaultVisible: true },
+  { key: 'description', label: '', icon: 'description', description: 'Description', defaultVisible: true },
+  { key: 'date', label: '', icon: 'event', description: 'Date issued at', defaultVisible: true },
+  { key: 'time', label: '', icon: 'schedule', description: 'Time issued at', defaultVisible: true },
+  { key: 'exposures', label: '', icon: 'tag', description: 'Number of {SpS | MCS | AGC} Exposures', defaultVisible: true },
+  { key: 'exptime', label: '', icon: 'shutter_speed', description: 'Exposure Time [s]', defaultVisible: true },
+  { key: 'notes', label: '', icon: 'notes', description: 'Notes', defaultVisible: true },
+]
+
+type ColumnVisibility = Record<ColumnKey, boolean>
+
+const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = Object.fromEntries(
+  COLUMN_DEFINITIONS.map((col) => [col.key, col.defaultVisible])
+) as ColumnVisibility
+
+const STORAGE_KEY = 'pfs-obslog:visitList:columns'
+
+function useColumnVisibility(): [ColumnVisibility, (key: ColumnKey, visible: boolean) => void] {
+  const [columns, setColumns] = useState<ColumnVisibility>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      if (saved) {
+        return { ...DEFAULT_COLUMN_VISIBILITY, ...JSON.parse(saved) }
+      }
+    } catch {
+      // ignore
+    }
+    return DEFAULT_COLUMN_VISIBILITY
+  })
+
+  const setColumnVisibility = useCallback((key: ColumnKey, visible: boolean) => {
+    setColumns((prev) => {
+      const next = { ...prev, [key]: visible }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      return next
+    })
+  }, [])
+
+  return [columns, setColumnVisibility]
+}
+
+// =============================================================================
+// Column Selector Component
+// =============================================================================
+interface ColumnSelectorProps {
+  columns: ColumnVisibility
+  onToggle: (key: ColumnKey, visible: boolean) => void
+}
+
+function ColumnSelector({ columns, onToggle }: ColumnSelectorProps) {
+  return (
+    <ul className={styles.columnSelector}>
+      {COLUMN_DEFINITIONS.map((col) => (
+        <li key={col.key}>
+          <Tooltip content={col.description}>
+            <label>
+              <input
+                type="checkbox"
+                checked={columns[col.key]}
+                onChange={(e) => onToggle(col.key, e.target.checked)}
+              />
+              {col.icon ? <Icon name={col.icon} size={14} /> : col.label}
+            </label>
+          </Tooltip>
+        </li>
+      ))}
+    </ul>
+  )
+}
 
 /** VisitGroupの型定義 */
 interface VisitGroup {
@@ -152,9 +245,10 @@ function getSequenceTypeClass(sequenceType: string): string {
 
 interface VisitGroupComponentProps {
   group: VisitGroup
+  columns: ColumnVisibility
 }
 
-function VisitGroupComponent({ group }: VisitGroupComponentProps) {
+function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
   const { selectedVisitId, setSelectedVisitId } = useHomeContext()
   
   // Check if any visit in this group is selected
@@ -182,13 +276,13 @@ function VisitGroupComponent({ group }: VisitGroupComponentProps) {
       <table className={styles.visitTable}>
         <thead>
           <tr>
-            <th className={styles.colId}>ID</th>
-            <th className={styles.colDescription}>Description</th>
-            <th className={styles.colDate}>Date</th>
-            <th className={styles.colTime}>Time</th>
-            <th className={styles.colExposures}>S/M/A</th>
-            <th className={styles.colExptime}>Exp</th>
-            <th className={styles.colNotes}>Notes</th>
+            {columns.id && <th className={styles.colId}>ID</th>}
+            {columns.description && <th className={styles.colDescription}><Icon name="description" size={14} /></th>}
+            {columns.date && <th className={styles.colDate}><Icon name="event" size={14} /></th>}
+            {columns.time && <th className={styles.colTime}><Icon name="schedule" size={14} /></th>}
+            {columns.exposures && <th className={styles.colExposures}><Icon name="tag" size={14} /></th>}
+            {columns.exptime && <th className={styles.colExptime}><Icon name="shutter_speed" size={14} /></th>}
+            {columns.notes && <th className={styles.colNotes}><Icon name="notes" size={14} /></th>}
           </tr>
         </thead>
         <tbody>
@@ -203,29 +297,37 @@ function VisitGroupComponent({ group }: VisitGroupComponentProps) {
                 className={isSelected ? styles.selected : ''}
                 onClick={() => setSelectedVisitId(visit.id)}
               >
-                <td className={styles.colId}>{visit.id}</td>
-                <td className={styles.colDescription} title={visit.description || ''}>
-                  {visit.description || '-'}
-                </td>
-                <td className={styles.colDate}>{date}</td>
-                <td className={styles.colTime}>{time}</td>
-                <td
-                  className={`${styles.colExposures} ${getExposureClass(
-                    visit.n_sps_exposures ?? 0,
-                    visit.n_mcs_exposures ?? 0,
-                    visit.n_agc_exposures ?? 0
-                  )}`}
-                >
-                  {visit.n_sps_exposures ?? 0}/{visit.n_mcs_exposures ?? 0}/{visit.n_agc_exposures ?? 0}
-                </td>
-                <td className={styles.colExptime}>
-                  {visit.avg_exptime ? visit.avg_exptime.toFixed(1) : '-'}
-                </td>
-                <td className={styles.colNotes}>
-                  {(visit.notes?.length ?? 0) > 0 && (
-                    <span className={styles.notesBadge}>{visit.notes?.length}</span>
-                  )}
-                </td>
+                {columns.id && <td className={styles.colId}>{visit.id}</td>}
+                {columns.description && (
+                  <td className={styles.colDescription} title={visit.description || ''}>
+                    {visit.description || '-'}
+                  </td>
+                )}
+                {columns.date && <td className={styles.colDate}>{date}</td>}
+                {columns.time && <td className={styles.colTime}>{time}</td>}
+                {columns.exposures && (
+                  <td
+                    className={`${styles.colExposures} ${getExposureClass(
+                      visit.n_sps_exposures ?? 0,
+                      visit.n_mcs_exposures ?? 0,
+                      visit.n_agc_exposures ?? 0
+                    )}`}
+                  >
+                    {visit.n_sps_exposures ?? 0}/{visit.n_mcs_exposures ?? 0}/{visit.n_agc_exposures ?? 0}
+                  </td>
+                )}
+                {columns.exptime && (
+                  <td className={styles.colExptime}>
+                    {visit.avg_exptime ? visit.avg_exptime.toFixed(1) : '-'}
+                  </td>
+                )}
+                {columns.notes && (
+                  <td className={styles.colNotes}>
+                    {(visit.notes?.length ?? 0) > 0 && (
+                      <span className={styles.notesBadge}>{visit.notes?.length}</span>
+                    )}
+                  </td>
+                )}
               </tr>
             )
           })}
@@ -242,6 +344,9 @@ export function VisitList() {
   const contentRef = useRef<HTMLDivElement>(null)
   const scrollHeightBeforeLoadRef = useRef<number | null>(null)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+
+  // Column visibility state with localStorage persistence
+  const [columns, setColumnVisibility] = useColumnVisibility()
 
   // RTK Query API
   const { data, isLoading, isFetching, isError, refetch } = useListVisitsApiVisitsGetQuery({
@@ -446,12 +551,13 @@ export function VisitList() {
         </div>
       </div>
 
+      {/* Column selector row */}
+      <div className={styles.columnsRow}>
+        <ColumnSelector columns={columns} onToggle={setColumnVisibility} />
+      </div>
+
       <div className={styles.content} ref={contentRef}>
-        {isLoadingMore && (
-          <div className={styles.loadingOverlay}>
-            <LoadingSpinner size={64} showText={false} />
-          </div>
-        )}
+        <LoadingOverlay isLoading={isFetching} />
 
         {/* Navigation at top - scrolls with content */}
         <div className={styles.paginationTop}>
@@ -491,6 +597,7 @@ export function VisitList() {
             <VisitGroupComponent
               key={group.iicSequence?.iic_sequence_id ?? `no-seq-${index}`}
               group={group}
+              columns={columns}
             />
           ))
         )}

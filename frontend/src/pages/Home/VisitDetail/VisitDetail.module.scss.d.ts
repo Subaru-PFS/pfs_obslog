@@ -2,7 +2,6 @@ export type Styles = {
   error: string;
   inspector: string;
   loading: string;
-  loadingOverlay: string;
   noData: string;
   note: string;
   noteBody: string;

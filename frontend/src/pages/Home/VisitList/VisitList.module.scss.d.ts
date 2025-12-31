@@ -6,6 +6,8 @@ export type Styles = {
   colId: string;
   colNotes: string;
   colTime: string;
+  columnSelector: string;
+  columnsRow: string;
   command: string;
   comments: string;
   content: string;
@@ -23,7 +25,6 @@ export type Styles = {
   iicSequence: string;
   info: string;
   loading: string;
-  loadingOverlay: string;
   noSequence: string;
   notesBadge: string;
   pageInfo: string;
