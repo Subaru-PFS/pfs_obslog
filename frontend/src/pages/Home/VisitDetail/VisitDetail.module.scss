@@ -63,6 +63,8 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  // min-height: 0 is required for flex children to shrink below their content size
+  min-height: 0;
 }
 
 .placeholder,

@@ -68,6 +68,8 @@
   border: 1px solid #bbb;
   border-top: 1px solid #bbb;
   margin-top: -1px;
+  // min-height: 0 is required for flex children to shrink below their content size
+  min-height: 0;
 }
 
 .tabPanel {

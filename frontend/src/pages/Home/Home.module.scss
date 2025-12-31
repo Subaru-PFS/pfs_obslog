@@ -12,6 +12,8 @@
   flex-direction: column;
   border-right: 1px solid $border-color;
   overflow: hidden;
+  // min-height: 0 is required for flex children to shrink below their content size
+  min-height: 0;
 }
 
 .resizer {
@@ -34,6 +36,8 @@
   flex-direction: column;
   overflow: hidden;
   background-color: $background-color;
+  // min-height: 0 is required for flex children to shrink below their content size
+  min-height: 0;
 }
 
 .placeholder {
