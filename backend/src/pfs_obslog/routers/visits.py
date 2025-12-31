@@ -691,7 +691,7 @@ async def _fetch_iic_sequence_detail(db: AsyncSession, visit_id: int) -> IicSequ
 
 
 @router.get("/{visit_id}/rank", response_model=VisitRankResponse)
-def get_visit_rank(
+async def get_visit_rank(
     db: DbSession,
     visit_id: int,
     sql: str | None = Query(default=None, description="SQLライクなフィルタ条件（例: where id > 100）"),
@@ -748,9 +748,10 @@ def get_visit_rank(
     ranked_subquery = ranked_subquery.subquery("ranked")
 
     # 指定されたvisit_idの順位を取得
-    rank = db.execute(
+    result = await db.execute(
         select(ranked_subquery.c.rank).where(ranked_subquery.c.id == visit_id)
-    ).scalar_one_or_none()
+    )
+    rank = result.scalar_one_or_none()
 
     return VisitRankResponse(rank=rank)
 
@@ -763,7 +764,7 @@ csv_router = APIRouter(tags=["visits"])
 
 
 @csv_router.get("/visits.csv")
-def export_visits_csv(
+async def export_visits_csv(
     db: DbSession,
     offset: int = Query(default=0, ge=0, description="ページネーションのオフセット"),
     limit: int = Query(default=10000, ge=-1, le=100000, description="取得件数上限（-1で無制限）"),
@@ -798,10 +799,10 @@ def export_visits_csv(
             raise HTTPException(status_code=400, detail=str(e)) from e
 
     # Visit一覧を取得
-    visits, _count = _fetch_visits(db, effective_limit, offset, where_condition, required_joins)
+    visits, _count = await _fetch_visits(db, effective_limit, offset, where_condition, required_joins)
 
     # 関連するIicSequenceを取得
-    iic_sequences = _fetch_related_iic_sequences(db, visits)
+    iic_sequences = await _fetch_related_iic_sequences(db, visits)
     iic_sequence_map = {seq.iic_sequence_id: seq for seq in iic_sequences}
 
     # CSVを生成

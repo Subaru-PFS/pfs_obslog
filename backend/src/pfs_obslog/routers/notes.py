@@ -9,7 +9,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from pfs_obslog import models as M
 from pfs_obslog.auth.session import require_user
@@ -47,8 +47,8 @@ class NoteUpdateRequest(BaseModel):
 # ============================================================
 
 
-def get_user_id(
-    db: Annotated[Session, Depends(get_db)],
+async def get_user_id(
+    db: Annotated[AsyncSession, Depends(get_db)],
     account_name: Annotated[str, Depends(require_user)],
 ) -> int:
     """認証されたユーザーのDB IDを取得する
@@ -63,16 +63,17 @@ def get_user_id(
     Raises:
         HTTPException: ユーザーが見つからない場合は404エラー
     """
-    user = db.execute(
+    result = await db.execute(
         select(M.ObslogUser).where(M.ObslogUser.account_name == account_name)
-    ).scalar_one_or_none()
+    )
+    user = result.scalar_one_or_none()
 
     if user is None:
         # ユーザーが存在しない場合は自動作成
         user = M.ObslogUser(account_name=account_name)  # type: ignore[call-arg]
         db.add(user)
-        db.commit()
-        db.refresh(user)
+        await db.commit()
+        await db.refresh(user)
 
     return user.id
 
@@ -89,17 +90,18 @@ def get_user_id(
     summary="Create a visit note",
     description="Create a new note for a visit. Requires authentication.",
 )
-def create_visit_note(
+async def create_visit_note(
     visit_id: int,
     request: NoteCreateRequest,
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[AsyncSession, Depends(get_db)],
     user_id: Annotated[int, Depends(get_user_id)],
 ) -> NoteCreateResponse:
     """Visitにメモを追加する"""
     # Visitの存在確認
-    visit = db.execute(
+    result = await db.execute(
         select(M.PfsVisit).where(M.PfsVisit.pfs_visit_id == visit_id)
-    ).scalar_one_or_none()
+    )
+    visit = result.scalar_one_or_none()
 
     if visit is None:
         raise HTTPException(
@@ -113,8 +115,8 @@ def create_visit_note(
         body=request.body,
     )
     db.add(note)
-    db.commit()
-    db.refresh(note)
+    await db.commit()
+    await db.refresh(note)
 
     return NoteCreateResponse(id=note.id)
 
@@ -125,21 +127,22 @@ def create_visit_note(
     summary="Update a visit note",
     description="Update an existing visit note. Only the author can update their own notes.",
 )
-def update_visit_note(
+async def update_visit_note(
     visit_id: int,
     note_id: int,
     request: NoteUpdateRequest,
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[AsyncSession, Depends(get_db)],
     user_id: Annotated[int, Depends(get_user_id)],
 ) -> None:
     """Visitのメモを更新する（自分のメモのみ）"""
-    note = db.execute(
+    result = await db.execute(
         select(M.ObslogVisitNote).where(
             (M.ObslogVisitNote.id == note_id)
             & (M.ObslogVisitNote.pfs_visit_id == visit_id)
             & (M.ObslogVisitNote.user_id == user_id)
         )
-    ).scalar_one_or_none()
+    )
+    note = result.scalar_one_or_none()
 
     if note is None:
         raise HTTPException(
@@ -148,7 +151,7 @@ def update_visit_note(
         )
 
     note.body = request.body
-    db.commit()
+    await db.commit()
 
 
 @router.delete(
@@ -157,20 +160,21 @@ def update_visit_note(
     summary="Delete a visit note",
     description="Delete a visit note. Only the author can delete their own notes.",
 )
-def delete_visit_note(
+async def delete_visit_note(
     visit_id: int,
     note_id: int,
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[AsyncSession, Depends(get_db)],
     user_id: Annotated[int, Depends(get_user_id)],
 ) -> None:
     """Visitのメモを削除する（自分のメモのみ）"""
-    note = db.execute(
+    result = await db.execute(
         select(M.ObslogVisitNote).where(
             (M.ObslogVisitNote.id == note_id)
             & (M.ObslogVisitNote.pfs_visit_id == visit_id)
             & (M.ObslogVisitNote.user_id == user_id)
         )
-    ).scalar_one_or_none()
+    )
+    note = result.scalar_one_or_none()
 
     if note is None:
         raise HTTPException(
@@ -178,8 +182,8 @@ def delete_visit_note(
             detail="Note not found or you don't have permission to delete it",
         )
 
-    db.delete(note)
-    db.commit()
+    await db.delete(note)
+    await db.commit()
 
 
 # ============================================================
@@ -194,17 +198,18 @@ def delete_visit_note(
     summary="Create a visit set note",
     description="Create a new note for a visit set (IIC sequence). Requires authentication.",
 )
-def create_visit_set_note(
+async def create_visit_set_note(
     visit_set_id: int,
     request: NoteCreateRequest,
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[AsyncSession, Depends(get_db)],
     user_id: Annotated[int, Depends(get_user_id)],
 ) -> NoteCreateResponse:
     """Visit Set（IIC Sequence）にメモを追加する"""
     # IIC Sequenceの存在確認
-    sequence = db.execute(
+    result = await db.execute(
         select(M.IicSequence).where(M.IicSequence.iic_sequence_id == visit_set_id)
-    ).scalar_one_or_none()
+    )
+    sequence = result.scalar_one_or_none()
 
     if sequence is None:
         raise HTTPException(
@@ -218,8 +223,8 @@ def create_visit_set_note(
         body=request.body,
     )
     db.add(note)
-    db.commit()
-    db.refresh(note)
+    await db.commit()
+    await db.refresh(note)
 
     return NoteCreateResponse(id=note.id)
 
@@ -230,21 +235,22 @@ def create_visit_set_note(
     summary="Update a visit set note",
     description="Update an existing visit set note. Only the author can update their own notes.",
 )
-def update_visit_set_note(
+async def update_visit_set_note(
     visit_set_id: int,
     note_id: int,
     request: NoteUpdateRequest,
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[AsyncSession, Depends(get_db)],
     user_id: Annotated[int, Depends(get_user_id)],
 ) -> None:
     """Visit Setのメモを更新する（自分のメモのみ）"""
-    note = db.execute(
+    result = await db.execute(
         select(M.ObslogVisitSetNote).where(
             (M.ObslogVisitSetNote.id == note_id)
             & (M.ObslogVisitSetNote.iic_sequence_id == visit_set_id)
             & (M.ObslogVisitSetNote.user_id == user_id)
         )
-    ).scalar_one_or_none()
+    )
+    note = result.scalar_one_or_none()
 
     if note is None:
         raise HTTPException(
@@ -253,7 +259,7 @@ def update_visit_set_note(
         )
 
     note.body = request.body
-    db.commit()
+    await db.commit()
 
 
 @router.delete(
@@ -262,20 +268,21 @@ def update_visit_set_note(
     summary="Delete a visit set note",
     description="Delete a visit set note. Only the author can delete their own notes.",
 )
-def delete_visit_set_note(
+async def delete_visit_set_note(
     visit_set_id: int,
     note_id: int,
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[AsyncSession, Depends(get_db)],
     user_id: Annotated[int, Depends(get_user_id)],
 ) -> None:
     """Visit Setのメモを削除する（自分のメモのみ）"""
-    note = db.execute(
+    result = await db.execute(
         select(M.ObslogVisitSetNote).where(
             (M.ObslogVisitSetNote.id == note_id)
             & (M.ObslogVisitSetNote.iic_sequence_id == visit_set_id)
             & (M.ObslogVisitSetNote.user_id == user_id)
         )
-    ).scalar_one_or_none()
+    )
+    note = result.scalar_one_or_none()
 
     if note is None:
         raise HTTPException(
@@ -283,5 +290,5 @@ def delete_visit_set_note(
             detail="Note not found or you don't have permission to delete it",
         )
 
-    db.delete(note)
-    db.commit()
+    await db.delete(note)
+    await db.commit()
