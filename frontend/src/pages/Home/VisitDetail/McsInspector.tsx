@@ -1,6 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { McsVisitDetail, McsExposure } from '../../../store/api/generatedApi'
+import { LazyImage } from '../../../components/LazyImage'
+import { IconButton } from '../../../components/Icon'
+import { API_BASE_URL } from '../../../config'
+import { useHomeContext } from '../context'
 import styles from './Inspector.module.scss'
+
+type ImageScale = 0.75 | 1 | 2
 
 interface McsInspectorProps {
   mcs: McsVisitDetail
@@ -15,22 +21,52 @@ function calculateAverageExptime(exposures: McsExposure[]): number {
   return exptimes.reduce((a, b) => a + b, 0) / exptimes.length
 }
 
-/**
- * 日時をフォーマット
- */
-function formatTime(dateStr: string | null | undefined): string {
-  if (!dateStr) return '-'
-  const d = new Date(dateStr)
-  return d.toLocaleTimeString('ja-JP', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+/** MCS Plot画像のサイズ */
+const PLOT_SIZE = { width: 300, height: 214 }
+/** MCS Raw画像のサイズ */
+const RAW_SIZE = { width: 332, height: 214 }
+
+function getMcsPlotUrl(frameId: number, scale: ImageScale): string {
+  const params = new URLSearchParams({
+    width: String(Math.floor(scale * PLOT_SIZE.width)),
+    height: String(Math.floor(scale * PLOT_SIZE.height)),
   })
+  return `${API_BASE_URL}/api/mcs_data/${frameId}.png?${params}`
+}
+
+function getMcsRawUrl(visitId: number, frameId: number, scale: ImageScale): string {
+  const params = new URLSearchParams({
+    width: String(Math.floor(scale * RAW_SIZE.width)),
+    height: String(Math.floor(scale * RAW_SIZE.height)),
+  })
+  return `${API_BASE_URL}/api/fits/visits/${visitId}/mcs/${frameId}.png?${params}`
+}
+
+function getMcsLargePreviewUrl(visitId: number, frameId: number): string {
+  return `${API_BASE_URL}/api/fits/visits/${visitId}/mcs/${frameId}.png`
+}
+
+function getMcsFitsDownloadUrl(visitId: number, frameId: number): string {
+  return `${API_BASE_URL}/api/fits/visits/${visitId}/mcs/${frameId}.fits`
 }
 
 export function McsInspector({ mcs }: McsInspectorProps) {
+  const { selectedVisitId } = useHomeContext()
   const exposures = mcs.exposures ?? []
   const avgExptime = useMemo(() => calculateAverageExptime(exposures), [exposures])
+
+  const [showPlot, setShowPlot] = useState(true)
+  const [showRaw, setShowRaw] = useState(false)
+  const [imageScale, setImageScale] = useState<ImageScale>(1)
+
+  const plotSize = {
+    width: Math.floor(imageScale * PLOT_SIZE.width),
+    height: Math.floor(imageScale * PLOT_SIZE.height),
+  }
+  const rawSize = {
+    width: Math.floor(imageScale * RAW_SIZE.width),
+    height: Math.floor(imageScale * RAW_SIZE.height),
+  }
 
   return (
     <div className={styles.inspector}>
@@ -45,31 +81,140 @@ export function McsInspector({ mcs }: McsInspectorProps) {
         </div>
       </div>
 
+      <div className={styles.settings}>
+        <div className={styles.settingsGroup}>
+          <span className={styles.settingsLabel}>Image Type:</span>
+          <label>
+            <input
+              type="checkbox"
+              checked={showPlot}
+              onChange={(e) => setShowPlot(e.target.checked)}
+            />
+            Plot
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={showRaw}
+              onChange={(e) => setShowRaw(e.target.checked)}
+            />
+            Raw
+          </label>
+        </div>
+        <div className={styles.settingsGroup}>
+          <span className={styles.settingsLabel}>Image Size:</span>
+          <label>
+            <input
+              type="radio"
+              name="mcsImageScale"
+              value="0.75"
+              checked={imageScale === 0.75}
+              onChange={() => setImageScale(0.75)}
+            />
+            Small
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="mcsImageScale"
+              value="1"
+              checked={imageScale === 1}
+              onChange={() => setImageScale(1)}
+            />
+            Medium
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="mcsImageScale"
+              value="2"
+              checked={imageScale === 2}
+              onChange={() => setImageScale(2)}
+            />
+            Large
+          </label>
+        </div>
+      </div>
+
       <div className={styles.content}>
-        <table className={styles.dataTable}>
-          <thead>
-            <tr>
-              <th>Frame ID</th>
-              <th>Exptime</th>
-              <th>Altitude</th>
-              <th>Azimuth</th>
-              <th>InsRot</th>
-              <th>Taken at</th>
-            </tr>
-          </thead>
-          <tbody>
-            {exposures.map(exp => (
-              <tr key={exp.frame_id}>
-                <td>{exp.frame_id}</td>
-                <td>{exp.exptime?.toFixed(3) ?? '-'}s</td>
-                <td>{exp.altitude?.toFixed(2) ?? '-'}°</td>
-                <td>{exp.azimuth?.toFixed(2) ?? '-'}°</td>
-                <td>{exp.insrot?.toFixed(2) ?? '-'}°</td>
-                <td>{formatTime(exp.taken_at)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className={styles.exposureList}>
+          {exposures.map(exp => (
+            <McsExposureCard
+              key={exp.frame_id}
+              exposure={exp}
+              visitId={selectedVisitId!}
+              showPlot={showPlot}
+              showRaw={showRaw}
+              plotSize={plotSize}
+              rawSize={rawSize}
+              scale={imageScale}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface McsExposureCardProps {
+  exposure: McsExposure
+  visitId: number
+  showPlot: boolean
+  showRaw: boolean
+  plotSize: { width: number; height: number }
+  rawSize: { width: number; height: number }
+  scale: ImageScale
+}
+
+function McsExposureCard({
+  exposure,
+  visitId,
+  showPlot,
+  showRaw,
+  plotSize,
+  rawSize,
+  scale,
+}: McsExposureCardProps) {
+  return (
+    <div className={styles.exposureCard}>
+      <div className={styles.exposureCardHeader}>
+        Frame ID = {exposure.frame_id}
+      </div>
+      <div className={styles.exposureCardImages}>
+        {showPlot && (
+          <LazyImage
+            src={getMcsPlotUrl(exposure.frame_id, scale)}
+            alt={`MCS Plot ${exposure.frame_id}`}
+            skeletonWidth={plotSize.width}
+            skeletonHeight={plotSize.height}
+            transparentBackground
+          />
+        )}
+        {showRaw && (
+          <LazyImage
+            src={getMcsRawUrl(visitId, exposure.frame_id, scale)}
+            alt={`MCS Raw ${exposure.frame_id}`}
+            skeletonWidth={rawSize.width}
+            skeletonHeight={rawSize.height}
+          />
+        )}
+      </div>
+      <div className={styles.exposureCardInfo}>
+        <span>Exptime: {exposure.exptime?.toFixed(3) ?? '-'}s</span>
+        <span>Alt: {exposure.altitude?.toFixed(2) ?? '-'}°</span>
+        <span>Az: {exposure.azimuth?.toFixed(2) ?? '-'}°</span>
+      </div>
+      <div className={styles.exposureCardActions}>
+        <IconButton
+          icon="visibility"
+          tooltip="Open Large Preview"
+          onClick={() => window.open(getMcsLargePreviewUrl(visitId, exposure.frame_id))}
+        />
+        <IconButton
+          icon="download"
+          tooltip="Download FITS File"
+          onClick={() => { location.href = getMcsFitsDownloadUrl(visitId, exposure.frame_id) }}
+        />
       </div>
     </div>
   )

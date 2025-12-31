@@ -1,7 +1,10 @@
 export type Styles = {
   armCell: string;
   badge: string;
+  cameraGrid: string;
   cameraId: string;
+  cameraItem: string;
+  cameraLink: string;
   commandCode: string;
   commandLabel: string;
   commandSection: string;
@@ -11,7 +14,13 @@ export type Styles = {
   content: string;
   dataTable: string;
   emptyCell: string;
+  exposureCard: string;
+  exposureCardActions: string;
+  exposureCardHeader: string;
+  exposureCardImages: string;
+  exposureCardInfo: string;
   exposureInfo: string;
+  exposureList: string;
   exposureTable: string;
   exptime: string;
   header: string;
@@ -29,6 +38,7 @@ export type Styles = {
   notesSection: string;
   noteUser: string;
   pagination: string;
+  previewActions: string;
   previewCell: string;
   previewContainer: string;
   previewInfo: string;

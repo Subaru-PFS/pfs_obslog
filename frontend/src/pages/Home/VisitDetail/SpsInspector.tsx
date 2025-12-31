@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { SpsVisitDetail, SpsExposure } from '../../../store/api/generatedApi'
 import { LazyImage } from '../../../components/LazyImage'
+import { IconButton } from '../../../components/Icon'
 import { API_BASE_URL } from '../../../config'
 import { useHomeContext } from '../context'
 import styles from './Inspector.module.scss'
@@ -62,6 +63,14 @@ function getSpsPreviewUrl(
     scale: String(scale),
   })
   return `${API_BASE_URL}/api/fits/visits/${visitId}/sps/${cameraId}.png?${params}`
+}
+
+function getSpsLargePreviewUrl(visitId: number, cameraId: number): string {
+  return `${API_BASE_URL}/api/fits/visits/${visitId}/sps/${cameraId}.png`
+}
+
+function getSpsFitsDownloadUrl(visitId: number, cameraId: number): string {
+  return `${API_BASE_URL}/api/fits/visits/${visitId}/sps/${cameraId}.fits`
 }
 
 export function SpsInspector({ sps }: SpsInspectorProps) {
@@ -196,6 +205,18 @@ export function SpsInspector({ sps }: SpsInspectorProps) {
                               <div className={styles.previewInfo}>
                                 <span>#{exp.camera_id}</span>
                                 <span>{exp.exptime?.toFixed(1)}s</span>
+                              </div>
+                              <div className={styles.previewActions}>
+                                <IconButton
+                                  icon="visibility"
+                                  tooltip="Open Large Preview"
+                                  onClick={() => window.open(getSpsLargePreviewUrl(selectedVisitId, exp.camera_id))}
+                                />
+                                <IconButton
+                                  icon="download"
+                                  tooltip="Download FITS File"
+                                  onClick={() => { location.href = getSpsFitsDownloadUrl(selectedVisitId, exp.camera_id) }}
+                                />
                               </div>
                             </div>
                           )}

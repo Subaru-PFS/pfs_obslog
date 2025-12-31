@@ -1,12 +1,22 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef, useEffect } from 'react'
 import type { AgcVisitDetail, AgcExposure } from '../../../store/api/generatedApi'
+import { LazyImage } from '../../../components/LazyImage'
+import { IconButton } from '../../../components/Icon'
+import { API_BASE_URL } from '../../../config'
+import { useHomeContext } from '../context'
 import styles from './Inspector.module.scss'
+
+type ImageScale = 0.5 | 0.67 | 1
 
 interface AgcInspectorProps {
   agc: AgcVisitDetail
 }
 
 const PER_PAGE = 20
+const CAMERA_COUNT = 6
+
+/** AGC画像のサイズ */
+const CAMERA_SIZE = { width: 358, height: 345 }
 
 /**
  * 平均露出時間を計算
@@ -17,29 +27,45 @@ function calculateAverageExptime(exposures: AgcExposure[]): number {
   return exptimes.reduce((a, b) => a + b, 0) / exptimes.length
 }
 
-/**
- * 日時をフォーマット
- */
-function formatTime(dateStr: string | null | undefined): string {
-  if (!dateStr) return '-'
-  const d = new Date(dateStr)
-  return d.toLocaleTimeString('ja-JP', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+function getAgcPreviewUrl(visitId: number, exposureId: number, hduIndex: number, scale: ImageScale): string {
+  const params = new URLSearchParams({
+    width: String(Math.floor(scale * CAMERA_SIZE.width)),
+    height: String(Math.floor(scale * CAMERA_SIZE.height)),
   })
+  return `${API_BASE_URL}/api/fits/visits/${visitId}/agc/${exposureId}/${hduIndex}.png?${params}`
+}
+
+function getAgcLargePreviewUrl(visitId: number, exposureId: number, hduIndex: number): string {
+  return `${API_BASE_URL}/api/fits/visits/${visitId}/agc/${exposureId}/${hduIndex}.png`
+}
+
+function getAgcFitsDownloadUrl(visitId: number, exposureId: number): string {
+  return `${API_BASE_URL}/api/fits/visits/${visitId}/agc/${exposureId}.fits`
 }
 
 export function AgcInspector({ agc }: AgcInspectorProps) {
+  const { selectedVisitId } = useHomeContext()
   const exposures = agc.exposures ?? []
   const avgExptime = useMemo(() => calculateAverageExptime(exposures), [exposures])
   const [page, setPage] = useState(0)
+  const [imageScale, setImageScale] = useState<ImageScale>(0.67)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   const totalPages = Math.ceil(exposures.length / PER_PAGE)
   const pagedExposures = useMemo(
     () => exposures.slice(page * PER_PAGE, (page + 1) * PER_PAGE),
     [exposures, page]
   )
+
+  // ページ変更時にスクロール位置をリセット
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0, left: 0 })
+  }, [page])
+
+  const cameraSize = {
+    width: Math.floor(imageScale * CAMERA_SIZE.width),
+    height: Math.floor(imageScale * CAMERA_SIZE.height),
+  }
 
   return (
     <div className={styles.inspector}>
@@ -73,39 +99,111 @@ export function AgcInspector({ agc }: AgcInspectorProps) {
         )}
       </div>
 
-      <div className={styles.content}>
-        <table className={styles.dataTable}>
-          <thead>
-            <tr>
-              <th>Exposure ID</th>
-              <th>Exptime</th>
-              <th>Altitude</th>
-              <th>Azimuth</th>
-              <th>InsRot</th>
-              <th>Taken at</th>
-              <th>Guide Offset</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pagedExposures.map(exp => (
-              <tr key={exp.id}>
-                <td>{exp.id}</td>
-                <td>{exp.exptime?.toFixed(3) ?? '-'}s</td>
-                <td>{exp.altitude?.toFixed(2) ?? '-'}°</td>
-                <td>{exp.azimuth?.toFixed(2) ?? '-'}°</td>
-                <td>{exp.insrot?.toFixed(2) ?? '-'}°</td>
-                <td>{formatTime(exp.taken_at)}</td>
-                <td>
-                  {exp.guide_offset ? (
-                    <span title={`ΔRA: ${exp.guide_offset.delta_ra?.toFixed(3) ?? '-'}, ΔDec: ${exp.guide_offset.delta_dec?.toFixed(3) ?? '-'}`}>
-                      ✓
-                    </span>
-                  ) : '-'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className={styles.settings}>
+        <div className={styles.settingsGroup}>
+          <span className={styles.settingsLabel}>Image Size:</span>
+          <label>
+            <input
+              type="radio"
+              name="agcImageScale"
+              value="0.5"
+              checked={imageScale === 0.5}
+              onChange={() => setImageScale(0.5)}
+            />
+            Small
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="agcImageScale"
+              value="0.67"
+              checked={imageScale === 0.67}
+              onChange={() => setImageScale(0.67)}
+            />
+            Medium
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="agcImageScale"
+              value="1"
+              checked={imageScale === 1}
+              onChange={() => setImageScale(1)}
+            />
+            Large
+          </label>
+        </div>
+      </div>
+
+      <div className={styles.content} ref={scrollRef}>
+        <div className={styles.exposureList}>
+          {pagedExposures.map(exp => (
+            <AgcExposureCard
+              key={exp.id}
+              exposure={exp}
+              visitId={selectedVisitId!}
+              cameraSize={cameraSize}
+              scale={imageScale}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface AgcExposureCardProps {
+  exposure: AgcExposure
+  visitId: number
+  cameraSize: { width: number; height: number }
+  scale: ImageScale
+}
+
+function AgcExposureCard({ exposure, visitId, cameraSize, scale }: AgcExposureCardProps) {
+  const guideOffset = exposure.guide_offset
+
+  return (
+    <div className={styles.exposureCard}>
+      <div className={styles.exposureCardHeader}>
+        Exposure ID = {exposure.id}
+      </div>
+      <div className={styles.cameraGrid}>
+        {Array.from({ length: CAMERA_COUNT }, (_, i) => i + 1).map(hduIndex => (
+          <div key={hduIndex} className={styles.cameraItem}>
+            <LazyImage
+              src={getAgcPreviewUrl(visitId, exposure.id, hduIndex, scale)}
+              alt={`AGC ${exposure.id} HDU ${hduIndex}`}
+              skeletonWidth={cameraSize.width}
+              skeletonHeight={cameraSize.height}
+            />
+            <a
+              className={styles.cameraLink}
+              href={getAgcLargePreviewUrl(visitId, exposure.id, hduIndex)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              [{hduIndex}]
+            </a>
+          </div>
+        ))}
+      </div>
+      <div className={styles.exposureCardInfo}>
+        <span>Exptime: {exposure.exptime?.toFixed(3) ?? '-'}s</span>
+        <span>Alt: {exposure.altitude?.toFixed(2) ?? '-'}°</span>
+        <span>Az: {exposure.azimuth?.toFixed(2) ?? '-'}°</span>
+        {guideOffset && (
+          <span>
+            Guide Offset: ΔRA={guideOffset.delta_ra?.toFixed(3) ?? '-'}, 
+            ΔDec={guideOffset.delta_dec?.toFixed(3) ?? '-'}
+          </span>
+        )}
+      </div>
+      <div className={styles.exposureCardActions}>
+        <IconButton
+          icon="download"
+          tooltip="Download FITS File"
+          onClick={() => { location.href = getAgcFitsDownloadUrl(visitId, exposure.id) }}
+        />
       </div>
     </div>
   )
