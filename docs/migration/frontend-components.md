@@ -8,13 +8,13 @@
 
 | カテゴリ | 完了 | 一部完了 | 未完了 | 進捗率 |
 |----------|------|----------|--------|--------|
-| ページ・レイアウト | 2 | 0 | 2 | 50% |
-| 共通コンポーネント | 4 | 0 | 4 | 50% |
+| ページ・レイアウト | 3 | 0 | 1 | 75% |
+| 共通コンポーネント | 6 | 0 | 2 | 75% |
 | Home: Visit一覧 | 4 | 1 | 3 | 56% |
-| Home: Visit詳細 | 6 | 1 | 5 | 54% |
-| Home: Note機能 | 0 | 1 | 3 | 13% |
+| Home: Visit詳細 | 9 | 0 | 3 | 75% |
+| Home: Note機能 | 4 | 0 | 0 | 100% |
 | Designs機能 | 0 | 0 | 5 | 0% |
-| **合計** | **16** | **3** | **22** | **43%** |
+| **合計** | **26** | **1** | **14** | **66%** |
 
 ---
 
@@ -23,7 +23,7 @@
 | 既存コンポーネント | 既存パス | 新コンポーネント | 新パス | 状態 | 備考 |
 |-------------------|---------|-----------------|-------|------|------|
 | Login | `pages/Login` | Login | `pages/Login` | ✅ 完了 | ログインフォーム |
-| Header | `pages/Header` | - | - | ⏳ 未実装 | ヘッダー（ナビゲーション、ログアウト） |
+| Header | `pages/Header` | Header | `components/Header` | ✅ 完了 | ヘッダー（ナビゲーション、ログアウト） |
 | Home | `pages/Home` | Home | `pages/Home` | ✅ 完了 | Visit一覧・詳細ページ |
 | Designs | `pages/Designs` | - | - | ⏳ 未実装 | PFS Design一覧・詳細ページ |
 
@@ -33,13 +33,13 @@
 
 | 既存コンポーネント | 既存パス | 新コンポーネント | 新パス | 状態 | 備考 |
 |-------------------|---------|-----------------|-------|------|------|
-| Icon, IconButton | `components/Icon` | Icon | `components/Icon` | ✅ 完了 | Material Symbolsアイコン |
+| Icon, IconButton | `components/Icon` | Icon, IconButton | `components/Icon` | ✅ 完了 | Material Symbolsアイコン |
 | Loading, Block | `components/Loading` | LoadingSpinner, LoadingOverlay | `components/LoadingSpinner`, `components/LoadingOverlay` | ✅ 完了 | ローディング表示 |
 | Tabs | `components/Tabs` | Tabs, TabPanel | `components/Tabs` | ✅ 完了 | タブUI |
 | tippy (Tippy) | `components/Tippy.tsx` | Tooltip | `components/Tooltip` | ✅ 完了 | ツールチップ |
+| LazyImage | `components/LazyImage` | LazyImage | `components/LazyImage` | ✅ 完了 | 遅延読み込み画像 |
+| NoteList | `pages/Home/NoteList` | NoteList | `components/NoteList` | ✅ 完了 | メモ一覧（CRUD対応） |
 | DatePicker, DateRangePicker | `components/DatePicker` | - | - | ⏳ 未実装 | 日付選択/日付範囲選択 |
-| LazyImage | `components/LazyImage` | - | - | ⏳ 未実装 | 遅延読み込み画像 |
-| Flex, FlexColumn, FlexPadding, GridCellGroup | `components/layout` | - | - | ⏳ 未実装 | Flex/Grid等のレイアウトユーティリティ |
 | FocalPlane | `components/pfs/FocalPlane.tsx` | - | - | ⏳ 未実装 | PFS焦点面可視化 |
 
 ---
@@ -64,26 +64,26 @@
 | 既存機能 | 既存コンポーネント | 新コンポーネント | 状態 | 備考 |
 |---------|------------------|-----------------|------|------|
 | Visit基本情報 | `VisitDetail` | `VisitDetail` (Summary) | ✅ 完了 | ID、説明、発行日時、露出数 |
-| SPS Inspector | `VisitInspector/SpsInspector` | `SpsInspector` | ✅ 完了 | SPS露出一覧、アノテーション表示 |
+| SPS Inspector | `VisitInspector/SpsInspector` | `SpsInspector` | ✅ 完了 | SPS露出一覧、プレビュー画像表示 |
 | MCS Inspector | `VisitInspector/McsInspector` | `McsInspector` | ✅ 完了 | MCS露出一覧、環境情報表示 |
 | AGC Inspector | `VisitInspector/AgcInspector` | `AgcInspector` | ✅ 完了 | AGC露出一覧、ガイドオフセット表示 |
 | IIC Sequence Info | `VisitInspector/IicSequence` | `IicSequenceInfo` | ✅ 完了 | シーケンス情報表示 |
 | Sequence Group Info | `VisitInspector/SequenceGroup` | `SequenceGroupInfo` | ✅ 完了 | グループ情報表示 |
-| Visit Notes表示 | `VisitDetail` (notes部分) | `VisitDetail` (Summary内) | 🔶 一部完了 | 表示のみ（CRUD未実装） |
+| Visit Notes | `VisitDetail` (notes部分) | `VisitDetail` + `NoteList` | ✅ 完了 | メモのCRUD機能付き |
+| FITS Preview画像 | `SpsInspector` (LazyImage) | `SpsInspector` + `LazyImage` | ✅ 完了 | SPS FITSプレビュー画像表示 |
+| Image Type/Size選択 | `SpsInspector` (settings) | `SpsInspector` | ✅ 完了 | raw/postISRCCD、サイズ選択 |
 | FITS Header Info | `FitsHeaderInfo` | - | ⏳ 未実装 | FITSヘッダー表示（HDU選択、検索機能付き） |
-| FITS Preview画像 | `SpsInspector` (LazyImage), `McsInspector`, `AgcInspector` | - | ⏳ 未実装 | FITSプレビュー画像表示 |
 | FITS Download | `SpsInspector` (downloadRawExposures) | - | ⏳ 未実装 | FITSファイルダウンロード |
-| Image Type選択 | `SpsInspector` (raw/postISRCCD) | - | ⏳ 未実装 | 画像タイプ切り替え |
-| Image Size選択 | `SpsInspector` (scale) | - | ⏳ 未実装 | プレビューサイズ切り替え |
+| MCS/AGC Preview画像 | `McsInspector`, `AgcInspector` | - | ⏳ 未実装 | MCS/AGC FITSプレビュー画像表示 |
 
 ### Note機能 (NoteList)
 
 | 既存機能 | 既存コンポーネント | 新コンポーネント | 状態 | 備考 |
 |---------|------------------|-----------------|------|------|
-| メモ一覧表示 | `NoteList` | - | 🔶 一部完了 | Visit詳細内で表示のみ |
-| メモ作成 | `NoteList/NewNote` | - | ⏳ 未実装 | 認証必須 |
-| メモ編集 | `NoteList/Note` (edit) | - | ⏳ 未実装 | 自分のメモのみ編集可 |
-| メモ削除 | `NoteList/Note` (delete) | - | ⏳ 未実装 | 自分のメモのみ削除可 |
+| メモ一覧表示 | `NoteList` | `NoteList` | ✅ 完了 | Visit詳細内で表示 |
+| メモ作成 | `NoteList/NewNote` | `NoteList` | ✅ 完了 | 認証必須 |
+| メモ編集 | `NoteList/Note` (edit) | `NoteList` | ✅ 完了 | 自分のメモのみ編集可 |
+| メモ削除 | `NoteList/Note` (delete) | `NoteList` | ✅ 完了 | 自分のメモのみ削除可 |
 
 ---
 
@@ -128,3 +128,4 @@
 |------|------|
 | 2024-12-30 | 初版作成 |
 | 2024-12-30 | コンポーネント単位の詳細な機能一覧に更新 |
+| 2024-12-31 | Header, Layout, NoteList, LazyImage, SPS FITS Preview 完了 |
