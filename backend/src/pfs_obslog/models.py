@@ -3,9 +3,9 @@ import datetime
 
 from sqlalchemy import ARRAY, BigInteger, Boolean, Column, DateTime, Double, ForeignKeyConstraint, Index, Integer, PrimaryKeyConstraint, REAL, String, Table, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import DeclarativeBase, Mapped, MappedAsDataclass, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-class Base(MappedAsDataclass, DeclarativeBase):
+class Base(DeclarativeBase):
     pass
 
 
@@ -184,9 +184,9 @@ class ObslogUser(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     account_name: Mapped[str] = mapped_column(String, nullable=False)
 
-    obslog_visit_note: Mapped[list['ObslogVisitNote']] = relationship('ObslogVisitNote', back_populates='user', default_factory=list)
-    obslog_mcs_exposure_note: Mapped[list['ObslogMcsExposureNote']] = relationship('ObslogMcsExposureNote', back_populates='user', default_factory=list)
-    obslog_visit_set_note: Mapped[list['ObslogVisitSetNote']] = relationship('ObslogVisitSetNote', back_populates='user', default_factory=list)
+    obslog_visit_note: Mapped[list['ObslogVisitNote']] = relationship('ObslogVisitNote', back_populates='user')
+    obslog_mcs_exposure_note: Mapped[list['ObslogMcsExposureNote']] = relationship('ObslogMcsExposureNote', back_populates='user')
+    obslog_visit_set_note: Mapped[list['ObslogVisitSetNote']] = relationship('ObslogVisitSetNote', back_populates='user')
 
 
 class PfsDesign(Base):
@@ -601,8 +601,8 @@ class ObslogVisitNote(Base):
     user_id: Mapped[Optional[int]] = mapped_column(Integer)
     pfs_visit_id: Mapped[Optional[int]] = mapped_column(Integer)
 
-    pfs_visit: Mapped[Optional['PfsVisit']] = relationship('PfsVisit', back_populates='obslog_visit_note', default=None)
-    user: Mapped[Optional['ObslogUser']] = relationship('ObslogUser', back_populates='obslog_visit_note', default=None)
+    pfs_visit: Mapped[Optional['PfsVisit']] = relationship('PfsVisit', back_populates='obslog_visit_note')
+    user: Mapped[Optional['ObslogUser']] = relationship('ObslogUser', back_populates='obslog_visit_note')
 
 
 t_pfs_config = Table(
@@ -956,8 +956,8 @@ class ObslogMcsExposureNote(Base):
     user_id: Mapped[Optional[int]] = mapped_column(Integer)
     mcs_exposure_frame_id: Mapped[Optional[int]] = mapped_column(Integer)
 
-    mcs_exposure_frame: Mapped[Optional['McsExposure']] = relationship('McsExposure', back_populates='obslog_mcs_exposure_note', default=None)
-    user: Mapped[Optional['ObslogUser']] = relationship('ObslogUser', back_populates='obslog_mcs_exposure_note', default=None)
+    mcs_exposure_frame: Mapped[Optional['McsExposure']] = relationship('McsExposure', back_populates='obslog_mcs_exposure_note')
+    user: Mapped[Optional['ObslogUser']] = relationship('ObslogUser', back_populates='obslog_mcs_exposure_note')
 
 
 class ObslogVisitSetNote(Base):
@@ -973,8 +973,8 @@ class ObslogVisitSetNote(Base):
     user_id: Mapped[Optional[int]] = mapped_column(Integer)
     iic_sequence_id: Mapped[Optional[int]] = mapped_column(Integer)
 
-    iic_sequence: Mapped[Optional['IicSequence']] = relationship('IicSequence', back_populates='obslog_visit_set_note', default=None)
-    user: Mapped[Optional['ObslogUser']] = relationship('ObslogUser', back_populates='obslog_visit_set_note', default=None)
+    iic_sequence: Mapped[Optional['IicSequence']] = relationship('IicSequence', back_populates='obslog_visit_set_note')
+    user: Mapped[Optional['ObslogUser']] = relationship('ObslogUser', back_populates='obslog_visit_set_note')
 
 
 class PfsConfigAgc(Base):
@@ -1083,7 +1083,7 @@ class AgcMatch(AgcData):
     agc_nominal_y_mm: Mapped[Optional[float]] = mapped_column(REAL, comment='Nominal designed y-position on the AGC [PFI mm]')
     agc_center_x_mm: Mapped[Optional[float]] = mapped_column(REAL, comment='Center measured x-position on the AGC [PFI mm]')
     agc_center_y_mm: Mapped[Optional[float]] = mapped_column(REAL, comment='Center measured y-position on the AGC [PFI mm]')
-    agc_match_flags: Mapped[Optional[int]] = mapped_column('flags', Integer, comment='Flags')
+    flags: Mapped[Optional[int]] = mapped_column(Integer, comment='Flags')
 
 
 class CobraMatch(CobraTarget):
@@ -1103,7 +1103,7 @@ class CobraMatch(CobraTarget):
     spot_id: Mapped[Optional[int]] = mapped_column(Integer, comment='Corresponding MCS image spot identifier ')
     pfi_center_x_mm: Mapped[Optional[float]] = mapped_column(REAL, comment='Actual x-position on the PFI [mm]')
     pfi_center_y_mm: Mapped[Optional[float]] = mapped_column(REAL, comment='Actual y-position on the PFI [mm]')
-    cobra_match_flags: Mapped[Optional[int]] = mapped_column('flags', Integer, comment='flags for movement etc.')
+    flags: Mapped[Optional[int]] = mapped_column(Integer, comment='flags for movement etc.')
 
     mcs_data: Mapped[Optional['McsData']] = relationship('McsData', back_populates='cobra_match')
 
@@ -1181,4 +1181,4 @@ class CobraMove(CobraMatch):
     motor_target_phi: Mapped[Optional[float]] = mapped_column(REAL, comment='the target angle of the phi motor')
     motor_num_step_phi: Mapped[Optional[int]] = mapped_column(Integer, comment='the number of steps the phi motor has undertaken')
     motor_on_time_phi: Mapped[Optional[float]] = mapped_column(REAL, comment='the phi motor ontime value')
-    cobra_move_flags: Mapped[Optional[int]] = mapped_column('flags', Integer, comment='flags for movement etc.')
+    flags: Mapped[Optional[int]] = mapped_column(Integer, comment='flags for movement etc.')

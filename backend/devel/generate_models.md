@@ -39,8 +39,8 @@ Generated 54 model classes
 
 ## 生成されるモデルについて
 
-- SQLAlchemy 2.0の`MappedAsDataclass`スタイルで生成
-- 型アノテーション付き
+- SQLAlchemy 2.0の`DeclarativeBase`スタイルで生成
+- `Mapped[]`型アノテーション付き
 - リレーションシップも自動生成
 
 ## DB接続情報

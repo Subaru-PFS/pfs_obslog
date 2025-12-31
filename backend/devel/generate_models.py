@@ -53,7 +53,7 @@ def generate_models(
         "-m",
         "sqlacodegen",
         db_url,
-        "--generator", "dataclasses",
+        "--generator", "declarative",
         "--outfile", str(output_path),
     ]
 
