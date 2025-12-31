@@ -462,6 +462,10 @@ $pagination-border-radius: 12px;
       background-color: $hover-background-color;
     }
 
+    &:active {
+      background-color: $selected-active-background;
+    }
+
     &.selected {
       background-color: $selected-background;
 

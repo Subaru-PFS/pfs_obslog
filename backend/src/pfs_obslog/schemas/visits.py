@@ -270,3 +270,9 @@ class VisitDetail(BaseModel):
     mcs: McsVisitDetail | None = None
     agc: AgcVisitDetail | None = None
     iic_sequence: IicSequenceDetail | None = None
+
+
+class VisitRankResponse(BaseModel):
+    """Visit順位のレスポンス"""
+
+    rank: int | None = None
