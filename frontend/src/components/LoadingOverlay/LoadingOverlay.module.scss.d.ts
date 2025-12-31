@@ -1,4 +1,5 @@
 export type Styles = {
+  fadeIn: string;
   fullScreen: string;
   overlay: string;
 };

@@ -288,19 +288,19 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
       <table className={styles.visitTable}>
         <thead>
           <tr>
-            {columns.id && <th className={styles.colId}>ID</th>}
-            {columns.description && <th className={styles.colDescription}><Icon name="description" size={14} /></th>}
-            {columns.date && <th className={styles.colDate}><Icon name="event" size={14} /></th>}
-            {columns.time && <th className={styles.colTime}><Icon name="schedule" size={14} /></th>}
-            {columns.exposures && <th className={styles.colExposures}><Icon name="tag" size={14} /></th>}
-            {columns.exptime && <th className={styles.colExptime}><Icon name="shutter_speed" size={14} /></th>}
-            {columns.pfs_design_id && <th className={styles.colDesign}><Icon name="design_services" size={14} /></th>}
-            {columns.ra && <th className={styles.colCoord}>α</th>}
-            {columns.dec && <th className={styles.colCoord}>δ</th>}
-            {columns.azimuth && <th className={styles.colCoord}>A°</th>}
-            {columns.altitude && <th className={styles.colCoord}>E°</th>}
-            {columns.insrot && <th className={styles.colCoord}>I°</th>}
-            {columns.notes && <th className={styles.colNotes}><Icon name="notes" size={14} /></th>}
+            {columns.id && <th className={styles.colId}><Tooltip content="Visit ID"><span>ID</span></Tooltip></th>}
+            {columns.description && <th className={styles.colDescription}><Tooltip content="Description"><span><Icon name="description" size={14} /></span></Tooltip></th>}
+            {columns.date && <th className={styles.colDate}><Tooltip content="Date issued at"><span><Icon name="event" size={14} /></span></Tooltip></th>}
+            {columns.time && <th className={styles.colTime}><Tooltip content="Time issued at"><span><Icon name="schedule" size={14} /></span></Tooltip></th>}
+            {columns.exposures && <th className={styles.colExposures}><Tooltip content="Number of {SpS | MCS | AGC} Exposures"><span><Icon name="tag" size={14} /></span></Tooltip></th>}
+            {columns.exptime && <th className={styles.colExptime}><Tooltip content="Exposure Time [s]"><span><Icon name="shutter_speed" size={14} /></span></Tooltip></th>}
+            {columns.pfs_design_id && <th className={styles.colDesign}><Tooltip content="PFS Design ID (HEX)"><span><Icon name="design_services" size={14} /></span></Tooltip></th>}
+            {columns.ra && <th className={styles.colCoord}><Tooltip content="Right Ascension [°]"><span>α</span></Tooltip></th>}
+            {columns.dec && <th className={styles.colCoord}><Tooltip content="Declination [°]"><span>δ</span></Tooltip></th>}
+            {columns.azimuth && <th className={styles.colCoord}><Tooltip content="Azimuth [°]"><span>A°</span></Tooltip></th>}
+            {columns.altitude && <th className={styles.colCoord}><Tooltip content="Altitude [°]"><span>E°</span></Tooltip></th>}
+            {columns.insrot && <th className={styles.colCoord}><Tooltip content="Instrument Rotator [°]"><span>I°</span></Tooltip></th>}
+            {columns.notes && <th className={styles.colNotes}><Tooltip content="Notes"><span><Icon name="notes" size={14} /></span></Tooltip></th>}
           </tr>
         </thead>
         <tbody>
