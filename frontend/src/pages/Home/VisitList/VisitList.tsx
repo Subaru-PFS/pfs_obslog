@@ -397,6 +397,7 @@ export function VisitList() {
   const scrollHeightBeforeLoadRef = useRef<number | null>(null)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [searchError, setSearchError] = useState<string | null>(null)
+  const [shouldScrollToTop, setShouldScrollToTop] = useState(false)
 
   // Column visibility state with localStorage persistence
   const [columns, setColumnVisibility] = useColumnVisibility()
@@ -430,19 +431,19 @@ export function VisitList() {
   const handleFirstPage = useCallback(() => {
     setOffset(0)
     setLimit(PER_PAGE)
-    contentRef.current?.scrollTo(0, 0)
+    setShouldScrollToTop(true)
   }, [])
 
   const handlePrevPage = useCallback(() => {
     setOffset((prev) => Math.max(0, prev - PER_PAGE))
     setLimit(PER_PAGE)
-    contentRef.current?.scrollTo(0, 0)
+    setShouldScrollToTop(true)
   }, [])
 
   const handleNextPage = useCallback(() => {
     setOffset((prev) => prev + PER_PAGE)
     setLimit(PER_PAGE)
-    contentRef.current?.scrollTo(0, 0)
+    setShouldScrollToTop(true)
   }, [])
 
   const handleLastPage = useCallback(() => {
@@ -450,7 +451,7 @@ export function VisitList() {
       const lastPageOffset = Math.floor((totalCount - 1) / PER_PAGE) * PER_PAGE
       setOffset(lastPageOffset)
       setLimit(PER_PAGE)
-      contentRef.current?.scrollTo(0, 0)
+      setShouldScrollToTop(true)
     }
   }, [totalCount])
 
@@ -488,11 +489,19 @@ export function VisitList() {
     }
   }, [isFetching, isLoadingMore])
 
+  // Scroll to top after data load completes (for pagination/search)
+  useEffect(() => {
+    if (!isFetching && shouldScrollToTop) {
+      setShouldScrollToTop(false)
+      contentRef.current?.scrollTo(0, 0)
+    }
+  }, [isFetching, shouldScrollToTop])
+
   // Go to latest visits
   const handleGoToLatest = useCallback(() => {
     setOffset(0)
     setLimit(PER_PAGE)
-    contentRef.current?.scrollTo(0, 0)
+    setShouldScrollToTop(true)
   }, [])
 
   // Refresh
@@ -524,7 +533,7 @@ export function VisitList() {
     // Reset pagination
     setOffset(0)
     setLimit(PER_PAGE)
-    contentRef.current?.scrollTo(0, 0)
+    setShouldScrollToTop(true)
   }, [searchQuery, isSqlQuery])
 
   // Clear search
@@ -534,7 +543,7 @@ export function VisitList() {
     setSearchError(null)
     setOffset(0)
     setLimit(PER_PAGE)
-    contentRef.current?.scrollTo(0, 0)
+    setShouldScrollToTop(true)
   }, [])
 
   // キーボードナビゲーション
