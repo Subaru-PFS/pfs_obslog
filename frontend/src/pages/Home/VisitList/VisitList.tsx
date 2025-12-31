@@ -288,19 +288,19 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
       <table className={styles.visitTable}>
         <thead>
           <tr>
-            {columns.id && <th className={styles.colId}><Tooltip content="Visit ID"><span>ID</span></Tooltip></th>}
-            {columns.description && <th className={styles.colDescription}><Tooltip content="Description"><span><Icon name="description" size={14} /></span></Tooltip></th>}
-            {columns.date && <th className={styles.colDate}><Tooltip content="Date issued at"><span><Icon name="event" size={14} /></span></Tooltip></th>}
-            {columns.time && <th className={styles.colTime}><Tooltip content="Time issued at"><span><Icon name="schedule" size={14} /></span></Tooltip></th>}
-            {columns.exposures && <th className={styles.colExposures}><Tooltip content="Number of {SpS | MCS | AGC} Exposures"><span><Icon name="tag" size={14} /></span></Tooltip></th>}
-            {columns.exptime && <th className={styles.colExptime}><Tooltip content="Exposure Time [s]"><span><Icon name="shutter_speed" size={14} /></span></Tooltip></th>}
-            {columns.pfs_design_id && <th className={styles.colDesign}><Tooltip content="PFS Design ID (HEX)"><span><Icon name="design_services" size={14} /></span></Tooltip></th>}
-            {columns.ra && <th className={styles.colCoord}><Tooltip content="Right Ascension [°]"><span>α</span></Tooltip></th>}
-            {columns.dec && <th className={styles.colCoord}><Tooltip content="Declination [°]"><span>δ</span></Tooltip></th>}
-            {columns.azimuth && <th className={styles.colCoord}><Tooltip content="Azimuth [°]"><span>A°</span></Tooltip></th>}
-            {columns.altitude && <th className={styles.colCoord}><Tooltip content="Altitude [°]"><span>E°</span></Tooltip></th>}
-            {columns.insrot && <th className={styles.colCoord}><Tooltip content="Instrument Rotator [°]"><span>I°</span></Tooltip></th>}
-            {columns.notes && <th className={styles.colNotes}><Tooltip content="Notes"><span><Icon name="notes" size={14} /></span></Tooltip></th>}
+            {columns.id && <Tooltip content="Visit ID"><th className={styles.colId}>ID</th></Tooltip>}
+            {columns.description && <Tooltip content="Description"><th className={styles.colDescription}><Icon name="description" size={14} /></th></Tooltip>}
+            {columns.date && <Tooltip content="Date issued at"><th className={styles.colDate}><Icon name="event" size={14} /></th></Tooltip>}
+            {columns.time && <Tooltip content="Time issued at"><th className={styles.colTime}><Icon name="schedule" size={14} /></th></Tooltip>}
+            {columns.exposures && <Tooltip content="Number of {SpS | MCS | AGC} Exposures"><th className={styles.colExposures}><Icon name="tag" size={14} /></th></Tooltip>}
+            {columns.exptime && <Tooltip content="Exposure Time [s]"><th className={styles.colExptime}><Icon name="shutter_speed" size={14} /></th></Tooltip>}
+            {columns.pfs_design_id && <Tooltip content="PFS Design ID (HEX)"><th className={styles.colDesign}><Icon name="design_services" size={14} /></th></Tooltip>}
+            {columns.ra && <Tooltip content="Right Ascension [°]"><th className={styles.colCoord}>α</th></Tooltip>}
+            {columns.dec && <Tooltip content="Declination [°]"><th className={styles.colCoord}>δ</th></Tooltip>}
+            {columns.azimuth && <Tooltip content="Azimuth [°]"><th className={styles.colCoord}>A°</th></Tooltip>}
+            {columns.altitude && <Tooltip content="Altitude [°]"><th className={styles.colCoord}>E°</th></Tooltip>}
+            {columns.insrot && <Tooltip content="Instrument Rotator [°]"><th className={styles.colCoord}>I°</th></Tooltip>}
+            {columns.notes && <Tooltip content="Notes"><th className={styles.colNotes}><Icon name="notes" size={14} /></th></Tooltip>}
           </tr>
         </thead>
         <tbody>
@@ -346,12 +346,12 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
                 )}
                 {columns.ra && (
                   <td className={styles.colCoord}>
-                    {visit.avg_ra !== null && visit.avg_ra !== undefined ? visit.avg_ra.toFixed(4) : '-'}
+                    {visit.avg_ra !== null && visit.avg_ra !== undefined ? visit.avg_ra.toFixed(1) : '-'}
                   </td>
                 )}
                 {columns.dec && (
                   <td className={styles.colCoord}>
-                    {visit.avg_dec !== null && visit.avg_dec !== undefined ? visit.avg_dec.toFixed(4) : '-'}
+                    {visit.avg_dec !== null && visit.avg_dec !== undefined ? visit.avg_dec.toFixed(1) : '-'}
                   </td>
                 )}
                 {columns.azimuth && (

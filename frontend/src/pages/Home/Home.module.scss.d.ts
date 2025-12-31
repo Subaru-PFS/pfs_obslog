@@ -6,6 +6,7 @@ export type Styles = {
   mainContent: string;
   placeholder: string;
   resizer: string;
+  resizerActive: string;
   rightPane: string;
   userInfo: string;
   username: string;

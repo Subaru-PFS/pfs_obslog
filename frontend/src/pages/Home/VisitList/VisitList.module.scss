@@ -537,53 +537,86 @@ $pagination-border-radius: 12px;
 // Exposure count colors
 // Based on old-project colors.ts int2color() using HSV color wheel
 // bit pattern: (SPS > 0) << 2 | (MCS > 0) << 1 | (AGC > 0) << 0
+// Selected rows get darker background
 // =============================================================================
 // No exposures (000): gray #777
 .exposureNone {
   background-color: #dddddd;
   color: #3c3c3c;
+
+  tr.selected & {
+    background-color: #c5c5c5;
+  }
 }
 
 // AGC only (001): HSV(150, 100, 100) = cyan-green
 .exposureAgc {
   background-color: #bfffdf;
   color: #107040;
+
+  tr.selected & {
+    background-color: #9fe0c2;
+  }
 }
 
 // MCS only (010): HSV(300, 100, 100) = magenta
 .exposureMcs {
   background-color: #ffbfff;
   color: #701070;
+
+  tr.selected & {
+    background-color: #e09fe0;
+  }
 }
 
 // MCS + AGC (011): HSV(450 mod 360 = 90, 100, 100) = chartreuse
 .exposureMcsAgc {
   background-color: #dfffbf;
   color: #407010;
+
+  tr.selected & {
+    background-color: #c2e09f;
+  }
 }
 
 // SPS only (100): HSV(600 mod 360 = 240, 100, 100) = blue
 .exposureSps {
   background-color: #bfbfff;
   color: #101070;
+
+  tr.selected & {
+    background-color: #9f9fe0;
+  }
 }
 
 // SPS + AGC (101): HSV(750 mod 360 = 30, 100, 100) = orange
 .exposureSpsAgc {
   background-color: #ffdfbf;
   color: #704010;
+
+  tr.selected & {
+    background-color: #e0c29f;
+  }
 }
 
 // SPS + MCS (110): HSV(900 mod 360 = 180, 100, 100) = cyan
 .exposureSpsMcs {
   background-color: #bfffff;
   color: #107070;
+
+  tr.selected & {
+    background-color: #9fe0e0;
+  }
 }
 
 // All three (111): HSV(1050 mod 360 = 330, 100, 100) = pink-magenta
 .exposureMixed {
   background-color: #ffbfdf;
   color: #701040;
+
+  tr.selected & {
+    background-color: #e09fc2;
+  }
 }
 
 // =============================================================================
