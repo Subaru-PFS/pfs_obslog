@@ -8,14 +8,14 @@
 |----------|------|--------|--------|
 | 認証 | 4 | 0 | 100% |
 | ヘルスチェック | 2 | 0 | 100% |
-| Visit | 2 | 2 | 50% |
+| Visit | 4 | 0 | 100% |
 | Visit Note | 3 | 0 | 100% |
 | Visit Set Note | 3 | 0 | 100% |
 | FITS | 8 | 0 | 100% |
 | PFS Design | 3 | 1 | 75% |
 | Attachment | 4 | 0 | 100% |
-| Plot | 0 | 1 | 0% |
-| **合計** | **29** | **4** | **88%** |
+| Plot | 1 | 0 | 100% |
+| **合計** | **32** | **1** | **97%** |
 
 ---
 
@@ -43,8 +43,8 @@
 |----------|-------------------|-----------------|------|------|
 | GET | `/api/visits` | `/api/visits` | ✅ 完了 | Visit一覧取得、SQLフィルタリング対応 |
 | GET | `/api/visits/{id}` | `/api/visits/{visit_id}` | ✅ 完了 | Visit詳細取得 |
-| GET | `/api/visits/{id}/rank` | - | ⏳ 未実装 | SQLフィルタリング内での順位取得 |
-| GET | `/api/visits.csv` | - | ⏳ 未実装 | CSV形式でのエクスポート |
+| GET | `/api/visits/{id}/rank` | `/api/visits/{visit_id}/rank` | ✅ 完了 | SQLフィルタリング内での順位取得 |
+| GET | `/api/visits.csv` | `/api/visits.csv` | ✅ 完了 | CSV形式でのエクスポート |
 
 ### Visit Note（Visitメモ）
 
@@ -97,7 +97,7 @@
 
 | メソッド | 既存エンドポイント | 新エンドポイント | 状態 | 備考 |
 |----------|-------------------|-----------------|------|------|
-| GET | `/api/mcs_data/{frame_id}.png` | - | ⏳ 未実装 | MCSデータチャート画像 |
+| GET | `/api/mcs_data/{frame_id}.png` | `/api/mcs_data/{frame_id}.png` | ✅ 完了 | MCSデータチャート画像 |
 
 ---
 

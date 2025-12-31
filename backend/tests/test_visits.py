@@ -383,3 +383,155 @@ class TestSqlFiltering:
             ids1 = {v["id"] for v in data1["visits"]}
             ids2 = {v["id"] for v in data2["visits"]}
             assert ids1.isdisjoint(ids2)
+
+
+class TestVisitRank:
+    """GET /api/visits/{visit_id}/rank のテスト"""
+
+    def test_get_visit_rank(self):
+        """Visitの順位を取得"""
+        # まずVisit一覧から数件取得
+        list_response = client.get("/api/visits?limit=10")
+        assert list_response.status_code == 200
+        visits = list_response.json()["visits"]
+
+        if len(visits) == 0:
+            pytest.skip("No visits in database")
+
+        # 最新のVisit（リストの先頭）は順位1になるはず
+        visit_id = visits[0]["id"]
+        response = client.get(f"/api/visits/{visit_id}/rank")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert "rank" in data
+        assert data["rank"] == 1  # 最新なので順位は1
+
+    def test_get_visit_rank_with_filter(self):
+        """SQLフィルタリング内での順位を取得"""
+        # Visit一覧から取得
+        list_response = client.get("/api/visits?limit=20")
+        assert list_response.status_code == 200
+        visits = list_response.json()["visits"]
+
+        if len(visits) < 5:
+            pytest.skip("Not enough visits in database")
+
+        # 中間のVisitを選択
+        mid_visit = visits[len(visits) // 2]
+        visit_id = mid_visit["id"]
+
+        # そのID以上でフィルタリングした場合の順位
+        response = client.get(f"/api/visits/{visit_id}/rank?sql=where id >= {visit_id}")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert "rank" in data
+        # フィルタリング結果内での順位を確認
+        assert data["rank"] is not None
+        assert data["rank"] >= 1
+
+    def test_get_visit_rank_not_found(self):
+        """存在しないVisitの順位を取得"""
+        response = client.get("/api/visits/999999999/rank")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["rank"] is None
+
+    def test_get_visit_rank_invalid_sql(self):
+        """不正なSQLでの順位取得"""
+        # まずVisit一覧から1件取得
+        list_response = client.get("/api/visits?limit=1")
+        visits = list_response.json()["visits"]
+
+        if len(visits) == 0:
+            pytest.skip("No visits in database")
+
+        visit_id = visits[0]["id"]
+        response = client.get(f"/api/visits/{visit_id}/rank?sql=where invalid_column = 1")
+        assert response.status_code == 400
+
+
+class TestVisitCSVExport:
+    """GET /api/visits.csv のテスト"""
+
+    def test_export_visits_csv(self):
+        """Visit一覧をCSVでエクスポート"""
+        response = client.get("/api/visits.csv?limit=10")
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "text/csv; charset=utf-8"
+        assert "content-disposition" in response.headers
+        assert "pfsobslog.utf8.csv" in response.headers["content-disposition"]
+
+        # CSVの内容を確認
+        content = response.text
+        lines = content.strip().split("\n")
+
+        # ヘッダー行があるか
+        assert len(lines) >= 1
+        header = lines[0]
+        assert header.startswith("# ")  # 最初の列は#で始まる
+        assert "visit_id" in header
+
+    def test_export_visits_csv_with_filter(self):
+        """SQLフィルタリングしてCSVエクスポート"""
+        # まずVisit一覧から取得
+        list_response = client.get("/api/visits?limit=10")
+        visits = list_response.json()["visits"]
+
+        if len(visits) == 0:
+            pytest.skip("No visits in database")
+
+        # 存在するIDでフィルタリング
+        visit_id = visits[0]["id"]
+        response = client.get(f"/api/visits.csv?sql=where id = {visit_id}")
+        assert response.status_code == 200
+
+        content = response.text
+        lines = content.strip().split("\n")
+
+        # ヘッダー + 1行
+        assert len(lines) == 2
+
+    def test_export_visits_csv_empty(self):
+        """空の結果をCSVエクスポート"""
+        response = client.get("/api/visits.csv?sql=where id = -1")
+        assert response.status_code == 200
+
+        content = response.text
+        # 空のCSV
+        assert content.strip() == ""
+
+    def test_export_visits_csv_columns(self):
+        """CSVの列を確認"""
+        response = client.get("/api/visits.csv?limit=1")
+        assert response.status_code == 200
+
+        content = response.text
+        lines = content.strip().split("\n")
+
+        if len(lines) < 1:
+            pytest.skip("No data in CSV")
+
+        header = lines[0]
+        expected_columns = [
+            "visit_id",
+            "description",
+            "sequence_name",
+            "issued_at",
+            "iic_sequence_id",
+            "n_sps_exposures",
+            "n_mcs_exposures",
+            "n_agc_exposures",
+            "avg_exptime",
+            "pfs_design_id",
+            "avg_azimuth",
+            "avg_altitude",
+            "avg_insrot",
+            "notes",
+            "visit_set_notes",
+        ]
+
+        for col in expected_columns:
+            assert col in header, f"Column {col} not found in header"

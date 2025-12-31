@@ -3,9 +3,12 @@
 Visit一覧の取得APIを提供します。
 """
 
+import csv
+import io
 from typing import Sequence
 
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy.sql.elements import ColumnElement
@@ -33,6 +36,7 @@ from pfs_obslog.schemas.visits import (
     VisitList,
     VisitListEntry,
     VisitNote,
+    VisitRankResponse,
     VisitSetNote,
 )
 
@@ -667,3 +671,183 @@ def _fetch_iic_sequence_detail(db: Session, visit_id: int) -> IicSequenceDetail 
         notes=notes,
         status=status_info,
     )
+
+
+# =============================================================================
+# Visit Rank API
+# =============================================================================
+
+
+@router.get("/{visit_id}/rank", response_model=VisitRankResponse)
+def get_visit_rank(
+    db: DbSession,
+    visit_id: int,
+    sql: str | None = Query(default=None, description="SQLライクなフィルタ条件（例: where id > 100）"),
+) -> VisitRankResponse:
+    """指定したVisitのフィルタリング結果内での順位を取得
+
+    Args:
+        db: DBセッション
+        visit_id: VisitID
+        sql: SQLライクなフィルタ条件
+
+    Returns:
+        順位（1から始まる）。Visitが見つからない場合はNone
+    """
+    # SQLフィルタリング条件をパース
+    where_condition: ColumnElement | None = None
+    required_joins: set[str] = set()
+
+    if sql:
+        try:
+            where_ast = parse_where_clause(sql)
+            if where_ast:
+                evaluator = QueryEvaluator(M)
+                where_condition = evaluator.evaluate(where_ast)
+                required_joins = evaluator.required_joins
+        except QueryParseError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+
+    # ベースクエリ
+    base_query = select(M.PfsVisit.pfs_visit_id).select_from(M.PfsVisit)
+
+    # フィルタリング条件がある場合、必要なJOINを適用
+    if where_condition is not None:
+        join_builder = JoinBuilder(M)
+        base_query = join_builder.apply_joins(base_query, required_joins)
+        base_query = base_query.where(where_condition)
+        base_query = base_query.distinct()
+
+    # サブクエリとしてランク付き結果を作成
+    ranked_subquery = (
+        select(
+            M.PfsVisit.pfs_visit_id.label("id"),
+            func.rank().over(order_by=M.PfsVisit.pfs_visit_id.desc()).label("rank"),
+        )
+        .select_from(M.PfsVisit)
+    )
+
+    # フィルタ条件がある場合はJOINとWHEREを適用
+    if where_condition is not None:
+        join_builder = JoinBuilder(M)
+        ranked_subquery = join_builder.apply_joins(ranked_subquery, required_joins)
+        ranked_subquery = ranked_subquery.where(where_condition)
+
+    ranked_subquery = ranked_subquery.subquery("ranked")
+
+    # 指定されたvisit_idの順位を取得
+    rank = db.execute(
+        select(ranked_subquery.c.rank).where(ranked_subquery.c.id == visit_id)
+    ).scalar_one_or_none()
+
+    return VisitRankResponse(rank=rank)
+
+
+# =============================================================================
+# Visit CSV Export API
+# =============================================================================
+
+csv_router = APIRouter(tags=["visits"])
+
+
+@csv_router.get("/visits.csv")
+def export_visits_csv(
+    db: DbSession,
+    offset: int = Query(default=0, ge=0, description="ページネーションのオフセット"),
+    limit: int = Query(default=10000, ge=-1, le=100000, description="取得件数上限（-1で無制限）"),
+    sql: str | None = Query(default=None, description="SQLライクなフィルタ条件（例: where id > 100）"),
+) -> Response:
+    """Visit一覧をCSV形式でエクスポート
+
+    Args:
+        db: DBセッション
+        offset: オフセット
+        limit: 取得件数上限
+        sql: SQLライクなフィルタ条件
+
+    Returns:
+        CSV形式のレスポンス
+    """
+    # limitが-1の場合は無制限
+    effective_limit: int | None = None if limit == -1 else limit
+
+    # SQLフィルタリング条件をパース
+    where_condition: ColumnElement | None = None
+    required_joins: set[str] = set()
+
+    if sql:
+        try:
+            where_ast = parse_where_clause(sql)
+            if where_ast:
+                evaluator = QueryEvaluator(M)
+                where_condition = evaluator.evaluate(where_ast)
+                required_joins = evaluator.required_joins
+        except QueryParseError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+
+    # Visit一覧を取得
+    visits, _count = _fetch_visits(db, effective_limit, offset, where_condition, required_joins)
+
+    # 関連するIicSequenceを取得
+    iic_sequences = _fetch_related_iic_sequences(db, visits)
+    iic_sequence_map = {seq.iic_sequence_id: seq for seq in iic_sequences}
+
+    # CSVを生成
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+
+    for i, visit in enumerate(visits):
+        iic_sequence = iic_sequence_map.get(visit.iic_sequence_id)
+        row_dict = _visit_to_csv_dict(visit, iic_sequence)
+        if i == 0:
+            # ヘッダー行（最初の列に#を付ける）
+            columns = [f"# {c}" if i_c == 0 else c for i_c, c in enumerate(row_dict.keys())]
+            writer.writerow(columns)
+        writer.writerow(row_dict.values())
+
+    csv_content = buf.getvalue()
+    return Response(
+        content=csv_content,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="pfsobslog.utf8.csv"'},
+    )
+
+
+def _visit_to_csv_dict(visit: VisitListEntry, iic_sequence: IicSequence | None) -> dict[str, str | None]:
+    """VisitListEntryをCSV行用の辞書に変換"""
+    return _stringify_values(
+        {
+            "visit_id": visit.id,
+            "description": visit.description,
+            "sequence_name": iic_sequence.name if iic_sequence else None,
+            "issued_at": visit.issued_at,
+            "iic_sequence_id": visit.iic_sequence_id,
+            "n_sps_exposures": visit.n_sps_exposures,
+            "n_mcs_exposures": visit.n_mcs_exposures,
+            "n_agc_exposures": visit.n_agc_exposures,
+            "avg_exptime": visit.avg_exptime,
+            "pfs_design_id": visit.pfs_design_id,
+            "avg_azimuth": visit.avg_azimuth,
+            "avg_altitude": visit.avg_altitude,
+            "avg_insrot": visit.avg_insrot,
+            "notes": _notes_to_csv_cell(visit.notes),
+            "visit_set_notes": _iic_sequence_notes_to_csv_cell(iic_sequence) if iic_sequence else None,
+        }
+    )
+
+
+def _stringify_values(d: dict[str, object]) -> dict[str, str | None]:
+    """辞書の値を文字列に変換"""
+    return {k: str(v) if v is not None else None for k, v in d.items()}
+
+
+def _notes_to_csv_cell(notes: list[VisitNote]) -> str:
+    """VisitNoteリストをCSVセル用の文字列に変換"""
+    return "\n".join(f"{n.body} by {n.user.account_name}" for n in notes)
+
+
+def _iic_sequence_notes_to_csv_cell(iic_sequence: IicSequence | None) -> str | None:
+    """IicSequenceのノートをCSVセル用の文字列に変換"""
+    if iic_sequence is None:
+        return None
+    return "\n".join(f"{n.body} by {n.user.account_name}" for n in iic_sequence.notes)

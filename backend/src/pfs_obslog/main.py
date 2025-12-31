@@ -6,7 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from pfs_obslog.config import get_settings
 from pfs_obslog.orjsonresponse import ORJSONResponse
-from pfs_obslog.routers import attachments, auth, fits, health, notes, pfs_designs, visits
+from pfs_obslog.routers import attachments, auth, fits, health, notes, pfs_designs, plot, visits
 
 settings = get_settings()
 
@@ -45,10 +45,12 @@ app.add_middleware(
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(auth.router, prefix="/api")
 app.include_router(visits.router, prefix="/api", tags=["visits"])
+app.include_router(visits.csv_router, prefix="/api", tags=["visits"])
 app.include_router(notes.router, tags=["notes"])
 app.include_router(fits.router, tags=["fits"])
 app.include_router(pfs_designs.router, tags=["pfs_designs"])
 app.include_router(attachments.router, tags=["attachments"])
+app.include_router(plot.router, prefix="/api", tags=["plot"])
 
 
 @app.get("/api")
