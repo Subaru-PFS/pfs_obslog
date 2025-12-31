@@ -121,8 +121,8 @@ systemctl --user start pfs-obslog2
 # 状態確認
 systemctl --user status pfs-obslog2
 
-# ログを確認
-journalctl --user -u pfs-obslog2 -f
+# ログを確認（下記「ログ確認について」を参照）
+journalctl _UID=$(id -u) -u pfs-obslog2 -f
 ```
 
 ### 7. 自動起動の設定
@@ -151,12 +151,26 @@ systemctl --user restart pfs-obslog2
 # 状態確認
 systemctl --user status pfs-obslog2
 
-# ログ確認
-journalctl --user -u pfs-obslog2 -f
+# ログ確認（下記「ログ確認について」を参照）
+journalctl _UID=$(id -u) -u pfs-obslog2 -f
 
 # アプリケーションログの直接確認
 tail -f ~/pfs-obslog2/logs/access.log
 tail -f ~/pfs-obslog2/logs/error.log
+```
+
+### ログ確認について
+
+**注意:** 一部の環境では `journalctl --user` がログを表示しない場合があります。これは、ユーザー専用のジャーナルファイルが存在せず、すべてのログがシステムジャーナルに統合されているためです。
+
+その場合は、ユーザーIDでフィルタリングする方法を使用してください：
+
+```bash
+# --user の代わりに _UID=$(id -u) を使用
+journalctl _UID=$(id -u) -u pfs-obslog2 -f
+
+# 最新100行を表示
+journalctl _UID=$(id -u) -u pfs-obslog2 -n 100 --no-pager
 ```
 
 ## 設定のカスタマイズ
@@ -236,7 +250,7 @@ server {
 
 ```bash
 # 詳細なログを確認
-journalctl --user -u pfs-obslog2 -n 100
+journalctl _UID=$(id -u) -u pfs-obslog2 -n 100 --no-pager
 
 # 手動で起動してエラーを確認
 cd ~/pfs-obslog2/backend
