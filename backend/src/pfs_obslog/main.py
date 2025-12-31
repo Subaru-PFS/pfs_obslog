@@ -7,6 +7,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from pfs_obslog.config import get_settings
 from pfs_obslog.orjsonresponse import ORJSONResponse
 from pfs_obslog.routers import attachments, auth, fits, health, notes, pfs_designs, plot, visits
+from pfs_obslog.staticassets import setup_static_assets
 
 settings = get_settings()
 
@@ -57,3 +58,7 @@ app.include_router(plot.router, prefix="/api", tags=["plot"])
 async def root():  # pragma: no cover
     """ルートエンドポイント"""
     return {"message": "PFS Obslog API", "docs": f"{settings.root_path}/api/docs"}
+
+
+# productionモードでは静的アセットを配信
+setup_static_assets(app)

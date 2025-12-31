@@ -8,6 +8,7 @@ import os
 import secrets
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -19,6 +20,10 @@ class Settings(BaseSettings):
         env_prefix="PFS_OBSLOG_",
         case_sensitive=True,
     )
+
+    # アプリケーション環境（development/production）
+    # 本番環境では PFS_OBSLOG_app_env=production を設定
+    app_env: Literal["development", "production"] = "development"
 
     # APIのルートパス（デフォルト: /obslog）
     root_path: str = "/obslog"

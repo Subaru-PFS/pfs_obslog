@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "../../../styles/theme" as *;
 
 .listContainer {
@@ -49,8 +50,8 @@
 }
 
 @mixin bump($baseColor) {
-  $top: lighten($baseColor, 15%);
-  $bottom: darken($baseColor, 15%);
+  $top: color.adjust($baseColor, $lightness: 15%);
+  $bottom: color.adjust($baseColor, $lightness: -15%);
   background: linear-gradient(to bottom, $top, $bottom);
 }
 

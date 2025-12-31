@@ -10,7 +10,8 @@ from typing import Sequence
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import Response
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.elements import ColumnElement
 
 from pfs_obslog import models as M
@@ -45,7 +46,7 @@ router = APIRouter(prefix="/visits", tags=["visits"])
 
 
 @router.get("", response_model=VisitList)
-def list_visits(
+async def list_visits(
     db: DbSession,
     offset: int = Query(default=0, ge=0, description="ページネーションのオフセット"),
     limit: int = Query(default=50, ge=-1, le=1000, description="取得件数上限（-1で無制限）"),
@@ -77,10 +78,10 @@ def list_visits(
             raise HTTPException(status_code=400, detail=str(e)) from e
 
     # Visit一覧を取得
-    visits, count = _fetch_visits(db, effective_limit, offset, where_condition, required_joins)
+    visits, count = await _fetch_visits(db, effective_limit, offset, where_condition, required_joins)
 
     # 関連するIicSequenceを取得
-    iic_sequences = _fetch_related_iic_sequences(db, visits)
+    iic_sequences = await _fetch_related_iic_sequences(db, visits)
 
     return VisitList(
         visits=visits,
@@ -89,8 +90,8 @@ def list_visits(
     )
 
 
-def _fetch_visits(
-    db: Session,
+async def _fetch_visits(
+    db: AsyncSession,
     limit: int | None,
     offset: int,
     where_condition: ColumnElement | None = None,
@@ -124,7 +125,8 @@ def _fetch_visits(
 
     # 総件数を取得
     count_query = select(func.count()).select_from(base_query.subquery())
-    count: int = db.execute(count_query).scalar_one()
+    count_result = await db.execute(count_query)
+    count: int = count_result.scalar_one()
 
     # 対象VisitIDを取得（ページネーション適用）
     ids_query = (
@@ -135,17 +137,18 @@ def _fetch_visits(
     if limit is not None:
         ids_query = ids_query.limit(limit)
 
-    ids = [row[0] for row in db.execute(ids_query)]
+    ids_result = await db.execute(ids_query)
+    ids = [row[0] for row in ids_result]
 
     if not ids:
         return [], count
 
     # Visit詳細を取得
-    visits = _build_visit_list_entries(db, ids)
+    visits = await _build_visit_list_entries(db, ids)
     return visits, count
 
 
-def _build_visit_list_entries(db: Session, visit_ids: list[int]) -> list[VisitListEntry]:
+async def _build_visit_list_entries(db: AsyncSession, visit_ids: list[int]) -> list[VisitListEntry]:
     """VisitIDリストからVisitListEntryを構築
 
     Args:
@@ -252,7 +255,8 @@ def _build_visit_list_entries(db: Session, visit_ids: list[int]) -> list[VisitLi
         .order_by(M.PfsVisit.pfs_visit_id.desc())
     )
 
-    results = db.execute(query).all()
+    result = await db.execute(query)
+    results = result.all()
 
     # VisitListEntryに変換
     visits = []
@@ -299,8 +303,8 @@ def _build_visit_list_entries(db: Session, visit_ids: list[int]) -> list[VisitLi
     return visits
 
 
-def _fetch_related_iic_sequences(
-    db: Session,
+async def _fetch_related_iic_sequences(
+    db: AsyncSession,
     visits: list[VisitListEntry],
 ) -> list[IicSequence]:
     """関連するIicSequenceを取得
@@ -328,7 +332,8 @@ def _fetch_related_iic_sequences(
             )
         )
     )
-    results: Sequence[M.IicSequence] = db.scalars(query).all()
+    result = await db.scalars(query)
+    results: Sequence[M.IicSequence] = result.all()
 
     # IicSequenceスキーマに変換
     sequences = []
@@ -379,7 +384,7 @@ def _fetch_related_iic_sequences(
 
 
 @router.get("/{visit_id}", response_model=VisitDetail)
-def get_visit(
+async def get_visit(
     db: DbSession,
     visit_id: int,
 ) -> VisitDetail:
@@ -388,10 +393,10 @@ def get_visit(
     指定されたVisit IDの詳細情報を取得します。
     SPS/MCS/AGC露出情報、IICシーケンス情報、メモを含みます。
     """
-    return _fetch_visit_detail(db, visit_id)
+    return await _fetch_visit_detail(db, visit_id)
 
 
-def _fetch_visit_detail(db: Session, visit_id: int) -> VisitDetail:
+async def _fetch_visit_detail(db: AsyncSession, visit_id: int) -> VisitDetail:
     """Visit詳細を取得
 
     Args:
@@ -405,13 +410,14 @@ def _fetch_visit_detail(db: Session, visit_id: int) -> VisitDetail:
         HTTPException: Visitが見つからない場合
     """
     # PfsVisitを取得
-    pfs_visit = db.execute(
+    result = await db.execute(
         select(M.PfsVisit)
         .where(M.PfsVisit.pfs_visit_id == visit_id)
         .options(
             selectinload(M.PfsVisit.obslog_visit_note).selectinload(M.ObslogVisitNote.user)
         )
-    ).scalar_one_or_none()
+    )
+    pfs_visit = result.scalar_one_or_none()
 
     if not pfs_visit:
         raise HTTPException(status_code=404, detail=f"Visit {visit_id} not found")
@@ -431,16 +437,16 @@ def _fetch_visit_detail(db: Session, visit_id: int) -> VisitDetail:
     ]
 
     # SpS情報を取得
-    sps = _fetch_sps_detail(db, visit_id)
+    sps = await _fetch_sps_detail(db, visit_id)
 
     # MCS情報を取得
-    mcs = _fetch_mcs_detail(db, visit_id)
+    mcs = await _fetch_mcs_detail(db, visit_id)
 
     # AGC情報を取得
-    agc = _fetch_agc_detail(db, visit_id)
+    agc = await _fetch_agc_detail(db, visit_id)
 
     # IicSequence情報を取得
-    iic_sequence = _fetch_iic_sequence_detail(db, visit_id)
+    iic_sequence = await _fetch_iic_sequence_detail(db, visit_id)
 
     return VisitDetail(
         id=pfs_visit.pfs_visit_id,
@@ -454,14 +460,15 @@ def _fetch_visit_detail(db: Session, visit_id: int) -> VisitDetail:
     )
 
 
-def _fetch_sps_detail(db: Session, visit_id: int) -> SpsVisitDetail | None:
+async def _fetch_sps_detail(db: AsyncSession, visit_id: int) -> SpsVisitDetail | None:
     """SpS露出詳細を取得"""
     # SpsVisitを取得
-    sps_visit = db.execute(
+    result = await db.execute(
         select(M.SpsVisit)
         .where(M.SpsVisit.pfs_visit_id == visit_id)
         .options(selectinload(M.SpsVisit.sps_exposure).selectinload(M.SpsExposure.sps_annotation))
-    ).scalar_one_or_none()
+    )
+    sps_visit = result.scalar_one_or_none()
 
     if not sps_visit:
         return None
@@ -491,14 +498,15 @@ def _fetch_sps_detail(db: Session, visit_id: int) -> SpsVisitDetail | None:
     )
 
 
-def _fetch_mcs_detail(db: Session, visit_id: int) -> McsVisitDetail | None:
+async def _fetch_mcs_detail(db: AsyncSession, visit_id: int) -> McsVisitDetail | None:
     """MCS露出詳細を取得"""
-    mcs_exposures = db.scalars(
+    result = await db.scalars(
         select(M.McsExposure)
         .where(M.McsExposure.pfs_visit_id == visit_id)
         .options(selectinload(M.McsExposure.obslog_mcs_exposure_note).selectinload(M.ObslogMcsExposureNote.user))
         .order_by(M.McsExposure.mcs_frame_id)
-    ).all()
+    )
+    mcs_exposures = result.all()
 
     if not mcs_exposures:
         return None
@@ -537,23 +545,24 @@ def _fetch_mcs_detail(db: Session, visit_id: int) -> McsVisitDetail | None:
     return McsVisitDetail(exposures=exposures)
 
 
-def _fetch_agc_detail(db: Session, visit_id: int) -> AgcVisitDetail | None:
+async def _fetch_agc_detail(db: AsyncSession, visit_id: int) -> AgcVisitDetail | None:
     """AGC露出詳細を取得"""
-    agc_exposures = db.scalars(
+    result = await db.scalars(
         select(M.AgcExposure)
         .where(M.AgcExposure.pfs_visit_id == visit_id)
         .order_by(M.AgcExposure.agc_exposure_id)
-    ).all()
+    )
+    agc_exposures = result.all()
 
     if not agc_exposures:
         return None
 
     # AgcGuideOffsetを一括取得
     exposure_ids = [exp.agc_exposure_id for exp in agc_exposures]
-    guide_offsets_result = db.scalars(
+    guide_offsets_result = await db.scalars(
         select(M.AgcGuideOffset).where(M.AgcGuideOffset.agc_exposure_id.in_(exposure_ids))
-    ).all()
-    guide_offsets_map = {go.agc_exposure_id: go for go in guide_offsets_result}
+    )
+    guide_offsets_map = {go.agc_exposure_id: go for go in guide_offsets_result.all()}
 
     exposures = []
     for exp in agc_exposures:
@@ -601,31 +610,34 @@ def _fetch_agc_detail(db: Session, visit_id: int) -> AgcVisitDetail | None:
     return AgcVisitDetail(exposures=exposures)
 
 
-def _fetch_iic_sequence_detail(db: Session, visit_id: int) -> IicSequenceDetail | None:
+async def _fetch_iic_sequence_detail(db: AsyncSession, visit_id: int) -> IicSequenceDetail | None:
     """IICシーケンス詳細を取得"""
     # visit_setテーブルからiic_sequence_idを取得
-    iic_sequence_id = db.execute(
+    result = await db.execute(
         select(M.t_visit_set.c.iic_sequence_id).where(M.t_visit_set.c.pfs_visit_id == visit_id)
-    ).scalar_one_or_none()
+    )
+    iic_sequence_id = result.scalar_one_or_none()
 
     if not iic_sequence_id:
         return None
 
     # IicSequenceを取得
-    iic_sequence = db.execute(
+    result = await db.execute(
         select(M.IicSequence)
         .where(M.IicSequence.iic_sequence_id == iic_sequence_id)
         .options(selectinload(M.IicSequence.group))
         .options(selectinload(M.IicSequence.obslog_visit_set_note).selectinload(M.ObslogVisitSetNote.user))
-    ).scalar_one_or_none()
+    )
+    iic_sequence = result.scalar_one_or_none()
 
     if not iic_sequence:
         return None
 
     # IicSequenceStatusを取得
-    status = db.execute(
+    result = await db.execute(
         select(M.IicSequenceStatus).where(M.IicSequenceStatus.iic_sequence_id == iic_sequence_id)
-    ).scalar_one_or_none()
+    )
+    status = result.scalar_one_or_none()
 
     # グループ情報
     group = None

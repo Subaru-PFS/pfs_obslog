@@ -11,6 +11,10 @@ export default defineConfig({
       // stellar-globe パッケージのエイリアス
       '@stellar-globe/stellar-globe': path.resolve(__dirname, '../external/stellar-globe/stellar-globe/dist/stellar-globe.js'),
       '@stellar-globe/react-stellar-globe': path.resolve(__dirname, '../external/stellar-globe/react-stellar-globe/dist/react-stellar-globe.es.js'),
+      // 外部パッケージが同じReactインスタンスを使用するようにエイリアスを設定
+      // （react-stellar-globeがバンドルしたReactではなく、メインプロジェクトのReactを使用）
+      'react': path.resolve(__dirname, './node_modules/react'),
+      'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
     },
   },
   server: {
@@ -23,6 +27,8 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['@stellar-globe/stellar-globe', '@stellar-globe/react-stellar-globe'],
+    // stellar-globe パッケージはプリバンドルから除外
+    // （プリバンドルするとReactの参照が壊れる）
+    exclude: ['@stellar-globe/stellar-globe', '@stellar-globe/react-stellar-globe'],
   },
 })
