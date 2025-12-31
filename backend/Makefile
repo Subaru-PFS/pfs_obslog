@@ -1,12 +1,16 @@
-.PHONY: dev test cov typecheck openapi-for-frontend clean help
+.PHONY: dev test test-all cov typecheck openapi-for-frontend clean help
 
 # 開発サーバーを起動
 dev:
 	PFS_OBSLOG_session_secret_key='???' \
 	uv run uvicorn pfs_obslog.main:app --reload --host 0.0.0.0 --port 8000
 
-# テストを実行
+# テストを実行（遅いテストをスキップ）
 test:
+	uv run pytest -m "not slow"
+
+# 全テストを実行（遅いテスト含む）
+test-all:
 	uv run pytest
 
 # 型チェック（pyright）
@@ -15,7 +19,7 @@ typecheck:
 
 # カバレッジ付きテスト（HTML レポート生成）
 cov:
-	uv run pytest --cov=pfs_obslog --cov-branch --cov-report=term-missing --cov-report=html
+	uv run pytest -m "not slow" --cov=pfs_obslog --cov-branch --cov-report=term-missing --cov-report=html
 
 # フロントエンド用にOpenAPIスキーマを出力（フロントエンドから呼ばれる）
 openapi-for-frontend:
@@ -30,7 +34,8 @@ clean:
 help:
 	@echo "使用可能なコマンド:"
 	@echo "  make dev              - 開発サーバーを起動"
-	@echo "  make test             - テストを実行"
+	@echo "  make test             - テストを実行（遅いテストをスキップ）"
+	@echo "  make test-all         - 全テストを実行（遅いテスト含む）"
 	@echo "  make cov              - カバレッジ付きテスト（HTMLレポート生成）"
 	@echo "  make typecheck        - 型チェック（pyright）"
 	@echo "  make openapi-for-frontend - フロントエンド用にOpenAPIスキーマを出力"
