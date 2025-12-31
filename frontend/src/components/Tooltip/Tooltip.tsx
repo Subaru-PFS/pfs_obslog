@@ -48,17 +48,7 @@ export function Tooltip({
   // Calculate position synchronously after DOM update
   useLayoutEffect(() => {
     if (isVisible && triggerRef.current && tooltipRef.current) {
-      // Get the first child element if the trigger has display: contents
-      // This handles cases where CSS sets display: contents on the parent
-      const triggerElement = triggerRef.current
-      const triggerRect = triggerElement.getBoundingClientRect()
-      
-      // If trigger has no dimensions (display: contents), try first child
-      let rect = triggerRect
-      if (triggerRect.width === 0 && triggerRect.height === 0 && triggerElement.firstElementChild) {
-        rect = triggerElement.firstElementChild.getBoundingClientRect()
-      }
-      
+      const rect = triggerRef.current.getBoundingClientRect()
       const tooltipRect = tooltipRef.current.getBoundingClientRect()
       const tooltipWidth = tooltipRect.width
       const tooltipHeight = tooltipRect.height
