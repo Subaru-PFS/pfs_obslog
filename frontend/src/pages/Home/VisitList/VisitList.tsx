@@ -686,14 +686,8 @@ export function VisitList() {
             >
               <Icon name="download" size={18} />
             </button>
-          </Tooltip>          <Tooltip content="Download CSV">
-            <button
-              className={styles.toolbarButton}
-              onClick={handleDownloadCsv}
-            >
-              <Icon name="download" size={18} />
-            </button>
-          </Tooltip>          <Tooltip content="Go to latest visits">
+          </Tooltip>
+          <Tooltip content="Go to latest visits">
             <button
               className={styles.toolbarButton}
               onClick={handleGoToLatest}
