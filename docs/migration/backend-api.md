@@ -9,13 +9,13 @@
 | 認証 | 4 | 0 | 100% |
 | ヘルスチェック | 1 | 0 | 100% |
 | Visit | 3 | 1 | 75% |
-| Visit Note | 0 | 3 | 0% |
-| Visit Set Note | 0 | 3 | 0% |
+| Visit Note | 3 | 0 | 100% |
+| Visit Set Note | 3 | 0 | 100% |
 | FITS | 0 | 8 | 0% |
 | PFS Design | 0 | 4 | 0% |
 | Attachment | 0 | 4 | 0% |
 | Plot | 0 | 1 | 0% |
-| **合計** | **8** | **24** | **25%** |
+| **合計** | **14** | **18** | **44%** |
 
 ---
 
@@ -50,17 +50,17 @@
 
 | メソッド | 既存エンドポイント | 新エンドポイント | 状態 | 備考 |
 |----------|-------------------|-----------------|------|------|
-| POST | `/api/visits/{visit_id}/notes` | - | ⏳ 未実装 | メモ作成（要認証） |
-| PUT | `/api/visits/{visit_id}/notes/{id}` | - | ⏳ 未実装 | メモ更新（自分のメモのみ） |
-| DELETE | `/api/visits/{visit_id}/notes/{id}` | - | ⏳ 未実装 | メモ削除（自分のメモのみ） |
+| POST | `/api/visits/{visit_id}/notes` | `/api/visits/{visit_id}/notes` | ✅ 完了 | メモ作成（要認証） |
+| PUT | `/api/visits/{visit_id}/notes/{id}` | `/api/visits/{visit_id}/notes/{note_id}` | ✅ 完了 | メモ更新（自分のメモのみ） |
+| DELETE | `/api/visits/{visit_id}/notes/{id}` | `/api/visits/{visit_id}/notes/{note_id}` | ✅ 完了 | メモ削除（自分のメモのみ） |
 
 ### Visit Set Note（シーケンスメモ）
 
 | メソッド | 既存エンドポイント | 新エンドポイント | 状態 | 備考 |
 |----------|-------------------|-----------------|------|------|
-| POST | `/api/visit_sets/{visit_set_id}/notes` | - | ⏳ 未実装 | シーケンスメモ作成（要認証） |
-| PUT | `/api/visit_sets/{visit_set_id}/notes/{id}` | - | ⏳ 未実装 | シーケンスメモ更新（自分のメモのみ） |
-| DELETE | `/api/visit_sets/{visit_set_id}/notes/{id}` | - | ⏳ 未実装 | シーケンスメモ削除（自分のメモのみ） |
+| POST | `/api/visit_sets/{visit_set_id}/notes` | `/api/visit_sets/{visit_set_id}/notes` | ✅ 完了 | シーケンスメモ作成（要認証） |
+| PUT | `/api/visit_sets/{visit_set_id}/notes/{id}` | `/api/visit_sets/{visit_set_id}/notes/{note_id}` | ✅ 完了 | シーケンスメモ更新（自分のメモのみ） |
+| DELETE | `/api/visit_sets/{visit_set_id}/notes/{id}` | `/api/visit_sets/{visit_set_id}/notes/{note_id}` | ✅ 完了 | シーケンスメモ削除（自分のメモのみ） |
 
 ### FITS ファイル
 
