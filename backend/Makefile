@@ -1,4 +1,4 @@
-.PHONY: dev test cov openapi-for-frontend clean help
+.PHONY: dev test cov typecheck openapi-for-frontend clean help
 
 # 開発サーバーを起動
 dev:
@@ -8,6 +8,10 @@ dev:
 # テストを実行
 test:
 	uv run pytest
+
+# 型チェック（pyright）
+typecheck:
+	uv run pyright src/
 
 # カバレッジ付きテスト（HTML レポート生成）
 cov:
@@ -28,5 +32,6 @@ help:
 	@echo "  make dev              - 開発サーバーを起動"
 	@echo "  make test             - テストを実行"
 	@echo "  make cov              - カバレッジ付きテスト（HTMLレポート生成）"
+	@echo "  make typecheck        - 型チェック（pyright）"
 	@echo "  make openapi-for-frontend - フロントエンド用にOpenAPIスキーマを出力"
 	@echo "  make clean            - 一時ファイルを削除"

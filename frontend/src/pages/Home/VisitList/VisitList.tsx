@@ -11,6 +11,7 @@ import { Icon } from '../../../components/Icon'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
 import { Tooltip, TruncatedCell, TruncatedText } from '../../../components/Tooltip'
+import { API_BASE_URL } from '../../../config'
 import styles from './VisitList.module.scss'
 
 const PER_PAGE = 200
@@ -509,6 +510,22 @@ export function VisitList() {
     refetch()
   }, [refetch])
 
+  // Download CSV
+  const handleDownloadCsv = useCallback(() => {
+    const params = new URLSearchParams()
+    // Use current SQL filter (WHERE clause)
+    if (appliedSql) {
+      params.set('sql', `select * ${appliedSql}`)
+    } else {
+      params.set('sql', 'select *')
+    }
+    // Set a reasonable limit for CSV export
+    params.set('limit', '10000')
+    
+    const url = `${API_BASE_URL}/api/visits.csv?${params}`
+    window.location.href = url
+  }, [appliedSql])
+
   // Check if the query looks like SQL WHERE clause
   const isSqlQuery = useCallback((query: string) => {
     return /^\s*where\s+/i.test(query)
@@ -662,7 +679,21 @@ export function VisitList() {
           </Tooltip>
         </div>
         <div className={styles.toolbarActions}>
-          <Tooltip content="Go to latest visits">
+          <Tooltip content="Download as CSV">
+            <button
+              className={styles.toolbarButton}
+              onClick={handleDownloadCsv}
+            >
+              <Icon name="download" size={18} />
+            </button>
+          </Tooltip>          <Tooltip content="Download CSV">
+            <button
+              className={styles.toolbarButton}
+              onClick={handleDownloadCsv}
+            >
+              <Icon name="download" size={18} />
+            </button>
+          </Tooltip>          <Tooltip content="Go to latest visits">
             <button
               className={styles.toolbarButton}
               onClick={handleGoToLatest}
