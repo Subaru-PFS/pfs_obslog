@@ -8,9 +8,12 @@ from typing import Sequence
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.sql.elements import ColumnElement
 
 from pfs_obslog import models as M
 from pfs_obslog.database import DbSession
+from pfs_obslog.visitquery import QueryEvaluator, QueryParseError, parse_where_clause
+from pfs_obslog.visitquery.joins import JoinBuilder
 from pfs_obslog.schemas.visits import (
     AgcExposure,
     AgcGuideOffset,
@@ -42,19 +45,35 @@ def list_visits(
     db: DbSession,
     offset: int = Query(default=0, ge=0, description="ページネーションのオフセット"),
     limit: int = Query(default=50, ge=-1, le=1000, description="取得件数上限（-1で無制限）"),
-    # SQLフィルタリングは後で実装
-    # sql: str | None = Query(default=None, description="SQLライクなフィルタ条件"),
+    sql: str | None = Query(default=None, description="SQLライクなフィルタ条件（例: where id > 100）"),
 ) -> VisitList:
     """Visit一覧を取得
 
     ページネーション付きでVisit一覧を取得します。
     各Visitには露出数、平均値、メモなどの集計情報が含まれます。
+
+    sqlパラメータを指定すると、WHERE句でフィルタリングできます。
+    例: sql=where id > 100
     """
     # limitが-1の場合は無制限
     effective_limit: int | None = None if limit == -1 else limit
 
+    # SQLフィルタリング条件をパース
+    where_condition: ColumnElement | None = None
+    required_joins: set[str] = set()
+
+    if sql:
+        try:
+            where_ast = parse_where_clause(sql)
+            if where_ast:
+                evaluator = QueryEvaluator(M)
+                where_condition = evaluator.evaluate(where_ast)
+                required_joins = evaluator.required_joins
+        except QueryParseError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+
     # Visit一覧を取得
-    visits, count = _fetch_visits(db, effective_limit, offset)
+    visits, count = _fetch_visits(db, effective_limit, offset, where_condition, required_joins)
 
     # 関連するIicSequenceを取得
     iic_sequences = _fetch_related_iic_sequences(db, visits)
@@ -70,7 +89,8 @@ def _fetch_visits(
     db: Session,
     limit: int | None,
     offset: int,
-    # TODO: フィルタリング用のパラメータを追加
+    where_condition: ColumnElement | None = None,
+    required_joins: set[str] | None = None,
 ) -> tuple[list[VisitListEntry], int]:
     """Visit一覧を取得
 
@@ -78,16 +98,33 @@ def _fetch_visits(
         db: DBセッション
         limit: 取得件数上限（Noneで無制限）
         offset: オフセット
+        where_condition: SQLAlchemy WHERE条件（オプション）
+        required_joins: 必要なJOINの名前のセット（オプション）
 
     Returns:
         (Visit一覧, 総件数)
     """
+    if required_joins is None:
+        required_joins = set()
+
+    # ベースクエリ
+    base_query = select(M.PfsVisit.pfs_visit_id).select_from(M.PfsVisit)
+
+    # フィルタリング条件がある場合、必要なJOINを適用
+    if where_condition is not None:
+        join_builder = JoinBuilder(M)
+        base_query = join_builder.apply_joins(base_query, required_joins)
+        base_query = base_query.where(where_condition)
+        # フィルタリング時はDISTINCTが必要（JOIN で重複が生じる可能性）
+        base_query = base_query.distinct()
+
     # 総件数を取得
-    count: int = db.execute(select(func.count()).select_from(M.PfsVisit)).scalar_one()
+    count_query = select(func.count()).select_from(base_query.subquery())
+    count: int = db.execute(count_query).scalar_one()
 
     # 対象VisitIDを取得（ページネーション適用）
     ids_query = (
-        select(M.PfsVisit.pfs_visit_id)
+        base_query
         .order_by(M.PfsVisit.pfs_visit_id.desc())
         .offset(offset)
     )
@@ -96,7 +133,7 @@ def _fetch_visits(
 
     ids = [row[0] for row in db.execute(ids_query)]
 
-    if not ids:  # pragma: no cover
+    if not ids:
         return [], count
 
     # Visit詳細を取得

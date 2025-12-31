@@ -296,3 +296,90 @@ class TestGetVisit:
         assert "group" in data["iic_sequence"]
         assert "notes" in data["iic_sequence"]
         assert "status" in data["iic_sequence"]
+
+
+class TestSqlFiltering:
+    """SQLフィルタリング機能のテスト"""
+
+    def test_filter_by_id(self):
+        """ID指定でフィルタリング"""
+        # まずVisit一覧から1件取得
+        list_response = client.get("/api/visits?limit=1")
+        visits = list_response.json()["visits"]
+
+        if len(visits) == 0:
+            pytest.skip("No visits in database")
+
+        visit_id = visits[0]["id"]
+
+        # IDでフィルタリング
+        response = client.get(f"/api/visits?sql=where id = {visit_id}")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["count"] == 1
+        assert len(data["visits"]) == 1
+        assert data["visits"][0]["id"] == visit_id
+
+    def test_filter_by_id_range(self):
+        """ID範囲指定でフィルタリング"""
+        # まず複数件取得
+        list_response = client.get("/api/visits?limit=10")
+        visits = list_response.json()["visits"]
+
+        if len(visits) < 2:
+            pytest.skip("Not enough visits in database")
+
+        # 最大・最小ID
+        ids = [v["id"] for v in visits]
+        min_id = min(ids)
+        max_id = max(ids)
+
+        # ID範囲でフィルタリング
+        response = client.get(f"/api/visits?sql=where id between {min_id} and {max_id}")
+        assert response.status_code == 200
+
+        data = response.json()
+        # フィルタリング結果のIDが範囲内であること
+        for v in data["visits"]:
+            assert min_id <= v["id"] <= max_id
+
+    def test_filter_invalid_sql(self):
+        """無効なSQLでエラー"""
+        response = client.get("/api/visits?sql=invalid sql syntax")
+        assert response.status_code == 400
+
+    def test_filter_with_pagination(self):
+        """SQLフィルタリングとページネーションの組み合わせ"""
+        # まず全件数を確認
+        all_response = client.get("/api/visits?limit=1")
+        total = all_response.json()["count"]
+
+        if total == 0:
+            pytest.skip("No visits in database")
+
+        # 存在するIDを取得
+        ids = [v["id"] for v in client.get("/api/visits?limit=10").json()["visits"]]
+        if len(ids) == 0:
+            pytest.skip("No visits in database")
+
+        median_id = ids[len(ids) // 2]
+
+        # より大きいIDでフィルタリング（offset=0, limit=5）
+        response1 = client.get(f"/api/visits?sql=where id >= {median_id}&limit=5&offset=0")
+        assert response1.status_code == 200
+        data1 = response1.json()
+
+        # offset=5で取得
+        response2 = client.get(f"/api/visits?sql=where id >= {median_id}&limit=5&offset=5")
+        assert response2.status_code == 200
+        data2 = response2.json()
+
+        # countは同じ
+        assert data1["count"] == data2["count"]
+
+        # データが重複しないこと
+        if len(data1["visits"]) > 0 and len(data2["visits"]) > 0:
+            ids1 = {v["id"] for v in data1["visits"]}
+            ids2 = {v["id"] for v in data2["visits"]}
+            assert ids1.isdisjoint(ids2)

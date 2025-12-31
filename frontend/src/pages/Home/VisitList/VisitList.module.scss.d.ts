@@ -13,6 +13,7 @@ export type Styles = {
   content: string;
   empty: string;
   error: string;
+  errorInput: string;
   exposureAgc: string;
   exposureMcs: string;
   exposureMcsAgc: string;
@@ -35,6 +36,7 @@ export type Styles = {
   paginationButton: string;
   paginationTop: string;
   searchBox: string;
+  searchError: string;
   searchInput: string;
   selected: string;
   sequenceGroup: string;
@@ -44,7 +46,7 @@ export type Styles = {
   sequenceTypeArc: string;
   sequenceTypeFlat: string;
   sequenceTypeScience: string;
-  sql: string;
+  sqlInput: string;
   status: string;
   statusError: string;
   statusOk: string;

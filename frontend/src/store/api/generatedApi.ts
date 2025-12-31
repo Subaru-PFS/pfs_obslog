@@ -50,6 +50,7 @@ const injectedRtkApi = api.injectEndpoints({
         params: {
           offset: queryArg.offset,
           limit: queryArg.limit,
+          sql: queryArg.sql,
         },
       }),
     }),
@@ -95,6 +96,8 @@ export type ListVisitsApiVisitsGetApiArg = {
   offset?: number;
   /** 取得件数上限（-1で無制限） */
   limit?: number;
+  /** SQLライクなフィルタ条件（例: where id > 100） */
+  sql?: string | null;
 };
 export type GetVisitApiVisitsVisitIdGetApiResponse =
   /** status 200 Successful Response */ VisitDetail;

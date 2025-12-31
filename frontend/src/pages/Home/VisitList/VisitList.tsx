@@ -339,20 +339,33 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
 
 export function VisitList() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [appliedSql, setAppliedSql] = useState<string | null>(null)
   const [offset, setOffset] = useState(0)
   const [limit, setLimit] = useState(PER_PAGE)
   const contentRef = useRef<HTMLDivElement>(null)
   const scrollHeightBeforeLoadRef = useRef<number | null>(null)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [searchError, setSearchError] = useState<string | null>(null)
 
   // Column visibility state with localStorage persistence
   const [columns, setColumnVisibility] = useColumnVisibility()
 
-  // RTK Query API
-  const { data, isLoading, isFetching, isError, refetch } = useListVisitsApiVisitsGetQuery({
+  // RTK Query API - include sql parameter when set
+  const { data, isLoading, isFetching, isError, error, refetch } = useListVisitsApiVisitsGetQuery({
     offset,
     limit,
+    sql: appliedSql ?? undefined,
   })
+
+  // Handle API error for search
+  useEffect(() => {
+    if (isError && error && 'data' in error) {
+      const apiError = error as { data?: { detail?: string } }
+      setSearchError(apiError.data?.detail ?? 'Search failed')
+    } else {
+      setSearchError(null)
+    }
+  }, [isError, error])
 
   const visitGroups = useMemo(() => {
     if (!data) return []
@@ -436,6 +449,43 @@ export function VisitList() {
     refetch()
   }, [refetch])
 
+  // Check if the query looks like SQL WHERE clause
+  const isSqlQuery = useCallback((query: string) => {
+    return /^\s*where\s+/i.test(query)
+  }, [])
+
+  // Execute search
+  const handleSearch = useCallback(() => {
+    setSearchError(null)
+    const query = searchQuery.trim()
+    
+    if (query === '') {
+      // Clear filter
+      setAppliedSql(null)
+    } else if (isSqlQuery(query)) {
+      // Direct SQL query
+      setAppliedSql(query)
+    } else {
+      // Simple text search - wrap with any_column LIKE
+      setAppliedSql(`where any_column like '%${query}%'`)
+    }
+    
+    // Reset pagination
+    setOffset(0)
+    setLimit(PER_PAGE)
+    contentRef.current?.scrollTo(0, 0)
+  }, [searchQuery, isSqlQuery])
+
+  // Clear search
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery('')
+    setAppliedSql(null)
+    setSearchError(null)
+    setOffset(0)
+    setLimit(PER_PAGE)
+    contentRef.current?.scrollTo(0, 0)
+  }, [])
+
   // キーボードナビゲーション
   const { selectedVisitId, setSelectedVisitId } = useHomeContext()
 
@@ -505,17 +555,39 @@ export function VisitList() {
     <div className={styles.visitList}>
       <div className={styles.toolbar}>
         <div className={styles.searchBox}>
-          <input
-            type="search"
-            className={styles.searchInput}
-            placeholder="Search visits..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+          <form onSubmit={(e) => { e.preventDefault(); handleSearch() }}>
+            <input
+              type="search"
+              className={`${styles.searchInput} ${isSqlQuery(searchQuery) ? styles.sqlInput : ''} ${searchError ? styles.errorInput : ''}`}
+              placeholder="Search or enter WHERE clause..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                // Clear error when typing
+                if (searchError) setSearchError(null)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  handleClearSearch()
+                }
+              }}
+            />
+          </form>
+          {appliedSql && (
+            <Tooltip content="Clear search">
+              <button
+                className={styles.toolbarButton}
+                onClick={handleClearSearch}
+              >
+                <Icon name="close" size={18} />
+              </button>
+            </Tooltip>
+          )}
           <Tooltip content="Search">
             <button
               className={styles.toolbarButton}
-              disabled
+              onClick={handleSearch}
+              disabled={isFetching}
             >
               <Icon name="search" size={18} />
             </button>
@@ -523,7 +595,7 @@ export function VisitList() {
           <Tooltip content="Syntax Docs">
             <button
               className={styles.toolbarButton}
-              disabled
+              onClick={() => window.open('/visits/sql-syntax-help', '_blank')}
             >
               <Icon name="help" size={18} />
             </button>
@@ -534,7 +606,7 @@ export function VisitList() {
             <button
               className={styles.toolbarButton}
               onClick={handleGoToLatest}
-              disabled={isFirstPage}
+              disabled={isFirstPage && !appliedSql}
             >
               <Icon name="vertical_align_top" size={18} />
             </button>
@@ -550,6 +622,14 @@ export function VisitList() {
           </Tooltip>
         </div>
       </div>
+
+      {/* Search error message */}
+      {searchError && (
+        <div className={styles.searchError}>
+          <Icon name="error" size={16} />
+          <span>{searchError}</span>
+        </div>
+      )}
 
       {/* Column selector row */}
       <div className={styles.columnsRow}>

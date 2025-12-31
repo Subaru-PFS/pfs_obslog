@@ -26,6 +26,11 @@
   flex: 1;
   min-width: 200px;
   gap: 4px;
+
+  form {
+    flex: 1;
+    display: flex;
+  }
 }
 
 .searchInput {
@@ -35,11 +40,26 @@
   font-size: 0.875rem;
   box-shadow: 0 0 4px inset rgba($shadow-color, 0.5);
 
-  &.sql {
+  &.sqlInput {
     color: $sql-text-color;
     font-family: $font-family-mono;
     box-shadow: 0 0 4px inset rgba($sql-color, 1);
   }
+
+  &.errorInput {
+    box-shadow: 0 0 4px inset rgba($error-color, 1);
+  }
+}
+
+.searchError {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: rgba($error-color, 0.1);
+  color: $error-color;
+  font-size: 0.8rem;
+  border-bottom: 1px solid rgba($error-color, 0.3);
 }
 
 .toolbarButton {
