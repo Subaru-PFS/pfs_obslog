@@ -4,18 +4,23 @@ PFS Design ファイル（観測設計）の一覧表示、詳細取得、ダウ
 """
 
 import datetime
+import io
 import re
 from logging import getLogger
 from pathlib import Path
 from typing import Any, Optional
 
+import matplotlib
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import FileResponse, Response
+from matplotlib import pyplot as plt
 from pydantic import BaseModel
 
 from pfs_obslog.config import get_settings
 from pfs_obslog.routers.fits import FitsMeta, FitsHdu, FitsHeader, Card
 
+# Aggバックエンドを使用（GUI不要）
+matplotlib.use("Agg")
 
 logger = getLogger(__name__)
 router = APIRouter(prefix="/api/pfs_designs", tags=["pfs_designs"])
@@ -322,21 +327,96 @@ def get_design(id_hex: str):
 @router.get(
     ".png",
     summary="Get PFS Design chart",
-    description="Generate a chart image for one or more PFS Designs. (Not implemented)",
+    description="Generate a chart image for one or more PFS Designs.",
 )
 def get_design_chart(
     id_hex: list[str] = Query(..., description="Design IDs to include in the chart"),
     date: Optional[datetime.date] = Query(
         None, description="Date for the chart (for visibility calculations)"
     ),
-):
+    width: int = Query(default=600, le=1200, description="Image width in pixels"),
+    height: int = Query(default=250, le=500, description="Image height in pixels"),
+) -> Response:
     """PFS Design のチャート画像を生成
 
-    Note: この機能は pfs.datamodel と pfs.utils パッケージが必要です。
-    現在は未実装です。
+    指定されたPFS Design IDのチャート画像を生成します。
+    pfs.utils.pfsDesignUtils.showPfsDesign を使用して可視化します。
+
+    Args:
+        id_hex: Design ID（16進数文字列のリスト）
+        date: チャートの日付（可視性計算用）
+        width: 画像幅（px）
+        height: 画像高さ（px）
+
+    Returns:
+        PNG画像のレスポンス
     """
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Design chart generation is not yet implemented. "
-        "Requires pfs.datamodel and pfs.utils packages.",
-    )
+    from pfs.datamodel.pfsConfig import PfsDesign
+    from pfs.utils.pfsDesignUtils import showPfsDesign
+
+    settings = get_settings()
+
+    # IDを検証して整数に変換
+    pfs_design_ids = []
+    for h in id_hex:
+        if not re.match(r"^[0-9a-fA-F]{16}$", h):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid design ID format: {h}",
+            )
+        pfs_design_ids.append(int(h, 16))
+
+    # PfsDesignを読み込み
+    try:
+        pfs_designs = [
+            PfsDesign.read(design_id, str(settings.pfs_design_dir))
+            for design_id in pfs_design_ids
+        ]
+    except Exception as e:
+        logger.exception(f"Error reading PfsDesign: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Design file not found or error reading: {e}",
+        )
+
+    # チャートを生成
+    try:
+        png_bytes = _create_design_chart(pfs_designs, date, width, height)
+        return Response(content=png_bytes, media_type="image/png")
+    except Exception as e:
+        logger.exception(f"Error generating design chart: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error generating chart: {e}",
+        )
+
+
+def _create_design_chart(
+    pfs_designs: list,
+    date: Optional[datetime.date],
+    width: int,
+    height: int,
+) -> bytes:
+    """PFS Design チャートを生成
+
+    Args:
+        pfs_designs: PfsDesign オブジェクトのリスト
+        date: チャートの日付
+        width: 画像幅（px）
+        height: 画像高さ（px）
+
+    Returns:
+        PNG画像のバイト列
+    """
+    from pfs.utils.pfsDesignUtils import showPfsDesign
+
+    DPI = 72
+    fig = plt.figure(dpi=DPI, figsize=(width / DPI, height / DPI))
+    try:
+        showPfsDesign(pfs_designs, date=date, showTime=True)
+
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", transparent=True)
+        return buf.getvalue()
+    finally:
+        plt.close(fig)

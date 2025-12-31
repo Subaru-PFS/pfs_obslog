@@ -11,9 +11,12 @@
 // =============================================================================
 // Toolbar
 // =============================================================================
+$toolbar-input-height: 32px;
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   padding: 8px;
   background-color: $background-color;
@@ -23,6 +26,7 @@
 
 .searchBox {
   display: flex;
+  align-items: center;
   flex: 1;
   min-width: 200px;
   gap: 4px;
@@ -36,7 +40,8 @@
 .searchInput {
   @include rounded-text-input;
   flex: 1;
-  padding: 6px 12px;
+  height: $toolbar-input-height;
+  padding: 0 12px;
   font-size: 0.875rem;
   box-shadow: 0 0 4px inset rgba($shadow-color, 0.5);
 
@@ -64,11 +69,15 @@
 
 .toolbarButton {
   @include button-base;
-  padding: 4px 8px;
+  height: $toolbar-input-height;
+  padding: 0 8px;
   font-size: 0.875rem;
   background-color: $input-background;
-  min-width: 32px;
+  min-width: $toolbar-input-height;
   box-shadow: $small-shadow;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover:not(:disabled) {
     background-color: $hover-background-color;
@@ -83,6 +92,7 @@
 
 .toolbarActions {
   display: flex;
+  align-items: center;
   gap: 4px;
 }
 
