@@ -11,6 +11,7 @@ import { Icon } from '../../../components/Icon'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
 import { Tooltip, TruncatedCell, TruncatedText } from '../../../components/Tooltip'
+import { DateRangePicker, type DateRange } from '../../../components/DateRangePicker'
 import { API_BASE_URL } from '../../../config'
 import styles from './VisitList.module.scss'
 
@@ -392,6 +393,7 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
 export function VisitList() {
   const [searchQuery, setSearchQuery] = useState('')
   const [appliedSql, setAppliedSql] = useState<string | null>(null)
+  const [dateRange, setDateRange] = useState<DateRange>([undefined, undefined])
   const [offset, setOffset] = useState(0)
   const [limit, setLimit] = useState(PER_PAGE)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -403,11 +405,38 @@ export function VisitList() {
   // Column visibility state with localStorage persistence
   const [columns, setColumnVisibility] = useColumnVisibility()
 
+  // Build effective SQL combining search query and date range
+  const effectiveSql = useMemo(() => {
+    const conditions: string[] = []
+    
+    // Add search query condition
+    if (appliedSql) {
+      // Extract condition from "where ..." clause
+      const match = appliedSql.match(/^\s*where\s+(.+)$/i)
+      if (match) {
+        conditions.push(`(${match[1]})`)
+      }
+    }
+    
+    // Add date range condition
+    const [start, end] = dateRange
+    if (start && end) {
+      conditions.push(`(issued_at between '${start}' and '${end} 23:59:59')`)
+    } else if (start) {
+      conditions.push(`issued_at >= '${start}'`)
+    } else if (end) {
+      conditions.push(`issued_at <= '${end} 23:59:59'`)
+    }
+    
+    if (conditions.length === 0) return undefined
+    return `where ${conditions.join(' and ')}`
+  }, [appliedSql, dateRange])
+
   // RTK Query API - include sql parameter when set
   const { data, isLoading, isFetching, isError, error, refetch } = useListVisitsApiVisitsGetQuery({
     offset,
     limit,
-    sql: appliedSql ?? undefined,
+    sql: effectiveSql,
   })
 
   // Handle API error for search
@@ -558,6 +587,23 @@ export function VisitList() {
     setSearchQuery('')
     setAppliedSql(null)
     setSearchError(null)
+    setOffset(0)
+    setLimit(PER_PAGE)
+    setShouldScrollToTop(true)
+  }, [])
+
+  // Handle date range change
+  const handleDateRangeChange = useCallback((newRange: DateRange) => {
+    setDateRange(newRange)
+    // Reset pagination when date range changes
+    setOffset(0)
+    setLimit(PER_PAGE)
+    setShouldScrollToTop(true)
+  }, [])
+
+  // Clear date range
+  const handleClearDateRange = useCallback(() => {
+    setDateRange([undefined, undefined])
     setOffset(0)
     setLimit(PER_PAGE)
     setShouldScrollToTop(true)
@@ -715,6 +761,34 @@ export function VisitList() {
           <span>{searchError}</span>
         </div>
       )}
+
+      {/* Date range filter row */}
+      <div className={styles.filterRow}>
+        <Icon name="date_range" size={18} />
+        <DateRangePicker
+          value={dateRange}
+          onChange={handleDateRangeChange}
+          className={styles.dateRangePicker}
+        >
+          {(startInput, endInput) => (
+            <>
+              {startInput}
+              <span className={styles.dateRangeSeparator}>–</span>
+              {endInput}
+            </>
+          )}
+        </DateRangePicker>
+        {(dateRange[0] || dateRange[1]) && (
+          <Tooltip content="Clear date range">
+            <button
+              className={styles.clearDateButton}
+              onClick={handleClearDateRange}
+            >
+              <Icon name="close" size={16} />
+            </button>
+          </Tooltip>
+        )}
+      </div>
 
       {/* Column selector row */}
       <div className={styles.columnsRow}>

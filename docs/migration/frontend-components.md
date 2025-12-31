@@ -9,12 +9,12 @@
 | カテゴリ | 完了 | 一部完了 | 未完了 | 進捗率 |
 |----------|------|----------|--------|--------|
 | ページ・レイアウト | 3 | 0 | 1 | 75% |
-| 共通コンポーネント | 6 | 0 | 2 | 75% |
-| Home: Visit一覧 | 5 | 1 | 2 | 69% |
+| 共通コンポーネント | 7 | 0 | 1 | 88% |
+| Home: Visit一覧 | 6 | 1 | 1 | 81% |
 | Home: Visit詳細 | 12 | 0 | 0 | 100% |
 | Home: Note機能 | 4 | 0 | 0 | 100% |
 | Designs機能 | 0 | 0 | 5 | 0% |
-| **合計** | **30** | **1** | **10** | **76%** |
+| **合計** | **32** | **1** | **8** | **80%** |
 
 ---
 
@@ -39,7 +39,7 @@
 | tippy (Tippy) | `components/Tippy.tsx` | Tooltip | `components/Tooltip` | ✅ 完了 | ツールチップ |
 | LazyImage | `components/LazyImage` | LazyImage | `components/LazyImage` | ✅ 完了 | 遅延読み込み画像 |
 | NoteList | `pages/Home/NoteList` | NoteList | `components/NoteList` | ✅ 完了 | メモ一覧（CRUD対応） |
-| DatePicker, DateRangePicker | `components/DatePicker` | - | - | ⏳ 未実装 | 日付選択/日付範囲選択 |
+| DatePicker, DateRangePicker | `components/DatePicker` | DateRangePicker | `components/DateRangePicker` | ✅ 完了 | 日付範囲選択 |
 | FocalPlane | `components/pfs/FocalPlane.tsx` | - | - | ⏳ 未実装 | PFS焦点面可視化 |
 
 ---
@@ -56,7 +56,7 @@
 | ページネーション | `VisitSetList/Paginator` | `VisitList` (Paginator) | ✅ 完了 | オフセット/リミット |
 | Go to Visit | `VisitSetList/ToolBar` (goToVisit) | `VisitList` | 🔶 一部完了 | UI実装済み、バックエンドAPI未実装 |
 | CSVダウンロード | `VisitSetList/ToolBar` (downloadCsv) | `VisitList` | ✅ 完了 | 一覧のCSVエクスポート |
-| 日付範囲フィルター | `VisitSetList/SearchConditions` | - | ⏳ 未実装 | DateRangePickerとの連携 |
+| 日付範囲フィルター | `VisitSetList/SearchConditions` | `VisitList` + `DateRangePicker` | ✅ 完了 | issued_atによる日付絞り込み |
 | SQLシンタックスヘルプ | `SqlSyntaxHelp` | - | ⏳ 未実装 | SQL構文のヘルプダイアログ |
 
 ### Visit詳細 (VisitDetail)

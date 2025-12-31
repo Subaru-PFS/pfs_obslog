@@ -1,0 +1,51 @@
+// SCSS for DateRangePicker component
+// Import vanillajs-datepicker styles with customization
+
+// Theme variables
+$accent: #4a90d9;
+$shadow-color: #000;
+
+$link: $accent;
+$dp-dropdown-shadow: 0 8px 16px rgba($shadow-color, 0.5);
+$dp-border-radius-small: 8px;
+$dp-background-color: #1e1e1e;
+$dp-foreground-color: #f0f0f0;
+$dp-border-color: #444;
+$dp-disabled-cell-color: #666;
+$dp-header-hover-bg: rgba($accent, 0.2);
+$dp-header-cell-hover-bg: rgba($accent, 0.2);
+$dp-cell-hover-bg: rgba($accent, 0.3);
+$dp-cell-selected-bg: $accent;
+$dp-cell-highlighted-bg: rgba($accent, 0.2);
+$dp-range-start-end-bg: $accent;
+$dp-range-bg: rgba($accent, 0.4);
+$dp-today-btn-bg: $accent;
+
+@import "vanillajs-datepicker/sass/datepicker.scss";
+
+// Additional customization
+.datepicker {
+  font-size: 12px;
+  
+  .datepicker-controls {
+    .button {
+      background-color: transparent;
+      border: 1px solid $dp-border-color;
+      color: $dp-foreground-color;
+      
+      &:hover {
+        background-color: $dp-header-hover-bg;
+      }
+    }
+  }
+  
+  .datepicker-cell {
+    &.focused:not(.selected) {
+      background-color: $dp-cell-hover-bg;
+    }
+    
+    &.today:not(.selected) {
+      background-color: $dp-cell-highlighted-bg;
+    }
+  }
+}

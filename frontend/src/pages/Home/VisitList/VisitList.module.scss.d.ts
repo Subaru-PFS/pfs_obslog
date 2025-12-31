@@ -1,4 +1,5 @@
 export type Styles = {
+  clearDateButton: string;
   colCoord: string;
   colDate: string;
   colDescription: string;
@@ -13,6 +14,8 @@ export type Styles = {
   command: string;
   comments: string;
   content: string;
+  dateRangePicker: string;
+  dateRangeSeparator: string;
   empty: string;
   error: string;
   errorInput: string;
@@ -24,6 +27,7 @@ export type Styles = {
   exposureSps: string;
   exposureSpsAgc: string;
   exposureSpsMcs: string;
+  filterRow: string;
   footer: string;
   iicSequence: string;
   info: string;
