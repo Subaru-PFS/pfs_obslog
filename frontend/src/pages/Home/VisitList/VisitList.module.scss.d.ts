@@ -8,6 +8,7 @@ export type Styles = {
   colExptime: string;
   colId: string;
   colNotes: string;
+  colNotesContent: string;
   colTime: string;
   columnSelector: string;
   columnsRow: string;
@@ -33,6 +34,11 @@ export type Styles = {
   info: string;
   loading: string;
   noSequence: string;
+  noteContentBody: string;
+  noteContentItem: string;
+  noteContentList: string;
+  noteContentUser: string;
+  noteDisplayModeSelect: string;
   notesBadge: string;
   pageInfo: string;
   pageRange: string;

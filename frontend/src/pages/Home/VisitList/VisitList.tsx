@@ -69,6 +69,7 @@ const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = Object.fromEntries(
 ) as ColumnVisibility
 
 const STORAGE_KEY = 'pfs-obslog:visitList:columns'
+const NOTE_DISPLAY_MODE_KEY = 'pfs-obslog:visitList:noteDisplayMode'
 
 function useColumnVisibility(): [ColumnVisibility, (key: ColumnKey, visible: boolean) => void] {
   const [columns, setColumns] = useState<ColumnVisibility>(() => {
@@ -94,15 +95,41 @@ function useColumnVisibility(): [ColumnVisibility, (key: ColumnKey, visible: boo
   return [columns, setColumnVisibility]
 }
 
+// Note display modes: 'count' shows only count badge, 'content' shows note body
+type NoteDisplayMode = 'count' | 'content'
+
+function useNoteDisplayMode(): [NoteDisplayMode, (mode: NoteDisplayMode) => void] {
+  const [mode, setMode] = useState<NoteDisplayMode>(() => {
+    try {
+      const saved = localStorage.getItem(NOTE_DISPLAY_MODE_KEY)
+      if (saved === 'count' || saved === 'content') {
+        return saved
+      }
+    } catch {
+      // ignore
+    }
+    return 'count'
+  })
+
+  const setNoteDisplayMode = useCallback((newMode: NoteDisplayMode) => {
+    setMode(newMode)
+    localStorage.setItem(NOTE_DISPLAY_MODE_KEY, newMode)
+  }, [])
+
+  return [mode, setNoteDisplayMode]
+}
+
 // =============================================================================
 // Column Selector Component
 // =============================================================================
 interface ColumnSelectorProps {
   columns: ColumnVisibility
   onToggle: (key: ColumnKey, visible: boolean) => void
+  noteDisplayMode: NoteDisplayMode
+  onNoteDisplayModeChange: (mode: NoteDisplayMode) => void
 }
 
-function ColumnSelector({ columns, onToggle }: ColumnSelectorProps) {
+function ColumnSelector({ columns, onToggle, noteDisplayMode, onNoteDisplayModeChange }: ColumnSelectorProps) {
   return (
     <ul className={styles.columnSelector}>
       {COLUMN_DEFINITIONS.map((col) => (
@@ -117,6 +144,18 @@ function ColumnSelector({ columns, onToggle }: ColumnSelectorProps) {
               {col.icon ? <Icon name={col.icon} size={14} /> : col.label}
             </label>
           </Tooltip>
+          {/* Note display mode selector */}
+          {col.key === 'notes' && columns.notes && (
+            <select
+              className={styles.noteDisplayModeSelect}
+              value={noteDisplayMode}
+              onChange={(e) => onNoteDisplayModeChange(e.target.value as NoteDisplayMode)}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <option value="count">Count</option>
+              <option value="content">Content</option>
+            </select>
+          )}
         </li>
       ))}
     </ul>
@@ -263,9 +302,10 @@ function getSequenceTypeClass(sequenceType: string): string {
 interface VisitGroupComponentProps {
   group: VisitGroup
   columns: ColumnVisibility
+  noteDisplayMode: NoteDisplayMode
 }
 
-function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
+function VisitGroupComponent({ group, columns, noteDisplayMode }: VisitGroupComponentProps) {
   const { selectedVisitId, setSelectedVisitId } = useHomeContext()
   
   // Check if any visit in this group is selected
@@ -377,11 +417,26 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
                   </TruncatedCell>
                 )}
                 {columns.notes && (
-                  <TruncatedCell content={visit.notes && visit.notes.length > 0 ? `${visit.notes.length} note(s)` : ''} className={styles.colNotes}>
-                    {(visit.notes?.length ?? 0) > 0 && (
-                      <span className={styles.notesBadge}>{visit.notes?.length}</span>
-                    )}
-                  </TruncatedCell>
+                  noteDisplayMode === 'content' ? (
+                    <td className={styles.colNotesContent}>
+                      {(visit.notes?.length ?? 0) > 0 ? (
+                        <ul className={styles.noteContentList}>
+                          {visit.notes?.map((note, idx) => (
+                            <li key={idx} className={styles.noteContentItem}>
+                              <span className={styles.noteContentBody}>{note.body}</span>
+                              <span className={styles.noteContentUser}>({note.user.account_name})</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : '-'}
+                    </td>
+                  ) : (
+                    <TruncatedCell content={visit.notes && visit.notes.length > 0 ? `${visit.notes.length} note(s)` : ''} className={styles.colNotes}>
+                      {(visit.notes?.length ?? 0) > 0 && (
+                        <span className={styles.notesBadge}>{visit.notes?.length}</span>
+                      )}
+                    </TruncatedCell>
+                  )
                 )}
               </tr>
             )
@@ -409,6 +464,9 @@ export function VisitList() {
 
   // Column visibility state with localStorage persistence
   const [columns, setColumnVisibility] = useColumnVisibility()
+  
+  // Note display mode state with localStorage persistence
+  const [noteDisplayMode, setNoteDisplayMode] = useNoteDisplayMode()
 
   // Build effective SQL combining search query and date range
   const effectiveSql = useMemo(() => {
@@ -842,7 +900,12 @@ export function VisitList() {
 
       {/* Column selector row */}
       <div className={styles.columnsRow}>
-        <ColumnSelector columns={columns} onToggle={setColumnVisibility} />
+        <ColumnSelector
+          columns={columns}
+          onToggle={setColumnVisibility}
+          noteDisplayMode={noteDisplayMode}
+          onNoteDisplayModeChange={setNoteDisplayMode}
+        />
       </div>
 
       <div className={styles.content} ref={contentRef}>
@@ -887,6 +950,7 @@ export function VisitList() {
               key={group.iicSequence?.iic_sequence_id ?? `no-seq-${index}`}
               group={group}
               columns={columns}
+              noteDisplayMode={noteDisplayMode}
             />
           ))
         )}
