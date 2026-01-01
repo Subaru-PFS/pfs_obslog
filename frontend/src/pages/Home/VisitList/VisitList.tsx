@@ -36,7 +36,8 @@ type ColumnKey =
   | 'azimuth'
   | 'altitude'
   | 'insrot'
-  | 'notes'
+  | 'notes_count'
+  | 'notes_content'
 
 interface ColumnDef {
   key: ColumnKey
@@ -59,7 +60,8 @@ const COLUMN_DEFINITIONS: ColumnDef[] = [
   { key: 'azimuth', label: 'A°', description: 'Azimuth [°]', defaultVisible: false },
   { key: 'altitude', label: 'E°', description: 'Altitude [°]', defaultVisible: false },
   { key: 'insrot', label: 'I°', description: 'Instrument Rotator [°]', defaultVisible: false },
-  { key: 'notes', label: '', icon: 'notes', description: 'Notes', defaultVisible: true },
+  { key: 'notes_count', label: '', icon: 'tag', description: 'Notes Count (hover for details)', defaultVisible: true },
+  { key: 'notes_content', label: '', icon: 'notes', description: 'Notes Content', defaultVisible: false },
 ]
 
 type ColumnVisibility = Record<ColumnKey, boolean>
@@ -69,7 +71,6 @@ const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = Object.fromEntries(
 ) as ColumnVisibility
 
 const STORAGE_KEY = 'pfs-obslog:visitList:columns'
-const NOTE_DISPLAY_MODE_KEY = 'pfs-obslog:visitList:noteDisplayMode'
 
 function useColumnVisibility(): [ColumnVisibility, (key: ColumnKey, visible: boolean) => void] {
   const [columns, setColumns] = useState<ColumnVisibility>(() => {
@@ -95,41 +96,15 @@ function useColumnVisibility(): [ColumnVisibility, (key: ColumnKey, visible: boo
   return [columns, setColumnVisibility]
 }
 
-// Note display modes: 'count' shows only count badge, 'content' shows note body
-type NoteDisplayMode = 'count' | 'content'
-
-function useNoteDisplayMode(): [NoteDisplayMode, (mode: NoteDisplayMode) => void] {
-  const [mode, setMode] = useState<NoteDisplayMode>(() => {
-    try {
-      const saved = localStorage.getItem(NOTE_DISPLAY_MODE_KEY)
-      if (saved === 'count' || saved === 'content') {
-        return saved
-      }
-    } catch {
-      // ignore
-    }
-    return 'count'
-  })
-
-  const setNoteDisplayMode = useCallback((newMode: NoteDisplayMode) => {
-    setMode(newMode)
-    localStorage.setItem(NOTE_DISPLAY_MODE_KEY, newMode)
-  }, [])
-
-  return [mode, setNoteDisplayMode]
-}
-
 // =============================================================================
 // Column Selector Component
 // =============================================================================
 interface ColumnSelectorProps {
   columns: ColumnVisibility
   onToggle: (key: ColumnKey, visible: boolean) => void
-  noteDisplayMode: NoteDisplayMode
-  onNoteDisplayModeChange: (mode: NoteDisplayMode) => void
 }
 
-function ColumnSelector({ columns, onToggle, noteDisplayMode, onNoteDisplayModeChange }: ColumnSelectorProps) {
+function ColumnSelector({ columns, onToggle }: ColumnSelectorProps) {
   return (
     <ul className={styles.columnSelector}>
       {COLUMN_DEFINITIONS.map((col) => (
@@ -144,18 +119,6 @@ function ColumnSelector({ columns, onToggle, noteDisplayMode, onNoteDisplayModeC
               {col.icon ? <Icon name={col.icon} size={14} /> : col.label}
             </label>
           </Tooltip>
-          {/* Note display mode selector */}
-          {col.key === 'notes' && columns.notes && (
-            <select
-              className={styles.noteDisplayModeSelect}
-              value={noteDisplayMode}
-              onChange={(e) => onNoteDisplayModeChange(e.target.value as NoteDisplayMode)}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <option value="count">Count</option>
-              <option value="content">Content</option>
-            </select>
-          )}
         </li>
       ))}
     </ul>
@@ -302,10 +265,9 @@ function getSequenceTypeClass(sequenceType: string): string {
 interface VisitGroupComponentProps {
   group: VisitGroup
   columns: ColumnVisibility
-  noteDisplayMode: NoteDisplayMode
 }
 
-function VisitGroupComponent({ group, columns, noteDisplayMode }: VisitGroupComponentProps) {
+function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
   const { selectedVisitId, setSelectedVisitId } = useHomeContext()
   
   // Check if any visit in this group is selected
@@ -346,7 +308,8 @@ function VisitGroupComponent({ group, columns, noteDisplayMode }: VisitGroupComp
               {columns.azimuth && <Tooltip content="Azimuth [°]" as="th" className={styles.colCoord}>A°</Tooltip>}
               {columns.altitude && <Tooltip content="Altitude [°]" as="th" className={styles.colCoord}>E°</Tooltip>}
               {columns.insrot && <Tooltip content="Instrument Rotator [°]" as="th" className={styles.colCoord}>I°</Tooltip>}
-              {columns.notes && <Tooltip content="Notes" as="th" className={styles.colNotes}><Icon name="notes" size={14} /></Tooltip>}
+              {columns.notes_count && <Tooltip content="Notes Count (hover for details)" as="th" className={styles.colNotesCount}><Icon name="tag" size={14} /></Tooltip>}
+              {columns.notes_content && <Tooltip content="Notes Content" as="th" className={styles.colNotesContent}><Icon name="notes" size={14} /></Tooltip>}
             </tr>
           </thead>
         <tbody>
@@ -416,27 +379,39 @@ function VisitGroupComponent({ group, columns, noteDisplayMode }: VisitGroupComp
                     {visit.avg_insrot !== null && visit.avg_insrot !== undefined ? visit.avg_insrot.toFixed(2) : '-'}
                   </TruncatedCell>
                 )}
-                {columns.notes && (
-                  noteDisplayMode === 'content' ? (
-                    <td className={styles.colNotesContent}>
-                      {(visit.notes?.length ?? 0) > 0 ? (
-                        <ul className={styles.noteContentList}>
-                          {visit.notes?.map((note, idx) => (
-                            <li key={idx} className={styles.noteContentItem}>
-                              <span className={styles.noteContentBody}>{note.body}</span>
-                              <span className={styles.noteContentUser}>({note.user.account_name})</span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : '-'}
-                    </td>
-                  ) : (
-                    <TruncatedCell content={visit.notes && visit.notes.length > 0 ? `${visit.notes.length} note(s)` : ''} className={styles.colNotes}>
-                      {(visit.notes?.length ?? 0) > 0 && (
+                {columns.notes_count && (
+                  <td className={styles.colNotesCount}>
+                    {(visit.notes?.length ?? 0) > 0 ? (
+                      <Tooltip
+                        content={
+                          <ul className={styles.noteTooltipList}>
+                            {visit.notes?.map((note, idx) => (
+                              <li key={idx}>
+                                <span className={styles.noteTooltipBody}>{note.body}</span>
+                                <span className={styles.noteTooltipUser}>({note.user.account_name})</span>
+                              </li>
+                            ))}
+                          </ul>
+                        }
+                      >
                         <span className={styles.notesBadge}>{visit.notes?.length}</span>
-                      )}
-                    </TruncatedCell>
-                  )
+                      </Tooltip>
+                    ) : '-'}
+                  </td>
+                )}
+                {columns.notes_content && (
+                  <td className={styles.colNotesContent}>
+                    {(visit.notes?.length ?? 0) > 0 ? (
+                      <ul className={styles.noteContentList}>
+                        {visit.notes?.map((note, idx) => (
+                          <li key={idx} className={styles.noteContentItem}>
+                            <span className={styles.noteContentBody}>{note.body}</span>
+                            <span className={styles.noteContentUser}>({note.user.account_name})</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : '-'}
+                  </td>
                 )}
               </tr>
             )
@@ -464,9 +439,6 @@ export function VisitList() {
 
   // Column visibility state with localStorage persistence
   const [columns, setColumnVisibility] = useColumnVisibility()
-  
-  // Note display mode state with localStorage persistence
-  const [noteDisplayMode, setNoteDisplayMode] = useNoteDisplayMode()
 
   // Build effective SQL combining search query and date range
   const effectiveSql = useMemo(() => {
@@ -903,8 +875,6 @@ export function VisitList() {
         <ColumnSelector
           columns={columns}
           onToggle={setColumnVisibility}
-          noteDisplayMode={noteDisplayMode}
-          onNoteDisplayModeChange={setNoteDisplayMode}
         />
       </div>
 
@@ -950,7 +920,6 @@ export function VisitList() {
               key={group.iicSequence?.iic_sequence_id ?? `no-seq-${index}`}
               group={group}
               columns={columns}
-              noteDisplayMode={noteDisplayMode}
             />
           ))
         )}

@@ -7,8 +7,8 @@ export type Styles = {
   colExposures: string;
   colExptime: string;
   colId: string;
-  colNotes: string;
   colNotesContent: string;
+  colNotesCount: string;
   colTime: string;
   columnSelector: string;
   columnsRow: string;
@@ -38,8 +38,10 @@ export type Styles = {
   noteContentItem: string;
   noteContentList: string;
   noteContentUser: string;
-  noteDisplayModeSelect: string;
   notesBadge: string;
+  noteTooltipBody: string;
+  noteTooltipList: string;
+  noteTooltipUser: string;
   pageInfo: string;
   pageRange: string;
   pageTotal: string;

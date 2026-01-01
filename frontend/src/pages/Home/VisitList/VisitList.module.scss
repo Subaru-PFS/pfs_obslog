@@ -205,26 +205,6 @@ $toolbar-input-height: 32px;
   }
 }
 
-.noteDisplayModeSelect {
-  margin-left: 4px;
-  padding: 0 2px;
-  font-size: 0.7rem;
-  border: 1px solid $border-color;
-  border-radius: 4px;
-  background-color: $input-background;
-  color: $text-color;
-  cursor: pointer;
-
-  &:hover {
-    background-color: $hover-background-color;
-  }
-
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba($accent, 0.5);
-  }
-}
-
 // =============================================================================
 // Pagination Controls (Top & Bottom)
 // Top nav: bottom corners rounded (attached to top of viewport)
@@ -632,7 +612,7 @@ $pagination-border-radius: 12px;
     font-size: 0.75rem;
   }
 
-  .colNotes {
+  .colNotesCount {
     width: 40px;
     text-align: center;
   }
@@ -673,6 +653,31 @@ $pagination-border-radius: 12px;
   flex-shrink: 0;
   color: $hint-text-color;
   font-size: 0.7rem;
+}
+
+// Notes tooltip styles
+.noteTooltipList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 400px;
+  text-align: left;
+}
+
+.noteTooltipBody {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.noteTooltipUser {
+  display: block;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.7rem;
+  margin-bottom: 8px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 // =============================================================================
