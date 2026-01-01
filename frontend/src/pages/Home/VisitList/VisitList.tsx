@@ -961,37 +961,69 @@ export function VisitList() {
         </div>
       )}
 
-      {/* Filter row: exposure types and date range */}
+      {/* Filter row: exposure types, date range, and pagination */}
       <div className={styles.filterRow}>
-        <ExposureTypeSelector
-          filters={exposureFilters}
-          onChange={setExposureFilters}
-        />
-        <div className={styles.filterSeparator} />
-        <Icon name="date_range" size={18} />
-        <DateRangePicker
-          value={dateRange}
-          onChange={handleDateRangeChange}
-          className={styles.dateRangePicker}
-        >
-          {(startInput, endInput) => (
-            <>
-              {startInput}
-              <span className={styles.dateRangeSeparator}>–</span>
-              {endInput}
-            </>
+        <div className={styles.filterRowLeft}>
+          <ExposureTypeSelector
+            filters={exposureFilters}
+            onChange={setExposureFilters}
+          />
+          <div className={styles.filterSeparator} />
+          <Icon name="date_range" size={18} />
+          <DateRangePicker
+            value={dateRange}
+            onChange={handleDateRangeChange}
+            className={styles.dateRangePicker}
+          >
+            {(startInput, endInput) => (
+              <>
+                {startInput}
+                <span className={styles.dateRangeSeparator}>–</span>
+                {endInput}
+              </>
+            )}
+          </DateRangePicker>
+          {(dateRange[0] || dateRange[1]) && (
+            <Tooltip content="Clear date range">
+              <button
+                className={styles.clearDateButton}
+                onClick={handleClearDateRange}
+              >
+                <Icon name="close" size={16} />
+              </button>
+            </Tooltip>
           )}
-        </DateRangePicker>
-        {(dateRange[0] || dateRange[1]) && (
-          <Tooltip content="Clear date range">
-            <button
-              className={styles.clearDateButton}
-              onClick={handleClearDateRange}
-            >
-              <Icon name="close" size={16} />
-            </button>
-          </Tooltip>
-        )}
+        </div>
+        <div className={styles.filterRowRight}>
+          <div className={styles.pagination}>
+            <Tooltip content="First page">
+              <button onClick={handleFirstPage} disabled={isFirstPage || isFetching}>
+                <Icon name="first_page" size={16} />
+              </button>
+            </Tooltip>
+            <Tooltip content="Previous page">
+              <button onClick={handlePrevPage} disabled={isFirstPage || isFetching}>
+                <Icon name="chevron_left" size={16} />
+              </button>
+            </Tooltip>
+            <Tooltip content={`Displaying ${offset + 1} – ${Math.min(offset + limit, totalCount)} of ${totalCount} visits`}>
+              <span className={styles.pageInfo}>
+                <span className={styles.pageRange}>{offset + 1} – {Math.min(offset + limit, totalCount)}</span>
+                <span className={styles.pageTotal}>{totalCount}</span>
+              </span>
+            </Tooltip>
+            <Tooltip content="Next page">
+              <button onClick={handleNextPage} disabled={isLastPage || isFetching}>
+                <Icon name="chevron_right" size={16} />
+              </button>
+            </Tooltip>
+            <Tooltip content="Last page">
+              <button onClick={handleLastPage} disabled={isLastPage || isFetching}>
+                <Icon name="last_page" size={16} />
+              </button>
+            </Tooltip>
+          </div>
+        </div>
       </div>
 
       {/* Column selector row */}
@@ -1075,50 +1107,6 @@ export function VisitList() {
               disabled={isLastPage || isFetching}
             >
               <Icon name="chevron_right" size={20} />
-            </button>
-          </Tooltip>
-        </div>
-      </div>
-
-      <div className={styles.footer}>
-        <div className={styles.pagination}>
-          <Tooltip content="Go to latest visits">
-            <button
-              onClick={handleGoToLatest}
-              disabled={isFirstPage || isFetching}
-            >
-              <Icon name="vertical_align_top" size={18} />
-            </button>
-          </Tooltip>
-          <Tooltip content="Refresh">
-            <button onClick={handleRefresh} disabled={isFetching}>
-              <Icon name="refresh" size={18} />
-            </button>
-          </Tooltip>
-          <Tooltip content="First page">
-            <button onClick={handleFirstPage} disabled={isFirstPage || isFetching}>
-              <Icon name="first_page" size={18} />
-            </button>
-          </Tooltip>
-          <Tooltip content="Previous page">
-            <button onClick={handlePrevPage} disabled={isFirstPage || isFetching}>
-              <Icon name="chevron_left" size={18} />
-            </button>
-          </Tooltip>
-          <Tooltip content={`Displaying ${offset + 1} – ${Math.min(offset + limit, totalCount)} of ${totalCount} visits`}>
-            <span className={styles.pageInfo}>
-              <span className={styles.pageRange}>{offset + 1} – {Math.min(offset + limit, totalCount)}</span>
-              <span className={styles.pageTotal}>{totalCount}</span>
-            </span>
-          </Tooltip>
-          <Tooltip content="Next page">
-            <button onClick={handleNextPage} disabled={isLastPage || isFetching}>
-              <Icon name="chevron_right" size={18} />
-            </button>
-          </Tooltip>
-          <Tooltip content="Last page">
-            <button onClick={handleLastPage} disabled={isLastPage || isFetching}>
-              <Icon name="last_page" size={18} />
             </button>
           </Tooltip>
         </div>

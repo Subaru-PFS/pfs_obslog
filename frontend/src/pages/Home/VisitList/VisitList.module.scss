@@ -97,16 +97,29 @@ $toolbar-input-height: 32px;
 }
 
 // =============================================================================
-// Filter Row (Exposure Types & Date Range Picker)
+// Filter Row (Exposure Types, Date Range & Pagination)
 // =============================================================================
 .filterRow {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   padding: 6px 8px;
   background-color: $background-color;
   border-bottom: 1px solid $border-color;
   color: $hint-text-color;
+}
+
+.filterRowLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filterRowRight {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .filterSeparator {
@@ -343,27 +356,20 @@ $pagination-border-radius: 12px;
 }
 
 // =============================================================================
-// Footer with Pagination
+// Pagination (in filter row)
 // =============================================================================
-.footer {
-  display: flex;
-  justify-content: flex-end;
-  padding: 8px;
-  background-color: $background-color;
-  box-shadow: $medium-shadow;
-  z-index: 1;
-}
-
 .pagination {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 
   button {
     @include button-base;
-    padding: 4px 8px;
-    font-size: 0.875rem;
+    padding: 2px 4px;
+    font-size: 0.75rem;
     background-color: $input-background;
+    min-width: 24px;
+    height: 24px;
 
     &:hover:not(:disabled) {
       background-color: $hover-background-color;
@@ -380,12 +386,12 @@ $pagination-border-radius: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2px 12px;
-    font-size: 0.8125rem;
+    padding: 0 6px;
+    font-size: 0.7rem;
     color: $hint-text-color;
     white-space: nowrap;
-    min-width: 8ch;
-    line-height: 1.2;
+    min-width: 6ch;
+    line-height: 1.1;
     cursor: default;
   }
 
@@ -395,7 +401,7 @@ $pagination-border-radius: 12px;
   }
 
   .pageTotal {
-    font-size: 0.75rem;
+    font-size: 0.6rem;
     color: $hint-text-color;
   }
 }

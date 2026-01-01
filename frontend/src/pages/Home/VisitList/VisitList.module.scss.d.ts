@@ -33,8 +33,9 @@ export type Styles = {
   exposureTypeSelect: string;
   exposureTypeSelector: string;
   filterRow: string;
+  filterRowLeft: string;
+  filterRowRight: string;
   filterSeparator: string;
-  footer: string;
   iicSequence: string;
   info: string;
   loading: string;
