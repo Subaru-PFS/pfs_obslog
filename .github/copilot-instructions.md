@@ -13,8 +13,9 @@
 
 バックエンド・フロントエンドの詳細な開発情報は以下を参照してください：
 
-- [バックエンド開発ガイド](../copilot/backend.md) - DB接続情報、開発コマンド、モデル生成など
-- [フロントエンド開発ガイド](../copilot/frontend.md) - 開発コマンド、SCSS型生成、RTK Query API生成など
+- [ドキュメント一覧](../docs/README.md) - 全ドキュメントの目次
+- [バックエンド開発ガイド](../docs/development/backend.md) - DB接続情報、開発コマンド、モデル生成など
+- [フロントエンド開発ガイド](../docs/development/frontend.md) - 開発コマンド、SCSS型生成、RTK Query API生成など
 - [プロジェクトREADME](../README.md) - セットアップ手順、開発サーバーの起動方法
 
 ## 言語ポリシー
