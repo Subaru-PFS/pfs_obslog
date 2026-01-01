@@ -1,51 +1,137 @@
 // SCSS for DateRangePicker component
-// Import vanillajs-datepicker styles with customization
+// The pre-built CSS is imported in DateRangePicker.tsx
+// This file contains dark theme customizations only
+
+@use "sass:color";
 
 // Theme variables
 $accent: #4a90d9;
 $shadow-color: #000;
+$background-color: #1e1e1e;
+$foreground-color: #f0f0f0;
+$border-color: #444;
+$disabled-cell-color: #666;
 
-$link: $accent;
-$dp-dropdown-shadow: 0 8px 16px rgba($shadow-color, 0.5);
-$dp-border-radius-small: 8px;
-$dp-background-color: #1e1e1e;
-$dp-foreground-color: #f0f0f0;
-$dp-border-color: #444;
-$dp-disabled-cell-color: #666;
-$dp-header-hover-bg: rgba($accent, 0.2);
-$dp-header-cell-hover-bg: rgba($accent, 0.2);
-$dp-cell-hover-bg: rgba($accent, 0.3);
-$dp-cell-selected-bg: $accent;
-$dp-cell-highlighted-bg: rgba($accent, 0.2);
-$dp-range-start-end-bg: $accent;
-$dp-range-bg: rgba($accent, 0.4);
-$dp-today-btn-bg: $accent;
-
-@import "vanillajs-datepicker/sass/datepicker.scss";
-
-// Additional customization
+// Dark theme customization
 .datepicker {
   font-size: 12px;
-  
-  .datepicker-controls {
-    .button {
-      background-color: transparent;
-      border: 1px solid $dp-border-color;
-      color: $dp-foreground-color;
-      
-      &:hover {
-        background-color: $dp-header-hover-bg;
+  background-color: $background-color;
+  color: $foreground-color;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba($shadow-color, 0.5);
+
+  .datepicker-picker {
+    background-color: $background-color;
+  }
+
+  .datepicker-header {
+    .datepicker-controls {
+      .button {
+        background-color: transparent;
+        border: 1px solid $border-color;
+        color: $foreground-color;
+
+        &:hover,
+        &:focus {
+          background-color: rgba($accent, 0.2);
+        }
+      }
+
+      .view-switch {
+        color: $foreground-color;
+        
+        &:hover {
+          background-color: rgba($accent, 0.2);
+        }
+      }
+
+      .prev-button,
+      .next-button {
+        color: $foreground-color;
+        
+        &:hover {
+          background-color: rgba($accent, 0.2);
+        }
+        
+        &.disabled {
+          color: $disabled-cell-color;
+        }
       }
     }
   }
-  
-  .datepicker-cell {
-    &.focused:not(.selected) {
-      background-color: $dp-cell-hover-bg;
+
+  .datepicker-main {
+    .days-of-week {
+      .dow {
+        color: $foreground-color;
+      }
     }
-    
+  }
+
+  .datepicker-cell {
+    color: $foreground-color;
+
+    &:not(.disabled):not(.selected):hover {
+      background-color: rgba($accent, 0.3);
+    }
+
+    &.focused:not(.selected) {
+      background-color: rgba($accent, 0.3);
+    }
+
     &.today:not(.selected) {
-      background-color: $dp-cell-highlighted-bg;
+      background-color: rgba($accent, 0.2);
+    }
+
+    &.selected,
+    &.selected:hover {
+      background-color: $accent;
+      color: white;
+    }
+
+    &.range {
+      background-color: rgba($accent, 0.4);
+    }
+
+    &.range-start,
+    &.range-end {
+      background-color: $accent;
+      color: white;
+    }
+
+    &.disabled {
+      color: $disabled-cell-color;
+    }
+
+    &.prev,
+    &.next {
+      color: $disabled-cell-color;
+    }
+  }
+
+  .datepicker-footer {
+    .datepicker-controls {
+      .button {
+        background-color: $accent;
+        border: none;
+        color: white;
+
+        &:hover {
+          background-color: color.adjust($accent, $lightness: -10%);
+        }
+      }
+
+      .today-button,
+      .clear-button {
+        background-color: transparent;
+        border: 1px solid $border-color;
+        color: $foreground-color;
+
+        &:hover {
+          background-color: rgba($accent, 0.2);
+        }
+      }
     }
   }
 }
