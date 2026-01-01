@@ -7,13 +7,12 @@ export type Styles = {
   noData: string;
   note: string;
   noteBody: string;
+  notesSection: string;
   noteUser: string;
   placeholder: string;
   splitContainer: string;
   summary: string;
-  summaryLabel: string;
-  summaryRow: string;
-  summaryValue: string;
+  summaryTable: string;
   topPane: string;
   visitDetail: string;
 };

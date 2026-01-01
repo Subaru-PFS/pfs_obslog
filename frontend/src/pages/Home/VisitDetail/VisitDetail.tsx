@@ -82,36 +82,35 @@ function Summary({ visit }: SummaryProps) {
 
   return (
     <div className={styles.summary}>
-      <div className={styles.summaryRow}>
-        <div className={styles.summaryLabel}>ID</div>
-        <div className={styles.summaryValue}>{visit.id}</div>
-      </div>
-      <div className={styles.summaryRow}>
-        <div className={styles.summaryLabel}>Description</div>
-        <div className={styles.summaryValue}>{visit.description || '-'}</div>
-      </div>
-      <div className={styles.summaryRow}>
-        <div className={styles.summaryLabel}>Issued at</div>
-        <div className={styles.summaryValue}>{formatDateTime(visit.issued_at)}</div>
-      </div>
-      <div className={styles.summaryRow}>
-        <div className={styles.summaryLabel}>Exposures (S/M/A)</div>
-        <div className={styles.summaryValue}>
-          <span style={getExposureCountStyle(spsCount, mcsCount, agcCount)}>
-            {spsCount}/{mcsCount}/{agcCount}
-          </span>
-        </div>
-      </div>
-      <div className={styles.summaryRow}>
-        <div className={styles.summaryLabel}>Notes</div>
-        <div className={styles.summaryValue}>
-          <NoteList
-            notes={visit.notes ?? []}
-            createNote={handleCreateNote}
-            updateNote={handleUpdateNote}
-            deleteNote={handleDeleteNote}
-          />
-        </div>
+      <table className={styles.summaryTable}>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Description</th>
+            <th>Issued at</th>
+            <th>Exposures (S/M/A)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{visit.id}</td>
+            <td>{visit.description || '-'}</td>
+            <td>{formatDateTime(visit.issued_at)}</td>
+            <td>
+              <span style={getExposureCountStyle(spsCount, mcsCount, agcCount)}>
+                {spsCount}/{mcsCount}/{agcCount}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div className={styles.notesSection}>
+        <NoteList
+          notes={visit.notes ?? []}
+          createNote={handleCreateNote}
+          updateNote={handleUpdateNote}
+          deleteNote={handleDeleteNote}
+        />
       </div>
     </div>
   )
