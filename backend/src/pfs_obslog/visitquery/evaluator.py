@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from pglast import ast, enums
-from sqlalchemy import String, and_, cast, not_, or_
+from sqlalchemy import DateTime, String, and_, cast, not_, or_
 from sqlalchemy.sql.elements import ColumnElement
 
 from .columns import VIRTUAL_COLUMNS
@@ -225,6 +225,9 @@ class QueryEvaluator:
         ):
             return self._handle_aggregate_op(op, left, right)
 
+        # timestamp型カラムと文字列の比較時に型変換を適用
+        left, right = self._coerce_timestamp_comparison(left, right)
+
         ops = {
             "=": lambda l, r: l == r,
             "<>": lambda l, r: l != r,
@@ -332,6 +335,10 @@ class QueryEvaluator:
         low = self.evaluate(node.rexpr[0])  # type: ignore[index]
         high = self.evaluate(node.rexpr[1])  # type: ignore[index]
 
+        # timestamp型カラムと文字列の比較時に型変換を適用
+        left, low = self._coerce_timestamp_comparison(left, low)
+        left, high = self._coerce_timestamp_comparison(left, high)
+
         result = left.between(low, high)  # type: ignore[union-attr]
         return not_(result) if negate else result
 
@@ -347,6 +354,28 @@ class QueryEvaluator:
     def _is_any_column_value(self, value: Any) -> bool:
         """評価結果がany_columnマーカーかどうかを判定"""
         return value == "__any_column__"
+
+    def _is_timestamp_column(self, value: Any) -> bool:
+        """timestamp型のカラムかどうかを判定"""
+        if not hasattr(value, "type"):
+            return False
+        try:
+            return isinstance(value.type, DateTime)
+        except Exception:
+            return False
+
+    def _coerce_timestamp_comparison(
+        self, column: Any, value: Any
+    ) -> tuple[Any, Any]:
+        """timestamp型カラムと文字列の比較時に文字列をtimestampにキャストする
+
+        SQLAlchemyは文字列リテラルをVARCHARとしてバインドするため、
+        timestamp型カラムとの比較時に型エラーが発生する。
+        これを回避するため、文字列をDateTime型にキャストする。
+        """
+        if self._is_timestamp_column(column) and isinstance(value, str):
+            return column, cast(value, DateTime)
+        return column, value
 
     def _eval_any_column_op(
         self, op: str, left: Any, right: Any, node: ast.A_Expr

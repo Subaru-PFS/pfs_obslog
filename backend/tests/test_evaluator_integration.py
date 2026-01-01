@@ -268,6 +268,36 @@ class TestTypeCast:
         with pytest.raises(QueryParseError, match="Unsupported type cast"):
             evaluator.evaluate(ast)
 
+    def test_timestamp_comparison_with_string(self, db_session_readonly):
+        """timestamp型カラムと文字列の比較
+
+        フロントエンドから issued_at >= '2024-01-01' のようなクエリが送られる。
+        SQLAlchemyはデフォルトで文字列をVARCHARにバインドするが、
+        timestampとの比較ではDateTimeにキャストする必要がある。
+        """
+        ast = parse_where_clause("where issued_at >= '2024-01-01'")
+        evaluator = QueryEvaluator(M)
+        where_clause = evaluator.evaluate(ast)
+
+        query = select(M.PfsVisit.pfs_visit_id).where(where_clause).limit(10)
+        # このクエリが「operator does not exist: timestamp without time zone >= character varying」
+        # というエラーを出さずに実行できることを確認
+        result = db_session_readonly.execute(query).fetchall()
+
+    def test_timestamp_between_with_strings(self, db_session_readonly):
+        """timestamp型カラムのBETWEEN式（文字列境界値）
+
+        issued_at between '2024-01-01' and '2024-12-31' のようなクエリ
+        """
+        ast = parse_where_clause(
+            "where issued_at between '2024-01-01' and '2024-12-31 23:59:59'"
+        )
+        evaluator = QueryEvaluator(M)
+        where_clause = evaluator.evaluate(ast)
+
+        query = select(M.PfsVisit.pfs_visit_id).where(where_clause).limit(10)
+        result = db_session_readonly.execute(query).fetchall()
+
 
 class TestFitsHeader:
     """fits_headerアクセスのテスト"""
