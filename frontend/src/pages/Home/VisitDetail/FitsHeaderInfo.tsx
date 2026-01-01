@@ -253,14 +253,14 @@ function CardRow({ card }: CardRowProps) {
 
   return (
     <tr>
-      <Tooltip content={card.key}>
-        <th>{card.key}</th>
+      <Tooltip content={card.key} as="th">
+        {card.key}
       </Tooltip>
-      <Tooltip content={String(card.value)}>
-        <td>{String(card.value)}</td>
+      <Tooltip content={String(card.value)} as="td">
+        {String(card.value)}
       </Tooltip>
-      <Tooltip content={card.comment || ''}>
-        <td className={styles.comment}>{card.comment}</td>
+      <Tooltip content={card.comment || ''} as="td" className={styles.comment}>
+        {card.comment}
       </Tooltip>
     </tr>
   )
