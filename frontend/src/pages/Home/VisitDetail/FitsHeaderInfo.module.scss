@@ -96,10 +96,10 @@
   height: 100%;
 }
 
-.info {
+.headerBar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
   padding: 8px 12px;
   background-color: #f5f5f5;
   border-bottom: 1px solid #e0e0e0;
@@ -110,6 +110,31 @@
   font-weight: bold;
   font-size: 12px;
   color: #333;
+}
+
+.hduLabel {
+  font-size: 12px;
+  color: #666;
+  margin-left: auto;
+}
+
+.hduDropdown {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 12px;
+  background-color: #fff;
+  cursor: pointer;
+  min-width: 120px;
+
+  &:hover {
+    border-color: #999;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #1976d2;
+  }
 }
 
 .hduButtons {

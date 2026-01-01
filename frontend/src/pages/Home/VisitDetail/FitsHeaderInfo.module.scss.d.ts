@@ -13,7 +13,9 @@ export type Styles = {
   filename: string;
   hduButton: string;
   hduButtons: string;
-  info: string;
+  hduDropdown: string;
+  hduLabel: string;
+  headerBar: string;
   loading: string;
   panel: string;
   panelCloseButton: string;

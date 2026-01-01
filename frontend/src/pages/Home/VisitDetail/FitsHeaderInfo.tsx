@@ -175,21 +175,39 @@ function FitsMetaViewer({ meta }: FitsMetaViewerProps) {
     )
   }, [meta, safeHduIndex, searchKey, searchValue, searchComment])
 
+  // HDUが多い場合（5個以上）はプルダウンで選択
+  const useDropdown = meta.hdul.length >= 5
+
   return (
     <div className={styles.viewer}>
-      <div className={styles.info}>
-        <div className={styles.filename}>{meta.filename}</div>
-        <div className={styles.hduButtons}>
-          {meta.hdul.map((_, index) => (
-            <button
-              key={index}
-              className={`${styles.hduButton} ${index === safeHduIndex ? styles.selected : ''}`}
-              onClick={() => setHduIndex(index)}
-            >
-              {index}
-            </button>
-          ))}
-        </div>
+      <div className={styles.headerBar}>
+        <span className={styles.filename}>{meta.filename}</span>
+        <span className={styles.hduLabel}>HDU:</span>
+        {useDropdown ? (
+          <select
+            value={safeHduIndex}
+            onChange={(e) => setHduIndex(Number(e.target.value))}
+            className={styles.hduDropdown}
+          >
+            {meta.hdul.map((hdu, index) => (
+              <option key={index} value={index}>
+                {index} ({hdu.header.cards.length} cards)
+              </option>
+            ))}
+          </select>
+        ) : (
+          <div className={styles.hduButtons}>
+            {meta.hdul.map((_, index) => (
+              <button
+                key={index}
+                className={`${styles.hduButton} ${index === safeHduIndex ? styles.selected : ''}`}
+                onClick={() => setHduIndex(index)}
+              >
+                {index}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       <div className={styles.scrollable}>
         <table className={styles.cards}>
