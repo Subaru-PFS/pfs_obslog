@@ -2,6 +2,7 @@
  * DesignList - PFS Design一覧サイドパネル
  */
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import { useLocalStorage } from 'react-use'
 import { IconButton } from '../../../components/Icon'
 import { Tooltip } from '../../../components/Tooltip'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
@@ -23,29 +24,6 @@ function safeRegexpCompile(pattern: string, flags?: string): RegExp {
   } catch {
     return new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), flags)
   }
-}
-
-/**
- * localStorage から値を取得
- */
-function useLocalStorage<T extends string>(
-  key: string,
-  defaultValue: T
-): [T, (value: T) => void] {
-  const [value, setValue] = useState<T>(() => {
-    const stored = localStorage.getItem(key)
-    return (stored as T) ?? defaultValue
-  })
-
-  const setStoredValue = useCallback(
-    (newValue: T) => {
-      setValue(newValue)
-      localStorage.setItem(key, newValue)
-    },
-    [key]
-  )
-
-  return [value, setStoredValue]
 }
 
 /**
@@ -129,14 +107,8 @@ export function DesignList() {
     zenithSkyCoord,
   } = useDesignsContext()
 
-  const [idFormat, setIdFormat] = useLocalStorage<IdFormat>(
-    ID_FORMAT_KEY,
-    'hex'
-  )
-  const [sortOrder, setSortOrder] = useLocalStorage<SortOrder>(
-    SORT_ORDER_KEY,
-    'altitude'
-  )
+  const [idFormat, setIdFormat] = useLocalStorage<IdFormat>(ID_FORMAT_KEY, 'hex')
+  const [sortOrder, setSortOrder] = useLocalStorage<SortOrder>(SORT_ORDER_KEY, 'altitude')
   const [searchText, setSearchText] = useState('')
 
   // 検索用正規表現
@@ -147,7 +119,7 @@ export function DesignList() {
 
   // フォーマット済みIDマップ
   const formattedIds = useMemo(
-    () => new Map(designs.map((d) => [d, formattedId(d, idFormat)])),
+    () => new Map(designs.map((d) => [d, formattedId(d, idFormat ?? 'hex')])),
     [designs, idFormat]
   )
 
@@ -165,7 +137,7 @@ export function DesignList() {
   // ソート
   const sortedDesigns = useMemo(() => {
     const sorted = [...filteredDesigns]
-    if (sortOrder === 'altitude') {
+    if ((sortOrder ?? 'altitude') === 'altitude') {
       sorted.sort((a, b) =>
         compareByAltitude(a, b, zenithSkyCoord.ra, zenithSkyCoord.dec)
       )
@@ -223,7 +195,7 @@ export function DesignList() {
   // IDコピー
   const handleCopyId = useCallback(
     (entry: PfsDesignEntry) => {
-      navigator.clipboard.writeText(formattedId(entry, idFormat))
+      navigator.clipboard.writeText(formattedId(entry, idFormat ?? 'hex'))
     },
     [idFormat]
   )
@@ -245,7 +217,7 @@ export function DesignList() {
           <label>
             <input
               type="radio"
-              checked={idFormat === 'hex'}
+              checked={(idFormat ?? 'hex') === 'hex'}
               onChange={() => setIdFormat('hex')}
             />
             Hex
@@ -253,7 +225,7 @@ export function DesignList() {
           <label>
             <input
               type="radio"
-              checked={idFormat === 'decimal'}
+              checked={(idFormat ?? 'hex') === 'decimal'}
               onChange={() => setIdFormat('decimal')}
             />
             Decimal
@@ -264,7 +236,7 @@ export function DesignList() {
           <label>
             <input
               type="radio"
-              checked={sortOrder === 'altitude'}
+              checked={(sortOrder ?? 'altitude') === 'altitude'}
               onChange={() => setSortOrder('altitude')}
             />
             Altitude
@@ -272,7 +244,7 @@ export function DesignList() {
           <label>
             <input
               type="radio"
-              checked={sortOrder === 'date_modified'}
+              checked={(sortOrder ?? 'altitude') === 'date_modified'}
               onChange={() => setSortOrder('date_modified')}
             />
             Date Modified

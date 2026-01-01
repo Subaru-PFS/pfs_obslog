@@ -247,6 +247,7 @@ function VisitDetailContent({ visit }: VisitDetailContentProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const gutterRef = useRef<HTMLDivElement>(null)
   const [topHeight, setTopHeight] = useState<number | null>(null)
+  const [isResizing, setIsResizing] = useState(false)
   const topHeightRef = useRef<number | null>(null)
   
   // topHeightRef を topHeight と同期
@@ -266,6 +267,7 @@ function VisitDetailContent({ visit }: VisitDetailContentProps) {
 
     const handleMouseDown = (e: MouseEvent) => {
       isDragging = true
+      setIsResizing(true)
       startY = e.clientY
       startHeight = topHeightRef.current ?? container.offsetHeight * 0.6
       document.body.style.cursor = 'row-resize'
@@ -282,6 +284,7 @@ function VisitDetailContent({ visit }: VisitDetailContentProps) {
 
     const handleMouseUp = () => {
       isDragging = false
+      setIsResizing(false)
       document.body.style.cursor = ''
       document.body.style.userSelect = ''
     }
@@ -315,7 +318,7 @@ function VisitDetailContent({ visit }: VisitDetailContentProps) {
           <VisitInspector visit={visit} />
         </div>
       </div>
-      <div className={styles.gutter} ref={gutterRef} />
+      <div className={`${styles.gutter} ${isResizing ? styles.gutterActive : ''}`} ref={gutterRef} />
       <div className={styles.bottomPane}>
         <FitsHeaderPanel />
       </div>

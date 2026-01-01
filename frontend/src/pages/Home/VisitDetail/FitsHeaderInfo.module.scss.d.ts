@@ -20,6 +20,7 @@ export type Styles = {
   panel: string;
   panelCloseButton: string;
   panelContent: string;
+  panelFilename: string;
   panelHeader: string;
   panelInfo: string;
   panelPlaceholder: string;

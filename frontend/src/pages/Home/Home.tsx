@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
+import { useLocalStorage } from 'react-use'
 import { HomeProvider } from './context'
 import { VisitList } from './VisitList'
 import { VisitDetail } from './VisitDetail'
@@ -10,10 +11,8 @@ const MAX_LEFT_PANE_WIDTH = 1200
 const STORAGE_KEY = 'pfs-obslog:home:leftPaneWidth'
 
 function HomeContent() {
-  const [leftPaneWidth, setLeftPaneWidth] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    return saved ? parseInt(saved, 10) : DEFAULT_LEFT_PANE_WIDTH
-  })
+  const [storedWidth, setStoredWidth] = useLocalStorage(STORAGE_KEY, DEFAULT_LEFT_PANE_WIDTH)
+  const [leftPaneWidth, setLeftPaneWidth] = useState(storedWidth ?? DEFAULT_LEFT_PANE_WIDTH)
   const [isResizing, setIsResizing] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -35,7 +34,7 @@ function HomeContent() {
 
     const handleMouseUp = () => {
       setIsResizing(false)
-      localStorage.setItem(STORAGE_KEY, leftPaneWidth.toString())
+      setStoredWidth(leftPaneWidth)
     }
 
     document.addEventListener('mousemove', handleMouseMove)
@@ -45,7 +44,7 @@ function HomeContent() {
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [isResizing, leftPaneWidth])
+  }, [isResizing, leftPaneWidth, setStoredWidth])
 
   return (
     <div className={styles.home} ref={containerRef}>

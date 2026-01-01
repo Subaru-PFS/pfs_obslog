@@ -149,13 +149,25 @@ function McsFitsHeader({ visitId, frameId }: McsFitsHeaderProps) {
 
 interface FitsMetaViewerProps {
   meta: FitsMeta
+  /** ヘッダーバーを表示するかどうか（デフォルト: true）*/
+  showHeaderBar?: boolean
+  /** 外部からHDUインデックスを制御する場合に指定 */
+  hduIndex?: number
 }
 
-function FitsMetaViewer({ meta }: FitsMetaViewerProps) {
-  const [hduIndex, setHduIndex] = useState(0)
+function FitsMetaViewer({ 
+  meta, 
+  showHeaderBar = true,
+  hduIndex: externalHduIndex,
+}: FitsMetaViewerProps) {
+  const [internalHduIndex, setInternalHduIndex] = useState(0)
   const [searchKey, setSearchKey] = useState('')
   const [searchValue, setSearchValue] = useState('')
   const [searchComment, setSearchComment] = useState('')
+
+  // 外部からhduIndexが渡されていれば使用、なければ内部状態を使用
+  const hduIndex = externalHduIndex ?? internalHduIndex
+  const setHduIndex = setInternalHduIndex
 
   // HDU index が範囲外の場合は 0 にリセット
   const safeHduIndex = hduIndex >= meta.hdul.length ? 0 : hduIndex
@@ -180,35 +192,41 @@ function FitsMetaViewer({ meta }: FitsMetaViewerProps) {
 
   return (
     <div className={styles.viewer}>
-      <div className={styles.headerBar}>
-        <span className={styles.filename}>{meta.filename}</span>
-        <span className={styles.hduLabel}>HDU:</span>
-        {useDropdown ? (
-          <select
-            value={safeHduIndex}
-            onChange={(e) => setHduIndex(Number(e.target.value))}
-            className={styles.hduDropdown}
-          >
-            {meta.hdul.map((hdu, index) => (
-              <option key={index} value={index}>
-                {index} ({hdu.header.cards.length} cards)
-              </option>
-            ))}
-          </select>
-        ) : (
-          <div className={styles.hduButtons}>
-            {meta.hdul.map((_, index) => (
-              <button
-                key={index}
-                className={`${styles.hduButton} ${index === safeHduIndex ? styles.selected : ''}`}
-                onClick={() => setHduIndex(index)}
-              >
-                {index}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+      {showHeaderBar && (
+        <div className={styles.headerBar}>
+          <span className={styles.filename}>{meta.filename}</span>
+          {meta.hdul.length > 1 && (
+            <>
+              <span className={styles.hduLabel}>HDU:</span>
+              {useDropdown ? (
+                <select
+                  value={safeHduIndex}
+                  onChange={(e) => setHduIndex(Number(e.target.value))}
+                  className={styles.hduDropdown}
+                >
+                  {meta.hdul.map((hdu, index) => (
+                    <option key={index} value={index}>
+                      {index} ({hdu.header.cards.length} cards)
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className={styles.hduButtons}>
+                  {meta.hdul.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`${styles.hduButton} ${index === safeHduIndex ? styles.selected : ''}`}
+                      onClick={() => setHduIndex(index)}
+                    >
+                      {index}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
       <div className={styles.scrollable}>
         <table className={styles.cards}>
           <thead>
@@ -303,34 +321,252 @@ export function FitsHeaderPanel() {
 
   return (
     <div className={styles.panel}>
-      <div className={styles.panelHeader}>
-        <span className={styles.panelTitle}>FITS Header</span>
-        <span className={styles.panelInfo}>
-          {selectedFitsId.type === 'sps' && `Visit ${selectedFitsId.visitId} / Camera ${selectedFitsId.cameraId}`}
-          {selectedFitsId.type === 'mcs' && `Visit ${selectedFitsId.visitId} / Frame ${selectedFitsId.frameId}`}
-          {selectedFitsId.type === 'agc' && `Visit ${selectedFitsId.visitId} / Exposure ${selectedFitsId.exposureId}`}
-        </span>
-        <button
-          className={styles.panelCloseButton}
-          onClick={() => setSelectedFitsId(null)}
-          title="Close"
-        >
-          <Icon name="close" size={18} />
-        </button>
-      </div>
-      <div className={styles.panelContent}>
-        {selectedFitsId.type === 'sps' && (
-          <SpsFitsHeader visitId={selectedFitsId.visitId} cameraId={selectedFitsId.cameraId} />
-        )}
-        {selectedFitsId.type === 'mcs' && (
-          <McsFitsHeader visitId={selectedFitsId.visitId} frameId={selectedFitsId.frameId} />
-        )}
-        {selectedFitsId.type === 'agc' && (
-          <div className={styles.placeholder}>
-            AGC FITS headers are not yet supported
+      {selectedFitsId.type === 'sps' && (
+        <SpsFitsHeaderPanel
+          visitId={selectedFitsId.visitId}
+          cameraId={selectedFitsId.cameraId}
+          onClose={() => setSelectedFitsId(null)}
+        />
+      )}
+      {selectedFitsId.type === 'mcs' && (
+        <McsFitsHeaderPanel
+          visitId={selectedFitsId.visitId}
+          frameId={selectedFitsId.frameId}
+          onClose={() => setSelectedFitsId(null)}
+        />
+      )}
+      {selectedFitsId.type === 'agc' && (
+        <>
+          <div className={styles.panelHeader}>
+            <span className={styles.panelTitle}>FITS Header</span>
+            <span className={styles.panelInfo}>
+              Visit {selectedFitsId.visitId} / Exposure {selectedFitsId.exposureId}
+            </span>
+            <button
+              className={styles.panelCloseButton}
+              onClick={() => setSelectedFitsId(null)}
+              title="Close"
+            >
+              <Icon name="close" size={18} />
+            </button>
           </div>
-        )}
+          <div className={styles.panelContent}>
+            <div className={styles.placeholder}>
+              AGC FITS headers are not yet supported
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+interface SpsFitsHeaderPanelProps {
+  visitId: number
+  cameraId: number
+  onClose: () => void
+}
+
+function SpsFitsHeaderPanel({ visitId, cameraId, onClose }: SpsFitsHeaderPanelProps) {
+  const { data, isLoading, error } = useGetSpsFitsHeadersApiFitsVisitsVisitIdSpsCameraIdHeadersGetQuery({
+    visitId,
+    cameraId,
+  })
+  const [hduIndex, setHduIndex] = useState(0)
+
+  if (isLoading) {
+    return (
+      <>
+        <FitsHeaderPanelHeader
+          title={`Visit ${visitId} / Camera ${cameraId}`}
+          filename={null}
+          hduIndex={0}
+          setHduIndex={() => {}}
+          hduCount={0}
+          getCardCount={() => 0}
+          onClose={onClose}
+        />
+        <div className={styles.panelContent}>
+          <div className={styles.loading}>
+            <LoadingSpinner size={32} />
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  if (error || !data) {
+    return (
+      <>
+        <FitsHeaderPanelHeader
+          title={`Visit ${visitId} / Camera ${cameraId}`}
+          filename={null}
+          hduIndex={0}
+          setHduIndex={() => {}}
+          hduCount={0}
+          getCardCount={() => 0}
+          onClose={onClose}
+        />
+        <div className={styles.panelContent}>
+          <div className={styles.error}>Failed to load FITS headers</div>
+        </div>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <FitsHeaderPanelHeader
+        title={`Visit ${visitId} / Camera ${cameraId}`}
+        filename={data.filename}
+        hduIndex={hduIndex}
+        setHduIndex={setHduIndex}
+        hduCount={data.hdul.length}
+        getCardCount={(i) => data.hdul[i]?.header.cards.length ?? 0}
+        onClose={onClose}
+      />
+      <div className={styles.panelContent}>
+        <FitsMetaViewer meta={data} showHeaderBar={false} hduIndex={hduIndex} />
       </div>
+    </>
+  )
+}
+
+interface McsFitsHeaderPanelProps {
+  visitId: number
+  frameId: number
+  onClose: () => void
+}
+
+function McsFitsHeaderPanel({ visitId, frameId, onClose }: McsFitsHeaderPanelProps) {
+  const { data, isLoading, error } = useGetMcsFitsHeadersApiFitsVisitsVisitIdMcsFrameIdHeadersGetQuery({
+    visitId,
+    frameId,
+  })
+  const [hduIndex, setHduIndex] = useState(0)
+
+  if (isLoading) {
+    return (
+      <>
+        <FitsHeaderPanelHeader
+          title={`Visit ${visitId} / Frame ${frameId}`}
+          filename={null}
+          hduIndex={0}
+          setHduIndex={() => {}}
+          hduCount={0}
+          getCardCount={() => 0}
+          onClose={onClose}
+        />
+        <div className={styles.panelContent}>
+          <div className={styles.loading}>
+            <LoadingSpinner size={32} />
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  if (error || !data) {
+    return (
+      <>
+        <FitsHeaderPanelHeader
+          title={`Visit ${visitId} / Frame ${frameId}`}
+          filename={null}
+          hduIndex={0}
+          setHduIndex={() => {}}
+          hduCount={0}
+          getCardCount={() => 0}
+          onClose={onClose}
+        />
+        <div className={styles.panelContent}>
+          <div className={styles.error}>Failed to load FITS headers</div>
+        </div>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <FitsHeaderPanelHeader
+        title={`Visit ${visitId} / Frame ${frameId}`}
+        filename={data.filename}
+        hduIndex={hduIndex}
+        setHduIndex={setHduIndex}
+        hduCount={data.hdul.length}
+        getCardCount={(i) => data.hdul[i]?.header.cards.length ?? 0}
+        onClose={onClose}
+      />
+      <div className={styles.panelContent}>
+        <FitsMetaViewer meta={data} showHeaderBar={false} hduIndex={hduIndex} />
+      </div>
+    </>
+  )
+}
+
+interface FitsHeaderPanelHeaderProps {
+  title: string
+  filename: string | null
+  hduIndex: number
+  setHduIndex: (index: number) => void
+  hduCount: number
+  getCardCount: (index: number) => number
+  onClose: () => void
+}
+
+function FitsHeaderPanelHeader({
+  title,
+  filename,
+  hduIndex,
+  setHduIndex,
+  hduCount,
+  getCardCount,
+  onClose,
+}: FitsHeaderPanelHeaderProps) {
+  const useDropdown = hduCount >= 5
+  const safeHduIndex = hduIndex >= hduCount ? 0 : hduIndex
+
+  return (
+    <div className={styles.panelHeader}>
+      <span className={styles.panelTitle}>FITS Header</span>
+      <span className={styles.panelInfo}>{title}</span>
+      {filename && <span className={styles.panelFilename}>{filename}</span>}
+      {hduCount > 1 && (
+        <>
+          <span className={styles.hduLabel}>HDU:</span>
+          {useDropdown ? (
+            <select
+              value={safeHduIndex}
+              onChange={(e) => setHduIndex(Number(e.target.value))}
+              className={styles.hduDropdown}
+            >
+              {Array.from({ length: hduCount }, (_, index) => (
+                <option key={index} value={index}>
+                  {index} ({getCardCount(index)} cards)
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className={styles.hduButtons}>
+              {Array.from({ length: hduCount }, (_, index) => (
+                <button
+                  key={index}
+                  className={`${styles.hduButton} ${index === safeHduIndex ? styles.selected : ''}`}
+                  onClick={() => setHduIndex(index)}
+                >
+                  {index}
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+      <button
+        className={styles.panelCloseButton}
+        onClick={onClose}
+        title="Close"
+      >
+        <Icon name="close" size={18} />
+      </button>
     </div>
   )
 }

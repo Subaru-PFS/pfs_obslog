@@ -2,6 +2,7 @@ export type Styles = {
   bottomPane: string;
   error: string;
   gutter: string;
+  gutterActive: string;
   inspector: string;
   loading: string;
   noData: string;

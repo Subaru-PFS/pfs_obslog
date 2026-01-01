@@ -110,12 +110,11 @@
   background-color: #e0e0e0;
   cursor: row-resize;
   flex-shrink: 0;
+  transition: background-color 0.2s;
+  user-select: none;
 
-  &:hover {
-    background-color: #ccc;
-  }
-
-  &:active {
+  &:hover,
+  &.gutterActive {
     background-color: #1976d2;
   }
 }

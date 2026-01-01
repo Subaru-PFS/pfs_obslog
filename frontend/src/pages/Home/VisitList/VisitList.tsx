@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import { useLocalStorage } from 'react-use'
 import type { MaterialSymbol } from 'material-symbols'
 import {
   useListVisitsApiVisitsGetQuery,
@@ -92,49 +93,23 @@ const DEFAULT_EXPOSURE_FILTERS: ExposureFilters = {
 const EXPOSURE_STORAGE_KEY = 'pfs-obslog:visitList:exposureFilters'
 
 function useExposureFilters(): [ExposureFilters, (filters: Partial<ExposureFilters>) => void] {
-  const [filters, setFilters] = useState<ExposureFilters>(() => {
-    try {
-      const saved = localStorage.getItem(EXPOSURE_STORAGE_KEY)
-      if (saved) {
-        return { ...DEFAULT_EXPOSURE_FILTERS, ...JSON.parse(saved) }
-      }
-    } catch {
-      // ignore
-    }
-    return DEFAULT_EXPOSURE_FILTERS
-  })
+  const [stored, setStored] = useLocalStorage<ExposureFilters>(EXPOSURE_STORAGE_KEY, DEFAULT_EXPOSURE_FILTERS)
+  const filters = useMemo(() => ({ ...DEFAULT_EXPOSURE_FILTERS, ...stored }), [stored])
 
   const updateFilters = useCallback((update: Partial<ExposureFilters>) => {
-    setFilters((prev) => {
-      const next = { ...prev, ...update }
-      localStorage.setItem(EXPOSURE_STORAGE_KEY, JSON.stringify(next))
-      return next
-    })
-  }, [])
+    setStored((prev) => ({ ...DEFAULT_EXPOSURE_FILTERS, ...prev, ...update }))
+  }, [setStored])
 
   return [filters, updateFilters]
 }
 
 function useColumnVisibility(): [ColumnVisibility, (key: ColumnKey, visible: boolean) => void] {
-  const [columns, setColumns] = useState<ColumnVisibility>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) {
-        return { ...DEFAULT_COLUMN_VISIBILITY, ...JSON.parse(saved) }
-      }
-    } catch {
-      // ignore
-    }
-    return DEFAULT_COLUMN_VISIBILITY
-  })
+  const [stored, setStored] = useLocalStorage<ColumnVisibility>(STORAGE_KEY, DEFAULT_COLUMN_VISIBILITY)
+  const columns = useMemo(() => ({ ...DEFAULT_COLUMN_VISIBILITY, ...stored }), [stored])
 
   const setColumnVisibility = useCallback((key: ColumnKey, visible: boolean) => {
-    setColumns((prev) => {
-      const next = { ...prev, [key]: visible }
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-      return next
-    })
-  }, [])
+    setStored((prev) => ({ ...DEFAULT_COLUMN_VISIBILITY, ...prev, [key]: visible }))
+  }, [setStored])
 
   return [columns, setColumnVisibility]
 }
