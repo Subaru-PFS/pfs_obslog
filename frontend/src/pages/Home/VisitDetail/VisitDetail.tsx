@@ -248,6 +248,12 @@ function VisitDetailContent({ visit }: VisitDetailContentProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const gutterRef = useRef<HTMLDivElement>(null)
   const [topHeight, setTopHeight] = useState<number | null>(null)
+  const topHeightRef = useRef<number | null>(null)
+  
+  // topHeightRef を topHeight と同期
+  useEffect(() => {
+    topHeightRef.current = topHeight
+  }, [topHeight])
 
   // リサイズ可能なスプリットパネルの実装
   useEffect(() => {
@@ -262,7 +268,7 @@ function VisitDetailContent({ visit }: VisitDetailContentProps) {
     const handleMouseDown = (e: MouseEvent) => {
       isDragging = true
       startY = e.clientY
-      startHeight = topHeight ?? container.offsetHeight * 0.6
+      startHeight = topHeightRef.current ?? container.offsetHeight * 0.6
       document.body.style.cursor = 'row-resize'
       document.body.style.userSelect = 'none'
     }
@@ -290,7 +296,7 @@ function VisitDetailContent({ visit }: VisitDetailContentProps) {
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [topHeight])
+  }, [])
 
   // 初期高さを設定（コンテナの60%）
   useEffect(() => {
