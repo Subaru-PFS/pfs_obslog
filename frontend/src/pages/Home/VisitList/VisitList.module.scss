@@ -114,7 +114,8 @@ $toolbar-input-height: 32px;
   align-items: center;
   gap: 4px;
 
-  input {
+  // Override global input styles with higher specificity
+  input[type="text"] {
     @include rounded-text-input;
     width: 90px;
     height: 26px;
