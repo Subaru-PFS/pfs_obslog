@@ -116,10 +116,10 @@ $toolbar-input-height: 32px;
 
   input {
     @include rounded-text-input;
-    width: 90px;
+    width: 95px;
     height: 26px;
-    padding: 0 6px;
-    font-size: 0.75rem;
+    padding: 0 4px;
+    font-size: 0.7rem;
     text-align: center;
     cursor: pointer;
     background-color: $input-background;
@@ -127,7 +127,7 @@ $toolbar-input-height: 32px;
 
     &::placeholder {
       color: $hint-text-color;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
     }
 
     &:hover {
