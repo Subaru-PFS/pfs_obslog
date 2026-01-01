@@ -2,11 +2,13 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import type { MaterialSymbol } from 'material-symbols'
 import {
   useListVisitsApiVisitsGetQuery,
-  useLazyGetVisitRankApiVisitsVisitIdRankGetQuery,
+  generatedApi,
   type VisitListEntry,
   type IicSequence,
   type VisitList as VisitListType,
 } from '../../../store/api/generatedApi'
+
+const { useLazyGetVisitRankApiVisitsVisitIdRankGetQuery } = generatedApi
 import { useHomeContext } from '../context'
 import { Icon } from '../../../components/Icon'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
