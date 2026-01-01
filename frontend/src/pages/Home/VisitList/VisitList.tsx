@@ -72,6 +72,49 @@ const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = Object.fromEntries(
 
 const STORAGE_KEY = 'pfs-obslog:visitList:columns'
 
+// =============================================================================
+// Exposure count filter types
+// =============================================================================
+type ExposureCondition = '>=0' | '>0' | '==0'
+
+interface ExposureFilters {
+  sps: ExposureCondition
+  mcs: ExposureCondition
+  agc: ExposureCondition
+}
+
+const DEFAULT_EXPOSURE_FILTERS: ExposureFilters = {
+  sps: '>=0',
+  mcs: '>=0',
+  agc: '>=0',
+}
+
+const EXPOSURE_STORAGE_KEY = 'pfs-obslog:visitList:exposureFilters'
+
+function useExposureFilters(): [ExposureFilters, (filters: Partial<ExposureFilters>) => void] {
+  const [filters, setFilters] = useState<ExposureFilters>(() => {
+    try {
+      const saved = localStorage.getItem(EXPOSURE_STORAGE_KEY)
+      if (saved) {
+        return { ...DEFAULT_EXPOSURE_FILTERS, ...JSON.parse(saved) }
+      }
+    } catch {
+      // ignore
+    }
+    return DEFAULT_EXPOSURE_FILTERS
+  })
+
+  const updateFilters = useCallback((update: Partial<ExposureFilters>) => {
+    setFilters((prev) => {
+      const next = { ...prev, ...update }
+      localStorage.setItem(EXPOSURE_STORAGE_KEY, JSON.stringify(next))
+      return next
+    })
+  }, [])
+
+  return [filters, updateFilters]
+}
+
 function useColumnVisibility(): [ColumnVisibility, (key: ColumnKey, visible: boolean) => void] {
   const [columns, setColumns] = useState<ColumnVisibility>(() => {
     try {
@@ -122,6 +165,65 @@ function ColumnSelector({ columns, onToggle }: ColumnSelectorProps) {
         </li>
       ))}
     </ul>
+  )
+}
+
+// =============================================================================
+// Exposure Type Selector
+// =============================================================================
+interface ExposureTypeSelectorProps {
+  filters: ExposureFilters
+  onChange: (filters: Partial<ExposureFilters>) => void
+}
+
+function ExposureTypeSelector({ filters, onChange }: ExposureTypeSelectorProps) {
+  return (
+    <div className={styles.exposureTypeSelector}>
+      <ExposureTypeSelect
+        label="#SpS:"
+        value={filters.sps}
+        onChange={(value) => onChange({ sps: value })}
+        tooltip="Number of SpS Exposures"
+      />
+      <ExposureTypeSelect
+        label="#MCS:"
+        value={filters.mcs}
+        onChange={(value) => onChange({ mcs: value })}
+        tooltip="Number of MCS Exposures"
+      />
+      <ExposureTypeSelect
+        label="#AGC:"
+        value={filters.agc}
+        onChange={(value) => onChange({ agc: value })}
+        tooltip="Number of AGC Exposures"
+      />
+    </div>
+  )
+}
+
+interface ExposureTypeSelectProps {
+  label: string
+  value: ExposureCondition
+  onChange: (value: ExposureCondition) => void
+  tooltip: string
+}
+
+function ExposureTypeSelect({ label, value, onChange, tooltip }: ExposureTypeSelectProps) {
+  return (
+    <Tooltip content={tooltip}>
+      <div className={styles.exposureTypeSelect}>
+        <span className={styles.exposureTypeLabel}>{label}</span>
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value as ExposureCondition)}
+          className={styles.exposureTypeDropdown}
+        >
+          <option value=">=0">≥0</option>
+          <option value=">0">&gt;0</option>
+          <option value="==0">=0</option>
+        </select>
+      </div>
+    </Tooltip>
   )
 }
 
@@ -429,6 +531,7 @@ export function VisitList() {
   const [searchQuery, setSearchQuery] = useState('')
   const [appliedSql, setAppliedSql] = useState<string | null>(null)
   const [dateRange, setDateRange] = useState<DateRange>([undefined, undefined])
+  const [exposureFilters, setExposureFilters] = useExposureFilters()
   const [offset, setOffset] = useState(0)
   const [limit, setLimit] = useState(PER_PAGE)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -440,7 +543,7 @@ export function VisitList() {
   // Column visibility state with localStorage persistence
   const [columns, setColumnVisibility] = useColumnVisibility()
 
-  // Build effective SQL combining search query and date range
+  // Build effective SQL combining search query, date range, and exposure filters
   const effectiveSql = useMemo(() => {
     const conditions: string[] = []
     
@@ -462,10 +565,26 @@ export function VisitList() {
     } else if (end) {
       conditions.push(`issued_at <= '${end} 23:59:59'`)
     }
+
+    // Add exposure filter conditions
+    const exposureConditionMap: Record<ExposureCondition, string> = {
+      '>=0': '',  // No filter needed
+      '>0': ' > 0',
+      '==0': ' = 0',
+    }
+    if (exposureFilters.sps !== '>=0') {
+      conditions.push(`sps_count${exposureConditionMap[exposureFilters.sps]}`)
+    }
+    if (exposureFilters.mcs !== '>=0') {
+      conditions.push(`mcs_count${exposureConditionMap[exposureFilters.mcs]}`)
+    }
+    if (exposureFilters.agc !== '>=0') {
+      conditions.push(`agc_count${exposureConditionMap[exposureFilters.agc]}`)
+    }
     
     if (conditions.length === 0) return undefined
     return `where ${conditions.join(' and ')}`
-  }, [appliedSql, dateRange])
+  }, [appliedSql, dateRange, exposureFilters])
 
   // RTK Query API - include sql parameter when set
   const { data, isLoading, isFetching, isError, error, refetch } = useListVisitsApiVisitsGetQuery({
@@ -842,8 +961,13 @@ export function VisitList() {
         </div>
       )}
 
-      {/* Date range filter row */}
+      {/* Filter row: exposure types and date range */}
       <div className={styles.filterRow}>
+        <ExposureTypeSelector
+          filters={exposureFilters}
+          onChange={setExposureFilters}
+        />
+        <div className={styles.filterSeparator} />
         <Icon name="date_range" size={18} />
         <DateRangePicker
           value={dateRange}

@@ -28,7 +28,12 @@ export type Styles = {
   exposureSps: string;
   exposureSpsAgc: string;
   exposureSpsMcs: string;
+  exposureTypeDropdown: string;
+  exposureTypeLabel: string;
+  exposureTypeSelect: string;
+  exposureTypeSelector: string;
   filterRow: string;
+  filterSeparator: string;
   footer: string;
   iicSequence: string;
   info: string;
