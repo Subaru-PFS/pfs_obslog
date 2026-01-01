@@ -13,23 +13,23 @@
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
-  padding: 8px 12px 0;
+  padding: 4px 8px 0;
   background-color: $distant-background;
   flex-shrink: 0;
 }
 
 // Individual tab: looks like a paper index tab
 .tab {
-  padding: 8px 16px;
+  padding: 4px 10px;
   background-color: $near-background;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.75rem;
   color: $hint-text-color;
 
   // Tab shape: rounded top corners, square bottom
   border: 1px solid $border-color;
   border-bottom: none;
-  border-radius: 6px 6px 0 0;
+  border-radius: 4px 4px 0 0;
 
   position: relative;
 
@@ -72,6 +72,7 @@
   margin-top: -1px;
   // min-height: 0 is required for flex children to shrink below their content size
   min-height: 0;
+  font-size: 0.85rem;
 }
 
 .tabPanel {
