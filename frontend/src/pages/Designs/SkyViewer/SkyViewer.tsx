@@ -27,6 +27,9 @@ const MARKER_COLOR: [number, number, number, number] = [0.75, 0.75, 0.5, 1]
 const FOCUS_COLOR: [number, number, number, number] = [1, 0, 1, 0.75]
 const SELECTED_COLOR: [number, number, number, number] = [0, 1, 1, 1]
 
+// マーカーサイズ（ピクセル単位）
+const MARKER_SIZE_PX = 24
+
 // 日付フォーマット
 function formatDate(date: Date): string {
   const y = date.getFullYear()
@@ -168,7 +171,7 @@ function DesignMarkers() {
     <>
       <ClickableMarkerLayer$
         markers={markers}
-        markerSize={MARKER_FOV / 2}
+        markerSize={MARKER_SIZE_PX}
         defaultColor={MARKER_COLOR}
         defaultType="circle"
         dimmAlpha={0.5}
