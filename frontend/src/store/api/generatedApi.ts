@@ -244,20 +244,6 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: (queryArg) => ({ url: `/api/pfs_designs/${queryArg.idHex}` }),
     }),
-    getDesignChartApiPfsDesignsPngGet: build.query<
-      GetDesignChartApiPfsDesignsPngGetApiResponse,
-      GetDesignChartApiPfsDesignsPngGetApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/pfs_designs.png`,
-        params: {
-          id_hex: queryArg.idHex,
-          date: queryArg.date,
-          width: queryArg.width,
-          height: queryArg.height,
-        },
-      }),
-    }),
     createAttachmentApiAttachmentsPost: build.mutation<
       CreateAttachmentApiAttachmentsPostApiResponse,
       CreateAttachmentApiAttachmentsPostApiArg
@@ -482,18 +468,6 @@ export type GetDesignApiPfsDesignsIdHexGetApiResponse =
 export type GetDesignApiPfsDesignsIdHexGetApiArg = {
   idHex: string;
 };
-export type GetDesignChartApiPfsDesignsPngGetApiResponse =
-  /** status 200 Successful Response */ any;
-export type GetDesignChartApiPfsDesignsPngGetApiArg = {
-  /** Design IDs to include in the chart */
-  idHex: string[];
-  /** Date for the chart (for visibility calculations) */
-  date?: string | null;
-  /** Image width in pixels */
-  width?: number;
-  /** Image height in pixels */
-  height?: number;
-};
 export type CreateAttachmentApiAttachmentsPostApiResponse =
   /** status 201 Successful Response */ CreateAttachmentResponse;
 export type CreateAttachmentApiAttachmentsPostApiArg = {
@@ -617,7 +591,7 @@ export type VisitList = {
 };
 export type SpsAnnotation = {
   annotation_id: number;
-  data_flag: number;
+  data_flag?: number | null;
   notes?: string | null;
   created_at?: string | null;
 };
@@ -831,10 +805,8 @@ export const {
   useGetMeApiAuthMeGetQuery,
   useGetStatusApiAuthStatusGetQuery,
   useListVisitsApiVisitsGetQuery,
-  useLazyListVisitsApiVisitsGetQuery,
   useGetVisitApiVisitsVisitIdGetQuery,
   useGetVisitRankApiVisitsVisitIdRankGetQuery,
-  useLazyGetVisitRankApiVisitsVisitIdRankGetQuery,
   useExportVisitsCsvApiVisitsCsvGetQuery,
   useCreateVisitNoteApiVisitsVisitIdNotesPostMutation,
   useUpdateVisitNoteApiVisitsVisitIdNotesNoteIdPutMutation,
@@ -853,7 +825,6 @@ export const {
   useListPfsDesignsApiPfsDesignsGetQuery,
   useDownloadDesignApiPfsDesignsIdHexFitsGetQuery,
   useGetDesignApiPfsDesignsIdHexGetQuery,
-  useGetDesignChartApiPfsDesignsPngGetQuery,
   useCreateAttachmentApiAttachmentsPostMutation,
   useListAttachmentsApiAttachmentsGetQuery,
   useGetAttachmentApiAttachmentsAccountNameFileIdGetQuery,

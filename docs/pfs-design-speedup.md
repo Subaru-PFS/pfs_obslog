@@ -9,7 +9,6 @@ PFS Design関連のAPIで発生している性能問題の分析と高速化提�
 | エンドポイント | 処理時間（推定） | 主原因 |
 |---------------|-----------------|--------|
 | `GET /api/pfs_designs` | ~92秒（3,886ファイル時） | FITSファイル一括読み込み + Pydanticオブジェクト大量生成 |
-| `GET /api/pfs_designs.png` | 数秒 | `pfs.datamodel.PfsDesign.read()` + `showPfsDesign()` |
 
 ---
 
@@ -187,60 +186,12 @@ Design一覧のメタデータをJSONファイルに事前キャッシュする�
 
 ---
 
-## 2. Designチャート API (`GET /api/pfs_designs.png`)
-
-### 現状の問題
-
-1. **`PfsDesign.read()` がファイル全体を読み込み**
-   - HDUデータを含む全体をパース
-   - 複数Design指定時に累積
-
-2. **`showPfsDesign()` の計算コスト**
-   - 天体位置計算（astropy.coordinates）
-   - matplotlib描画
-
-### 高速化提案
-
-#### 提案1: PfsDesignオブジェクトのキャッシュ（推奨）
-
-旧プロジェクトの `pfs_design_read()` 関数を参考に、読み込んだPfsDesignをキャッシュする。
-
-```python
-# 旧プロジェクトの実装
-def pfs_design_read(id: int, dirname: str):
-    path = Path(dirname) / PfsDesign.fileNameFormat.format(id)
-    data, save = pfsDesignReadCache.value_and_setter(
-        f'PfsDesign.read({repr(id)}, {repr(dirname)})',
-        valid_after=path.exists() and path.stat().st_mtime)
-    if data is None:
-        data = save(PfsDesign.read(id, dirname))
-    return data
-```
-
-**期待される効果:**
-- 同じDesignへの2回目以降のアクセス: **キャッシュヒットで即時応答**
-
-#### 提案2: チャート画像のキャッシュ
-
-生成したPNG画像自体をキャッシュする。
-
-**キャッシュキー設計:**
-```python
-cache_key = f"design_chart:{sorted(id_hex)}:{date}:{width}:{height}"
-```
-
-**注意点:**
-- `date=None`（今日）の場合、深夜にキャッシュ無効化が必要
-- Design IDの組み合わせによるキャッシュ膨張に注意
-
----
-
 ## 実装優先度
 
 | 優先度 | 提案 | 対象API | 効果 | 工数 |
 |--------|------|---------|------|------|
 | 1 | ヘッダー変換の遅延評価 | 一覧 | 大（54%削減） | 小 |
-| 2 | ファイルベースキャッシュ | 一覧/チャート | 大（2回目以降99%削減） | 中 |
+| 2 | ファイルベースキャッシュ | 一覧 | 大（2回目以降99%削減） | 中 |
 | 3 | 並列処理 | 一覧 | 中（2-4倍） | 小 |
 | 4 | ページネーション | 一覧 | 中 | 中 |
 | 5 | インデックスファイル | 一覧 | 大 | 大 |

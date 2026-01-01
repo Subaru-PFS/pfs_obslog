@@ -366,7 +366,6 @@ URL直接アクセス時、対応するDesignを自動選択・フォーカス�
 | GET | `/api/pfs_designs` | Design一覧取得 |
 | GET | `/api/pfs_designs/{id_hex}` | Design詳細取得 |
 | GET | `/api/pfs_designs/{id_hex}.fits` | FITSファイルダウンロード |
-| GET | `/api/pfs_designs.png` | Designチャート画像（未使用） |
 
 ### 6.2 PfsDesignEntry スキーマ
 

@@ -12,10 +12,10 @@
 | Visit Note | 3 | 0 | 100% |
 | Visit Set Note | 3 | 0 | 100% |
 | FITS | 8 | 0 | 100% |
-| PFS Design | 4 | 0 | 100% |
+| PFS Design | 3 | 0 | 100% |
 | Attachment | 4 | 0 | 100% |
 | Plot | 1 | 0 | 100% |
-| **合計** | **33** | **0** | **100%** |
+| **合計** | **32** | **0** | **100%** |
 
 ---
 
@@ -82,7 +82,6 @@
 | GET | `/api/pfs_designs` | `/api/pfs_designs` | ✅ 完了 | PFS Design一覧 |
 | GET | `/api/pfs_designs/{id_hex}` | `/api/pfs_designs/{id_hex}` | ✅ 完了 | PFS Design詳細 |
 | GET | `/api/pfs_designs/{id_hex}.fits` | `/api/pfs_designs/{id_hex}.fits` | ✅ 完了 | PFS Design FITSダウンロード |
-| GET | `/api/pfs_designs.png` | `/api/pfs_designs.png` | ✅ 完了 | PFS Designチャート画像 |
 
 ### Attachment（添付ファイル）
 

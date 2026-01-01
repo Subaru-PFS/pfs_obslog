@@ -48,19 +48,3 @@ class TestPfsDesignDetailAPI:
         """存在しないDesignへのアクセスは404を返す"""
         response = client.get("/api/pfs_designs/0000000000000000")
         assert response.status_code == 404
-
-
-class TestPfsDesignChartAPI:
-    """PFS Design チャート API のテスト"""
-
-    @pytest.mark.timeout(10)
-    def test_get_design_chart_invalid_id_format(self, client: TestClient):
-        """不正なID形式の場合は400を返す"""
-        response = client.get("/api/pfs_designs.png?id_hex=invalid")
-        assert response.status_code == 400
-
-    @pytest.mark.timeout(10)
-    def test_get_design_chart_not_found(self, client: TestClient):
-        """存在しないDesignの場合は404を返す"""
-        response = client.get("/api/pfs_designs.png?id_hex=0000000000000000")
-        assert response.status_code == 404

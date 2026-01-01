@@ -1359,98 +1359,6 @@
         }
       }
     },
-    "/api/pfs_designs.png": {
-      "get": {
-        "tags": [
-          "pfs_designs",
-          "pfs_designs"
-        ],
-        "summary": "Get PFS Design chart",
-        "description": "Generate a chart image for one or more PFS Designs.",
-        "operationId": "get_design_chart_api_pfs_designs_png_get",
-        "parameters": [
-          {
-            "name": "id_hex",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "description": "Design IDs to include in the chart",
-              "title": "Id Hex"
-            },
-            "description": "Design IDs to include in the chart"
-          },
-          {
-            "name": "date",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "date"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Date for the chart (for visibility calculations)",
-              "title": "Date"
-            },
-            "description": "Date for the chart (for visibility calculations)"
-          },
-          {
-            "name": "width",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 1200,
-              "description": "Image width in pixels",
-              "default": 600,
-              "title": "Width"
-            },
-            "description": "Image width in pixels"
-          },
-          {
-            "name": "height",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 500,
-              "description": "Image height in pixels",
-              "default": 250,
-              "title": "Height"
-            },
-            "description": "Image height in pixels"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/attachments": {
       "post": {
         "tags": [
@@ -3284,7 +3192,14 @@
             "title": "Annotation Id"
           },
           "data_flag": {
-            "type": "integer",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Data Flag"
           },
           "notes": {
@@ -3313,8 +3228,7 @@
         },
         "type": "object",
         "required": [
-          "annotation_id",
-          "data_flag"
+          "annotation_id"
         ],
         "title": "SpsAnnotation",
         "description": "SpS\u9732\u51fa\u306e\u30a2\u30ce\u30c6\u30fc\u30b7\u30e7\u30f3"
