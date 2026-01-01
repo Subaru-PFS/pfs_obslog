@@ -1,25 +1,26 @@
 // SCSS for DateRangePicker component
 // The pre-built CSS is imported in DateRangePicker.tsx
-// This file contains dark theme customizations only
+// This file contains light theme customizations only
 
 @use "sass:color";
 
-// Theme variables
+// Theme variables (light theme to match app theme)
 $accent: #4a90d9;
-$shadow-color: #000;
-$background-color: #1e1e1e;
-$foreground-color: #f0f0f0;
-$border-color: #444;
-$disabled-cell-color: #666;
+$shadow-color: rgba(0, 0, 0, 0.2);
+$background-color: #ffffff;
+$foreground-color: #333333;
+$border-color: #cccccc;
+$disabled-cell-color: #aaaaaa;
+$hover-background: #f0f0f0;
 
-// Dark theme customization
+// Light theme customization
 .datepicker {
   font-size: 12px;
   background-color: $background-color;
   color: $foreground-color;
   border: 1px solid $border-color;
   border-radius: 8px;
-  box-shadow: 0 8px 16px rgba($shadow-color, 0.5);
+  box-shadow: 0 8px 16px $shadow-color;
 
   .datepicker-picker {
     background-color: $background-color;
@@ -34,7 +35,7 @@ $disabled-cell-color: #666;
 
         &:hover,
         &:focus {
-          background-color: rgba($accent, 0.2);
+          background-color: $hover-background;
         }
       }
 
@@ -42,7 +43,7 @@ $disabled-cell-color: #666;
         color: $foreground-color;
         
         &:hover {
-          background-color: rgba($accent, 0.2);
+          background-color: $hover-background;
         }
       }
 
@@ -51,7 +52,7 @@ $disabled-cell-color: #666;
         color: $foreground-color;
         
         &:hover {
-          background-color: rgba($accent, 0.2);
+          background-color: $hover-background;
         }
         
         &.disabled {
@@ -73,15 +74,15 @@ $disabled-cell-color: #666;
     color: $foreground-color;
 
     &:not(.disabled):not(.selected):hover {
-      background-color: rgba($accent, 0.3);
+      background-color: rgba($accent, 0.15);
     }
 
     &.focused:not(.selected) {
-      background-color: rgba($accent, 0.3);
+      background-color: rgba($accent, 0.15);
     }
 
     &.today:not(.selected) {
-      background-color: rgba($accent, 0.2);
+      background-color: rgba($accent, 0.1);
     }
 
     &.selected,
@@ -91,7 +92,7 @@ $disabled-cell-color: #666;
     }
 
     &.range {
-      background-color: rgba($accent, 0.4);
+      background-color: rgba($accent, 0.2);
     }
 
     &.range-start,
@@ -129,7 +130,7 @@ $disabled-cell-color: #666;
         color: $foreground-color;
 
         &:hover {
-          background-color: rgba($accent, 0.2);
+          background-color: $hover-background;
         }
       }
     }
