@@ -3,9 +3,10 @@
 .header {
   display: flex;
   align-items: center;
-  box-shadow: $medium-shadow;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   padding: 0.25em 0.5em;
-  z-index: 2;
+  z-index: 10;
+  position: relative;
   background-color: $background-color;
 }
 
