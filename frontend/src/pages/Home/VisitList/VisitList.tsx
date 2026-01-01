@@ -60,7 +60,7 @@ const COLUMN_DEFINITIONS: ColumnDef[] = [
   { key: 'azimuth', label: 'A°', description: 'Azimuth [°]', defaultVisible: false },
   { key: 'altitude', label: 'E°', description: 'Altitude [°]', defaultVisible: false },
   { key: 'insrot', label: 'I°', description: 'Instrument Rotator [°]', defaultVisible: false },
-  { key: 'notes_count', label: '', icon: 'tag', description: 'Notes Count (hover for details)', defaultVisible: true },
+  { key: 'notes_count', label: '#', icon: 'comment', description: 'Notes Count (hover for details)', defaultVisible: true },
   { key: 'notes_content', label: '', icon: 'notes', description: 'Notes Content', defaultVisible: false },
 ]
 
@@ -308,7 +308,7 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
               {columns.azimuth && <Tooltip content="Azimuth [°]" as="th" className={styles.colCoord}>A°</Tooltip>}
               {columns.altitude && <Tooltip content="Altitude [°]" as="th" className={styles.colCoord}>E°</Tooltip>}
               {columns.insrot && <Tooltip content="Instrument Rotator [°]" as="th" className={styles.colCoord}>I°</Tooltip>}
-              {columns.notes_count && <Tooltip content="Notes Count (hover for details)" as="th" className={styles.colNotesCount}><Icon name="tag" size={14} /></Tooltip>}
+              {columns.notes_count && <Tooltip content="Notes Count (hover for details)" as="th" className={styles.colNotesCount}><Icon name="comment" size={14} /></Tooltip>}
               {columns.notes_content && <Tooltip content="Notes Content" as="th" className={styles.colNotesContent}><Icon name="notes" size={14} /></Tooltip>}
             </tr>
           </thead>
