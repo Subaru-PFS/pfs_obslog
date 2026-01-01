@@ -3,9 +3,12 @@
 ログイン、ログアウト、ユーザー情報取得のAPIを提供します。
 """
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from pfs_obslog import models as M
 from pfs_obslog.auth.ldap_auth import authorize
 from pfs_obslog.auth.session import (
     CurrentUser,
@@ -13,6 +16,7 @@ from pfs_obslog.auth.session import (
     clear_user,
     set_user,
 )
+from pfs_obslog.database import get_db
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -43,6 +47,20 @@ class LogoutResponse(BaseModel):
 
     success: bool
     message: str
+
+
+class AuthUser(BaseModel):
+    """認証ユーザー情報"""
+
+    id: int
+    account_name: str
+
+
+class AuthStatusResponse(BaseModel):
+    """認証状態レスポンス"""
+
+    authenticated: bool
+    user: AuthUser | None = None
 
 
 @router.post("/login", response_model=LoginResponse)
@@ -81,12 +99,25 @@ async def get_me(user_id: RequireUser) -> UserResponse:
     return UserResponse(user_id=user_id)
 
 
-@router.get("/status")
-async def get_status(user_id: CurrentUser) -> dict:
+@router.get("/status", response_model=AuthStatusResponse)
+async def get_status(
+    user_id: CurrentUser,
+    db: AsyncSession = Depends(get_db),
+) -> AuthStatusResponse:
     """認証状態を取得
 
     ログイン中かどうかを確認できます。認証は必要ありません。
+    ログイン中の場合は、ユーザーの詳細情報（id, account_name）も返します。
     """
     if user_id:
-        return {"authenticated": True, "user_id": user_id}
-    return {"authenticated": False, "user_id": None}
+        # ユーザー情報を取得
+        result = await db.execute(
+            select(M.ObslogUser).where(M.ObslogUser.account_name == user_id)
+        )
+        user = result.scalar_one_or_none()
+        if user:
+            return AuthStatusResponse(
+                authenticated=True,
+                user=AuthUser(id=user.id, account_name=user.account_name),
+            )
+    return AuthStatusResponse(authenticated=False, user=None)

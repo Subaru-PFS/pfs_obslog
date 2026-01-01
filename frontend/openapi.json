@@ -142,7 +142,7 @@
           "auth"
         ],
         "summary": "Get Status",
-        "description": "\u8a8d\u8a3c\u72b6\u614b\u3092\u53d6\u5f97\n\n\u30ed\u30b0\u30a4\u30f3\u4e2d\u304b\u3069\u3046\u304b\u3092\u78ba\u8a8d\u3067\u304d\u307e\u3059\u3002\u8a8d\u8a3c\u306f\u5fc5\u8981\u3042\u308a\u307e\u305b\u3093\u3002",
+        "description": "\u8a8d\u8a3c\u72b6\u614b\u3092\u53d6\u5f97\n\n\u30ed\u30b0\u30a4\u30f3\u4e2d\u304b\u3069\u3046\u304b\u3092\u78ba\u8a8d\u3067\u304d\u307e\u3059\u3002\u8a8d\u8a3c\u306f\u5fc5\u8981\u3042\u308a\u307e\u305b\u3093\u3002\n\u30ed\u30b0\u30a4\u30f3\u4e2d\u306e\u5834\u5408\u306f\u3001\u30e6\u30fc\u30b6\u30fc\u306e\u8a73\u7d30\u60c5\u5831\uff08id, account_name\uff09\u3082\u8fd4\u3057\u307e\u3059\u3002",
         "operationId": "get_status_api_auth_status_get",
         "responses": {
           "200": {
@@ -150,9 +150,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Get Status Api Auth Status Get"
+                  "$ref": "#/components/schemas/AuthStatusResponse"
                 }
               }
             }
@@ -2069,6 +2067,49 @@
         ],
         "title": "AttachmentList",
         "description": "\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30eb\u4e00\u89a7"
+      },
+      "AuthStatusResponse": {
+        "properties": {
+          "authenticated": {
+            "type": "boolean",
+            "title": "Authenticated"
+          },
+          "user": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthUser"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "authenticated"
+        ],
+        "title": "AuthStatusResponse",
+        "description": "\u8a8d\u8a3c\u72b6\u614b\u30ec\u30b9\u30dd\u30f3\u30b9"
+      },
+      "AuthUser": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "account_name": {
+            "type": "string",
+            "title": "Account Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "account_name"
+        ],
+        "title": "AuthUser",
+        "description": "\u8a8d\u8a3c\u30e6\u30fc\u30b6\u30fc\u60c5\u5831"
       },
       "Body_create_attachment_api_attachments_post": {
         "properties": {

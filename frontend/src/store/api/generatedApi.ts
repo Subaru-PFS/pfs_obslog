@@ -323,9 +323,7 @@ export type GetMeApiAuthMeGetApiResponse =
   /** status 200 Successful Response */ UserResponse;
 export type GetMeApiAuthMeGetApiArg = void;
 export type GetStatusApiAuthStatusGetApiResponse =
-  /** status 200 Successful Response */ {
-    [key: string]: any;
-  };
+  /** status 200 Successful Response */ AuthStatusResponse;
 export type GetStatusApiAuthStatusGetApiArg = void;
 export type ListVisitsApiVisitsGetApiResponse =
   /** status 200 Successful Response */ VisitList;
@@ -532,6 +530,14 @@ export type LogoutResponse = {
 };
 export type UserResponse = {
   user_id: string;
+};
+export type AuthUser = {
+  id: number;
+  account_name: string;
+};
+export type AuthStatusResponse = {
+  authenticated: boolean;
+  user?: AuthUser | null;
 };
 export type ObslogUser = {
   id: number;
