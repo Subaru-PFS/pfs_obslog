@@ -17,13 +17,14 @@ Visit一覧のフィルタリングにSQLライクなWHERE句を使用できる�
 """
 
 from .parser import QueryParseError, parse_where_clause
-from .evaluator import QueryEvaluator
+from .evaluator import QueryEvaluator, AggregateCondition
 from .columns import VIRTUAL_COLUMNS, VirtualColumn
 
 __all__ = [
     "QueryParseError",
     "parse_where_clause",
     "QueryEvaluator",
+    "AggregateCondition",
     "VIRTUAL_COLUMNS",
     "VirtualColumn",
 ]

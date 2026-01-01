@@ -122,7 +122,18 @@ WHERE sps_count >= 5
 
 -- 平均露出時間が30秒以上のVisit
 WHERE sps_avg_exptime >= 30
+
+-- 複数の集約条件を組み合わせ
+WHERE sps_count > 0 AND mcs_count > 0
+
+-- 通常の条件と組み合わせ
+WHERE id > 10000 AND sps_count >= 5
 ```
+
+**制限事項:**
+- 集約カラムは `OR` 式の中では使用できません
+- 集約カラムは `NOT` 式の中では使用できません
+- 集約カラムは `AND` 式で他の条件と組み合わせることができます
 
 ---
 

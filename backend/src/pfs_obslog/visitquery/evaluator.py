@@ -6,6 +6,7 @@ pglastのASTノードをSQLAlchemyのWHERE句に変換する。
 使用して行います。
 """
 
+from dataclasses import dataclass, field
 from typing import Any
 
 from pglast import ast, enums
@@ -15,6 +16,37 @@ from sqlalchemy.sql.elements import ColumnElement
 from .columns import VIRTUAL_COLUMNS
 from .joins import JoinBuilder
 from .parser import QueryParseError
+
+
+@dataclass
+class AggregateCondition:
+    """集約条件を表すデータクラス"""
+
+    column_name: str
+    """カラム名（例: 'sps_count'）"""
+
+    table: str
+    """集約対象のテーブル名（例: 'sps_exposure'）"""
+
+    func: str
+    """集約関数（'count' または 'avg'）"""
+
+    source_column: str | None
+    """集約対象のカラム名（AVGの場合）"""
+
+    operator: str
+    """比較演算子（'=', '<', '>', '<=', '>='）"""
+
+    value: Any
+    """比較値"""
+
+
+# 集約カラムを表すマーカークラス
+@dataclass
+class AggregateColumnMarker:
+    """集約カラム参照を表すマーカー"""
+
+    column_name: str
 
 
 class QueryEvaluator:
@@ -29,6 +61,9 @@ class QueryEvaluator:
         self.models = models
         self.required_joins: set[str] = set()
         self._join_builder = join_builder or JoinBuilder(models)
+
+        # 集約条件を格納するリスト
+        self.aggregate_conditions: list[AggregateCondition] = []
 
         # モデルからカラムマッピングを構築
         self._column_map = self._build_column_map()
@@ -114,7 +149,7 @@ class QueryEvaluator:
         else:
             raise QueryParseError(f"Unknown constant type: {type(val).__name__}")
 
-    def eval_ColumnRef(self, node: ast.ColumnRef) -> ColumnElement[Any] | str:
+    def eval_ColumnRef(self, node: ast.ColumnRef) -> ColumnElement[Any] | str | AggregateColumnMarker:
         """カラム参照"""
         if len(node.fields) != 1:  # type: ignore[arg-type]
             raise QueryParseError(f"Invalid column reference: {node.fields}")
@@ -136,6 +171,10 @@ class QueryEvaluator:
         if col_name == "any_column":
             return "__any_column__"
 
+        # 集約カラムの場合は特殊なマーカーを返す
+        if vcol.is_aggregate:
+            return AggregateColumnMarker(column_name=col_name)
+
         # 計算カラムの場合
         if vcol.is_computed:
             return self._get_computed_column(col_name)
@@ -146,7 +185,7 @@ class QueryEvaluator:
 
         raise QueryParseError(f"Column '{col_name}' not mapped to SQLAlchemy")
 
-    def eval_A_Expr(self, node: ast.A_Expr) -> ColumnElement[Any]:
+    def eval_A_Expr(self, node: ast.A_Expr) -> ColumnElement[Any] | None:
         """式（演算子）"""
         kind = node.kind
 
@@ -163,7 +202,7 @@ class QueryEvaluator:
         else:
             raise QueryParseError(f"Unsupported expression kind: {kind}")
 
-    def _eval_op_expr(self, node: ast.A_Expr) -> ColumnElement[Any]:
+    def _eval_op_expr(self, node: ast.A_Expr) -> ColumnElement[Any] | None:
         """演算子式（=, <>, <, >, <=, >=）"""
         if not node.name or len(node.name) != 1:
             raise QueryParseError(f"Invalid operator: {node.name}")
@@ -172,13 +211,19 @@ class QueryEvaluator:
         if not isinstance(op_node, ast.String):
             raise QueryParseError(f"Invalid operator: {op_node}")
 
-        op = op_node.sval  # type: ignore[union-attr]
+        op: str = op_node.sval  # type: ignore[assignment]
         left = self.evaluate(node.lexpr)  # type: ignore[arg-type]
         right = self.evaluate(node.rexpr)  # type: ignore[arg-type]
 
         # any_column の特殊処理
         if self._is_any_column_value(left) or self._is_any_column_value(right):
             return self._eval_any_column_op(op, left, right, node)  # type: ignore[arg-type]
+
+        # 集約カラムの特殊処理
+        if isinstance(left, AggregateColumnMarker) or isinstance(
+            right, AggregateColumnMarker
+        ):
+            return self._handle_aggregate_op(op, left, right)
 
         ops = {
             "=": lambda l, r: l == r,
@@ -194,6 +239,52 @@ class QueryEvaluator:
             raise QueryParseError(f"Unsupported operator: {op}")
 
         return ops[op](left, right)
+
+    def _handle_aggregate_op(
+        self, op: str, left: Any, right: Any
+    ) -> None:
+        """集約カラムに対する演算子を処理
+
+        集約条件をaggregate_conditionsに追加し、Noneを返す（通常のWHERE句には追加しない）
+        """
+        if isinstance(left, AggregateColumnMarker):
+            marker = left
+            value = right
+        else:
+            marker = right
+            value = left
+            # 演算子の向きを反転
+            op_reverse = {
+                "=": "=",
+                "<>": "<>",
+                "!=": "!=",
+                "<": ">",
+                ">": "<",
+                "<=": ">=",
+                ">=": "<=",
+            }
+            op = op_reverse.get(op, op)
+
+        vcol = VIRTUAL_COLUMNS[marker.column_name]
+
+        if not vcol.aggregate_table or not vcol.aggregate_func:
+            raise QueryParseError(
+                f"Invalid aggregate column configuration: {marker.column_name}"
+            )
+
+        self.aggregate_conditions.append(
+            AggregateCondition(
+                column_name=marker.column_name,
+                table=vcol.aggregate_table,
+                func=vcol.aggregate_func,
+                source_column=vcol.aggregate_column,
+                operator=op,
+                value=value,
+            )
+        )
+
+        # 集約条件はNoneを返し、後でHAVING句として処理する
+        return None
 
     def _eval_like_expr(
         self, node: ast.A_Expr, negate: bool = False
@@ -282,18 +373,35 @@ class QueryEvaluator:
         result = or_(*[col.ilike(pattern) for col in columns])
         return not_(result) if negate else result
 
-    def eval_BoolExpr(self, node: ast.BoolExpr) -> ColumnElement[Any]:
+    def eval_BoolExpr(self, node: ast.BoolExpr) -> ColumnElement[Any] | None:
         """論理式（AND, OR, NOT）"""
         boolop = node.boolop
 
         if boolop == enums.BoolExprType.AND_EXPR:
-            return and_(*[self.evaluate(arg) for arg in node.args])  # type: ignore[union-attr, misc]
+            # Noneをフィルタリング（集約条件の場合Noneが返される）
+            conditions = [self.evaluate(arg) for arg in node.args]  # type: ignore[union-attr]
+            non_null_conditions = [c for c in conditions if c is not None]
+            if not non_null_conditions:
+                return None
+            if len(non_null_conditions) == 1:
+                return non_null_conditions[0]
+            return and_(*non_null_conditions)  # type: ignore[arg-type]
         elif boolop == enums.BoolExprType.OR_EXPR:
-            return or_(*[self.evaluate(arg) for arg in node.args])  # type: ignore[union-attr, misc]
+            # OR内に集約条件がある場合はエラー
+            conditions = [self.evaluate(arg) for arg in node.args]  # type: ignore[union-attr]
+            if any(c is None for c in conditions):
+                raise QueryParseError(
+                    "Aggregate columns cannot be used in OR expressions"
+                )
+            return or_(*conditions)  # type: ignore[arg-type]
         elif boolop == enums.BoolExprType.NOT_EXPR:
             if len(node.args) != 1:  # type: ignore[arg-type]
                 raise QueryParseError("NOT expression requires exactly one argument")
             inner = self.evaluate(node.args[0])  # type: ignore[index]
+            if inner is None:
+                raise QueryParseError(
+                    "Aggregate columns cannot be used in NOT expressions"
+                )
             # NOT NULL の場合の特殊処理
             # not_(x) は x が NULL の場合 NULL を返すが、
             # 実用上は NULL も false として扱いたい

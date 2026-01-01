@@ -469,3 +469,116 @@ class TestJoinBuilder:
         # JOINが必要であることを確認（実際のクエリ実行はJOINが複雑なためスキップ）
         assert len(evaluator.required_joins) > 0
         assert where_clause is not None
+
+class TestAggregateColumns:
+    """集約カラムのテスト"""
+
+    def test_sps_count_filter(self):
+        """sps_countでフィルタリング"""
+        ast = parse_where_clause("where sps_count > 0")
+        evaluator = QueryEvaluator(M)
+        where_clause = evaluator.evaluate(ast)
+
+        # 集約条件が追加されていることを確認
+        assert len(evaluator.aggregate_conditions) == 1
+        cond = evaluator.aggregate_conditions[0]
+        assert cond.column_name == "sps_count"
+        assert cond.table == "sps_exposure"
+        assert cond.func == "count"
+        assert cond.operator == ">"
+        assert cond.value == 0
+
+        # WHERE句はNoneになる（集約条件のみ）
+        assert where_clause is None
+
+    def test_mcs_avg_exptime_filter(self):
+        """mcs_avg_exptimeでフィルタリング"""
+        ast = parse_where_clause("where mcs_avg_exptime >= 10")
+        evaluator = QueryEvaluator(M)
+        where_clause = evaluator.evaluate(ast)
+
+        assert len(evaluator.aggregate_conditions) == 1
+        cond = evaluator.aggregate_conditions[0]
+        assert cond.column_name == "mcs_avg_exptime"
+        assert cond.table == "mcs_exposure"
+        assert cond.func == "avg"
+        assert cond.source_column == "mcs_exptime"
+        assert cond.operator == ">="
+        assert cond.value == 10
+
+    def test_agc_count_filter(self):
+        """agc_countでフィルタリング"""
+        ast = parse_where_clause("where agc_count < 5")
+        evaluator = QueryEvaluator(M)
+        where_clause = evaluator.evaluate(ast)
+
+        assert len(evaluator.aggregate_conditions) == 1
+        cond = evaluator.aggregate_conditions[0]
+        assert cond.column_name == "agc_count"
+        assert cond.table == "agc_exposure"
+        assert cond.func == "count"
+        assert cond.operator == "<"
+
+    def test_sps_avg_exptime_filter(self):
+        """sps_avg_exptimeでフィルタリング"""
+        ast = parse_where_clause("where sps_avg_exptime = 30")
+        evaluator = QueryEvaluator(M)
+        where_clause = evaluator.evaluate(ast)
+
+        assert len(evaluator.aggregate_conditions) == 1
+        cond = evaluator.aggregate_conditions[0]
+        assert cond.column_name == "sps_avg_exptime"
+        assert cond.func == "avg"
+        assert cond.source_column == "exptime"
+        assert cond.operator == "="
+
+    def test_combined_aggregate_and_normal(self):
+        """集約条件と通常条件の組み合わせ"""
+        ast = parse_where_clause("where id > 100 and sps_count >= 4")
+        evaluator = QueryEvaluator(M)
+        where_clause = evaluator.evaluate(ast)
+
+        # 集約条件が追加されていることを確認
+        assert len(evaluator.aggregate_conditions) == 1
+        cond = evaluator.aggregate_conditions[0]
+        assert cond.column_name == "sps_count"
+        assert cond.operator == ">="
+        assert cond.value == 4
+
+        # 通常の条件はWHERE句に含まれる
+        assert where_clause is not None
+
+    def test_multiple_aggregate_conditions(self):
+        """複数の集約条件"""
+        ast = parse_where_clause("where sps_count > 0 and mcs_count > 0")
+        evaluator = QueryEvaluator(M)
+        where_clause = evaluator.evaluate(ast)
+
+        # 両方の集約条件が追加されていることを確認
+        assert len(evaluator.aggregate_conditions) == 2
+
+    def test_aggregate_in_or_not_allowed(self):
+        """OR内の集約条件はエラー"""
+        ast = parse_where_clause("where sps_count > 0 or mcs_count > 0")
+        evaluator = QueryEvaluator(M)
+        with pytest.raises(QueryParseError, match="Aggregate columns cannot be used in OR"):
+            evaluator.evaluate(ast)
+
+    def test_aggregate_in_not_not_allowed(self):
+        """NOT内の集約条件はエラー"""
+        ast = parse_where_clause("where not sps_count > 0")
+        evaluator = QueryEvaluator(M)
+        with pytest.raises(QueryParseError, match="Aggregate columns cannot be used in NOT"):
+            evaluator.evaluate(ast)
+
+    def test_operator_reversal(self):
+        """集約カラムが右側にある場合の演算子反転"""
+        ast = parse_where_clause("where 5 < sps_count")
+        evaluator = QueryEvaluator(M)
+        where_clause = evaluator.evaluate(ast)
+
+        assert len(evaluator.aggregate_conditions) == 1
+        cond = evaluator.aggregate_conditions[0]
+        # 5 < sps_count は sps_count > 5 に変換される
+        assert cond.operator == ">"
+        assert cond.value == 5

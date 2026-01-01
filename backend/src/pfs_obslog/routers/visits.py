@@ -16,7 +16,12 @@ from sqlalchemy.sql.elements import ColumnElement
 
 from pfs_obslog import models as M
 from pfs_obslog.database import DbSession
-from pfs_obslog.visitquery import QueryEvaluator, QueryParseError, parse_where_clause
+from pfs_obslog.visitquery import (
+    AggregateCondition,
+    QueryEvaluator,
+    QueryParseError,
+    parse_where_clause,
+)
 from pfs_obslog.visitquery.joins import JoinBuilder
 from pfs_obslog.schemas.visits import (
     AgcExposure,
@@ -67,6 +72,7 @@ async def list_visits(
     where_condition: ColumnElement | None = None
     required_joins: set[str] = set()
     join_builder: JoinBuilder | None = None
+    aggregate_conditions: list[AggregateCondition] = []
 
     if sql:
         try:
@@ -76,11 +82,14 @@ async def list_visits(
                 evaluator = QueryEvaluator(M, join_builder)
                 where_condition = evaluator.evaluate(where_ast)
                 required_joins = evaluator.required_joins
+                aggregate_conditions = evaluator.aggregate_conditions
         except QueryParseError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
 
     # Visit一覧を取得
-    visits, count = await _fetch_visits(db, effective_limit, offset, where_condition, required_joins, join_builder)
+    visits, count = await _fetch_visits(
+        db, effective_limit, offset, where_condition, required_joins, join_builder, aggregate_conditions
+    )
 
     # 関連するIicSequenceを取得
     iic_sequences = await _fetch_related_iic_sequences(db, visits)
@@ -99,6 +108,7 @@ async def _fetch_visits(
     where_condition: ColumnElement | None = None,
     required_joins: set[str] | None = None,
     join_builder: JoinBuilder | None = None,
+    aggregate_conditions: list[AggregateCondition] | None = None,
 ) -> tuple[list[VisitListEntry], int]:
     """Visit一覧を取得
 
@@ -109,12 +119,15 @@ async def _fetch_visits(
         where_condition: SQLAlchemy WHERE条件（オプション）
         required_joins: 必要なJOINの名前のセット（オプション）
         join_builder: JoinBuilderインスタンス（オプション、エイリアス参照用）
+        aggregate_conditions: 集約条件のリスト（オプション）
 
     Returns:
         (Visit一覧, 総件数)
     """
     if required_joins is None:
         required_joins = set()
+    if aggregate_conditions is None:
+        aggregate_conditions = []
 
     # ベースクエリ
     base_query = select(M.PfsVisit.pfs_visit_id).select_from(M.PfsVisit)
@@ -128,6 +141,10 @@ async def _fetch_visits(
         base_query = base_query.where(where_condition)
         # フィルタリング時はDISTINCTが必要（JOIN で重複が生じる可能性）
         base_query = base_query.distinct()
+
+    # 集約条件がある場合、サブクエリでフィルタリング
+    if aggregate_conditions:
+        base_query = _apply_aggregate_conditions(base_query, aggregate_conditions)
 
     # 総件数を取得
     count_query = select(func.count()).select_from(base_query.subquery())
@@ -152,6 +169,87 @@ async def _fetch_visits(
     # Visit詳細を取得
     visits = await _build_visit_list_entries(db, ids)
     return visits, count
+
+
+def _apply_aggregate_conditions(
+    base_query: select,  # type: ignore[type-arg]
+    aggregate_conditions: list[AggregateCondition],
+) -> select:  # type: ignore[type-arg]
+    """集約条件をサブクエリでフィルタリング
+
+    Args:
+        base_query: ベースクエリ（visit_id選択）
+        aggregate_conditions: 集約条件のリスト
+
+    Returns:
+        集約条件が適用されたクエリ
+    """
+    # テーブル名からモデルへのマッピング
+    table_models = {
+        "sps_exposure": M.SpsExposure,
+        "mcs_exposure": M.McsExposure,
+        "agc_exposure": M.AgcExposure,
+    }
+
+    for cond in aggregate_conditions:
+        model = table_models.get(cond.table)
+        if model is None:
+            continue  # 不明なテーブルは無視
+
+        # 集約サブクエリを構築
+        if cond.func == "count":
+            agg_expr = func.count()
+        elif cond.func == "avg":
+            if cond.source_column:
+                agg_expr = func.avg(getattr(model, cond.source_column))
+            else:
+                continue  # ソースカラムがない場合はスキップ
+        else:
+            continue  # 不明な集約関数はスキップ
+
+        # サブクエリで集約を計算
+        agg_subquery = (
+            select(model.pfs_visit_id, agg_expr.label("agg_value"))
+            .group_by(model.pfs_visit_id)
+            .subquery()
+        )
+
+        # 比較演算子を適用
+        ops = {
+            "=": lambda col, val: col == val,
+            "<>": lambda col, val: col != val,
+            "!=": lambda col, val: col != val,
+            "<": lambda col, val: col < val,
+            ">": lambda col, val: col > val,
+            "<=": lambda col, val: col <= val,
+            ">=": lambda col, val: col >= val,
+        }
+
+        op_func = ops.get(cond.operator)
+        if op_func is None:
+            continue
+
+        # ベースクエリにJOINして条件を適用
+        # COUNTが0の場合はLEFT JOINでNULLになるが、0として扱う必要がある
+        if cond.func == "count":
+            # COUNTの場合：JOINなし = 0件 として扱う
+            # COALESCE(agg_value, 0) を使用
+            base_query = base_query.outerjoin(
+                agg_subquery,
+                agg_subquery.c.pfs_visit_id == M.PfsVisit.pfs_visit_id,
+            ).where(
+                op_func(func.coalesce(agg_subquery.c.agg_value, 0), cond.value)
+            )
+        else:
+            # AVGの場合：NULLは除外
+            base_query = base_query.join(
+                agg_subquery,
+                agg_subquery.c.pfs_visit_id == M.PfsVisit.pfs_visit_id,
+            ).where(
+                op_func(agg_subquery.c.agg_value, cond.value)
+            )
+
+    return base_query
 
 
 async def _build_visit_list_entries(db: AsyncSession, visit_ids: list[int]) -> list[VisitListEntry]:
@@ -716,6 +814,7 @@ async def get_visit_rank(
     where_condition: ColumnElement | None = None
     required_joins: set[str] = set()
     join_builder: JoinBuilder | None = None
+    aggregate_conditions: list[AggregateCondition] = []
 
     if sql:
         try:
@@ -725,6 +824,7 @@ async def get_visit_rank(
                 evaluator = QueryEvaluator(M, join_builder)
                 where_condition = evaluator.evaluate(where_ast)
                 required_joins = evaluator.required_joins
+                aggregate_conditions = evaluator.aggregate_conditions
         except QueryParseError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
 
@@ -738,6 +838,10 @@ async def get_visit_rank(
         base_query = join_builder.apply_joins(base_query, required_joins)
         base_query = base_query.where(where_condition)
         base_query = base_query.distinct()
+
+    # 集約条件がある場合、サブクエリでフィルタリング
+    if aggregate_conditions:
+        base_query = _apply_aggregate_conditions(base_query, aggregate_conditions)
 
     # サブクエリとしてランク付き結果を作成
     ranked_subquery = (
@@ -754,6 +858,10 @@ async def get_visit_rank(
             join_builder = JoinBuilder(M)
         ranked_subquery = join_builder.apply_joins(ranked_subquery, required_joins)
         ranked_subquery = ranked_subquery.where(where_condition)
+
+    # 集約条件がある場合、サブクエリでフィルタリング
+    if aggregate_conditions:
+        ranked_subquery = _apply_aggregate_conditions(ranked_subquery, aggregate_conditions)
 
     ranked_subquery = ranked_subquery.subquery("ranked")
 
@@ -798,6 +906,7 @@ async def export_visits_csv(
     where_condition: ColumnElement | None = None
     required_joins: set[str] = set()
     join_builder: JoinBuilder | None = None
+    aggregate_conditions: list[AggregateCondition] = []
 
     if sql:
         try:
@@ -807,11 +916,14 @@ async def export_visits_csv(
                 evaluator = QueryEvaluator(M, join_builder)
                 where_condition = evaluator.evaluate(where_ast)
                 required_joins = evaluator.required_joins
+                aggregate_conditions = evaluator.aggregate_conditions
         except QueryParseError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
 
     # Visit一覧を取得
-    visits, _count = await _fetch_visits(db, effective_limit, offset, where_condition, required_joins, join_builder)
+    visits, _count = await _fetch_visits(
+        db, effective_limit, offset, where_condition, required_joins, join_builder, aggregate_conditions
+    )
 
     # 関連するIicSequenceを取得
     iic_sequences = await _fetch_related_iic_sequences(db, visits)

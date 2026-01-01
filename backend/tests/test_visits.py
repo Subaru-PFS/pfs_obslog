@@ -509,3 +509,134 @@ class TestVisitCSVExport:
 
         for col in expected_columns:
             assert col in header, f"Column {col} not found in header"
+
+class TestAggregateFiltering:
+    """集約カラムでのフィルタリングテスト"""
+
+    def test_filter_by_sps_count(self, client: TestClient):
+        """sps_count でフィルタリング"""
+        # sps_count > 0 のVisitを取得
+        response = client.get("/api/visits?sql=where sps_count > 0&limit=10")
+        assert response.status_code == 200
+
+        data = response.json()
+        # 取得された全てのVisitがSPS露出を持つことを確認
+        for visit in data["visits"]:
+            assert visit["n_sps_exposures"] > 0
+
+    def test_filter_by_sps_count_zero(self, client: TestClient):
+        """sps_count = 0 でフィルタリング"""
+        # sps_count = 0 のVisitを取得
+        response = client.get("/api/visits?sql=where sps_count = 0&limit=10")
+        assert response.status_code == 200
+
+        data = response.json()
+        # 取得された全てのVisitがSPS露出を持たないことを確認
+        for visit in data["visits"]:
+            assert visit["n_sps_exposures"] == 0
+
+    def test_filter_by_mcs_count(self, client: TestClient):
+        """mcs_count でフィルタリング"""
+        # mcs_count > 0 のVisitを取得
+        response = client.get("/api/visits?sql=where mcs_count > 0&limit=10")
+        assert response.status_code == 200
+
+        data = response.json()
+        # 取得された全てのVisitがMCS露出を持つことを確認
+        for visit in data["visits"]:
+            assert visit["n_mcs_exposures"] > 0
+
+    def test_filter_by_agc_count(self, client: TestClient):
+        """agc_count でフィルタリング"""
+        # agc_count > 0 のVisitを取得
+        response = client.get("/api/visits?sql=where agc_count > 0&limit=10")
+        assert response.status_code == 200
+
+        data = response.json()
+        # 取得された全てのVisitがAGC露出を持つことを確認
+        for visit in data["visits"]:
+            assert visit["n_agc_exposures"] > 0
+
+    def test_filter_by_sps_count_with_other_condition(self, client: TestClient):
+        """sps_count と他の条件を組み合わせ"""
+        # まずVisit一覧から取得してID範囲を決定
+        list_response = client.get("/api/visits?limit=100")
+        visits = list_response.json()["visits"]
+
+        if len(visits) < 10:
+            pytest.skip("Not enough visits in database")
+
+        # 中間のIDを取得
+        ids = [v["id"] for v in visits]
+        median_id = sorted(ids)[len(ids) // 2]
+
+        # sps_count > 0 AND id >= median_id
+        response = client.get(
+            f"/api/visits?sql=where sps_count > 0 and id >= {median_id}&limit=10"
+        )
+        assert response.status_code == 200
+
+        data = response.json()
+        for visit in data["visits"]:
+            assert visit["n_sps_exposures"] > 0
+            assert visit["id"] >= median_id
+
+    def test_filter_multiple_aggregate_conditions(self, client: TestClient):
+        """複数の集約条件を組み合わせ"""
+        # sps_count > 0 AND mcs_count > 0
+        response = client.get("/api/visits?sql=where sps_count > 0 and mcs_count > 0&limit=10")
+        assert response.status_code == 200
+
+        data = response.json()
+        for visit in data["visits"]:
+            assert visit["n_sps_exposures"] > 0
+            assert visit["n_mcs_exposures"] > 0
+
+    def test_filter_by_count_less_than(self, client: TestClient):
+        """sps_count < N でフィルタリング"""
+        response = client.get("/api/visits?sql=where sps_count < 5&limit=10")
+        assert response.status_code == 200
+
+        data = response.json()
+        for visit in data["visits"]:
+            assert visit["n_sps_exposures"] < 5
+
+    def test_aggregate_in_or_returns_error(self, client: TestClient):
+        """OR内の集約条件はエラー"""
+        response = client.get("/api/visits?sql=where sps_count > 0 or mcs_count > 0")
+        assert response.status_code == 400
+        assert "OR" in response.json()["detail"]
+
+    def test_visit_rank_with_aggregate_filter(self, client: TestClient):
+        """集約フィルタリング内での順位取得"""
+        # まずsps_count > 0 のVisit一覧を取得
+        list_response = client.get("/api/visits?sql=where sps_count > 0&limit=10")
+        if list_response.status_code != 200:
+            pytest.skip("Filter query failed")
+
+        visits = list_response.json()["visits"]
+        if len(visits) == 0:
+            pytest.skip("No visits with SPS exposures")
+
+        # 最新のVisitの順位を確認（フィルタリング結果内での順位）
+        visit_id = visits[0]["id"]
+        rank_response = client.get(f"/api/visits/{visit_id}/rank?sql=where sps_count > 0")
+        assert rank_response.status_code == 200
+
+        data = rank_response.json()
+        assert data["rank"] == 1  # 最新なので順位は1
+
+    def test_csv_export_with_aggregate_filter(self, client: TestClient):
+        """集約フィルタリングしてCSVエクスポート"""
+        response = client.get("/api/visits.csv?sql=where sps_count > 0&limit=10")
+        assert response.status_code == 200
+        assert "text/csv" in response.headers["content-type"]
+
+        content = response.text
+        lines = content.strip().split("\n")
+
+        # ヘッダー行があるか
+        if len(lines) >= 2:
+            # ヘッダー行を除いたデータ行の列をパース
+            header = lines[0]
+            assert "visit_id" in header

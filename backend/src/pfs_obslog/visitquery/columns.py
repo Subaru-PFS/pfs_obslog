@@ -32,6 +32,18 @@ class VirtualColumn:
     is_computed: bool = False
     """計算カラム（IS NULL等の比較結果）かどうか"""
 
+    is_aggregate: bool = False
+    """集約カラム（COUNT, AVG等を使用するもの）かどうか"""
+
+    aggregate_table: str | None = None
+    """集約対象のテーブル名（集約カラムの場合）"""
+
+    aggregate_func: str | None = None
+    """集約関数（'count' または 'avg'）"""
+
+    aggregate_column: str | None = None
+    """集約対象のカラム名（AVGの場合）"""
+
 
 # カラム定義
 # 注意: SQLAlchemy式はmodelsのインポート後に設定する必要がある
@@ -158,5 +170,62 @@ VIRTUAL_COLUMNS: dict[str, VirtualColumn] = {
             "pfs_design_fiber",
         },
         is_computed=True,
+    ),
+    # =============================================================================
+    # 集約カラム（COUNT, AVG等）
+    # =============================================================================
+    # SPS露出の集約
+    "sps_count": VirtualColumn(
+        name="sps_count",
+        description="SPS露出の数",
+        required_joins=set(),
+        is_aggregate=True,
+        aggregate_table="sps_exposure",
+        aggregate_func="count",
+    ),
+    "sps_avg_exptime": VirtualColumn(
+        name="sps_avg_exptime",
+        description="SPS露出の平均露出時間",
+        required_joins=set(),
+        is_aggregate=True,
+        aggregate_table="sps_exposure",
+        aggregate_func="avg",
+        aggregate_column="exptime",
+    ),
+    # MCS露出の集約
+    "mcs_count": VirtualColumn(
+        name="mcs_count",
+        description="MCS露出の数",
+        required_joins=set(),
+        is_aggregate=True,
+        aggregate_table="mcs_exposure",
+        aggregate_func="count",
+    ),
+    "mcs_avg_exptime": VirtualColumn(
+        name="mcs_avg_exptime",
+        description="MCS露出の平均露出時間",
+        required_joins=set(),
+        is_aggregate=True,
+        aggregate_table="mcs_exposure",
+        aggregate_func="avg",
+        aggregate_column="mcs_exptime",
+    ),
+    # AGC露出の集約
+    "agc_count": VirtualColumn(
+        name="agc_count",
+        description="AGC露出の数",
+        required_joins=set(),
+        is_aggregate=True,
+        aggregate_table="agc_exposure",
+        aggregate_func="count",
+    ),
+    "agc_avg_exptime": VirtualColumn(
+        name="agc_avg_exptime",
+        description="AGC露出の平均露出時間",
+        required_joins=set(),
+        is_aggregate=True,
+        aggregate_table="agc_exposure",
+        aggregate_func="avg",
+        aggregate_column="agc_exptime",
     ),
 }
