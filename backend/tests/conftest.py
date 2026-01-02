@@ -166,8 +166,32 @@ def client():
 
     get_db依存関係をテスト用DBに向けてオーバーライドします。
     各テスト関数ごとに新しいクライアントを作成します（セッションの分離）。
+
+    認証が必要なエンドポイントをテストする場合は、
+    authenticated_client フィクスチャを使用してください。
     """
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(scope="function")
+def authenticated_client(client):
+    """認証済みのテスト用クライアントを作成
+
+    テスト用ユーザー(testuser)でログイン済みの状態のクライアントを返します。
+    認証が必要なエンドポイントのテストに使用してください。
+    """
+    from unittest.mock import patch
+
+    # LDAPの認証をモックしてログイン
+    with patch("pfs_obslog.routers.auth.authorize") as mock_authorize:
+        mock_authorize.return_value = "testuser"
+        response = client.post(
+            "/api/auth/login",
+            json={"username": "testuser", "password": "testpass"},
+        )
+        assert response.status_code == 200, f"Login failed: {response.json()}"
+
+    return client

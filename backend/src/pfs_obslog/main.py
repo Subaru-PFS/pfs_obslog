@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
+from pfs_obslog.auth.middleware import AuthMiddleware
 from pfs_obslog.config import get_settings
 from pfs_obslog.orjsonresponse import ORJSONResponse
 from pfs_obslog.routers import attachments, auth, fits, health, notes, pfs_designs, plot, visits
@@ -22,8 +23,23 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
 )
 
+# CORS設定（最初に処理される）
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 本番環境では適切に制限してください
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 認証ミドルウェア（デフォルトで全APIエンドポイントに認証を要求）
+# public_patterns に指定したパスは認証をスキップ
+# SessionMiddlewareの後に追加する（request.sessionが必要なため）
+app.add_middleware(AuthMiddleware)
+
 # セッションミドルウェア（クッキーセッション）
 # max_age=None でセッションクッキー（ブラウザを閉じると消える）
+# 認証ミドルウェアより先に処理される（後に追加 = 先に処理）
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.session_secret_key,
@@ -31,15 +47,6 @@ app.add_middleware(
     max_age=None,  # セッションクッキー
     same_site="lax",
     https_only=settings.session_https_only,
-)
-
-# CORS設定
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # 本番環境では適切に制限してください
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
 )
 
 # ルーターを登録（/api配下に配置）

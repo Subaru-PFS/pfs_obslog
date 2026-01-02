@@ -4,12 +4,22 @@ import pytest
 from fastapi.testclient import TestClient
 
 
+class TestListVisitsAuth:
+    """GET /api/visits の認証テスト"""
+
+    def test_list_visits_requires_auth(self, client: TestClient):
+        """認証なしでVisit一覧にアクセスすると401を返す"""
+        response = client.get("/api/visits")
+        assert response.status_code == 401
+        assert response.json()["detail"] == "Not authenticated"
+
+
 class TestListVisits:
     """GET /api/visits のテスト"""
 
-    def test_list_visits_default(self, client: TestClient):
+    def test_list_visits_default(self, authenticated_client: TestClient):
         """デフォルトパラメータでVisit一覧を取得"""
-        response = client.get("/api/visits")
+        response = authenticated_client.get("/api/visits")
         assert response.status_code == 200
 
         data = response.json()
@@ -26,23 +36,23 @@ class TestListVisits:
         # limitが50なので最大50件
         assert len(data["visits"]) <= 50
 
-    def test_list_visits_with_limit(self, client: TestClient):
+    def test_list_visits_with_limit(self, authenticated_client: TestClient):
         """limit指定でVisit一覧を取得"""
-        response = client.get("/api/visits?limit=10")
+        response = authenticated_client.get("/api/visits?limit=10")
         assert response.status_code == 200
 
         data = response.json()
         assert len(data["visits"]) <= 10
 
-    def test_list_visits_with_offset(self, client: TestClient):
+    def test_list_visits_with_offset(self, authenticated_client: TestClient):
         """offset指定でVisit一覧を取得"""
         # まずoffset=0で取得
-        response1 = client.get("/api/visits?limit=5&offset=0")
+        response1 = authenticated_client.get("/api/visits?limit=5&offset=0")
         assert response1.status_code == 200
         data1 = response1.json()
 
         # offset=5で取得
-        response2 = client.get("/api/visits?limit=5&offset=5")
+        response2 = authenticated_client.get("/api/visits?limit=5&offset=5")
         assert response2.status_code == 200
         data2 = response2.json()
 
@@ -55,18 +65,18 @@ class TestListVisits:
             ids2 = {v["id"] for v in data2["visits"]}
             assert ids1.isdisjoint(ids2), "offsetで取得したデータが重複している"
 
-    def test_list_visits_unlimited(self, client: TestClient):
+    def test_list_visits_unlimited(self, authenticated_client: TestClient):
         """limit=-1で全件取得"""
-        response = client.get("/api/visits?limit=-1")
+        response = authenticated_client.get("/api/visits?limit=-1")
         assert response.status_code == 200
 
         data = response.json()
         # 全件取得されている
         assert len(data["visits"]) == data["count"]
 
-    def test_visit_entry_structure(self, client: TestClient):
+    def test_visit_entry_structure(self, authenticated_client: TestClient):
         """VisitListEntryの構造を確認"""
-        response = client.get("/api/visits?limit=1")
+        response = authenticated_client.get("/api/visits?limit=1")
         assert response.status_code == 200
 
         data = response.json()
@@ -99,9 +109,9 @@ class TestListVisits:
             # 設計ID
             assert "pfs_design_id" in visit
 
-    def test_iic_sequence_structure(self, client: TestClient):
+    def test_iic_sequence_structure(self, authenticated_client: TestClient):
         """IicSequenceの構造を確認"""
-        response = client.get("/api/visits?limit=100")
+        response = authenticated_client.get("/api/visits?limit=100")
         assert response.status_code == 200
 
         data = response.json()
@@ -121,9 +131,9 @@ class TestListVisits:
             assert "group" in seq
             assert "notes" in seq
 
-    def test_visits_ordered_by_id_desc(self, client: TestClient):
+    def test_visits_ordered_by_id_desc(self, authenticated_client: TestClient):
         """VisitがIDの降順でソートされていることを確認"""
-        response = client.get("/api/visits?limit=10")
+        response = authenticated_client.get("/api/visits?limit=10")
         assert response.status_code == 200
 
         data = response.json()
@@ -136,10 +146,10 @@ class TestListVisits:
 class TestGetVisit:
     """GET /api/visits/{visit_id} のテスト"""
 
-    def test_get_visit_success(self, client: TestClient):
+    def test_get_visit_success(self, authenticated_client: TestClient):
         """存在するVisitの詳細を取得"""
         # まずVisit一覧から1件取得
-        list_response = client.get("/api/visits?limit=1")
+        list_response = authenticated_client.get("/api/visits?limit=1")
         assert list_response.status_code == 200
         visits = list_response.json()["visits"]
 
@@ -149,7 +159,7 @@ class TestGetVisit:
         visit_id = visits[0]["id"]
 
         # Visit詳細を取得
-        response = client.get(f"/api/visits/{visit_id}")
+        response = authenticated_client.get(f"/api/visits/{visit_id}")
         assert response.status_code == 200
 
         data = response.json()
@@ -167,22 +177,22 @@ class TestGetVisit:
         assert "agc" in data
         assert "iic_sequence" in data
 
-    def test_get_visit_not_found(self, client: TestClient):
+    def test_get_visit_not_found(self, authenticated_client: TestClient):
         """存在しないVisitの詳細を取得"""
-        response = client.get("/api/visits/999999999")
+        response = authenticated_client.get("/api/visits/999999999")
         assert response.status_code == 404
 
-    def test_get_visit_sps_structure(self, client: TestClient):
+    def test_get_visit_sps_structure(self, authenticated_client: TestClient):
         """SPS露出情報の構造を確認"""
         # SPS露出があるVisitを探す
-        list_response = client.get("/api/visits?limit=100")
+        list_response = authenticated_client.get("/api/visits?limit=100")
         visits = list_response.json()["visits"]
         sps_visit = next((v for v in visits if v["n_sps_exposures"] > 0), None)
 
         if sps_visit is None:
             pytest.skip("No visits with SPS exposures")
 
-        response = client.get(f"/api/visits/{sps_visit['id']}")
+        response = authenticated_client.get(f"/api/visits/{sps_visit['id']}")
         assert response.status_code == 200
 
         data = response.json()
@@ -198,17 +208,17 @@ class TestGetVisit:
             assert "exp_end" in exp
             assert "annotations" in exp
 
-    def test_get_visit_mcs_structure(self, client: TestClient):
+    def test_get_visit_mcs_structure(self, authenticated_client: TestClient):
         """MCS露出情報の構造を確認"""
         # MCS露出があるVisitを探す
-        list_response = client.get("/api/visits?limit=100")
+        list_response = authenticated_client.get("/api/visits?limit=100")
         visits = list_response.json()["visits"]
         mcs_visit = next((v for v in visits if v["n_mcs_exposures"] > 0), None)
 
         if mcs_visit is None:
             pytest.skip("No visits with MCS exposures")
 
-        response = client.get(f"/api/visits/{mcs_visit['id']}")
+        response = authenticated_client.get(f"/api/visits/{mcs_visit['id']}")
         assert response.status_code == 200
 
         data = response.json()
@@ -223,17 +233,17 @@ class TestGetVisit:
             assert "taken_at" in exp
             assert "notes" in exp
 
-    def test_get_visit_agc_structure(self, client: TestClient):
+    def test_get_visit_agc_structure(self, authenticated_client: TestClient):
         """AGC露出情報の構造を確認"""
         # AGC露出があるVisitを探す
-        list_response = client.get("/api/visits?limit=100")
+        list_response = authenticated_client.get("/api/visits?limit=100")
         visits = list_response.json()["visits"]
         agc_visit = next((v for v in visits if v["n_agc_exposures"] > 0), None)
 
         if agc_visit is None:
             pytest.skip("No visits with AGC exposures")
 
-        response = client.get(f"/api/visits/{agc_visit['id']}")
+        response = authenticated_client.get(f"/api/visits/{agc_visit['id']}")
         assert response.status_code == 200
 
         data = response.json()
@@ -248,17 +258,17 @@ class TestGetVisit:
             assert "taken_at" in exp
             assert "guide_offset" in exp
 
-    def test_get_visit_iic_sequence_structure(self, client: TestClient):
+    def test_get_visit_iic_sequence_structure(self, authenticated_client: TestClient):
         """IICシーケンス情報の構造を確認"""
         # IICシーケンスがあるVisitを探す
-        list_response = client.get("/api/visits?limit=100")
+        list_response = authenticated_client.get("/api/visits?limit=100")
         visits = list_response.json()["visits"]
         seq_visit = next((v for v in visits if v["iic_sequence_id"] is not None), None)
 
         if seq_visit is None:
             pytest.skip("No visits with IIC sequence")
 
-        response = client.get(f"/api/visits/{seq_visit['id']}")
+        response = authenticated_client.get(f"/api/visits/{seq_visit['id']}")
         assert response.status_code == 200
 
         data = response.json()
@@ -275,10 +285,10 @@ class TestGetVisit:
 class TestSqlFiltering:
     """SQLフィルタリング機能のテスト"""
 
-    def test_filter_by_id(self, client: TestClient):
+    def test_filter_by_id(self, authenticated_client: TestClient):
         """ID指定でフィルタリング"""
         # まずVisit一覧から1件取得
-        list_response = client.get("/api/visits?limit=1")
+        list_response = authenticated_client.get("/api/visits?limit=1")
         visits = list_response.json()["visits"]
 
         if len(visits) == 0:
@@ -287,7 +297,7 @@ class TestSqlFiltering:
         visit_id = visits[0]["id"]
 
         # IDでフィルタリング
-        response = client.get(f"/api/visits?sql=where id = {visit_id}")
+        response = authenticated_client.get(f"/api/visits?sql=where id = {visit_id}")
         assert response.status_code == 200
 
         data = response.json()
@@ -295,10 +305,10 @@ class TestSqlFiltering:
         assert len(data["visits"]) == 1
         assert data["visits"][0]["id"] == visit_id
 
-    def test_filter_by_id_range(self, client: TestClient):
+    def test_filter_by_id_range(self, authenticated_client: TestClient):
         """ID範囲指定でフィルタリング"""
         # まず複数件取得
-        list_response = client.get("/api/visits?limit=10")
+        list_response = authenticated_client.get("/api/visits?limit=10")
         visits = list_response.json()["visits"]
 
         if len(visits) < 2:
@@ -310,7 +320,7 @@ class TestSqlFiltering:
         max_id = max(ids)
 
         # ID範囲でフィルタリング
-        response = client.get(f"/api/visits?sql=where id between {min_id} and {max_id}")
+        response = authenticated_client.get(f"/api/visits?sql=where id between {min_id} and {max_id}")
         assert response.status_code == 200
 
         data = response.json()
@@ -318,34 +328,34 @@ class TestSqlFiltering:
         for v in data["visits"]:
             assert min_id <= v["id"] <= max_id
 
-    def test_filter_invalid_sql(self, client: TestClient):
+    def test_filter_invalid_sql(self, authenticated_client: TestClient):
         """無効なSQLでエラー"""
-        response = client.get("/api/visits?sql=invalid sql syntax")
+        response = authenticated_client.get("/api/visits?sql=invalid sql syntax")
         assert response.status_code == 400
 
-    def test_filter_with_pagination(self, client: TestClient):
+    def test_filter_with_pagination(self, authenticated_client: TestClient):
         """SQLフィルタリングとページネーションの組み合わせ"""
         # まず全件数を確認
-        all_response = client.get("/api/visits?limit=1")
+        all_response = authenticated_client.get("/api/visits?limit=1")
         total = all_response.json()["count"]
 
         if total == 0:
             pytest.skip("No visits in database")
 
         # 存在するIDを取得
-        ids = [v["id"] for v in client.get("/api/visits?limit=10").json()["visits"]]
+        ids = [v["id"] for v in authenticated_client.get("/api/visits?limit=10").json()["visits"]]
         if len(ids) == 0:
             pytest.skip("No visits in database")
 
         median_id = ids[len(ids) // 2]
 
         # より大きいIDでフィルタリング（offset=0, limit=5）
-        response1 = client.get(f"/api/visits?sql=where id >= {median_id}&limit=5&offset=0")
+        response1 = authenticated_client.get(f"/api/visits?sql=where id >= {median_id}&limit=5&offset=0")
         assert response1.status_code == 200
         data1 = response1.json()
 
         # offset=5で取得
-        response2 = client.get(f"/api/visits?sql=where id >= {median_id}&limit=5&offset=5")
+        response2 = authenticated_client.get(f"/api/visits?sql=where id >= {median_id}&limit=5&offset=5")
         assert response2.status_code == 200
         data2 = response2.json()
 
@@ -362,10 +372,10 @@ class TestSqlFiltering:
 class TestVisitRank:
     """GET /api/visits/{visit_id}/rank のテスト"""
 
-    def test_get_visit_rank(self, client: TestClient):
+    def test_get_visit_rank(self, authenticated_client: TestClient):
         """Visitの順位を取得"""
         # まずVisit一覧から数件取得
-        list_response = client.get("/api/visits?limit=10")
+        list_response = authenticated_client.get("/api/visits?limit=10")
         assert list_response.status_code == 200
         visits = list_response.json()["visits"]
 
@@ -374,17 +384,17 @@ class TestVisitRank:
 
         # 最新のVisit（リストの先頭）は順位1になるはず
         visit_id = visits[0]["id"]
-        response = client.get(f"/api/visits/{visit_id}/rank")
+        response = authenticated_client.get(f"/api/visits/{visit_id}/rank")
         assert response.status_code == 200
 
         data = response.json()
         assert "rank" in data
         assert data["rank"] == 1  # 最新なので順位は1
 
-    def test_get_visit_rank_with_filter(self, client: TestClient):
+    def test_get_visit_rank_with_filter(self, authenticated_client: TestClient):
         """SQLフィルタリング内での順位を取得"""
         # Visit一覧から取得
-        list_response = client.get("/api/visits?limit=20")
+        list_response = authenticated_client.get("/api/visits?limit=20")
         assert list_response.status_code == 200
         visits = list_response.json()["visits"]
 
@@ -396,7 +406,7 @@ class TestVisitRank:
         visit_id = mid_visit["id"]
 
         # そのID以上でフィルタリングした場合の順位
-        response = client.get(f"/api/visits/{visit_id}/rank?sql=where id >= {visit_id}")
+        response = authenticated_client.get(f"/api/visits/{visit_id}/rank?sql=where id >= {visit_id}")
         assert response.status_code == 200
 
         data = response.json()
@@ -405,34 +415,34 @@ class TestVisitRank:
         assert data["rank"] is not None
         assert data["rank"] >= 1
 
-    def test_get_visit_rank_not_found(self, client: TestClient):
+    def test_get_visit_rank_not_found(self, authenticated_client: TestClient):
         """存在しないVisitの順位を取得"""
-        response = client.get("/api/visits/999999999/rank")
+        response = authenticated_client.get("/api/visits/999999999/rank")
         assert response.status_code == 200
 
         data = response.json()
         assert data["rank"] is None
 
-    def test_get_visit_rank_invalid_sql(self, client: TestClient):
+    def test_get_visit_rank_invalid_sql(self, authenticated_client: TestClient):
         """不正なSQLでの順位取得"""
         # まずVisit一覧から1件取得
-        list_response = client.get("/api/visits?limit=1")
+        list_response = authenticated_client.get("/api/visits?limit=1")
         visits = list_response.json()["visits"]
 
         if len(visits) == 0:
             pytest.skip("No visits in database")
 
         visit_id = visits[0]["id"]
-        response = client.get(f"/api/visits/{visit_id}/rank?sql=where invalid_column = 1")
+        response = authenticated_client.get(f"/api/visits/{visit_id}/rank?sql=where invalid_column = 1")
         assert response.status_code == 400
 
 
 class TestVisitCSVExport:
     """GET /api/visits.csv のテスト"""
 
-    def test_export_visits_csv(self, client: TestClient):
+    def test_export_visits_csv(self, authenticated_client: TestClient):
         """Visit一覧をCSVでエクスポート"""
-        response = client.get("/api/visits.csv?limit=10")
+        response = authenticated_client.get("/api/visits.csv?limit=10")
         assert response.status_code == 200
         assert response.headers["content-type"] == "text/csv; charset=utf-8"
         assert "content-disposition" in response.headers
@@ -448,10 +458,10 @@ class TestVisitCSVExport:
         assert header.startswith("# ")  # 最初の列は#で始まる
         assert "visit_id" in header
 
-    def test_export_visits_csv_with_filter(self, client: TestClient):
+    def test_export_visits_csv_with_filter(self, authenticated_client: TestClient):
         """SQLフィルタリングしてCSVエクスポート"""
         # まずVisit一覧から取得
-        list_response = client.get("/api/visits?limit=10")
+        list_response = authenticated_client.get("/api/visits?limit=10")
         visits = list_response.json()["visits"]
 
         if len(visits) == 0:
@@ -459,7 +469,7 @@ class TestVisitCSVExport:
 
         # 存在するIDでフィルタリング
         visit_id = visits[0]["id"]
-        response = client.get(f"/api/visits.csv?sql=where id = {visit_id}")
+        response = authenticated_client.get(f"/api/visits.csv?sql=where id = {visit_id}")
         assert response.status_code == 200
 
         content = response.text
@@ -468,18 +478,18 @@ class TestVisitCSVExport:
         # ヘッダー + 1行
         assert len(lines) == 2
 
-    def test_export_visits_csv_empty(self, client: TestClient):
+    def test_export_visits_csv_empty(self, authenticated_client: TestClient):
         """空の結果をCSVエクスポート"""
-        response = client.get("/api/visits.csv?sql=where id = -1")
+        response = authenticated_client.get("/api/visits.csv?sql=where id = -1")
         assert response.status_code == 200
 
         content = response.text
         # 空のCSV
         assert content.strip() == ""
 
-    def test_export_visits_csv_columns(self, client: TestClient):
+    def test_export_visits_csv_columns(self, authenticated_client: TestClient):
         """CSVの列を確認"""
-        response = client.get("/api/visits.csv?limit=1")
+        response = authenticated_client.get("/api/visits.csv?limit=1")
         assert response.status_code == 200
 
         content = response.text
@@ -513,10 +523,10 @@ class TestVisitCSVExport:
 class TestAggregateFiltering:
     """集約カラムでのフィルタリングテスト"""
 
-    def test_filter_by_sps_count(self, client: TestClient):
+    def test_filter_by_sps_count(self, authenticated_client: TestClient):
         """sps_count でフィルタリング"""
         # sps_count > 0 のVisitを取得
-        response = client.get("/api/visits?sql=where sps_count > 0&limit=10")
+        response = authenticated_client.get("/api/visits?sql=where sps_count > 0&limit=10")
         assert response.status_code == 200
 
         data = response.json()
@@ -524,10 +534,10 @@ class TestAggregateFiltering:
         for visit in data["visits"]:
             assert visit["n_sps_exposures"] > 0
 
-    def test_filter_by_sps_count_zero(self, client: TestClient):
+    def test_filter_by_sps_count_zero(self, authenticated_client: TestClient):
         """sps_count = 0 でフィルタリング"""
         # sps_count = 0 のVisitを取得
-        response = client.get("/api/visits?sql=where sps_count = 0&limit=10")
+        response = authenticated_client.get("/api/visits?sql=where sps_count = 0&limit=10")
         assert response.status_code == 200
 
         data = response.json()
@@ -535,10 +545,10 @@ class TestAggregateFiltering:
         for visit in data["visits"]:
             assert visit["n_sps_exposures"] == 0
 
-    def test_filter_by_mcs_count(self, client: TestClient):
+    def test_filter_by_mcs_count(self, authenticated_client: TestClient):
         """mcs_count でフィルタリング"""
         # mcs_count > 0 のVisitを取得
-        response = client.get("/api/visits?sql=where mcs_count > 0&limit=10")
+        response = authenticated_client.get("/api/visits?sql=where mcs_count > 0&limit=10")
         assert response.status_code == 200
 
         data = response.json()
@@ -546,10 +556,10 @@ class TestAggregateFiltering:
         for visit in data["visits"]:
             assert visit["n_mcs_exposures"] > 0
 
-    def test_filter_by_agc_count(self, client: TestClient):
+    def test_filter_by_agc_count(self, authenticated_client: TestClient):
         """agc_count でフィルタリング"""
         # agc_count > 0 のVisitを取得
-        response = client.get("/api/visits?sql=where agc_count > 0&limit=10")
+        response = authenticated_client.get("/api/visits?sql=where agc_count > 0&limit=10")
         assert response.status_code == 200
 
         data = response.json()
@@ -557,10 +567,10 @@ class TestAggregateFiltering:
         for visit in data["visits"]:
             assert visit["n_agc_exposures"] > 0
 
-    def test_filter_by_sps_count_with_other_condition(self, client: TestClient):
+    def test_filter_by_sps_count_with_other_condition(self, authenticated_client: TestClient):
         """sps_count と他の条件を組み合わせ"""
         # まずVisit一覧から取得してID範囲を決定
-        list_response = client.get("/api/visits?limit=100")
+        list_response = authenticated_client.get("/api/visits?limit=100")
         visits = list_response.json()["visits"]
 
         if len(visits) < 10:
@@ -571,7 +581,7 @@ class TestAggregateFiltering:
         median_id = sorted(ids)[len(ids) // 2]
 
         # sps_count > 0 AND id >= median_id
-        response = client.get(
+        response = authenticated_client.get(
             f"/api/visits?sql=where sps_count > 0 and id >= {median_id}&limit=10"
         )
         assert response.status_code == 200
@@ -581,10 +591,10 @@ class TestAggregateFiltering:
             assert visit["n_sps_exposures"] > 0
             assert visit["id"] >= median_id
 
-    def test_filter_multiple_aggregate_conditions(self, client: TestClient):
+    def test_filter_multiple_aggregate_conditions(self, authenticated_client: TestClient):
         """複数の集約条件を組み合わせ"""
         # sps_count > 0 AND mcs_count > 0
-        response = client.get("/api/visits?sql=where sps_count > 0 and mcs_count > 0&limit=10")
+        response = authenticated_client.get("/api/visits?sql=where sps_count > 0 and mcs_count > 0&limit=10")
         assert response.status_code == 200
 
         data = response.json()
@@ -592,25 +602,25 @@ class TestAggregateFiltering:
             assert visit["n_sps_exposures"] > 0
             assert visit["n_mcs_exposures"] > 0
 
-    def test_filter_by_count_less_than(self, client: TestClient):
+    def test_filter_by_count_less_than(self, authenticated_client: TestClient):
         """sps_count < N でフィルタリング"""
-        response = client.get("/api/visits?sql=where sps_count < 5&limit=10")
+        response = authenticated_client.get("/api/visits?sql=where sps_count < 5&limit=10")
         assert response.status_code == 200
 
         data = response.json()
         for visit in data["visits"]:
             assert visit["n_sps_exposures"] < 5
 
-    def test_aggregate_in_or_returns_error(self, client: TestClient):
+    def test_aggregate_in_or_returns_error(self, authenticated_client: TestClient):
         """OR内の集約条件はエラー"""
-        response = client.get("/api/visits?sql=where sps_count > 0 or mcs_count > 0")
+        response = authenticated_client.get("/api/visits?sql=where sps_count > 0 or mcs_count > 0")
         assert response.status_code == 400
         assert "OR" in response.json()["detail"]
 
-    def test_visit_rank_with_aggregate_filter(self, client: TestClient):
+    def test_visit_rank_with_aggregate_filter(self, authenticated_client: TestClient):
         """集約フィルタリング内での順位取得"""
         # まずsps_count > 0 のVisit一覧を取得
-        list_response = client.get("/api/visits?sql=where sps_count > 0&limit=10")
+        list_response = authenticated_client.get("/api/visits?sql=where sps_count > 0&limit=10")
         if list_response.status_code != 200:
             pytest.skip("Filter query failed")
 
@@ -620,15 +630,15 @@ class TestAggregateFiltering:
 
         # 最新のVisitの順位を確認（フィルタリング結果内での順位）
         visit_id = visits[0]["id"]
-        rank_response = client.get(f"/api/visits/{visit_id}/rank?sql=where sps_count > 0")
+        rank_response = authenticated_client.get(f"/api/visits/{visit_id}/rank?sql=where sps_count > 0")
         assert rank_response.status_code == 200
 
         data = rank_response.json()
         assert data["rank"] == 1  # 最新なので順位は1
 
-    def test_csv_export_with_aggregate_filter(self, client: TestClient):
+    def test_csv_export_with_aggregate_filter(self, authenticated_client: TestClient):
         """集約フィルタリングしてCSVエクスポート"""
-        response = client.get("/api/visits.csv?sql=where sps_count > 0&limit=10")
+        response = authenticated_client.get("/api/visits.csv?sql=where sps_count > 0&limit=10")
         assert response.status_code == 200
         assert "text/csv" in response.headers["content-type"]
 

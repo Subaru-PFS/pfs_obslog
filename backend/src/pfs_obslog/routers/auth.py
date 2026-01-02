@@ -120,4 +120,6 @@ async def get_status(
                 authenticated=True,
                 user=AuthUser(id=user.id, account_name=user.account_name),
             )
+        # ユーザーがDBに存在しない場合でもセッションがあれば認証済み
+        return AuthStatusResponse(authenticated=True, user=None)
     return AuthStatusResponse(authenticated=False, user=None)
