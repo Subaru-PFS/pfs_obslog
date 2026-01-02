@@ -3,7 +3,7 @@ import type { AgcVisitDetail, AgcExposure } from '../../../store/api/generatedAp
 import { LazyImage } from '../../../components/LazyImage'
 import { IconButton } from '../../../components/Icon'
 import { API_BASE_URL } from '../../../config'
-import { useHomeContext } from '../context'
+import { useVisitsBrowserContext } from '../context'
 import styles from './Inspector.module.scss'
 
 type ImageScale = 0.5 | 0.67 | 1
@@ -44,7 +44,7 @@ function getAgcFitsDownloadUrl(visitId: number, exposureId: number): string {
 }
 
 export function AgcInspector({ agc }: AgcInspectorProps) {
-  const { selectedVisitId } = useHomeContext()
+  const { selectedVisitId } = useVisitsBrowserContext()
   const exposures = agc.exposures ?? []
   const avgExptime = useMemo(() => calculateAverageExptime(exposures), [exposures])
   const [page, setPage] = useState(0)

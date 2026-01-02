@@ -1,6 +1,6 @@
 import { createHashRouter, Navigate } from 'react-router-dom'
 import { Login } from '../pages/Login'
-import { Home } from '../pages/Home'
+import { VisitsBrowser } from '../pages/VisitsBrowser'
 import { SqlSyntaxHelp } from '../pages/SqlSyntaxHelp'
 import { Designs } from '../pages/Designs'
 import { RequireAuth } from '../components/Auth/RequireAuth'
@@ -27,7 +27,15 @@ export const router = createHashRouter([
     children: [
       {
         index: true,
-        element: <Home />,
+        element: <Navigate to="/visits" replace />,
+      },
+      {
+        path: 'visits',
+        element: <VisitsBrowser />,
+      },
+      {
+        path: 'visits/:visitId',
+        element: <VisitsBrowser />,
       },
       {
         path: 'sql-syntax-help',
@@ -45,6 +53,6 @@ export const router = createHashRouter([
   },
   {
     path: '*',
-    element: <Navigate to="/" replace />,
+    element: <Navigate to="/visits" replace />,
   },
 ])

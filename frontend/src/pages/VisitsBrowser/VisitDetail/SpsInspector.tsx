@@ -3,7 +3,7 @@ import type { SpsVisitDetail, SpsExposure } from '../../../store/api/generatedAp
 import { LazyImage } from '../../../components/LazyImage'
 import { IconButton } from '../../../components/Icon'
 import { API_BASE_URL } from '../../../config'
-import { useHomeContext } from '../context'
+import { useVisitsBrowserContext } from '../context'
 import { useVisitDetailContext } from './context'
 import styles from './Inspector.module.scss'
 
@@ -75,7 +75,7 @@ function getSpsFitsDownloadUrl(visitId: number, cameraId: number): string {
 }
 
 export function SpsInspector({ sps }: SpsInspectorProps) {
-  const { selectedVisitId } = useHomeContext()
+  const { selectedVisitId } = useVisitsBrowserContext()
   const { selectedFitsId, setSelectedFitsId } = useVisitDetailContext()
   const exposures = sps.exposures ?? []
   const avgExptime = useMemo(() => calculateAverageExptime(exposures), [exposures])

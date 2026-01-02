@@ -1,10 +1,10 @@
 export type Styles = {
-  home: string;
   leftPane: string;
   placeholder: string;
   resizer: string;
   resizerActive: string;
   rightPane: string;
+  visitsBrowser: string;
 };
 
 export type ClassNames = keyof Styles;

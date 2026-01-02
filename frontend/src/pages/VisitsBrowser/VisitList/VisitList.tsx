@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useLocalStorage } from 'react-use'
 import type { MaterialSymbol } from 'material-symbols'
 import {
@@ -15,7 +16,7 @@ import {
 } from '../../../store/api/enhancedApi'
 
 const { useLazyGetVisitRankApiVisitsVisitIdRankGetQuery } = generatedApi
-import { useHomeContext } from '../context'
+import { useVisitsBrowserContext } from '../context'
 import { Icon } from '../../../components/Icon'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
@@ -88,25 +89,6 @@ interface ExposureFilters {
   sps: ExposureCondition
   mcs: ExposureCondition
   agc: ExposureCondition
-}
-
-const DEFAULT_EXPOSURE_FILTERS: ExposureFilters = {
-  sps: '>=0',
-  mcs: '>=0',
-  agc: '>=0',
-}
-
-const EXPOSURE_STORAGE_KEY = 'pfs-obslog:visitList:exposureFilters'
-
-function useExposureFilters(): [ExposureFilters, (filters: Partial<ExposureFilters>) => void] {
-  const [stored, setStored] = useLocalStorage<ExposureFilters>(EXPOSURE_STORAGE_KEY, DEFAULT_EXPOSURE_FILTERS)
-  const filters = useMemo(() => ({ ...DEFAULT_EXPOSURE_FILTERS, ...stored }), [stored])
-
-  const updateFilters = useCallback((update: Partial<ExposureFilters>) => {
-    setStored((prev) => ({ ...DEFAULT_EXPOSURE_FILTERS, ...prev, ...update }))
-  }, [setStored])
-
-  return [filters, updateFilters]
 }
 
 function useColumnVisibility(): [ColumnVisibility, (key: ColumnKey, visible: boolean) => void] {
@@ -294,7 +276,7 @@ interface IicSequenceHeaderProps {
 }
 
 function IicSequenceHeader({ iicSequence, visitId, onSequenceGroupClick }: IicSequenceHeaderProps) {
-  const { setSelectedVisitId } = useHomeContext()
+  const { setSelectedVisitId } = useVisitsBrowserContext()
   const [createNote] = useCreateVisitSetNoteApiVisitSetsVisitSetIdNotesPostMutation()
   const [updateNote] = useUpdateVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdPutMutation()
   const [deleteNote] = useDeleteVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdDeleteMutation()
@@ -401,7 +383,7 @@ interface VisitGroupComponentProps {
 }
 
 function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGroupComponentProps) {
-  const { selectedVisitId, setSelectedVisitId } = useHomeContext()
+  const { selectedVisitId, setSelectedVisitId } = useVisitsBrowserContext()
   
   // Check if any visit in this group is selected
   const hasSelectedVisit = group.visits.some(v => v.id === selectedVisitId)
@@ -560,13 +542,42 @@ function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGrou
   )
 }
 
-export function VisitList() {
-  const { selectedVisitId, setSelectedVisitId } = useHomeContext()
+// Helper to parse URL search params
+function parseUrlParams(searchParams: URLSearchParams) {
+  const sql = searchParams.get('sql') ?? ''
+  const startDate = searchParams.get('startDate') ?? undefined
+  const endDate = searchParams.get('endDate') ?? undefined
+  const sps = (searchParams.get('sps') ?? '>=0') as ExposureCondition
+  const mcs = (searchParams.get('mcs') ?? '>=0') as ExposureCondition
+  const agc = (searchParams.get('agc') ?? '>=0') as ExposureCondition
   
-  const [searchQuery, setSearchQuery] = useState('')
-  const [appliedSql, setAppliedSql] = useState<string | null>(null)
-  const [dateRange, setDateRange] = useState<DateRange>([undefined, undefined])
-  const [exposureFilters, setExposureFilters] = useExposureFilters()
+  return {
+    sql,
+    dateRange: [startDate, endDate] as DateRange,
+    exposureFilters: {
+      sps: ['>=0', '>0', '==0'].includes(sps) ? sps : '>=0',
+      mcs: ['>=0', '>0', '==0'].includes(mcs) ? mcs : '>=0',
+      agc: ['>=0', '>0', '==0'].includes(agc) ? agc : '>=0',
+    } as ExposureFilters,
+  }
+}
+
+export function VisitList() {
+  const { selectedVisitId, setSelectedVisitId } = useVisitsBrowserContext()
+  const [searchParams, setSearchParams] = useSearchParams()
+  
+  // Parse URL params once on mount and when they change externally
+  const urlParams = useMemo(() => parseUrlParams(searchParams), [searchParams])
+  
+  // Local state for the search text box (may differ from applied SQL)
+  const [searchQuery, setSearchQuery] = useState(urlParams.sql)
+  // Applied SQL (synced with URL)
+  const appliedSql = urlParams.sql || null
+  // Date range (synced with URL)
+  const dateRange = urlParams.dateRange
+  // Exposure filters (synced with URL)
+  const exposureFilters = urlParams.exposureFilters
+  
   const [offset, setOffset] = useState(0)
   const [limit, setLimit] = useState(PER_PAGE)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -574,6 +585,93 @@ export function VisitList() {
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [searchError, setSearchError] = useState<string | null>(null)
   const [shouldScrollToTop, setShouldScrollToTop] = useState(false)
+
+  // Helper to update URL params
+  const updateUrlParams = useCallback((updates: {
+    sql?: string | null
+    startDate?: string | null
+    endDate?: string | null
+    sps?: ExposureCondition
+    mcs?: ExposureCondition
+    agc?: ExposureCondition
+  }) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      
+      if ('sql' in updates) {
+        if (updates.sql) {
+          newParams.set('sql', updates.sql)
+        } else {
+          newParams.delete('sql')
+        }
+      }
+      if ('startDate' in updates) {
+        if (updates.startDate) {
+          newParams.set('startDate', updates.startDate)
+        } else {
+          newParams.delete('startDate')
+        }
+      }
+      if ('endDate' in updates) {
+        if (updates.endDate) {
+          newParams.set('endDate', updates.endDate)
+        } else {
+          newParams.delete('endDate')
+        }
+      }
+      if ('sps' in updates) {
+        if (updates.sps && updates.sps !== '>=0') {
+          newParams.set('sps', updates.sps)
+        } else {
+          newParams.delete('sps')
+        }
+      }
+      if ('mcs' in updates) {
+        if (updates.mcs && updates.mcs !== '>=0') {
+          newParams.set('mcs', updates.mcs)
+        } else {
+          newParams.delete('mcs')
+        }
+      }
+      if ('agc' in updates) {
+        if (updates.agc && updates.agc !== '>=0') {
+          newParams.set('agc', updates.agc)
+        } else {
+          newParams.delete('agc')
+        }
+      }
+      
+      return newParams
+    }, { replace: true })
+  }, [setSearchParams])
+
+  // Wrapper functions to update URL when state changes
+  const setAppliedSql = useCallback((sql: string | null) => {
+    updateUrlParams({ sql })
+    setOffset(0)
+    setShouldScrollToTop(true)
+  }, [updateUrlParams])
+  
+  const setDateRange = useCallback((range: DateRange) => {
+    updateUrlParams({ 
+      startDate: range[0] ?? null, 
+      endDate: range[1] ?? null 
+    })
+    setOffset(0)
+    setShouldScrollToTop(true)
+  }, [updateUrlParams])
+  
+  const setExposureFilters = useCallback((partialFilters: Partial<ExposureFilters>) => {
+    // Merge with current filters to get full filters
+    const newFilters = { ...exposureFilters, ...partialFilters }
+    updateUrlParams({ 
+      sps: newFilters.sps, 
+      mcs: newFilters.mcs, 
+      agc: newFilters.agc 
+    })
+    setOffset(0)
+    setShouldScrollToTop(true)
+  }, [updateUrlParams, exposureFilters])
 
   // Column visibility state with localStorage persistence
   const [columns, setColumnVisibility] = useColumnVisibility()
@@ -804,21 +902,17 @@ export function VisitList() {
       setAppliedSql(`where any_column like '%${query}%'`)
     }
     
-    // Reset pagination
-    setOffset(0)
+    // Reset pagination (setAppliedSql already handles offset reset and scroll)
     setLimit(PER_PAGE)
-    setShouldScrollToTop(true)
-  }, [searchQuery, isSqlQuery])
+  }, [searchQuery, isSqlQuery, setAppliedSql])
 
   // Clear search
   const handleClearSearch = useCallback(() => {
     setSearchQuery('')
     setAppliedSql(null)
     setSearchError(null)
-    setOffset(0)
     setLimit(PER_PAGE)
-    setShouldScrollToTop(true)
-  }, [])
+  }, [setAppliedSql])
 
   // Handle sequence group filter
   const handleSequenceGroupFilter = useCallback((groupId: number, _groupName: string) => {
@@ -826,27 +920,20 @@ export function VisitList() {
     setSearchQuery(sql)
     setAppliedSql(sql)
     setSearchError(null)
-    setOffset(0)
     setLimit(PER_PAGE)
-    setShouldScrollToTop(true)
-  }, [])
+  }, [setAppliedSql])
 
-  // Handle date range change
+  // Handle date range change (setDateRange already handles offset reset and scroll)
   const handleDateRangeChange = useCallback((newRange: DateRange) => {
     setDateRange(newRange)
-    // Reset pagination when date range changes
-    setOffset(0)
     setLimit(PER_PAGE)
-    setShouldScrollToTop(true)
-  }, [])
+  }, [setDateRange])
 
   // Clear date range
   const handleClearDateRange = useCallback(() => {
     setDateRange([undefined, undefined])
-    setOffset(0)
     setLimit(PER_PAGE)
-    setShouldScrollToTop(true)
-  }, [])
+  }, [setDateRange])
 
   // キーボードナビゲーション
   useEffect(() => {

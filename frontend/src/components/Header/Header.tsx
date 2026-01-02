@@ -35,7 +35,7 @@ export function Header() {
 
   return (
     <header className={styles.header}>
-      <div className={styles.logo} onClick={() => navigate('/')}>
+      <div className={styles.logo} onClick={() => navigate('/visits')}>
         PFS-OBSLOG
       </div>
 
@@ -48,7 +48,7 @@ export function Header() {
       <div className={styles.buttons}>
         <IconButton
           icon="camera"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/visits')}
           disabled={isVisitsActive}
           tooltip="Visits"
         />

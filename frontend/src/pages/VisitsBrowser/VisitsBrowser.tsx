@@ -1,16 +1,16 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useLocalStorage } from 'react-use'
-import { HomeProvider } from './context'
+import { VisitsBrowserProvider } from './context'
 import { VisitList } from './VisitList'
 import { VisitDetail } from './VisitDetail'
-import styles from './Home.module.scss'
+import styles from './VisitsBrowser.module.scss'
 
 const DEFAULT_LEFT_PANE_WIDTH = 500
 const MIN_LEFT_PANE_WIDTH = 300
 const MAX_LEFT_PANE_WIDTH = 1200
-const STORAGE_KEY = 'pfs-obslog:home:leftPaneWidth'
+const STORAGE_KEY = 'pfs-obslog:visitsBrowser:leftPaneWidth'
 
-function HomeContent() {
+function VisitsBrowserContent() {
   const [storedWidth, setStoredWidth] = useLocalStorage(STORAGE_KEY, DEFAULT_LEFT_PANE_WIDTH)
   const [leftPaneWidth, setLeftPaneWidth] = useState(storedWidth ?? DEFAULT_LEFT_PANE_WIDTH)
   const [isResizing, setIsResizing] = useState(false)
@@ -47,7 +47,7 @@ function HomeContent() {
   }, [isResizing, leftPaneWidth, setStoredWidth])
 
   return (
-    <div className={styles.home} ref={containerRef}>
+    <div className={styles.visitsBrowser} ref={containerRef}>
       <div className={styles.leftPane} style={{ width: leftPaneWidth }}>
         <VisitList />
       </div>
@@ -64,11 +64,11 @@ function HomeContent() {
   )
 }
 
-export function Home() {
+export function VisitsBrowser() {
   return (
-    <HomeProvider>
-      <HomeContent />
-    </HomeProvider>
+    <VisitsBrowserProvider>
+      <VisitsBrowserContent />
+    </VisitsBrowserProvider>
   )
 }
 

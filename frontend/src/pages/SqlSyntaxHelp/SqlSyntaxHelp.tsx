@@ -79,8 +79,8 @@ export function SqlSyntaxHelp() {
   const navigate = useNavigate()
 
   const handleExampleClick = (sql: string) => {
-    // Navigate to home with the SQL query
-    navigate(`/${buildSearchString(sql)}`)
+    // Navigate to visits page with the SQL query
+    navigate(`/visits${buildSearchString(sql)}`)
   }
 
   return (

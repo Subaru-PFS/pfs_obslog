@@ -8,7 +8,7 @@ import {
   useUpdateVisitNoteApiVisitsVisitIdNotesNoteIdPutMutation,
   useDeleteVisitNoteApiVisitsVisitIdNotesNoteIdDeleteMutation,
 } from '../../../store/api/enhancedApi'
-import { useHomeContext } from '../context'
+import { useVisitsBrowserContext } from '../context'
 import { VisitDetailProvider, useVisitDetailContext, type TabName } from './context'
 import { Tabs, TabPanel, type TabItem } from '../../../components/Tabs'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
@@ -198,7 +198,7 @@ function VisitInspector({ visit }: VisitInspectorProps) {
 }
 
 export function VisitDetail() {
-  const { selectedVisitId } = useHomeContext()
+  const { selectedVisitId } = useVisitsBrowserContext()
 
   const {
     data: visit,

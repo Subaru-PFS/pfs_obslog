@@ -3,7 +3,7 @@ import type { McsVisitDetail, McsExposure } from '../../../store/api/generatedAp
 import { LazyImage } from '../../../components/LazyImage'
 import { IconButton } from '../../../components/Icon'
 import { API_BASE_URL } from '../../../config'
-import { useHomeContext } from '../context'
+import { useVisitsBrowserContext } from '../context'
 import { useVisitDetailContext } from './context'
 import styles from './Inspector.module.scss'
 
@@ -52,7 +52,7 @@ function getMcsFitsDownloadUrl(visitId: number, frameId: number): string {
 }
 
 export function McsInspector({ mcs }: McsInspectorProps) {
-  const { selectedVisitId } = useHomeContext()
+  const { selectedVisitId } = useVisitsBrowserContext()
   const { selectedFitsId, setSelectedFitsId } = useVisitDetailContext()
   const exposures = mcs.exposures ?? []
   const avgExptime = useMemo(() => calculateAverageExptime(exposures), [exposures])
