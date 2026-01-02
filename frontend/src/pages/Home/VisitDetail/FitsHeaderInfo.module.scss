@@ -308,7 +308,8 @@ table.cards {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #999;
+  color: $hint-text-color;
   font-size: 13px;
   font-style: italic;
+  background-color: $distant-background;
 }
