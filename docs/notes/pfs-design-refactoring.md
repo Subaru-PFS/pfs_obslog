@@ -208,19 +208,106 @@ React Contextを使用してページ全体の状態を管理:
 
 ## 7. リファクタリング検討事項
 
-### 7.1 パフォーマンス改善
+### 7.1 メタデータのSQLite化（優先度: 高）
 
-- [ ] Design一覧取得のキャッシュ導入
-- [ ] 検索のデバウンス処理追加
+**課題:**
+現在の実装では、Design一覧を取得する際に以下の処理を行っています：
+1. ディレクトリ内の全FITSファイルをglob
+2. 各FITSファイルを個別にオープンしてヘッダーを読み込み
+3. メタデータを抽出
+
+これはDesignファイルが大量（数百～数千）になると非常に遅くなります。
+
+**解決策:**
+メタデータをSQLiteデータベースにキャッシュし、一覧取得を高速化します。
+
+#### 設計案
+
+**データベーススキーマ:**
+```sql
+CREATE TABLE pfs_design_metadata (
+    id TEXT PRIMARY KEY,           -- Design ID (16進数)
+    frameid TEXT NOT NULL,         -- ファイル名
+    name TEXT,                      -- Design名
+    file_mtime REAL NOT NULL,      -- FITSファイルの更新時刻（UNIX timestamp）
+    ra REAL,                        -- 中心赤経
+    dec REAL,                       -- 中心赤緯
+    arms TEXT,                      -- 使用アーム
+    num_design_rows INTEGER,       -- Design行数
+    num_photometry_rows INTEGER,   -- 測光行数
+    num_guidestar_rows INTEGER,    -- ガイド星行数
+    -- ターゲットタイプ別カウント
+    science_count INTEGER,
+    sky_count INTEGER,
+    fluxstd_count INTEGER,
+    unassigned_count INTEGER,
+    engineering_count INTEGER,
+    sunss_imaging_count INTEGER,
+    sunss_diffuse_count INTEGER,
+    -- 管理用
+    cached_at REAL NOT NULL        -- キャッシュ作成時刻
+);
+
+CREATE INDEX idx_pfs_design_mtime ON pfs_design_metadata(file_mtime);
+```
+
+**更新ロジック:**
+```
+1. ディレクトリ内のFITSファイル一覧を取得（os.scandir使用）
+2. 各ファイルのmtimeを確認
+3. DBに存在しない or mtimeが更新されているファイルのみFITSを読み込み
+4. DBを更新
+5. DBから一覧を返却
+
+同時に:
+- DBに存在するがファイルが消えているレコードを削除
+```
+
+**実装モジュール構成:**
+```
+backend/src/pfs_obslog/
+├── pfs_design_cache.py      # SQLiteキャッシュ管理
+└── routers/
+    └── pfs_designs.py       # 既存（キャッシュ使用に変更）
+```
+
+**クラス設計:**
+```python
+class PfsDesignCache:
+    def __init__(self, db_path: Path, design_dir: Path):
+        ...
+    
+    def get_all_entries(self) -> list[PfsDesignEntry]:
+        """キャッシュを更新し、全エントリを返却"""
+        ...
+    
+    def sync(self) -> None:
+        """ファイルシステムとDBを同期"""
+        ...
+    
+    def _needs_update(self, path: Path) -> bool:
+        """ファイルの更新が必要か判定"""
+        ...
+```
+
+**設定:**
+```python
+# config.py
+pfs_design_cache_db: Path = Path("~/.cache/pfs-obslog/pfs_design.db")
+```
+
+### 7.2 パフォーマンス改善（その他）
+
+- [ ] 検索のデバウンス処理追加（フロントエンド）
 - [ ] ファイバーマーカー描画の最適化
 
-### 7.2 機能追加案
+### 7.3 機能追加案
 
 - [ ] Design比較機能
 - [ ] フィルタリング強化（アーム、ターゲットタイプ）
 - [ ] エクスポート機能（CSV、JSONなど）
 
-### 7.3 UI/UX改善
+### 7.4 UI/UX改善
 
 - [ ] レスポンシブデザイン対応
 - [ ] キーボードショートカット
