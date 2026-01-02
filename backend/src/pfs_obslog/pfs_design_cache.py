@@ -148,6 +148,126 @@ class PfsDesignCache:
             for row in rows
         ]
 
+    def get_entries_paginated(
+        self,
+        search: str | None = None,
+        sort_by: str = "date_modified",
+        sort_order: str = "desc",
+        offset: int = 0,
+        limit: int = 50,
+    ) -> tuple[list[dict], int]:
+        """ページネーション、フィルタリング、ソート対応でエントリを取得
+
+        Args:
+            search: 検索文字列（name または id に部分一致）
+            sort_by: ソートキー（"date_modified", "name", "id"）
+            sort_order: ソート順序（"asc", "desc"）
+            offset: 取得開始位置
+            limit: 取得件数
+
+        Returns:
+            (エントリリスト, 総件数) のタプル
+        """
+        if not self.design_dir.exists():
+            return [], 0
+
+        # SQLクエリの構築
+        base_query = """
+            SELECT id, frameid, name, file_mtime, ra, dec, arms,
+                   num_design_rows, num_photometry_rows, num_guidestar_rows,
+                   science_count, sky_count, fluxstd_count,
+                   unassigned_count, engineering_count,
+                   sunss_imaging_count, sunss_diffuse_count
+            FROM pfs_design_metadata
+        """
+        count_query = "SELECT COUNT(*) FROM pfs_design_metadata"
+        params: list = []
+
+        # 検索条件
+        if search:
+            where_clause = " WHERE (name LIKE ? OR id LIKE ?)"
+            search_param = f"%{search}%"
+            params.extend([search_param, search_param])
+            base_query += where_clause
+            count_query += where_clause
+
+        # ソート
+        sort_column_map = {
+            "date_modified": "file_mtime",
+            "name": "name",
+            "id": "id",
+        }
+        sort_column = sort_column_map.get(sort_by, "file_mtime")
+        sort_dir = "ASC" if sort_order.lower() == "asc" else "DESC"
+        base_query += f" ORDER BY {sort_column} {sort_dir}"
+
+        # ページネーション
+        base_query += " LIMIT ? OFFSET ?"
+        query_params = params + [limit, offset]
+
+        with self._get_connection() as conn:
+            # 総件数を取得
+            cursor = conn.execute(count_query, params)
+            total = cursor.fetchone()[0]
+
+            # データを取得
+            cursor = conn.execute(base_query, query_params)
+            rows = cursor.fetchall()
+
+        entries = [
+            {
+                "id": row["id"],
+                "frameid": row["frameid"],
+                "name": row["name"] or "",
+                "date_modified": datetime.datetime.fromtimestamp(row["file_mtime"]),
+                "ra": row["ra"] or 0.0,
+                "dec": row["dec"] or 0.0,
+                "arms": row["arms"] or "-",
+                "num_design_rows": row["num_design_rows"] or 0,
+                "num_photometry_rows": row["num_photometry_rows"] or 0,
+                "num_guidestar_rows": row["num_guidestar_rows"] or 0,
+                "design_rows": {
+                    "science": row["science_count"] or 0,
+                    "sky": row["sky_count"] or 0,
+                    "fluxstd": row["fluxstd_count"] or 0,
+                    "unassigned": row["unassigned_count"] or 0,
+                    "engineering": row["engineering_count"] or 0,
+                    "sunss_imaging": row["sunss_imaging_count"] or 0,
+                    "sunss_diffuse": row["sunss_diffuse_count"] or 0,
+                },
+            }
+            for row in rows
+        ]
+
+        return entries, total
+
+    def get_all_positions(self) -> list[dict]:
+        """全Designの位置情報を取得（軽量版）
+
+        Returns:
+            位置情報（id, ra, dec）のリスト
+        """
+        if not self.design_dir.exists():
+            return []
+
+        with self._get_connection() as conn:
+            cursor = conn.execute(
+                """
+                SELECT id, ra, dec
+                FROM pfs_design_metadata
+                """
+            )
+            rows = cursor.fetchall()
+
+        return [
+            {
+                "id": row["id"],
+                "ra": row["ra"] or 0.0,
+                "dec": row["dec"] or 0.0,
+            }
+            for row in rows
+        ]
+
     def sync(self) -> bool:
         """ファイルシステムとデータベースを同期
 

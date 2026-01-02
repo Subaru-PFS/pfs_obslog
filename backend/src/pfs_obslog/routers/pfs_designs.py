@@ -7,7 +7,7 @@ import datetime
 import re
 from logging import getLogger
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from fastapi.responses import FileResponse
@@ -52,6 +52,23 @@ class PfsDesignEntry(BaseModel):
     num_photometry_rows: int  # 測光行数
     num_guidestar_rows: int  # ガイド星行数
     design_rows: DesignRows  # ターゲットタイプ別行数
+
+
+class PfsDesignListResponse(BaseModel):
+    """PFS Design 一覧レスポンス（ページネーション対応）"""
+
+    items: list[PfsDesignEntry]  # Designエントリのリスト
+    total: int  # 全件数（フィルタ適用後）
+    offset: int  # 現在のオフセット
+    limit: int  # 取得件数
+
+
+class PfsDesignPosition(BaseModel):
+    """PFS Design 位置情報（軽量版）"""
+
+    id: str  # Design ID（16進数文字列）
+    ra: float  # 中心赤経
+    dec: float  # 中心赤緯
 
 
 class DesignData(BaseModel):
@@ -200,12 +217,23 @@ def _sync_cache_in_background() -> None:
 
 @router.get(
     "",
-    response_model=list[PfsDesignEntry],
+    response_model=PfsDesignListResponse,
     summary="List PFS Designs",
-    description="Get a list of all available PFS Design files.",
+    description="Get a paginated list of PFS Design files with optional filtering and sorting.",
 )
-def list_pfs_designs(background_tasks: BackgroundTasks):
-    """PFS Design の一覧を取得
+def list_pfs_designs(
+    background_tasks: BackgroundTasks,
+    search: Optional[str] = Query(
+        None, description="Search string (matches name or id)"
+    ),
+    sort_by: Literal["date_modified", "name", "id"] = Query(
+        "date_modified", description="Field to sort by"
+    ),
+    sort_order: Literal["asc", "desc"] = Query("desc", description="Sort order"),
+    offset: int = Query(0, ge=0, description="Number of items to skip"),
+    limit: int = Query(50, ge=1, le=1000, description="Number of items to return"),
+):
+    """PFS Design の一覧を取得（ページネーション対応）
 
     キャッシュが有効な場合、SQLiteキャッシュから一覧を取得し、
     バックグラウンドでキャッシュを更新します。
@@ -214,7 +242,7 @@ def list_pfs_designs(background_tasks: BackgroundTasks):
     design_dir = settings.pfs_design_dir
 
     if not design_dir.exists():
-        return []
+        return PfsDesignListResponse(items=[], total=0, offset=offset, limit=limit)
 
     # キャッシュが有効な場合
     if settings.pfs_design_cache_enabled:
@@ -224,14 +252,26 @@ def list_pfs_designs(background_tasks: BackgroundTasks):
         background_tasks.add_task(_sync_cache_in_background)
 
         # キャッシュから取得
-        entries = cache.get_all_entries()
+        entries, total = cache.get_entries_paginated(
+            search=search,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            offset=offset,
+            limit=limit,
+        )
 
         # キャッシュが空の場合は同期を待つ（初回のみ）
-        if not entries:
+        if total == 0 and not search:
             cache.sync()
-            entries = cache.get_all_entries()
+            entries, total = cache.get_entries_paginated(
+                search=search,
+                sort_by=sort_by,
+                sort_order=sort_order,
+                offset=offset,
+                limit=limit,
+            )
 
-        return [
+        items = [
             PfsDesignEntry(
                 id=e["id"],
                 frameid=e["frameid"],
@@ -248,7 +288,12 @@ def list_pfs_designs(background_tasks: BackgroundTasks):
             for e in entries
         ]
 
+        return PfsDesignListResponse(
+            items=items, total=total, offset=offset, limit=limit
+        )
+
     # キャッシュが無効な場合（フォールバック）
+    # 全件取得してメモリでフィルタリング・ソート
     pattern = re.compile(r"^pfsDesign-0x[0-9a-fA-F]{16}\.fits$")
     design_list = []
 
@@ -261,10 +306,92 @@ def list_pfs_designs(background_tasks: BackgroundTasks):
                 logger.warning(f"Failed to read design file {path}: {e}")
                 continue
 
-    # 更新日時の降順でソート
-    design_list.sort(key=lambda d: d.date_modified, reverse=True)
+    # フィルタリング
+    if search:
+        search_lower = search.lower()
+        design_list = [
+            d
+            for d in design_list
+            if search_lower in d.name.lower() or search_lower in d.id.lower()
+        ]
 
-    return design_list
+    # ソート
+    reverse = sort_order == "desc"
+    if sort_by == "name":
+        design_list.sort(key=lambda d: d.name, reverse=reverse)
+    elif sort_by == "id":
+        design_list.sort(key=lambda d: d.id, reverse=reverse)
+    else:  # date_modified
+        design_list.sort(key=lambda d: d.date_modified, reverse=reverse)
+
+    # ページネーション
+    total = len(design_list)
+    items = design_list[offset : offset + limit]
+
+    return PfsDesignListResponse(items=items, total=total, offset=offset, limit=limit)
+
+
+@router.get(
+    "/positions",
+    response_model=list[PfsDesignPosition],
+    summary="Get all PFS Design positions",
+    description="Get positions (id, ra, dec) of all PFS Designs. This is a lightweight endpoint for visualization.",
+)
+def list_design_positions(background_tasks: BackgroundTasks):
+    """全Designの位置情報を取得（軽量版）
+
+    天球ビュー（SkyViewer）での全Design表示に使用します。
+    """
+    settings = get_settings()
+    design_dir = settings.pfs_design_dir
+
+    if not design_dir.exists():
+        return []
+
+    # キャッシュが有効な場合
+    if settings.pfs_design_cache_enabled:
+        cache = get_pfs_design_cache(settings.pfs_design_cache_db, design_dir)
+
+        # バックグラウンドでキャッシュ更新
+        background_tasks.add_task(_sync_cache_in_background)
+
+        # キャッシュから取得
+        positions = cache.get_all_positions()
+
+        # キャッシュが空の場合は同期を待つ（初回のみ）
+        if not positions:
+            cache.sync()
+            positions = cache.get_all_positions()
+
+        return [
+            PfsDesignPosition(id=p["id"], ra=p["ra"], dec=p["dec"]) for p in positions
+        ]
+
+    # キャッシュが無効な場合（フォールバック）
+    # 全ファイルを読み込み、位置情報のみ抽出
+    import astropy.io.fits as afits
+
+    pattern = re.compile(r"^pfsDesign-0x([0-9a-fA-F]{16})\.fits$")
+    positions = []
+
+    for path in design_dir.glob("pfsDesign-0x*.fits"):
+        match = pattern.match(path.name)
+        if match:
+            try:
+                with afits.open(path) as hdul:
+                    header = hdul[0].header  # type: ignore[union-attr]
+                    positions.append(
+                        PfsDesignPosition(
+                            id=match.group(1).lower(),
+                            ra=float(header.get("RA", 0.0)),
+                            dec=float(header.get("DEC", 0.0)),
+                        )
+                    )
+            except Exception as e:
+                logger.warning(f"Failed to read design file {path}: {e}")
+                continue
+
+    return positions
 
 
 @router.get(
