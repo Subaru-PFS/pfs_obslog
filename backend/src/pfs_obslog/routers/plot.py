@@ -99,8 +99,7 @@ def _create_color_scatter_plot(
         ax = fig.add_subplot(111)
         ax.set_aspect("equal")
 
-        cm = plt.cm.get_cmap("viridis")
-        scatter = ax.scatter(x, y, s=1, c=z, cmap=cm)
+        scatter = ax.scatter(x, y, s=1, c=z, cmap="viridis")
         ax.grid(True)
         fig.colorbar(scatter, ax=ax)
 
