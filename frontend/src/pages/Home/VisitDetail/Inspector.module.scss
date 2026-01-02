@@ -1,3 +1,6 @@
+@use "sass:color";
+@use '../../../styles/theme' as *;
+
 .inspector {
   display: flex;
   flex-direction: column;
@@ -122,8 +125,8 @@
   }
 
   .armCell {
-    background-color: #e3f2fd;
-    color: #1565c0;
+    background-color: color.change($theme, $lightness: 90%, $saturation: 20%);
+    color: $accent;
     font-weight: 700;
     width: 32px;
     vertical-align: middle;
@@ -378,7 +381,7 @@
 
 .cameraLink {
   font-size: 0.65rem;
-  color: #1976d2;
+  color: $accent;
   text-decoration: none;
 
   &:hover {
@@ -454,8 +457,8 @@
 
 // Selected state for FITS header button
 .selected {
-  background-color: #1976d2 !important;
-  color: white !important;
+  background-color: $accent !important;
+  color: $text-color !important;
 }
 
 // FITS Header Panel (second definition for different context)

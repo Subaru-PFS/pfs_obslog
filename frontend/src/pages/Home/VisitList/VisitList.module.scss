@@ -68,26 +68,12 @@ $toolbar-input-height: 32px;
 }
 
 .toolbarButton {
-  @include button-base;
+  @include button-standard;
   height: $toolbar-input-height;
-  padding: 0 8px;
-  font-size: 0.875rem;
-  background-color: $input-background;
   min-width: $toolbar-input-height;
-  box-shadow: $small-shadow;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  &:hover:not(:disabled) {
-    background-color: $hover-background-color;
-  }
-
-  &:disabled {
-    background-color: $disabled-background-color;
-    color: $disabled-text-color;
-    cursor: not-allowed;
-  }
 }
 
 .toolbarActions {
@@ -328,21 +314,9 @@ $pagination-border-radius: 12px;
 }
 
 .paginationButton {
-  @include button-base;
+  @include button-standard;
   padding: 4px 12px;
   font-size: 1rem;
-  background-color: $input-background;
-  box-shadow: $small-shadow;
-
-  &:hover:not(:disabled) {
-    background-color: $hover-background-color;
-  }
-
-  &:disabled {
-    background-color: $disabled-background-color;
-    color: $disabled-text-color;
-    cursor: not-allowed;
-  }
 }
 
 // =============================================================================
@@ -364,22 +338,10 @@ $pagination-border-radius: 12px;
   gap: 2px;
 
   button {
-    @include button-base;
+    @include button-standard;
     padding: 2px 4px;
-    font-size: 0.75rem;
-    background-color: $input-background;
     min-width: 24px;
     height: 24px;
-
-    &:hover:not(:disabled) {
-      background-color: $hover-background-color;
-    }
-
-    &:disabled {
-      background-color: $disabled-background-color;
-      color: $disabled-text-color;
-      cursor: not-allowed;
-    }
   }
 
   .pageInfo {

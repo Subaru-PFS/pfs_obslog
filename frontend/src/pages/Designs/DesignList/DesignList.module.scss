@@ -18,10 +18,8 @@
   margin-bottom: 8px;
 
   input[type="search"] {
+    @include rounded-text-input;
     flex-grow: 1;
-    padding: 4px 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
   }
 }
 

@@ -119,21 +119,12 @@
 }
 
 .hduDropdown {
-  padding: 4px 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 12px;
-  background-color: #fff;
-  cursor: pointer;
+  @include button-standard;
   min-width: 120px;
-
-  &:hover {
-    border-color: #999;
-  }
 
   &:focus {
     outline: none;
-    border-color: #1976d2;
+    box-shadow: inset 0 0 0 2px $accent;
   }
 }
 
@@ -143,23 +134,7 @@
 }
 
 .hduButton {
-  padding: 4px 10px;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-
-  &:hover {
-    background-color: #f0f0f0;
-  }
-
-  &.selected {
-    background-color: #1976d2;
-    color: white;
-    border-color: #1565c0;
-  }
+  @include button-standard;
 }
 
 .scrollable {
@@ -208,7 +183,7 @@ table.cards {
 
         &:focus {
           outline: none;
-          border-color: #1976d2;
+          border-color: $accent;
         }
       }
     }
@@ -240,7 +215,7 @@ table.cards {
 
     th {
       font-weight: 600;
-      color: #1565c0;
+      color: $accent;
     }
   }
 
