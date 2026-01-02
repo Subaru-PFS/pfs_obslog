@@ -50,6 +50,7 @@ PFS Obslog 2 のドキュメント一覧です。
 | ドキュメント | 説明 |
 |-------------|------|
 | [pfs-design-speedup.md](notes/pfs-design-speedup.md) | PFS Design API高速化の調査 |
+| [pfs-design-refactoring.md](notes/pfs-design-refactoring.md) | PFS Design Viewerリファクタリング調査 |
 | [visit-detail-pane.md](notes/visit-detail-pane.md) | Visit詳細ペイン実装の調査 |
 
 ---
