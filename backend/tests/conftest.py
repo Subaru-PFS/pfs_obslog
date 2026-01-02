@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 from pfs_obslog.config import Settings
 from pfs_obslog.main import app
 from pfs_obslog.database import get_db
+from pfs_obslog.pfs_design_cache import clear_pfs_design_cache
 
 
 # 開発用DBの設定
@@ -195,3 +196,14 @@ def authenticated_client(client):
         assert response.status_code == 200, f"Login failed: {response.json()}"
 
     return client
+
+
+@pytest.fixture(autouse=True)
+def cleanup_pfs_design_cache():
+    """各テスト前後にPFS Designキャッシュをクリア
+
+    シングルトンインスタンスの状態がテスト間で引き継がれないようにします。
+    """
+    clear_pfs_design_cache()
+    yield
+    clear_pfs_design_cache()

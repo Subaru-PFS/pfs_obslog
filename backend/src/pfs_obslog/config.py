@@ -58,6 +58,14 @@ class Settings(BaseSettings):
     # 添付ファイル保存ディレクトリ
     attachments_dir: Path = Path("./attachments")
 
+    # PFS Design キャッシュ設定
+    pfs_design_cache_enabled: bool = True  # SQLiteキャッシュを有効化
+
+    @property
+    def pfs_design_cache_db(self) -> Path:
+        """PFS Design キャッシュDBのパス"""
+        return self.cache_dir / "pfs_design.db"
+
     @property
     def api_prefix(self) -> str:  # pragma: no cover
         """APIのプレフィックス（例: /obslog/api）"""

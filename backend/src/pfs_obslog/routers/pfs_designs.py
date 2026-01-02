@@ -9,11 +9,12 @@ from logging import getLogger
 from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from pfs_obslog.config import get_settings
+from pfs_obslog.pfs_design_cache import get_pfs_design_cache
 from pfs_obslog.routers.fits import FitsMeta, FitsHdu, FitsHeader, Card
 
 logger = getLogger(__name__)
@@ -188,20 +189,66 @@ def _read_design_entry(path: Path) -> PfsDesignEntry:
 # ============================================================
 
 
+def _sync_cache_in_background() -> None:
+    """バックグラウンドでキャッシュを同期"""
+    settings = get_settings()
+    if not settings.pfs_design_cache_enabled:
+        return
+    cache = get_pfs_design_cache(settings.pfs_design_cache_db, settings.pfs_design_dir)
+    cache.sync()
+
+
 @router.get(
     "",
     response_model=list[PfsDesignEntry],
     summary="List PFS Designs",
     description="Get a list of all available PFS Design files.",
 )
-def list_pfs_designs():
-    """PFS Design の一覧を取得"""
+def list_pfs_designs(background_tasks: BackgroundTasks):
+    """PFS Design の一覧を取得
+
+    キャッシュが有効な場合、SQLiteキャッシュから一覧を取得し、
+    バックグラウンドでキャッシュを更新します。
+    """
     settings = get_settings()
     design_dir = settings.pfs_design_dir
 
     if not design_dir.exists():
         return []
 
+    # キャッシュが有効な場合
+    if settings.pfs_design_cache_enabled:
+        cache = get_pfs_design_cache(settings.pfs_design_cache_db, design_dir)
+
+        # バックグラウンドでキャッシュ更新
+        background_tasks.add_task(_sync_cache_in_background)
+
+        # キャッシュから取得
+        entries = cache.get_all_entries()
+
+        # キャッシュが空の場合は同期を待つ（初回のみ）
+        if not entries:
+            cache.sync()
+            entries = cache.get_all_entries()
+
+        return [
+            PfsDesignEntry(
+                id=e["id"],
+                frameid=e["frameid"],
+                name=e["name"],
+                date_modified=e["date_modified"],
+                ra=e["ra"],
+                dec=e["dec"],
+                arms=e["arms"],
+                num_design_rows=e["num_design_rows"],
+                num_photometry_rows=e["num_photometry_rows"],
+                num_guidestar_rows=e["num_guidestar_rows"],
+                design_rows=DesignRows(**e["design_rows"]),
+            )
+            for e in entries
+        ]
+
+    # キャッシュが無効な場合（フォールバック）
     pattern = re.compile(r"^pfsDesign-0x[0-9a-fA-F]{16}\.fits$")
     design_list = []
 
