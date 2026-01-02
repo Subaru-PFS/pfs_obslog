@@ -325,7 +325,8 @@
 // Exposure リスト（MCS/AGC用）
 .exposureList {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
@@ -334,6 +335,7 @@
   background-color: #fafafa;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .exposureCardHeader {

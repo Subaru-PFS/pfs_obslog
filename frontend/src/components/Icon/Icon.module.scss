@@ -1,3 +1,5 @@
+@use '../../styles/theme' as *;
+
 .icon {
   display: inline-flex;
   align-items: center;
@@ -7,22 +9,9 @@
 }
 
 .iconButton {
+  @include button-standard;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: none;
-  border: none;
   padding: 4px;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-
-  &:hover:not(:disabled) {
-    background-color: rgba(0, 0, 0, 0.1);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 }
