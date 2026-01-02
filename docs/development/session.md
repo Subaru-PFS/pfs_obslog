@@ -3,6 +3,17 @@
 ## 概要
 
 このシステムでは、Starletteの`SessionMiddleware`を使用したクッキーベースのセッション管理を採用しています。
+また、デフォルトで全てのAPIエンドポイントに認証を要求する`AuthMiddleware`を使用しています。
+
+## 認証フロー
+
+```
+リクエスト → SessionMiddleware → AuthMiddleware → ルーター → レスポンス
+```
+
+1. **SessionMiddleware**: クッキーからセッションデータを読み取り、`request.session`にセット
+2. **AuthMiddleware**: `request.session`をチェックし、未認証なら401を返す（公開パスは除く）
+3. **ルーター**: 認証済みのリクエストを処理
 
 ## 仕組み
 
@@ -13,6 +24,28 @@
 - **有効期限**: `max_age=None`（セッションクッキー）
   - ブラウザを閉じるとクッキーが削除される
 - **SameSite**: `lax`（CSRF対策）
+
+### 認証ミドルウェア
+
+認証ミドルウェア（`AuthMiddleware`）は、デフォルトで全てのAPIエンドポイントに認証を要求します。
+以下のパスは例外として認証なしでアクセスできます：
+
+| パスパターン | 説明 |
+|------------|------|
+| `/api/auth/login` | ログインエンドポイント |
+| `/api/auth/logout` | ログアウトエンドポイント |
+| `/api/auth/status` | 認証状態確認 |
+| `/api/auth/me` | ユーザー情報取得（ルーターレベルで認証） |
+| `/api/healthz` | ヘルスチェック |
+| `/api/readyz` | レディネスチェック |
+| `/api/docs*` | Swagger UIドキュメント |
+| `/api/redoc*` | ReDocドキュメント |
+| `/api/openapi.json` | OpenAPIスキーマ |
+| `/api/attachments/{user}/{id}` | 添付ファイルダウンロード |
+| 静的ファイル（`/api/`以外） | フロントエンドの静的ファイル |
+
+**注意**: 新しいAPIエンドポイントを追加した場合、デフォルトで認証が必要になります。
+公開エンドポイントにする場合は、`backend/src/pfs_obslog/auth/middleware.py`の`DEFAULT_PUBLIC_PATTERNS`に追加してください。
 
 ### セッションデータ
 
