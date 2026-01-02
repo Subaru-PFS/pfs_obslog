@@ -4,11 +4,13 @@
 import type {
   PfsDesignEntry as ApiPfsDesignEntry,
   PfsDesignDetail as ApiPfsDesignDetail,
+  PfsDesignPosition as ApiPfsDesignPosition,
 } from '../../store/api/generatedApi'
 
 // APIから取得する型を再エクスポート
 export type PfsDesignEntry = ApiPfsDesignEntry
 export type PfsDesignDetail = ApiPfsDesignDetail
+export type PfsDesignPosition = ApiPfsDesignPosition
 
 // 色分けモード
 export type ColorMode = 'targetType' | 'fiberStatus'
@@ -23,8 +25,8 @@ export interface LegendEntry {
 // ID表示形式
 export type IdFormat = 'hex' | 'decimal'
 
-// ソート順
-export type SortOrder = 'altitude' | 'date_modified'
+// クライアントサイドソート順（高度順はサーバーサイドでは計算不可）
+export type ClientSortOrder = 'altitude' | 'date_modified'
 
 // タイムゾーンオフセット（分単位）HST = UTC-10:00
 export const HST_TZ_OFFSET = 600

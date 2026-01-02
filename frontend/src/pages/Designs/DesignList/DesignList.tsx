@@ -7,24 +7,13 @@ import { IconButton } from '../../../components/Icon'
 import { Tooltip } from '../../../components/Tooltip'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
 import { useDesignsContext } from '../DesignsContext'
-import type { PfsDesignEntry, IdFormat, SortOrder } from '../types'
+import type { PfsDesignEntry, IdFormat, ClientSortOrder } from '../types'
 import { DESIGN_CROSS_MATCH_COSINE } from '../types'
 import styles from './DesignList.module.scss'
 
 // localStorage キー
 const ID_FORMAT_KEY = '/DesignList/idFormat'
-const SORT_ORDER_KEY = '/DesignList/sortOrder'
-
-/**
- * 安全に正規表現をコンパイル
- */
-function safeRegexpCompile(pattern: string, flags?: string): RegExp {
-  try {
-    return new RegExp(pattern, flags)
-  } catch {
-    return new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), flags)
-  }
-}
+const CLIENT_SORT_KEY = '/DesignList/clientSort'
 
 /**
  * 赤道座標をラジアンに変換
@@ -83,22 +72,19 @@ function compareByAltitude(
   return b - a // コサインが大きい方が天頂に近い
 }
 
-/**
- * 更新日時順の比較関数
- */
-function compareByDateModified(a: PfsDesignEntry, b: PfsDesignEntry): number {
-  return a.date_modified === b.date_modified
-    ? 0
-    : a.date_modified < b.date_modified
-      ? -1
-      : 1
-}
-
 export function DesignList() {
   const {
     designs,
+    total,
     isLoading,
     refetch,
+    offset,
+    setOffset,
+    limit,
+    search,
+    setSearch,
+    setSortBy,
+    setSortOrder,
     selectedDesign,
     setSelectedDesign,
     focusedDesign,
@@ -108,44 +94,36 @@ export function DesignList() {
   } = useDesignsContext()
 
   const [idFormat, setIdFormat] = useLocalStorage<IdFormat>(ID_FORMAT_KEY, 'hex')
-  const [sortOrder, setSortOrder] = useLocalStorage<SortOrder>(SORT_ORDER_KEY, 'altitude')
-  const [searchText, setSearchText] = useState('')
+  const [clientSort, setClientSort] = useLocalStorage<ClientSortOrder>(CLIENT_SORT_KEY, 'altitude')
+  const [searchInput, setSearchInput] = useState(search)
 
-  // 検索用正規表現
-  const searchRegexp = useMemo(
-    () => safeRegexpCompile(searchText, 'i'),
-    [searchText]
+  // 検索テキスト変更時のデバウンス
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchInput(value)
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
+      searchTimeoutRef.current = setTimeout(() => {
+        setSearch(value)
+        setOffset(0) // 検索時はページをリセット
+      }, 300)
+    },
+    [setSearch, setOffset]
   )
 
-  // フォーマット済みIDマップ
-  const formattedIds = useMemo(
-    () => new Map(designs.map((d) => [d, formattedId(d, idFormat ?? 'hex')])),
-    [designs, idFormat]
-  )
-
-  // 検索フィルタリング
-  const filteredDesigns = useMemo(
-    () =>
-      designs.filter(
-        (d) =>
-          searchRegexp.test(d.name) ||
-          searchRegexp.test(formattedIds.get(d) ?? '')
-      ),
-    [designs, searchRegexp, formattedIds]
-  )
-
-  // ソート
+  // クライアントサイドソート（高度順のみ、サーバーでは計算不可）
   const sortedDesigns = useMemo(() => {
-    const sorted = [...filteredDesigns]
-    if ((sortOrder ?? 'altitude') === 'altitude') {
+    const sorted = [...designs]
+    if ((clientSort ?? 'altitude') === 'altitude') {
       sorted.sort((a, b) =>
         compareByAltitude(a, b, zenithSkyCoord.ra, zenithSkyCoord.dec)
       )
-    } else {
-      sorted.sort((a, b) => -compareByDateModified(a, b))
     }
+    // date_modifiedはサーバーサイドでソート済み
     return sorted
-  }, [filteredDesigns, sortOrder, zenithSkyCoord])
+  }, [designs, clientSort, zenithSkyCoord])
 
   // グループ化（同一座標付近のDesignをまとめる）
   const groupedDesigns = useMemo(() => {
@@ -164,6 +142,19 @@ export function DesignList() {
     }
     return groups
   }, [sortedDesigns])
+
+  // ページネーション
+  const handlePrevPage = useCallback(() => {
+    if (offset > 0) {
+      setOffset(Math.max(0, offset - limit))
+    }
+  }, [offset, limit, setOffset])
+
+  const handleNextPage = useCallback(() => {
+    if (offset + limit < total) {
+      setOffset(offset + limit)
+    }
+  }, [offset, limit, total, setOffset])
 
   // フォーカス中のDesignへスクロール
   useEffect(() => {
@@ -207,8 +198,8 @@ export function DesignList() {
           <input
             type="search"
             placeholder="Search by name or ID"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            value={searchInput}
+            onChange={(e) => handleSearchChange(e.target.value)}
           />
           <IconButton icon="refresh" onClick={() => refetch()} title="Refresh" />
         </div>
@@ -232,23 +223,47 @@ export function DesignList() {
           </label>
         </div>
         <div className={styles.sortCondition}>
-          Sort Order:&nbsp;
+          Sort by:&nbsp;
           <label>
             <input
               type="radio"
-              checked={(sortOrder ?? 'altitude') === 'altitude'}
-              onChange={() => setSortOrder('altitude')}
+              checked={(clientSort ?? 'altitude') === 'altitude'}
+              onChange={() => setClientSort('altitude')}
             />
             Altitude
           </label>
           <label>
             <input
               type="radio"
-              checked={(sortOrder ?? 'altitude') === 'date_modified'}
-              onChange={() => setSortOrder('date_modified')}
+              checked={(clientSort ?? 'altitude') === 'date_modified'}
+              onChange={() => {
+                setClientSort('date_modified')
+                // サーバーサイドソートも更新
+                setSortBy('date_modified')
+                setSortOrder('desc')
+              }}
             />
             Date Modified
           </label>
+        </div>
+        <div className={styles.pagination}>
+          <span>
+            {total > 0
+              ? `${offset + 1}-${Math.min(offset + limit, total)} of ${total}`
+              : '0 designs'}
+          </span>
+          <IconButton
+            icon="chevron_left"
+            onClick={handlePrevPage}
+            disabled={offset === 0}
+            title="Previous page"
+          />
+          <IconButton
+            icon="chevron_right"
+            onClick={handleNextPage}
+            disabled={offset + limit >= total}
+            title="Next page"
+          />
         </div>
       </div>
 

@@ -102,13 +102,13 @@ function createCirclePath(
 
 // Designマーカーコンポーネント
 function DesignMarkers() {
-  const { designs, focusedDesign, selectedDesign, setFocusedDesign, setSelectedDesign, jumpTo } =
+  const { allPositions, focusedDesign, selectedDesign, setFocusedDesign, setSelectedDesign, jumpTo } =
     useDesignsContext()
   const getGlobe = useGetGlobe()
 
-  // マーカーデータを生成
+  // マーカーデータを生成（全位置情報から）
   const markers = useMemo(() => {
-    return designs.map((d) => {
+    return allPositions.map((d) => {
       const coord = SkyCoord.fromDeg(d.ra, d.dec)
       return {
         position: coord.xyz as [number, number, number],
@@ -116,34 +116,83 @@ function DesignMarkers() {
         type: 'circle' as const,
       }
     })
-  }, [designs])
+  }, [allPositions])
 
   // クリックハンドラ
   const handleClick = useCallback(
     (e: { index: number }) => {
-      const design = designs[e.index]
-      if (design) {
-        setSelectedDesign(design)
+      const position = allPositions[e.index]
+      if (position) {
+        // 位置情報から簡易的なDesignEntryを作成してセット
+        // 実際のDesignEntryはリストに含まれている場合のみ完全な情報を持つ
+        setSelectedDesign({
+          id: position.id,
+          frameid: `pfsDesign-0x${position.id}.fits`,
+          name: '',
+          date_modified: '',
+          ra: position.ra,
+          dec: position.dec,
+          arms: '',
+          num_design_rows: 0,
+          num_photometry_rows: 0,
+          num_guidestar_rows: 0,
+          design_rows: {
+            science: 0,
+            sky: 0,
+            fluxstd: 0,
+            unassigned: 0,
+            engineering: 0,
+            sunss_imaging: 0,
+            sunss_diffuse: 0,
+          },
+        })
         const globe = getGlobe()
         if (globe.camera.fovy >= angle.deg2rad(4)) {
           jumpTo({
             fovy: angle.deg2rad(0.8),
-            coord: { ra: design.ra, dec: design.dec },
+            coord: { ra: position.ra, dec: position.dec },
             duration: 1000,
           })
         }
       }
     },
-    [designs, setSelectedDesign, getGlobe, jumpTo]
+    [allPositions, setSelectedDesign, getGlobe, jumpTo]
   )
 
   // ホバーハンドラ
   const handleHoverChange = useCallback(
     (e: { index: number | null }) => {
-      const design = e.index !== null ? designs[e.index] : undefined
-      setFocusedDesign(design)
+      if (e.index !== null) {
+        const position = allPositions[e.index]
+        if (position) {
+          // 簡易的なDesignEntryを作成
+          setFocusedDesign({
+            id: position.id,
+            frameid: `pfsDesign-0x${position.id}.fits`,
+            name: '',
+            date_modified: '',
+            ra: position.ra,
+            dec: position.dec,
+            arms: '',
+            num_design_rows: 0,
+            num_photometry_rows: 0,
+            num_guidestar_rows: 0,
+            design_rows: {
+              science: 0,
+              sky: 0,
+              fluxstd: 0,
+              unassigned: 0,
+              engineering: 0,
+              sunss_imaging: 0,
+              sunss_diffuse: 0,
+            },
+          })
+        }
+      } else {
+        setFocusedDesign(undefined)
+      }
     },
-    [designs, setFocusedDesign]
+    [allPositions, setFocusedDesign]
   )
 
   // フォーカス・選択のパス

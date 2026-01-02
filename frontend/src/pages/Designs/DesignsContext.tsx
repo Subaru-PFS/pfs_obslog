@@ -13,9 +13,10 @@ import {
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   useListPfsDesignsApiPfsDesignsGetQuery,
+  useListDesignPositionsApiPfsDesignsPositionsGetQuery,
   useGetDesignApiPfsDesignsIdHexGetQuery,
 } from '../../store/api/generatedApi'
-import type { PfsDesignEntry, PfsDesignDetail } from './types'
+import type { PfsDesignEntry, PfsDesignDetail, PfsDesignPosition } from './types'
 import { SUBARU_TELESCOPE_LOCATION, HST_TZ_OFFSET } from './types'
 
 /**
@@ -61,11 +62,34 @@ export type JumpToOptions = {
   duration?: number
 }
 
+// ソートオプション
+export type SortBy = 'date_modified' | 'name' | 'id'
+export type SortOrder = 'asc' | 'desc'
+
 interface DesignsContextValue {
-  // Design一覧
+  // Design一覧（ページネーション）
   designs: PfsDesignEntry[]
+  total: number
   isLoading: boolean
   refetch: () => void
+
+  // ページネーション状態
+  offset: number
+  setOffset: (offset: number) => void
+  limit: number
+  setLimit: (limit: number) => void
+
+  // 検索・ソート（サーバーサイド）
+  search: string
+  setSearch: (search: string) => void
+  sortBy: SortBy
+  setSortBy: (sortBy: SortBy) => void
+  sortOrder: SortOrder
+  setSortOrder: (sortOrder: SortOrder) => void
+
+  // 全Design位置情報（SkyViewer用）
+  allPositions: PfsDesignPosition[]
+  isLoadingPositions: boolean
 
   // 選択・フォーカス
   selectedDesign: PfsDesignEntry | undefined
@@ -101,12 +125,36 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   const navigate = useNavigate()
   const { designId } = useParams<{ designId?: string }>()
 
-  // Design一覧取得
+  // ページネーション状態
+  const [offset, setOffset] = useState(0)
+  const [limit, setLimit] = useState(50)
+
+  // 検索・ソート状態（サーバーサイド）
+  const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState<SortBy>('date_modified')
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
+
+  // Design一覧取得（ページネーション付き）
   const {
-    data: designs = [],
+    data: listResponse,
     isLoading,
     refetch,
-  } = useListPfsDesignsApiPfsDesignsGetQuery()
+  } = useListPfsDesignsApiPfsDesignsGetQuery({
+    search: search || undefined,
+    sortBy,
+    sortOrder,
+    offset,
+    limit,
+  })
+
+  const designs = listResponse?.items ?? []
+  const total = listResponse?.total ?? 0
+
+  // 全Design位置情報取得（SkyViewer用）
+  const {
+    data: allPositions = [],
+    isLoading: isLoadingPositions,
+  } = useListDesignPositionsApiPfsDesignsPositionsGetQuery()
 
   // 選択・フォーカス状態
   const [selectedDesign, setSelectedDesignState] = useState<
@@ -156,24 +204,42 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
 
   // URL paramsからDesignを選択
   useEffect(() => {
-    if (designId && designs.length > 0) {
-      const design = designs.find((d) => d.id === designId)
-      if (design) {
-        setSelectedDesignState(design)
-        // 初期ジャンプ
+    if (designId && allPositions.length > 0) {
+      // 位置情報からDesignを検索
+      const position = allPositions.find((p) => p.id === designId)
+      if (position) {
+        // 一覧にあればそれを選択、なければ位置情報から仮のエントリを作成
+        const design = designs.find((d) => d.id === designId)
+        if (design) {
+          setSelectedDesignState(design)
+        }
+        // 初期ジャンプ（位置情報から）
         jumpTo({
           fovy: (0.8 * Math.PI) / 180,
-          coord: { ra: design.ra, dec: design.dec },
+          coord: { ra: position.ra, dec: position.dec },
           duration: 0,
         })
       }
     }
-  }, [designId, designs, jumpTo])
+  }, [designId, allPositions, designs, jumpTo])
 
   const value: DesignsContextValue = {
     designs,
+    total,
     isLoading,
     refetch,
+    offset,
+    setOffset,
+    limit,
+    setLimit,
+    search,
+    setSearch,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    allPositions,
+    isLoadingPositions,
     selectedDesign,
     setSelectedDesign,
     focusedDesign,

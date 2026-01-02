@@ -38,6 +38,20 @@
   }
 }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 4px;
+  font-size: small;
+
+  span {
+    margin-right: auto;
+    color: #666;
+  }
+}
+
 .list {
   position: relative;
   background-color: #777;

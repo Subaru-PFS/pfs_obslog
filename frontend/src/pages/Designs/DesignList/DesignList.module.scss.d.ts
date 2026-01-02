@@ -12,6 +12,7 @@ export type Styles = {
   list: string;
   listContainer: string;
   listHeader: string;
+  pagination: string;
   searchRow: string;
   sortCondition: string;
 };

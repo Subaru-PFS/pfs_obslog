@@ -1251,8 +1251,121 @@
           "pfs_designs"
         ],
         "summary": "List PFS Designs",
-        "description": "Get a list of all available PFS Design files.",
+        "description": "Get a paginated list of PFS Design files with optional filtering and sorting.",
         "operationId": "list_pfs_designs_api_pfs_designs_get",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search string (matches name or id)",
+              "title": "Search"
+            },
+            "description": "Search string (matches name or id)"
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "date_modified",
+                "name",
+                "id"
+              ],
+              "type": "string",
+              "description": "Field to sort by",
+              "default": "date_modified",
+              "title": "Sort By"
+            },
+            "description": "Field to sort by"
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string",
+              "description": "Sort order",
+              "default": "desc",
+              "title": "Sort Order"
+            },
+            "description": "Sort order"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of items to skip",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of items to skip"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "description": "Number of items to return",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Number of items to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PfsDesignListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pfs_designs/positions": {
+      "get": {
+        "tags": [
+          "pfs_designs",
+          "pfs_designs"
+        ],
+        "summary": "Get all PFS Design positions",
+        "description": "Get positions (id, ra, dec) of all PFS Designs. This is a lightweight endpoint for visualization.",
+        "operationId": "list_design_positions_api_pfs_designs_positions_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1260,10 +1373,10 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/PfsDesignEntry"
+                    "$ref": "#/components/schemas/PfsDesignPosition"
                   },
                   "type": "array",
-                  "title": "Response List Pfs Designs Api Pfs Designs Get"
+                  "title": "Response List Design Positions Api Pfs Designs Positions Get"
                 }
               }
             }
@@ -3115,6 +3228,62 @@
         ],
         "title": "PfsDesignEntry",
         "description": "PFS Design \u30a8\u30f3\u30c8\u30ea\uff08\u4e00\u89a7\u7528\uff09"
+      },
+      "PfsDesignListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PfsDesignEntry"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "offset",
+          "limit"
+        ],
+        "title": "PfsDesignListResponse",
+        "description": "PFS Design \u4e00\u89a7\u30ec\u30b9\u30dd\u30f3\u30b9\uff08\u30da\u30fc\u30b8\u30cd\u30fc\u30b7\u30e7\u30f3\u5bfe\u5fdc\uff09"
+      },
+      "PfsDesignPosition": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "ra": {
+            "type": "number",
+            "title": "Ra"
+          },
+          "dec": {
+            "type": "number",
+            "title": "Dec"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "ra",
+          "dec"
+        ],
+        "title": "PfsDesignPosition",
+        "description": "PFS Design \u4f4d\u7f6e\u60c5\u5831\uff08\u8efd\u91cf\u7248\uff09"
       },
       "PhotometryData": {
         "properties": {

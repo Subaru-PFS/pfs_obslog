@@ -230,7 +230,22 @@ const injectedRtkApi = api.injectEndpoints({
       ListPfsDesignsApiPfsDesignsGetApiResponse,
       ListPfsDesignsApiPfsDesignsGetApiArg
     >({
-      query: () => ({ url: `/api/pfs_designs` }),
+      query: (queryArg) => ({
+        url: `/api/pfs_designs`,
+        params: {
+          search: queryArg.search,
+          sort_by: queryArg.sortBy,
+          sort_order: queryArg.sortOrder,
+          offset: queryArg.offset,
+          limit: queryArg.limit,
+        },
+      }),
+    }),
+    listDesignPositionsApiPfsDesignsPositionsGet: build.query<
+      ListDesignPositionsApiPfsDesignsPositionsGetApiResponse,
+      ListDesignPositionsApiPfsDesignsPositionsGetApiArg
+    >({
+      query: () => ({ url: `/api/pfs_designs/positions` }),
     }),
     downloadDesignApiPfsDesignsIdHexFitsGet: build.query<
       DownloadDesignApiPfsDesignsIdHexFitsGetApiResponse,
@@ -454,8 +469,22 @@ export type GetAgcFitsPreviewApiFitsVisitsVisitIdAgcExposureIdHduIndexPngGetApiA
     height?: number;
   };
 export type ListPfsDesignsApiPfsDesignsGetApiResponse =
-  /** status 200 Successful Response */ PfsDesignEntry[];
-export type ListPfsDesignsApiPfsDesignsGetApiArg = void;
+  /** status 200 Successful Response */ PfsDesignListResponse;
+export type ListPfsDesignsApiPfsDesignsGetApiArg = {
+  /** Search string (matches name or id) */
+  search?: string | null;
+  /** Field to sort by */
+  sortBy?: "date_modified" | "name" | "id";
+  /** Sort order */
+  sortOrder?: "asc" | "desc";
+  /** Number of items to skip */
+  offset?: number;
+  /** Number of items to return */
+  limit?: number;
+};
+export type ListDesignPositionsApiPfsDesignsPositionsGetApiResponse =
+  /** status 200 Successful Response */ PfsDesignPosition[];
+export type ListDesignPositionsApiPfsDesignsPositionsGetApiArg = void;
 export type DownloadDesignApiPfsDesignsIdHexFitsGetApiResponse =
   /** status 200 Successful Response */ any;
 export type DownloadDesignApiPfsDesignsIdHexFitsGetApiArg = {
@@ -753,6 +782,17 @@ export type PfsDesignEntry = {
   num_guidestar_rows: number;
   design_rows: DesignRows;
 };
+export type PfsDesignListResponse = {
+  items: PfsDesignEntry[];
+  total: number;
+  offset: number;
+  limit: number;
+};
+export type PfsDesignPosition = {
+  id: string;
+  ra: number;
+  dec: number;
+};
 export type DesignData = {
   fiberId: number[];
   catId: number[];
@@ -829,6 +869,7 @@ export const {
   useDownloadAgcFitsApiFitsVisitsVisitIdAgcExposureIdFitsGetQuery,
   useGetAgcFitsPreviewApiFitsVisitsVisitIdAgcExposureIdHduIndexPngGetQuery,
   useListPfsDesignsApiPfsDesignsGetQuery,
+  useListDesignPositionsApiPfsDesignsPositionsGetQuery,
   useDownloadDesignApiPfsDesignsIdHexFitsGetQuery,
   useGetDesignApiPfsDesignsIdHexGetQuery,
   useCreateAttachmentApiAttachmentsPostMutation,
