@@ -24,7 +24,7 @@
   background-color: $near-background;
   cursor: pointer;
   font-size: 0.75rem;
-  color: $hint-text-color;
+  color: $text-color;
 
   // Tab shape: rounded top corners, square bottom
   border: 1px solid $border-color;
@@ -49,14 +49,17 @@
     z-index: 1;
   }
 
+  // Disabled tab: clearly different from inactive but enabled tabs
   &.disabled,
   &:disabled {
     color: $disabled-text-color;
     cursor: not-allowed;
-    background-color: $near-background;
+    background-color: $distant-background;
+    border-style: dashed;
+    opacity: 0.6;
 
     &:hover {
-      background-color: $near-background;
+      background-color: $distant-background;
       color: $disabled-text-color;
     }
   }

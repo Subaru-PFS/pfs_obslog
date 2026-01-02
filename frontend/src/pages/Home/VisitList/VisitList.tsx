@@ -8,6 +8,11 @@ import {
   type IicSequence,
   type VisitList as VisitListType,
 } from '../../../store/api/generatedApi'
+import {
+  useCreateVisitSetNoteApiVisitSetsVisitSetIdNotesPostMutation,
+  useUpdateVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdPutMutation,
+  useDeleteVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdDeleteMutation,
+} from '../../../store/api/enhancedApi'
 
 const { useLazyGetVisitRankApiVisitsVisitIdRankGetQuery } = generatedApi
 import { useHomeContext } from '../context'
@@ -16,6 +21,7 @@ import { LoadingSpinner } from '../../../components/LoadingSpinner'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
 import { Tooltip, TruncatedCell, TruncatedText } from '../../../components/Tooltip'
 import { DateRangePicker, type DateRange } from '../../../components/DateRangePicker'
+import { NoteList } from '../../../components/NoteList'
 import { API_BASE_URL } from '../../../config'
 import styles from './VisitList.module.scss'
 
@@ -283,15 +289,49 @@ function getExposureClass(sps: number, mcs: number, agc: number): string {
 interface IicSequenceHeaderProps {
   iicSequence: IicSequence
   visitId?: number
+  /** Callback when sequence group is clicked for filtering */
+  onSequenceGroupClick?: (groupId: number, groupName: string) => void
 }
 
-function IicSequenceHeader({ iicSequence, visitId }: IicSequenceHeaderProps) {
+function IicSequenceHeader({ iicSequence, visitId, onSequenceGroupClick }: IicSequenceHeaderProps) {
   const { setSelectedVisitId } = useHomeContext()
+  const [createNote] = useCreateVisitSetNoteApiVisitSetsVisitSetIdNotesPostMutation()
+  const [updateNote] = useUpdateVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdPutMutation()
+  const [deleteNote] = useDeleteVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdDeleteMutation()
   
   const handleClick = () => {
     if (visitId !== undefined) {
       setSelectedVisitId(visitId)
     }
+  }
+
+  const handleSequenceGroupClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (iicSequence.group && iicSequence.group.group_name && onSequenceGroupClick) {
+      onSequenceGroupClick(iicSequence.group.group_id, iicSequence.group.group_name)
+    }
+  }
+
+  const handleCreateNote = async (body: string) => {
+    await createNote({
+      visitSetId: iicSequence.iic_sequence_id,
+      noteCreateRequest: { body },
+    }).unwrap()
+  }
+
+  const handleUpdateNote = async (noteId: number, body: string) => {
+    await updateNote({
+      visitSetId: iicSequence.iic_sequence_id,
+      noteId,
+      noteUpdateRequest: { body },
+    }).unwrap()
+  }
+
+  const handleDeleteNote = async (noteId: number) => {
+    await deleteNote({
+      visitSetId: iicSequence.iic_sequence_id,
+      noteId,
+    }).unwrap()
   }
 
   return (
@@ -305,7 +345,13 @@ function IicSequenceHeader({ iicSequence, visitId }: IicSequenceHeaderProps) {
           </span>
         )}
         {iicSequence.group && (
-          <span className={styles.sequenceGroup}>{iicSequence.group.group_name}</span>
+          <button
+            className={styles.sequenceGroupButton}
+            onClick={handleSequenceGroupClick}
+            title={`Filter by group: ${iicSequence.group.group_name}`}
+          >
+            {iicSequence.group.group_name}
+          </button>
         )}
       </div>
       {iicSequence.comments && (
@@ -316,6 +362,14 @@ function IicSequenceHeader({ iicSequence, visitId }: IicSequenceHeaderProps) {
           {iicSequence.cmd_str}
         </TruncatedText>
       )}
+      <div className={styles.sequenceNotes} onClick={(e) => e.stopPropagation()}>
+        <NoteList
+          notes={iicSequence.notes ?? []}
+          createNote={handleCreateNote}
+          updateNote={handleUpdateNote}
+          deleteNote={handleDeleteNote}
+        />
+      </div>
     </div>
   )
 }
@@ -342,9 +396,11 @@ function getSequenceTypeClass(sequenceType: string): string {
 interface VisitGroupComponentProps {
   group: VisitGroup
   columns: ColumnVisibility
+  /** Callback when sequence group is clicked for filtering */
+  onSequenceGroupClick?: (groupId: number, groupName: string) => void
 }
 
-function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
+function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGroupComponentProps) {
   const { selectedVisitId, setSelectedVisitId } = useHomeContext()
   
   // Check if any visit in this group is selected
@@ -364,7 +420,11 @@ function VisitGroupComponent({ group, columns }: VisitGroupComponentProps) {
       onClick={handleGroupClick}
     >
       {group.iicSequence ? (
-        <IicSequenceHeader iicSequence={group.iicSequence} visitId={group.visits[0]?.id} />
+        <IicSequenceHeader
+          iicSequence={group.iicSequence}
+          visitId={group.visits[0]?.id}
+          onSequenceGroupClick={onSequenceGroupClick}
+        />
       ) : (
         <div className={styles.noSequence}>No sequence</div>
       )}
@@ -760,6 +820,17 @@ export function VisitList() {
     setShouldScrollToTop(true)
   }, [])
 
+  // Handle sequence group filter
+  const handleSequenceGroupFilter = useCallback((groupId: number, _groupName: string) => {
+    const sql = `where sequence_group_id = ${groupId}`
+    setSearchQuery(sql)
+    setAppliedSql(sql)
+    setSearchError(null)
+    setOffset(0)
+    setLimit(PER_PAGE)
+    setShouldScrollToTop(true)
+  }, [])
+
   // Handle date range change
   const handleDateRangeChange = useCallback((newRange: DateRange) => {
     setDateRange(newRange)
@@ -1051,6 +1122,7 @@ export function VisitList() {
               key={group.iicSequence?.iic_sequence_id ?? `no-seq-${index}`}
               group={group}
               columns={columns}
+              onSequenceGroupClick={handleSequenceGroupFilter}
             />
           ))
         )}

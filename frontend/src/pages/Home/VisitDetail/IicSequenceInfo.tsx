@@ -1,4 +1,10 @@
 import type { IicSequenceDetail } from '../../../store/api/generatedApi'
+import {
+  useCreateVisitSetNoteApiVisitSetsVisitSetIdNotesPostMutation,
+  useUpdateVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdPutMutation,
+  useDeleteVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdDeleteMutation,
+} from '../../../store/api/enhancedApi'
+import { NoteList } from '../../../components/NoteList'
 import styles from './Inspector.module.scss'
 
 interface IicSequenceInfoProps {
@@ -45,6 +51,32 @@ function getStatusStyle(cmdOutput: string | null | undefined): React.CSSProperti
 }
 
 export function IicSequenceInfo({ sequence }: IicSequenceInfoProps) {
+  const [createNote] = useCreateVisitSetNoteApiVisitSetsVisitSetIdNotesPostMutation()
+  const [updateNote] = useUpdateVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdPutMutation()
+  const [deleteNote] = useDeleteVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdDeleteMutation()
+
+  const handleCreateNote = async (body: string) => {
+    await createNote({
+      visitSetId: sequence.iic_sequence_id,
+      noteCreateRequest: { body },
+    }).unwrap()
+  }
+
+  const handleUpdateNote = async (noteId: number, body: string) => {
+    await updateNote({
+      visitSetId: sequence.iic_sequence_id,
+      noteId,
+      noteUpdateRequest: { body },
+    }).unwrap()
+  }
+
+  const handleDeleteNote = async (noteId: number) => {
+    await deleteNote({
+      visitSetId: sequence.iic_sequence_id,
+      noteId,
+    }).unwrap()
+  }
+
   return (
     <div className={styles.inspector}>
       <div className={styles.infoGrid}>
@@ -96,17 +128,14 @@ export function IicSequenceInfo({ sequence }: IicSequenceInfoProps) {
         </div>
       )}
 
-      {sequence.notes && sequence.notes.length > 0 && (
-        <div className={styles.notesSection}>
-          <div className={styles.notesLabel}>Notes:</div>
-          {sequence.notes.map(note => (
-            <div key={note.id} className={styles.noteItem}>
-              <span className={styles.noteUser}>{note.user.account_name}:</span>
-              <span className={styles.noteBody}>{note.body}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      <div className={styles.notesSection}>
+        <NoteList
+          notes={sequence.notes ?? []}
+          createNote={handleCreateNote}
+          updateNote={handleUpdateNote}
+          deleteNote={handleDeleteNote}
+        />
+      </div>
     </div>
   )
 }

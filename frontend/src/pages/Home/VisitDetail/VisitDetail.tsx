@@ -9,7 +9,7 @@ import {
   useDeleteVisitNoteApiVisitsVisitIdNotesNoteIdDeleteMutation,
 } from '../../../store/api/enhancedApi'
 import { useHomeContext } from '../context'
-import { VisitDetailProvider } from './context'
+import { VisitDetailProvider, useVisitDetailContext, type TabName } from './context'
 import { Tabs, TabPanel, type TabItem } from '../../../components/Tabs'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
@@ -122,9 +122,13 @@ interface VisitInspectorProps {
 
 /** 固定タブのラベル（常に同じ順序で表示） */
 const TAB_LABELS = ['SpS', 'MCS', 'AGC', 'IIC Sequence', 'Sequence Group'] as const
+/** タブインデックスからタブ名へのマッピング */
+const TAB_NAMES: TabName[] = ['sps', 'mcs', 'agc', 'iic_sequence', 'sequence_group']
 
 function VisitInspector({ visit }: VisitInspectorProps) {
   const [activeTabIndex, setActiveTabIndex] = useState(0)
+  const { selectFirstExposure } = useVisitDetailContext()
+  const prevVisitIdRef = useRef<number | null>(null)
 
   // 各タブが利用可能かどうかを判定
   const hasSps = (visit.sps?.exposures?.length ?? 0) > 0
@@ -146,6 +150,17 @@ function VisitInspector({ visit }: VisitInspectorProps) {
       }
     }
   }, [visit, activeTabIndex, tabAvailability])
+
+  // visit IDが変わった時、またはタブが変わった時に最初のExposureを選択
+  useEffect(() => {
+    prevVisitIdRef.current = visit.id
+
+    if (activeTabIndex >= 0) {
+      const tabName = TAB_NAMES[activeTabIndex]
+      // Visit変更時またはタブ変更時に最初のExposureを自動選択
+      selectFirstExposure(visit, tabName)
+    }
+  }, [visit.id, activeTabIndex, visit, selectFirstExposure])
 
   // タブ定義（disabled プロパティ付き）
   const tabs: TabItem[] = TAB_LABELS.map((label, index) => ({

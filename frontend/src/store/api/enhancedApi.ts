@@ -50,13 +50,13 @@ export const enhancedApi = generatedApi.enhanceEndpoints({
     },
     // Visit Set Note operations
     createVisitSetNoteApiVisitSetsVisitSetIdNotesPost: {
-      invalidatesTags: ["VisitList"],
+      invalidatesTags: ["VisitList", "VisitDetail"],
     },
     updateVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdPut: {
-      invalidatesTags: ["VisitList"],
+      invalidatesTags: ["VisitList", "VisitDetail"],
     },
     deleteVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdDelete: {
-      invalidatesTags: ["VisitList"],
+      invalidatesTags: ["VisitList", "VisitDetail"],
     },
   },
 });

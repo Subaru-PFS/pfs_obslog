@@ -60,8 +60,10 @@ export type Styles = {
   searchInput: string;
   selected: string;
   sequenceGroup: string;
+  sequenceGroupButton: string;
   sequenceId: string;
   sequenceName: string;
+  sequenceNotes: string;
   sequenceType: string;
   sequenceTypeArc: string;
   sequenceTypeFlat: string;

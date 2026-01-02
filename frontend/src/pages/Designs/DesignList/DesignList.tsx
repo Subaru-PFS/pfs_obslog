@@ -260,7 +260,7 @@ export function DesignList() {
               <Entry
                 key={entry.id}
                 entry={entry}
-                idFormat={idFormat}
+                idFormat={idFormat ?? 'hex'}
                 isSelected={selectedDesign?.id === entry.id}
                 isFocused={focusedDesign?.id === entry.id}
                 zenithSkyCoord={zenithSkyCoord}
