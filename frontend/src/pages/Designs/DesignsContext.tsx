@@ -8,6 +8,7 @@ import {
   useMemo,
   useCallback,
   useEffect,
+  useRef,
   type ReactNode,
 } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -215,13 +216,21 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     [navigate]
   )
 
-  // URL paramsからDesignを選択
+  // 初期ジャンプが完了したかを追跡
+  const initialJumpDoneRef = useRef(false)
+
+  // URL paramsからDesignを選択（初回ロード時のみ）
   useEffect(() => {
+    // 初期ジャンプが既に行われている場合はスキップ
+    if (initialJumpDoneRef.current) {
+      return
+    }
+
     if (designId && allPositions.length > 0) {
       // 位置情報からDesignを検索
       const position = allPositions.find((p) => p.id === designId)
       if (position) {
-        // 一覧にあればそれを選択、なければ位置情報から仮のエントリを作成
+        // 一覧にあればそれを選択
         const design = designs.find((d) => d.id === designId)
         if (design) {
           setSelectedDesignState(design)
@@ -232,6 +241,8 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
           coord: { ra: position.ra, dec: position.dec },
           duration: 0,
         })
+        // 初期ジャンプ完了をマーク
+        initialJumpDoneRef.current = true
       }
     }
   }, [designId, allPositions, designs, jumpTo])

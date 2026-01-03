@@ -16,7 +16,7 @@ import {
   useGetGlobe,
   type GlobeHandle,
 } from '@stellar-globe/react-stellar-globe'
-import { angle, path, SkyCoord } from '@stellar-globe/stellar-globe'
+import { angle, path, SkyCoord, GridLayer, matrixUtils, type Globe } from '@stellar-globe/stellar-globe'
 import { useDesignsContext, inTimeZone } from '../DesignsContext'
 import { HST_TZ_OFFSET, MARKER_FOV, type PfsDesignEntry } from '../types'
 import { Clock } from './Clock'
@@ -29,6 +29,20 @@ const SELECTED_COLOR: [number, number, number, number] = [0, 1, 1, 1]
 
 // マーカーサイズ（ピクセル単位）
 const MARKER_SIZE_PX = 24
+
+// カメラ初期パラメータ（オブジェクト参照を安定させるためコンポーネント外で定義）
+const INITIAL_CAMERA_PARAMS = {
+  fovy: 2,
+  theta: 0,
+  phi: 0,
+  za: 0,
+  zd: Math.PI / 2,
+  zp: 0,
+  roll: 0,
+}
+
+// 天頂からの傾き（グリッド表示用）
+const TILT = Math.PI / 2
 
 // 日付フォーマット
 function formatDate(date: Date): string {
@@ -233,20 +247,8 @@ function DesignMarkers() {
   )
 }
 
-// グリッドレイヤー（AltAzグリッド）
-function AltAzGrid() {
-  // AltAzグリッドは天頂を基準にした座標系で表示
-  // 実装の簡略化のため、通常のグリッドを表示
-  return (
-    <GridLayer$
-      optionsManipulate={(draft) => {
-        draft.defaultGridColor = [0, 0.25, 1, 1]
-        draft.thetaLine.gridColors = { 9: [1, 0.5, 0, 1] }
-        draft.phiLine.gridColors = { 12: [1, 0, 0, 1] }
-      }}
-    />
-  )
-}
+// グリッドレイヤー（AltAzグリッド）- onInitで追加するため、コンポーネントとしては不要
+// 代わりに、handleGlobeInit内でGridLayerを直接追加
 
 // 赤道座標グリッドレイヤー
 function EquatorialGrid() {
@@ -262,6 +264,7 @@ function EquatorialGrid() {
 
 export function SkyViewer() {
   const globeRef = useRef<GlobeHandle | null>(null)
+  const altAzGridRef = useRef<GridLayer | null>(null)
   const {
     jumpToSignal,
     setNow,
@@ -286,6 +289,30 @@ export function SkyViewer() {
       }
     }
   }, [jumpToSignal])
+
+  // Globe初期化時のコールバック - AltAzグリッドを追加
+  const handleGlobeInit = useCallback((globe: Globe) => {
+    // 天頂を基準にしたAltAzグリッドを追加
+    const altAzGrid = new GridLayer(globe, (draft) => {
+      draft.modelMatrix = () => {
+        const { za, zd, zp } = globe.camera
+        return matrixUtils.izenith4(za, zd - TILT, zp)
+      }
+      draft.defaultGridColor = [0, 0.25, 1, 1]
+      draft.thetaLine.gridColors = { 9: [1, 0.5, 0, 1] }
+      draft.phiLine.gridColors = { 12: [1, 0, 0, 1] }
+    })
+    globe.addLayer(altAzGrid)
+    altAzGridRef.current = altAzGrid
+  }, [])
+
+  // Globe解放時のコールバック
+  const handleGlobeRelease = useCallback(() => {
+    if (altAzGridRef.current) {
+      altAzGridRef.current.release()
+      altAzGridRef.current = null
+    }
+  }, [])
 
   // 天頂を中心に表示
   const centerZenith = useCallback(() => {
@@ -332,7 +359,9 @@ export function SkyViewer() {
         <Globe$
           ref={globeRef}
           retina
-          cameraParams={{ fovy: 2, theta: 0, phi: 0, za: 0, zd: Math.PI / 2, zp: 0, roll: 0 }}
+          cameraParams={INITIAL_CAMERA_PARAMS}
+          onInit={handleGlobeInit}
+          onRelease={handleGlobeRelease}
         >
           <PanLayer$ />
           <ZoomLayer$ />
@@ -343,7 +372,6 @@ export function SkyViewer() {
             baseUrl="//alasky.cds.unistra.fr/Pan-STARRS/DR1/color-i-r-g"
             animationLod={-0.25}
           />
-          <AltAzGrid />
           <EquatorialGrid />
           <DesignMarkers />
         </Globe$>
