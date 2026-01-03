@@ -353,40 +353,38 @@ function Entry({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <div style={{ flexGrow: 1, flexShrink: 1 }}>
-        <div className={styles.entryInfo}>
-          <Tooltip content={entry.name}>
-            <div className={styles.entryName}>{entry.name || '-'}</div>
+      <div className={styles.entryInfo}>
+        <Tooltip content={entry.name}>
+          <div className={styles.entryName}>{entry.name || '-'}</div>
+        </Tooltip>
+        <div className={styles.entryId}>
+          {formattedId(entry, idFormat)}
+        </div>
+        <div className={styles.entryDate}>{entry.date_modified}</div>
+        <div className={styles.entryDate}>
+          <Tooltip content="Number of Science Fibers">
+            <span>{entry.design_rows.science}</span>
           </Tooltip>
-          <div className={styles.entryId}>
-            {formattedId(entry, idFormat)}
-          </div>
-          <div className={styles.entryDate}>{entry.date_modified}</div>
-          <div className={styles.entryDate}>
-            <Tooltip content="Number of Science Fibers">
-              <span>{entry.design_rows.science}</span>
-            </Tooltip>
-            {' / '}
-            <Tooltip content="Number of Sky Fibers">
-              <span>{entry.design_rows.sky}</span>
-            </Tooltip>
-            {' / '}
-            <Tooltip content="Number of FluxSTD Fibers">
-              <span>{entry.design_rows.fluxstd}</span>
-            </Tooltip>
-            {' / '}
-            <Tooltip content="Number of Photometries">
-              <span>{entry.num_photometry_rows}</span>
-            </Tooltip>
-            {' / '}
-            <Tooltip content="Number of Guide Stars">
-              <span>{entry.num_guidestar_rows}</span>
-            </Tooltip>
-          </div>
-          <div>
-            α={entry.ra.toFixed(2)}°, δ={entry.dec.toFixed(2)}°,
-            Alt.={altitude.toFixed(2)}°
-          </div>
+          {' / '}
+          <Tooltip content="Number of Sky Fibers">
+            <span>{entry.design_rows.sky}</span>
+          </Tooltip>
+          {' / '}
+          <Tooltip content="Number of FluxSTD Fibers">
+            <span>{entry.design_rows.fluxstd}</span>
+          </Tooltip>
+          {' / '}
+          <Tooltip content="Number of Photometries">
+            <span>{entry.num_photometry_rows}</span>
+          </Tooltip>
+          {' / '}
+          <Tooltip content="Number of Guide Stars">
+            <span>{entry.num_guidestar_rows}</span>
+          </Tooltip>
+        </div>
+        <div>
+          α={entry.ra.toFixed(2)}°, δ={entry.dec.toFixed(2)}°,
+          Alt.={altitude.toFixed(2)}°
         </div>
       </div>
       <div className={styles.entryButtons}>

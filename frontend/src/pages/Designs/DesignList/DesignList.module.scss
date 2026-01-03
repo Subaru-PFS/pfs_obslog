@@ -118,8 +118,9 @@
 .entryName {
   color: #007;
   font-weight: bold;
-  word-break: break-all;
-  overflow-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .entryButtons {
@@ -135,8 +136,9 @@
 
 .entryInfo {
   padding: 4px;
-  width: 0;
   flex-grow: 1;
+  min-width: 0; // flexアイテムの最小幅を0にして縮小を許可
+  overflow: hidden;
 }
 
 .entryDate {
