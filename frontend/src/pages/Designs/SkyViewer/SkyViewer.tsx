@@ -18,7 +18,7 @@ import {
 } from '@stellar-globe/react-stellar-globe'
 import { angle, path, SkyCoord } from '@stellar-globe/stellar-globe'
 import { useDesignsContext, inTimeZone } from '../DesignsContext'
-import { HST_TZ_OFFSET, MARKER_FOV } from '../types'
+import { HST_TZ_OFFSET, MARKER_FOV, type PfsDesignEntry } from '../types'
 import { Clock } from './Clock'
 import styles from './SkyViewer.module.scss'
 
@@ -100,11 +100,45 @@ function createCirclePath(
   }
 }
 
+// ポジションからダミーのPfsDesignEntryを作成するヘルパー
+function createDummyEntry(position: { id: string; ra: number; dec: number }): PfsDesignEntry {
+  return {
+    id: position.id,
+    frameid: `pfsDesign-0x${position.id}.fits`,
+    name: '',
+    date_modified: '',
+    ra: position.ra,
+    dec: position.dec,
+    arms: '',
+    num_design_rows: 0,
+    num_photometry_rows: 0,
+    num_guidestar_rows: 0,
+    design_rows: {
+      science: 0,
+      sky: 0,
+      fluxstd: 0,
+      unassigned: 0,
+      engineering: 0,
+      sunss_imaging: 0,
+      sunss_diffuse: 0,
+    },
+  }
+}
+
 // Designマーカーコンポーネント
 function DesignMarkers() {
   const { allPositions, focusedDesign, selectedDesign, setFocusedDesign, setSelectedDesign, jumpTo } =
     useDesignsContext()
   const getGlobe = useGetGlobe()
+
+  // allPositionsからエントリのマップを作成（オブジェクトの参照を安定させる）
+  const positionEntryMap = useMemo(() => {
+    const map = new Map<string, PfsDesignEntry>()
+    for (const position of allPositions) {
+      map.set(position.id, createDummyEntry(position))
+    }
+    return map
+  }, [allPositions])
 
   // マーカーデータを生成（全位置情報から）
   const markers = useMemo(() => {
@@ -123,29 +157,10 @@ function DesignMarkers() {
     (e: { index: number }) => {
       const position = allPositions[e.index]
       if (position) {
-        // 位置情報から簡易的なDesignEntryを作成してセット
-        // 実際のDesignEntryはリストに含まれている場合のみ完全な情報を持つ
-        setSelectedDesign({
-          id: position.id,
-          frameid: `pfsDesign-0x${position.id}.fits`,
-          name: '',
-          date_modified: '',
-          ra: position.ra,
-          dec: position.dec,
-          arms: '',
-          num_design_rows: 0,
-          num_photometry_rows: 0,
-          num_guidestar_rows: 0,
-          design_rows: {
-            science: 0,
-            sky: 0,
-            fluxstd: 0,
-            unassigned: 0,
-            engineering: 0,
-            sunss_imaging: 0,
-            sunss_diffuse: 0,
-          },
-        })
+        const entry = positionEntryMap.get(position.id)
+        if (entry) {
+          setSelectedDesign(entry)
+        }
         const globe = getGlobe()
         if (globe.camera.fovy >= angle.deg2rad(4)) {
           jumpTo({
@@ -156,43 +171,25 @@ function DesignMarkers() {
         }
       }
     },
-    [allPositions, setSelectedDesign, getGlobe, jumpTo]
+    [allPositions, positionEntryMap, setSelectedDesign, getGlobe, jumpTo]
   )
 
-  // ホバーハンドラ
+  // ホバーハンドラ - キャッシュされたエントリを使用して不要な再レンダリングを防ぐ
   const handleHoverChange = useCallback(
     (e: { index: number | null }) => {
       if (e.index !== null) {
         const position = allPositions[e.index]
         if (position) {
-          // 簡易的なDesignEntryを作成
-          setFocusedDesign({
-            id: position.id,
-            frameid: `pfsDesign-0x${position.id}.fits`,
-            name: '',
-            date_modified: '',
-            ra: position.ra,
-            dec: position.dec,
-            arms: '',
-            num_design_rows: 0,
-            num_photometry_rows: 0,
-            num_guidestar_rows: 0,
-            design_rows: {
-              science: 0,
-              sky: 0,
-              fluxstd: 0,
-              unassigned: 0,
-              engineering: 0,
-              sunss_imaging: 0,
-              sunss_diffuse: 0,
-            },
-          })
+          const entry = positionEntryMap.get(position.id)
+          if (entry) {
+            setFocusedDesign(entry)
+          }
         }
       } else {
         setFocusedDesign(undefined)
       }
     },
-    [allPositions, setFocusedDesign]
+    [allPositions, positionEntryMap, setFocusedDesign]
   )
 
   // フォーカス・選択のパス

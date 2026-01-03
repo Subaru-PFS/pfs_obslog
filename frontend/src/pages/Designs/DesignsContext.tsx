@@ -160,9 +160,22 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   const [selectedDesign, setSelectedDesignState] = useState<
     PfsDesignEntry | undefined
   >()
-  const [focusedDesign, setFocusedDesign] = useState<
+  const [focusedDesign, setFocusedDesignState] = useState<
     PfsDesignEntry | undefined
   >()
+
+  // フォーカス状態の設定（同じIDなら更新をスキップして不要な再レンダリングを防ぐ）
+  const setFocusedDesign = useCallback(
+    (design: PfsDesignEntry | undefined) => {
+      setFocusedDesignState((prev) => {
+        if (prev?.id === design?.id) {
+          return prev // 同じIDなら更新しない
+        }
+        return design
+      })
+    },
+    []
+  )
 
   // 天球ビュー制御
   const [jumpToSignal, setJumpToSignal] = useState<JumpToOptions | null>(null)
