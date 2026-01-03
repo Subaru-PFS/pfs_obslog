@@ -612,3 +612,64 @@ class TestAggregateColumns:
         # 5 < sps_count は sps_count > 5 に変換される
         assert cond.operator == ">"
         assert cond.value == 5
+
+
+class TestNoteUserColumns:
+    """メモ作成者カラムのテスト"""
+
+    def test_visit_note_user(self, db_session_readonly):
+        """visit_note_userカラムでのフィルタリング"""
+        ast = parse_where_clause("where visit_note_user = 'test_user'")
+        evaluator, join_builder = _create_evaluator_with_join_builder()
+        where_clause = evaluator.evaluate(ast)
+
+        # 必要なJOINが追加されることを確認
+        assert "obslog_visit_note" in evaluator.required_joins
+        assert "visit_note_user" in evaluator.required_joins
+
+        # クエリを実行してエラーがないことを確認
+        query = select(M.PfsVisit.pfs_visit_id).select_from(M.PfsVisit)
+        query = join_builder.apply_joins(query, evaluator.required_joins)
+        query = query.where(where_clause).distinct().limit(10)
+        result = db_session_readonly.execute(query).fetchall()
+
+    def test_visit_note_user_like(self, db_session_readonly):
+        """visit_note_userカラムでのLIKEフィルタリング"""
+        ast = parse_where_clause("where visit_note_user like '%moritani%'")
+        evaluator, join_builder = _create_evaluator_with_join_builder()
+        where_clause = evaluator.evaluate(ast)
+
+        query = select(M.PfsVisit.pfs_visit_id).select_from(M.PfsVisit)
+        query = join_builder.apply_joins(query, evaluator.required_joins)
+        query = query.where(where_clause).distinct().limit(10)
+        result = db_session_readonly.execute(query).fetchall()
+
+    @pytest.mark.timeout(5)  # visit_set経由のJOINは時間がかかる
+    def test_visit_set_note_user(self, db_session_readonly):
+        """visit_set_note_userカラムでのフィルタリング"""
+        ast = parse_where_clause("where visit_set_note_user = 'test_user'")
+        evaluator, join_builder = _create_evaluator_with_join_builder()
+        where_clause = evaluator.evaluate(ast)
+
+        # 必要なJOINが追加されることを確認
+        assert "visit_set" in evaluator.required_joins
+        assert "obslog_visit_set_note" in evaluator.required_joins
+        assert "visit_set_note_user" in evaluator.required_joins
+
+        # クエリを実行してエラーがないことを確認
+        query = select(M.PfsVisit.pfs_visit_id).select_from(M.PfsVisit)
+        query = join_builder.apply_joins(query, evaluator.required_joins)
+        query = query.where(where_clause).distinct().limit(10)
+        result = db_session_readonly.execute(query).fetchall()
+
+    @pytest.mark.timeout(5)  # visit_set経由のJOINは時間がかかる
+    def test_visit_set_note_user_like(self, db_session_readonly):
+        """visit_set_note_userカラムでのLIKEフィルタリング"""
+        ast = parse_where_clause("where visit_set_note_user like '%moritani%'")
+        evaluator, join_builder = _create_evaluator_with_join_builder()
+        where_clause = evaluator.evaluate(ast)
+
+        query = select(M.PfsVisit.pfs_visit_id).select_from(M.PfsVisit)
+        query = join_builder.apply_joins(query, evaluator.required_joins)
+        query = query.where(where_clause).distinct().limit(10)
+        result = db_session_readonly.execute(query).fetchall()

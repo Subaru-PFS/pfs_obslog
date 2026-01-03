@@ -73,6 +73,8 @@ class QueryEvaluator:
         M = self.models
         # エイリアスを使用してテーブル重複警告を回避
         iic_sequence_status = self._join_builder.get_iic_sequence_status_alias()
+        visit_note_user = self._join_builder.get_visit_note_user_alias()
+        visit_set_note_user = self._join_builder.get_visit_set_note_user_alias()
         return {
             "visit_id": M.PfsVisit.pfs_visit_id,
             "id": M.PfsVisit.pfs_visit_id,
@@ -81,7 +83,9 @@ class QueryEvaluator:
             "comments": M.IicSequence.comments,
             "visit_set_id": M.IicSequence.iic_sequence_id,
             "visit_note": M.ObslogVisitNote.body,
+            "visit_note_user": visit_note_user.account_name,
             "visit_set_note": M.ObslogVisitSetNote.body,
+            "visit_set_note_user": visit_set_note_user.account_name,
             "status": iic_sequence_status.cmd_output,
             "sequence_group_id": M.SequenceGroup.group_id,
             "sequence_group_name": M.SequenceGroup.group_name,

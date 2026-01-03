@@ -37,8 +37,8 @@ JOIN_ORDER = [
 JOIN_DEPENDENCIES = {
     "visit_note_user": {"obslog_visit_note"},
     "iic_sequence": {"visit_set"},
-    "obslog_visit_set_note": {"visit_set"},
-    "visit_set_note_user": {"visit_set", "obslog_visit_set_note"},
+    "obslog_visit_set_note": {"visit_set", "iic_sequence"},
+    "visit_set_note_user": {"visit_set", "iic_sequence", "obslog_visit_set_note"},
     "iic_sequence_status": {"visit_set", "iic_sequence"},
     "sequence_group": {"visit_set", "iic_sequence"},
     "sps_exposure": {"sps_visit"},
@@ -133,7 +133,10 @@ class JoinBuilder:
                 M.IicSequence,
                 M.IicSequence.iic_sequence_id == M.t_visit_set.c.iic_sequence_id,
             ),
-            "obslog_visit_set_note": lambda q: q.outerjoin(M.ObslogVisitSetNote),
+            "obslog_visit_set_note": lambda q: q.outerjoin(
+                M.ObslogVisitSetNote,
+                M.ObslogVisitSetNote.iic_sequence_id == M.IicSequence.iic_sequence_id,
+            ),
             "visit_set_note_user": lambda q: q.outerjoin(
                 self.visit_set_note_user, M.ObslogVisitSetNote.user
             ),
