@@ -24,6 +24,20 @@ const columns = [
   { name: 'sequence_group_name', opdb_column: 'sequence_group.group_name', doc: 'Sequence Group Name' },
   { name: 'fits_header', opdb_column: 'N/A', doc: "FITS headers belonging to the visit.\nYou can access a card by fits_header['CARD_NAME']" },
   { name: 'any_column', opdb_column: 'N/A', doc: 'Expands to multiple columns at evaluation time. Useful for broad searches.' },
+  { name: 'proposal_id', opdb_column: 'pfs_design_fiber.proposal_id', doc: 'Proposal ID from the fiber design' },
+]
+
+/**
+ * Aggregate column definitions for the virtual table
+ * These columns perform COUNT/AVG aggregations and can be used in WHERE clauses
+ */
+const aggregateColumns = [
+  { name: 'sps_count', doc: 'Number of SPS exposures' },
+  { name: 'sps_avg_exptime', doc: 'Average exposure time of SPS exposures' },
+  { name: 'mcs_count', doc: 'Number of MCS exposures' },
+  { name: 'mcs_avg_exptime', doc: 'Average exposure time of MCS exposures' },
+  { name: 'agc_count', doc: 'Number of AGC exposures' },
+  { name: 'agc_avg_exptime', doc: 'Average exposure time of AGC exposures' },
 ]
 
 /**
@@ -36,9 +50,9 @@ const examples = [
     doc: 'Find all visits that have SpS exposures.',
   },
   {
-    title: 'Visits whose id is between 78500 and 78600',
-    sql: 'where visit_id between 78500 and 78600',
-    doc: null,
+    title: 'Visits with specific sequence type',
+    sql: "where sequence_type = 'scienceTrace'",
+    doc: 'Find visits with a specific sequence type.',
   },
   {
     title: "Visits whose any column contains 'science'",
@@ -46,19 +60,29 @@ const examples = [
     doc: 'Broad search across multiple columns.',
   },
   {
-    title: "Visits whose visit set has a note by 'moritani@stn'",
+    title: "Visits whose visit set has a note by a specific user",
     sql: "where visit_set_note_user = 'moritani@stn'",
-    doc: null,
+    doc: 'Filter by the user who created a visit set note.',
   },
   {
-    title: "Visits whose FITS card OBSERVER contains 'tamura'",
+    title: "Visits whose FITS card OBSERVER contains a name",
     sql: "where fits_header['OBSERVER'] like '%tamura%'",
     doc: 'Access specific FITS header cards.',
   },
   {
-    title: "Visits whose visit set's status contains 'error'",
-    sql: "where status like '%error%'",
-    doc: null,
+    title: 'Visits with completed status',
+    sql: "where status = 'complete'",
+    doc: 'Filter by sequence status.',
+  },
+  {
+    title: 'Visits with multiple SPS exposures',
+    sql: 'where sps_count >= 5',
+    doc: 'Filter by number of SPS exposures using aggregate columns.',
+  },
+  {
+    title: 'Visits with long average exposure time',
+    sql: 'where sps_avg_exptime >= 30',
+    doc: 'Filter by average SPS exposure time.',
   },
 ]
 
@@ -123,6 +147,29 @@ export function SqlSyntaxHelp() {
         </a>
         .
       </p>
+
+      <h2>Aggregate Columns</h2>
+      <p>
+        These columns perform aggregations (COUNT, AVG) on related exposures.
+        They can be used in WHERE clauses but cannot be combined with OR or NOT operators.
+      </p>
+
+      <table className={styles.virtualTable}>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          {aggregateColumns.map((column) => (
+            <tr key={column.name}>
+              <td>{column.name}</td>
+              <td>{column.doc}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       <h2>Examples</h2>
       <dl className={styles.examples}>
