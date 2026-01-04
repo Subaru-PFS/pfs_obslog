@@ -10,6 +10,7 @@ interface ClockProps {
   minute?: number
   second?: number
   onScrew?: (angle: number) => void
+  onScrewEnd?: () => void
 }
 
 interface ClockStyle {
@@ -132,7 +133,7 @@ function drawClock(
   ctx.restore()
 }
 
-export function Clock({ size = 120, hour, minute, second, onScrew }: ClockProps) {
+export function Clock({ size = 120, hour, minute, second, onScrew, onScrewEnd }: ClockProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [cursor, setCursor] = useState('grab')
 
@@ -191,6 +192,7 @@ export function Clock({ size = 120, hour, minute, second, onScrew }: ClockProps)
         document.removeEventListener('touchmove', handleMove)
         document.removeEventListener('touchend', handleEnd)
         document.removeEventListener('touchcancel', handleEnd)
+        onScrewEnd?.()
       }
 
       document.addEventListener('mousemove', handleMove)
@@ -199,7 +201,7 @@ export function Clock({ size = 120, hour, minute, second, onScrew }: ClockProps)
       document.addEventListener('touchend', handleEnd)
       document.addEventListener('touchcancel', handleEnd)
     },
-    [clockCenter, onScrew]
+    [clockCenter, onScrew, onScrewEnd]
   )
 
   const handleKeyDown = useCallback(

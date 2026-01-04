@@ -91,6 +91,7 @@ export function DesignList() {
     setFocusedDesign,
     jumpTo,
     zenithSkyCoord,
+    isDraggingClock,
   } = useDesignsContext()
 
   const [idFormat, setIdFormat] = useLocalStorage<IdFormat>(ID_FORMAT_KEY, 'hex')
@@ -114,7 +115,13 @@ export function DesignList() {
   )
 
   // クライアントサイドソート（高度順のみ、サーバーでは計算不可）
+  // 時計ドラッグ中は更新を抑制
+  const sortedDesignsRef = useRef<PfsDesignEntry[]>([])
   const sortedDesigns = useMemo(() => {
+    // ドラッグ中は前のソート結果を維持
+    if (isDraggingClock && clientSort === 'altitude') {
+      return sortedDesignsRef.current
+    }
     const sorted = [...designs]
     if ((clientSort ?? 'altitude') === 'altitude') {
       sorted.sort((a, b) =>
@@ -122,8 +129,9 @@ export function DesignList() {
       )
     }
     // date_modifiedはサーバーサイドでソート済み
+    sortedDesignsRef.current = sorted
     return sorted
-  }, [designs, clientSort, zenithSkyCoord])
+  }, [designs, clientSort, zenithSkyCoord, isDraggingClock])
 
   // グループ化（同一座標付近のDesignをまとめる）
   const groupedDesigns = useMemo(() => {

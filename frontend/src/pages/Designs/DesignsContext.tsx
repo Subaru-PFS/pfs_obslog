@@ -120,6 +120,9 @@ interface DesignsContextValue {
   zenithSkyCoord: { ra: number; dec: number }
   // 天頂座標（ラジアン）- AltAzグリッド用
   zenithZaZd: { za: number; zd: number }
+  // 時計ドラッグ中フラグ（高度ソート更新抑制用）
+  isDraggingClock: boolean
+  setDraggingClock: (dragging: boolean) => void
 }
 
 const DesignsContext = createContext<DesignsContextValue | null>(null)
@@ -191,6 +194,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   // 時刻・位置
   const [now, setNow] = useState(() => new Date())
   const telescopeLocation = SUBARU_TELESCOPE_LOCATION
+  const [isDraggingClock, setDraggingClock] = useState(false)
 
   // HST時刻
   const hst = useMemo(() => inTimeZone(now, HST_TZ_OFFSET), [now])
@@ -295,6 +299,8 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     telescopeLocation,
     zenithSkyCoord,
     zenithZaZd,
+    isDraggingClock,
+    setDraggingClock,
   }
 
   return (

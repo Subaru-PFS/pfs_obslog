@@ -273,6 +273,7 @@ export function SkyViewer() {
     zenithZaZd,
     showFibers,
     setShowFibers,
+    setDraggingClock,
   } = useDesignsContext()
 
   // ジャンプシグナルを監視
@@ -358,10 +359,16 @@ export function SkyViewer() {
   // 時計のドラッグで時刻変更
   const handleClockScrew = useCallback(
     (dt: number) => {
+      setDraggingClock(true)
       setNow((prev) => new Date(prev.getTime() + (12 * 3600_000 * dt) / (2 * Math.PI)))
     },
-    [setNow]
+    [setNow, setDraggingClock]
   )
+
+  // 時計のドラッグ終了
+  const handleClockScrewEnd = useCallback(() => {
+    setDraggingClock(false)
+  }, [setDraggingClock])
 
   // 日付変更
   const handleDateChange = useCallback(
@@ -415,6 +422,7 @@ export function SkyViewer() {
           minute={hst.getMinutes()}
           second={hst.getSeconds()}
           onScrew={handleClockScrew}
+          onScrewEnd={handleClockScrewEnd}
         />
         <button onClick={setToNow}>Set time to now</button>
         <button onClick={centerZenith}>Center Zenith</button>
