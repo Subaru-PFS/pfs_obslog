@@ -14,6 +14,8 @@ interface FocalPlaneProps {
   colorFunc: (cobra: Cobra) => string
   /** マウスがCobraに入った時のコールバック */
   onPointerEnter?: (cobra: Cobra | undefined) => void
+  /** 外部からフォーカスするCobra（SkyViewerからの連携用） */
+  externalFocusCobra?: Cobra
   /** 再描画トリガー用の依存配列 */
   refreshDeps?: unknown[]
 }
@@ -155,6 +157,7 @@ export function FocalPlane({
   size = 250,
   colorFunc,
   onPointerEnter,
+  externalFocusCobra,
   refreshDeps = [],
 }: FocalPlaneProps) {
   const baseCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -220,6 +223,13 @@ export function FocalPlane({
       lastFocalCobraRef.current = cobra
     }
   }, [])
+
+  // 外部からのフォーカス（SkyViewerからの連携）
+  useEffect(() => {
+    if (externalFocusCobra) {
+      showFocusedCobra(externalFocusCobra)
+    }
+  }, [externalFocusCobra, showFocusedCobra])
 
   // マウス移動ハンドラ
   const handleMouseMove = useCallback(

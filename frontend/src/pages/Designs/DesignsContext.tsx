@@ -68,6 +68,12 @@ export type JumpToOptions = {
   zp?: number
 }
 
+// フォーカスされたファイバーの情報
+export type FocusedFiber = {
+  fiberId: number  // FiberId (design_data.fiberId配列内の値)
+  source: 'skyViewer' | 'focalPlane'  // どこからフォーカスされたか
+}
+
 // ソートオプション
 export type SortBy = 'date_modified' | 'name' | 'id' | 'altitude'
 export type SortOrder = 'asc' | 'desc'
@@ -103,6 +109,10 @@ interface DesignsContextValue {
   setSelectedDesign: (design: PfsDesignEntry | undefined) => void
   focusedDesign: PfsDesignEntry | undefined
   setFocusedDesign: (design: PfsDesignEntry | undefined) => void
+
+  // ファイバーフォーカス（SkyViewerとFocalPlane間の連携）
+  focusedFiber: FocusedFiber | undefined
+  setFocusedFiber: (fiber: FocusedFiber | undefined) => void
 
   // Design詳細
   designDetail: PfsDesignDetail | undefined
@@ -225,6 +235,9 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   const [focusedDesign, setFocusedDesignState] = useState<
     PfsDesignEntry | undefined
   >()
+  const [focusedFiber, setFocusedFiberState] = useState<
+    FocusedFiber | undefined
+  >()
 
   // フォーカス状態の設定（同じIDなら更新をスキップして不要な再レンダリングを防ぐ）
   const setFocusedDesign = useCallback(
@@ -234,6 +247,19 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
           return prev // 同じIDなら更新しない
         }
         return design
+      })
+    },
+    []
+  )
+
+  // ファイバーフォーカス状態の設定
+  const setFocusedFiber = useCallback(
+    (fiber: FocusedFiber | undefined) => {
+      setFocusedFiberState((prev) => {
+        if (prev?.fiberId === fiber?.fiberId && prev?.source === fiber?.source) {
+          return prev // 同じなら更新しない
+        }
+        return fiber
       })
     },
     []
@@ -317,6 +343,8 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     setSelectedDesign,
     focusedDesign,
     setFocusedDesign,
+    focusedFiber,
+    setFocusedFiber,
     designDetail,
     isLoadingDetail,
     jumpToSignal,

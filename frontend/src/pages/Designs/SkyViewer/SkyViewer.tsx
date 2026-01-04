@@ -13,7 +13,6 @@ import {
   TouchLayer$,
   PathLayer$,
   ClickableMarkerLayer$,
-  MarkerLayer$,
   useGetGlobe,
   type GlobeHandle,
 } from '@stellar-globe/react-stellar-globe'
@@ -179,16 +178,21 @@ function DesignMarkers() {
     jumpTo,
     showFibers,
     designDetail,
+    focusedFiber,
+    setFocusedFiber,
   } = useDesignsContext()
   const getGlobe = useGetGlobe()
   
-  // 現在のマーカー透明度（fovyに応じて変化）
+  // 現在のマーカー透明度（fovyに応じて変化）- 量子化して再計算を削減
   const [markerAlpha, setMarkerAlpha] = useState(1)
+  // ファイバーが表示可能かどうか（fiberAlpha > 0.01）
+  const [fibersVisible, setFibersVisible] = useState(false)
 
   // fovyを監視してマーカー透明度を更新
   useEffect(() => {
     let animationId: number
     let lastAlpha = markerAlpha
+    let lastFibersVisible = fibersVisible
     
     const updateAlpha = () => {
       const globe = getGlobe()
@@ -209,10 +213,21 @@ function DesignMarkers() {
         newAlpha = DIM_MIN_ALPHA + t * (1 - DIM_MIN_ALPHA)
       }
       
-      // 閾値を超える変化があった場合のみ更新（パフォーマンス最適化）
-      if (Math.abs(newAlpha - lastAlpha) > 0.01) {
-        lastAlpha = newAlpha
-        setMarkerAlpha(newAlpha)
+      // 量子化: 0.05刻みで変化（20段階）- WebGLバッファの再生成を削減
+      const quantizedAlpha = Math.round(newAlpha * 20) / 20
+      
+      // 閾値を超える変化があった場合のみ更新
+      if (quantizedAlpha !== lastAlpha) {
+        lastAlpha = quantizedAlpha
+        setMarkerAlpha(quantizedAlpha)
+      }
+      
+      // ファイバー表示可否の更新（fiberAlpha = (1 - markerAlpha) * 2 > 0.01）
+      // markerAlpha < 0.995 のときファイバーが見える
+      const newFibersVisible = quantizedAlpha < 0.995
+      if (newFibersVisible !== lastFibersVisible) {
+        lastFibersVisible = newFibersVisible
+        setFibersVisible(newFibersVisible)
       }
       
       animationId = requestAnimationFrame(updateAlpha)
@@ -220,7 +235,7 @@ function DesignMarkers() {
     
     animationId = requestAnimationFrame(updateAlpha)
     return () => cancelAnimationFrame(animationId)
-  }, [getGlobe, markerAlpha])
+  }, [getGlobe, markerAlpha, fibersVisible])
 
   // allPositionsからエントリのマップを作成（オブジェクトの参照を安定させる）
   const positionEntryMap = useMemo(() => {
@@ -330,51 +345,107 @@ function DesignMarkers() {
 
   // ファイバーマーカー（選択中のdesignのファイバー位置を表示）
   // fovyに応じて透明度が変化する（既存プロジェクトと同様のロジック）
-  const fiberMarkers = useMemo(() => {
-    if (!showFibers || !designDetail) {
-      return []
-    }
-    
+  const fiberAlpha = useMemo(() => {
     // markerAlphaを使ってファイバーマーカーの透明度を計算
     // markerAlphaが1のときはズームアウト状態（fovy >= DIM_FOV_THRESHOLD）
     // markerAlphaが小さいときはズームイン状態
     // ファイバーマーカーはズームイン時に表示、ズームアウト時にフェードアウト
-    // 既存プロジェクトの動作: 中程度のズームで最も見やすく、極端なズームで薄くなる
-    const fiberAlpha = Math.min(1, (1 - markerAlpha) * 2)
-    
-    const markers: { position: [number, number, number]; color: [number, number, number, number] }[] = []
+    return Math.min(1, (1 - markerAlpha) * 2)
+  }, [markerAlpha])
 
-    // Design Data（ファイバー）
-    const { ra, dec, targetType } = designDetail.design_data
+  // ファイバーマーカーの基本データ（位置と基本色）- designDetailが変わったときのみ再計算
+  const fiberMarkerBaseData = useMemo(() => {
+    if (!designDetail) {
+      return { fibers: [], guideStars: [] }
+    }
+    
+    const { ra, dec, targetType, fiberId } = designDetail.design_data
+    const fibers: { position: [number, number, number]; baseColor: [number, number, number, number]; fiberId: number }[] = []
+    
     for (let i = 0; i < ra.length; i++) {
       const coord = SkyCoord.fromDeg(ra[i], dec[i])
       const colorEntry = targetTypeColors[targetType[i]]
       const baseColor = colorEntry ? colorToRgba(colorEntry.color) : DEFAULT_FIBER_COLOR
-      const color: [number, number, number, number] = [
-        baseColor[0],
-        baseColor[1],
-        baseColor[2],
-        baseColor[3] * fiberAlpha,
-      ]
-      markers.push({
+      fibers.push({
         position: coord.xyz as [number, number, number],
-        color,
+        baseColor,
+        fiberId: fiberId[i],
       })
     }
 
     // Guide Stars（赤色で表示）
     const guideRa = designDetail.guidestar_data.ra
     const guideDec = designDetail.guidestar_data.dec
+    const guideStars: { position: [number, number, number] }[] = []
     for (let i = 0; i < guideRa.length; i++) {
       const coord = SkyCoord.fromDeg(guideRa[i], guideDec[i])
-      markers.push({
+      guideStars.push({
         position: coord.xyz as [number, number, number],
-        color: [1, 0, 0, fiberAlpha], // Red for guide stars
+      })
+    }
+
+    return { fibers, guideStars }
+  }, [designDetail])
+
+  // 最終的なファイバーマーカー配列（透明度とハイライトを適用）
+  const fiberMarkers = useMemo(() => {
+    if (!showFibers || !fibersVisible || fiberMarkerBaseData.fibers.length === 0) {
+      return []
+    }
+    
+    // FocalPlaneからのホバー時にハイライトするfiberId
+    const highlightFiberId = focusedFiber?.source === 'focalPlane' ? focusedFiber.fiberId : undefined
+    
+    const markers: { position: [number, number, number]; color: [number, number, number, number] }[] = []
+    
+    for (const fiber of fiberMarkerBaseData.fibers) {
+      const isHighlighted = highlightFiberId !== undefined && fiber.fiberId === highlightFiberId
+      const color: [number, number, number, number] = isHighlighted
+        ? [1, 1, 1, 1] // 白色でハイライト
+        : [
+            fiber.baseColor[0],
+            fiber.baseColor[1],
+            fiber.baseColor[2],
+            fiber.baseColor[3] * fiberAlpha,
+          ]
+      markers.push({
+        position: fiber.position,
+        color,
+      })
+    }
+
+    // Guide Stars
+    for (const gs of fiberMarkerBaseData.guideStars) {
+      markers.push({
+        position: gs.position,
+        color: [1, 0, 0, fiberAlpha],
       })
     }
 
     return markers
-  }, [showFibers, designDetail, markerAlpha])
+  }, [showFibers, fibersVisible, fiberMarkerBaseData, fiberAlpha, focusedFiber])
+
+  // ファイバーマーカーのホバーハンドラ
+  const handleFiberHoverChange = useCallback(
+    (e: { index: number | null }) => {
+      if (e.index !== null && designDetail) {
+        const { fiberId } = designDetail.design_data
+        // ガイドスターはfiberIdを持たないので、design_data範囲内のみ対象
+        if (e.index < fiberId.length) {
+          setFocusedFiber({
+            fiberId: fiberId[e.index],
+            source: 'skyViewer',
+          })
+        } else {
+          // ガイドスターの場合はクリア
+          setFocusedFiber(undefined)
+        }
+      } else {
+        setFocusedFiber(undefined)
+      }
+    },
+    [designDetail, setFocusedFiber]
+  )
 
   return (
     <>
@@ -394,12 +465,14 @@ function DesignMarkers() {
         onClick={handleClick}
         onHoverChange={handleHoverChange}
       />
-      {/* ファイバーマーカー（ポイント） */}
+      {/* ファイバーマーカー（ポイント）- ホバー検出対応 */}
       {fiberMarkers.length > 0 && (
-        <MarkerLayer$
+        <ClickableMarkerLayer$
           markers={fiberMarkers}
           defaultColor={DEFAULT_FIBER_COLOR}
           defaultType="circle"
+          dimmAlpha={0}
+          onHoverChange={handleFiberHoverChange}
         />
       )}
       {/* フォーカス/選択マーカー */}

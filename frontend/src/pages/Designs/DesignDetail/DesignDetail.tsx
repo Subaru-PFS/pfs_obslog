@@ -2,7 +2,7 @@
  * DesignDetail - 焦点面ビューとファイバー詳細パネル
  */
 import { useState, useMemo, useCallback } from 'react'
-import { FocalPlane, type Cobra } from '../../../components/FocalPlane'
+import { FocalPlane, type Cobra, getCobraByFiberId } from '../../../components/FocalPlane'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
 import { Tooltip } from '../../../components/Tooltip'
 import { useDesignsContext } from '../DesignsContext'
@@ -29,18 +29,24 @@ function makeId2IndexMap(idList: number[]): Map<number, number[]> {
 }
 
 /**
- * 色関数を生成
+ * 色関数を生成（ハイライト対応）
  */
 function createColorFunc(
   colorMode: ColorMode,
   detail: PfsDesignDetail | undefined,
-  id2index: Map<number, number[]>
+  id2index: Map<number, number[]>,
+  highlightFiberId?: number
 ): (cobra: Cobra) => string {
   return (cobra: Cobra) => {
     if (!detail) return BLANK_COLOR
 
     const indices = id2index.get(cobra.fiberId)
     if (indices === undefined || indices.length === 0) return BLANK_COLOR
+
+    // SkyViewerからのホバーでハイライト
+    if (highlightFiberId !== undefined && cobra.fiberId === highlightFiberId) {
+      return '#ffffff' // 白でハイライト
+    }
 
     const index = indices[0]
 
@@ -55,7 +61,7 @@ function createColorFunc(
 }
 
 export function DesignDetail() {
-  const { designDetail, isLoadingDetail, selectedDesign } = useDesignsContext()
+  const { designDetail, isLoadingDetail, selectedDesign, focusedFiber, setFocusedFiber } = useDesignsContext()
   const [focusedCobra, setFocusedCobra] = useState<Cobra | undefined>()
   const [colorMode, setColorMode] = useState<ColorMode>('targetType')
 
@@ -65,16 +71,37 @@ export function DesignDetail() {
     [designDetail]
   )
 
+  // SkyViewerからのホバー時にハイライトするfiberId
+  const highlightFiberId = focusedFiber?.source === 'skyViewer' ? focusedFiber.fiberId : undefined
+
   // 色関数
   const colorFunc = useMemo(
-    () => createColorFunc(colorMode, designDetail, id2index),
-    [colorMode, designDetail, id2index]
+    () => createColorFunc(colorMode, designDetail, id2index, highlightFiberId),
+    [colorMode, designDetail, id2index, highlightFiberId]
   )
 
-  // Cobraのホバーハンドラ
+  // SkyViewerからのホバーでFocalPlaneのCobraをハイライト
+  const externalFocusFiberId = focusedFiber?.source === 'skyViewer' ? focusedFiber.fiberId : undefined
+
+  // Cobraのホバーハンドラ（FocalPlane → SkyViewer連携）
   const handlePointerEnter = useCallback((cobra: Cobra | undefined) => {
     setFocusedCobra(cobra)
-  }, [])
+    // Contextに通知（SkyViewerに連携）
+    if (cobra) {
+      setFocusedFiber({
+        fiberId: cobra.fiberId,
+        source: 'focalPlane',
+      })
+    } else {
+      setFocusedFiber(undefined)
+    }
+  }, [setFocusedFiber])
+
+  // SkyViewerからのホバーでFocalPlane上のCobraを取得
+  const externalFocusCobra = useMemo(() => {
+    if (externalFocusFiberId === undefined) return undefined
+    return getCobraByFiberId(externalFocusFiberId)
+  }, [externalFocusFiberId])
 
   if (!selectedDesign) {
     return (
@@ -94,7 +121,8 @@ export function DesignDetail() {
           size={250}
           colorFunc={colorFunc}
           onPointerEnter={handlePointerEnter}
-          refreshDeps={[colorMode, designDetail]}
+          externalFocusCobra={externalFocusCobra}
+          refreshDeps={[colorMode, designDetail, highlightFiberId]}
         />
         <div>
           <select

@@ -74,3 +74,25 @@ function rotation(x: number, y: number, rot: number): [number, number] {
 export function getAllCobras(): Cobra[] {
   return Array.from({ length: NUM_OF_COBRAS }, (_, i) => new Cobra(i))
 }
+
+/**
+ * fiberId -> Cobra のマップ（遅延生成）
+ */
+let fiberId2CobraCache: Map<number, Cobra> | null = null
+
+function getFiberId2CobraMap(): Map<number, Cobra> {
+  if (!fiberId2CobraCache) {
+    fiberId2CobraCache = new Map()
+    for (const cobra of getAllCobras()) {
+      fiberId2CobraCache.set(cobra.fiberId, cobra)
+    }
+  }
+  return fiberId2CobraCache
+}
+
+/**
+ * FiberIDからCobraを取得
+ */
+export function getCobraByFiberId(fiberId: number): Cobra | undefined {
+  return getFiberId2CobraMap().get(fiberId)
+}
