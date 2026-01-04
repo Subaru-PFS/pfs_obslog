@@ -353,7 +353,7 @@ function EquatorialGrid() {
 export function SkyViewer() {
   const globeRef = useRef<GlobeHandle | null>(null)
   const altAzGridRef = useRef<GridLayer | null>(null)
-  const zenithZaZdRef = useRef({ za: 0, zd: Math.PI / 2 })
+  const isInitializedRef = useRef(false)
   const {
     jumpToSignal,
     setNow,
@@ -364,11 +364,10 @@ export function SkyViewer() {
     setShowFibers,
     setDraggingClock,
   } = useDesignsContext()
-
-  // zenithZaZd を ref に同期
-  useEffect(() => {
-    zenithZaZdRef.current = zenithZaZd
-  }, [zenithZaZd])
+  
+  // 最新のzenithZaZdをRefで保持（初期化コールバック内から参照するため）
+  const zenithZaZdRef = useRef(zenithZaZd)
+  zenithZaZdRef.current = zenithZaZd
 
   // ジャンプシグナルを監視
   useEffect(() => {
@@ -395,12 +394,13 @@ export function SkyViewer() {
 
   // Globe初期化時のコールバック - AltAzグリッドを追加
   const handleGlobeInit = useCallback((globe: Globe) => {
-    // 天頂を基準にしたAltAzグリッドを追加
-    // modelMatrix は ref を参照するので、zenithZaZd が変わると自動的に更新される
+    // AltAzグリッドを追加
+    // 既存プロジェクトと同様に、カメラのza, zdを参照してモデル行列を計算
+    // これによりカメラの天頂パラメータが変わるとグリッドも追従する
     const altAzGrid = new GridLayer(globe, (draft) => {
       draft.modelMatrix = () => {
-        const { za, zd } = zenithZaZdRef.current
-        return matrixUtils.izenith4(za, zd - TILT, 0)
+        const { za, zd, zp } = globe.camera
+        return matrixUtils.izenith4(za, zd - TILT, zp)
       }
       draft.defaultGridColor = [0, 0.25, 1, 1]
       draft.thetaLine.gridColors = { 9: [1, 0.5, 0, 1] }
@@ -408,6 +408,15 @@ export function SkyViewer() {
     })
     globe.addLayer(altAzGrid)
     altAzGridRef.current = altAzGrid
+    
+    // 初期カメラ位置を設定（zenithZaZd.zd + TILTで天頂から90度傾いた位置＝地平線付近を向く）
+    // useRefを使って最新の値を取得
+    const { za, zd, zp } = zenithZaZdRef.current
+    globe.camera.jumpTo(
+      { za, zd: zd + TILT, zp },
+      { duration: 0 }
+    )
+    isInitializedRef.current = true
   }, [])
 
   // Globe解放時のコールバック
@@ -416,32 +425,37 @@ export function SkyViewer() {
       altAzGridRef.current.release()
       altAzGridRef.current = null
     }
+    isInitializedRef.current = false
   }, [])
 
-  // 時刻変更時にカメラの天頂パラメータを更新（天頂に対するカメラの相対位置は維持）
-  // これにより、時刻が変わっても星空は固定され、グリッドのみが天頂に追従する
+  // 時刻変更時にカメラの天頂パラメータを更新
+  // 既存プロジェクトと同様に、za, zd を更新（theta, phi は維持される）
+  // これにより、カメラの仰角・方位角は固定され、星空が動く（青グリッドは固定）
   useEffect(() => {
-    if (globeRef.current) {
-      const globe = globeRef.current()
-      // カメラの天頂パラメータを新しい天頂位置に更新（アニメーションなしで瞬時に）
-      globe.camera.jumpTo({ za: zenithZaZd.za, zd: zenithZaZd.zd }, { duration: 0 })
-      globe.requestRefresh()
-    }
+    // 初期化前は何もしない
+    if (!isInitializedRef.current || !globeRef.current) return
+    
+    const globe = globeRef.current()
+    // カメラの天頂パラメータを更新（zd + TILTで地平線付近を基準に）
+    globe.camera.jumpTo(
+      { za: zenithZaZd.za, zd: zenithZaZd.zd + TILT, zp: zenithZaZd.zp },
+      { duration: 0 }
+    )
+    globe.requestRefresh()
   }, [zenithZaZd])
 
-  // 天頂を中心に表示（AltAzグリッドの極が画面中央に来るようにする）
+  // 天頂を中心に表示
+  // coordオプションで天頂の赤道座標を指定し、カメラがその方向を向く
   const centerZenith = useCallback(() => {
     if (globeRef.current) {
       const globe = globeRef.current()
       const coord = SkyCoord.fromDeg(zenithSkyCoord.ra, zenithSkyCoord.dec)
-      // グリッドのmodelMatrixでTILTを引いているので、カメラのzdもそれに合わせる
-      // zd: zenithZaZd.zd でグリッドの極（天頂）が画面中央に来る
       globe.camera.jumpTo(
-        { fovy: 2, za: zenithZaZd.za, zd: zenithZaZd.zd },
+        { fovy: 2 },
         { coord, duration: 500 }
       )
     }
-  }, [zenithSkyCoord, zenithZaZd])
+  }, [zenithSkyCoord])
 
   // 現在時刻に設定
   const setToNow = useCallback(() => {

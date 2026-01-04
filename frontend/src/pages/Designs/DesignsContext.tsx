@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { dateUtils, angle } from '@stellar-globe/stellar-globe'
 import {
   useListPfsDesignsApiPfsDesignsGetQuery,
   useListDesignPositionsApiPfsDesignsPositionsGetQuery,
@@ -21,29 +22,29 @@ import type { PfsDesignEntry, PfsDesignDetail, PfsDesignPosition } from './types
 import { SUBARU_TELESCOPE_LOCATION, HST_TZ_OFFSET } from './types'
 
 /**
- * 天頂の赤道座標を計算
+ * 天頂の赤道座標を計算（度単位で返す）
+ * stellar-globeのdateUtils.zenithSkyCoordを使用
  */
 function calculateZenithSkyCoord(
   date: Date,
   location: { lat: number; lon: number }
 ): { ra: number; dec: number } {
-  // GMST（グリニッジ平均恒星時）を計算
-  const jd =
-    date.getTime() / 86400000 + 2440587.5 // Unix時間をユリウス日に変換
-  const T = (jd - 2451545.0) / 36525 // J2000.0からの経過世紀数
-  const gmst =
-    280.46061837 +
-    360.98564736629 * (jd - 2451545.0) +
-    0.000387933 * T * T -
-    (T * T * T) / 38710000
-
-  // 地方恒星時（LST）
-  const lst = ((gmst + location.lon) % 360 + 360) % 360
-
+  const { za, zd } = dateUtils.zenithSkyCoord({ when: date, where: location })
   return {
-    ra: lst,
-    dec: location.lat,
+    ra: angle.rad2deg(za),
+    dec: angle.rad2deg(zd),
   }
+}
+
+/**
+ * 天頂座標をラジアンで計算（za, zd, zpを返す）
+ * カメラやグリッドの天頂パラメータに使用
+ */
+function calculateZenithZaZd(
+  date: Date,
+  location: { lat: number; lon: number }
+): { za: number; zd: number; zp: number } {
+  return dateUtils.zenithSkyCoord({ when: date, where: location })
 }
 
 /**
@@ -119,8 +120,8 @@ interface DesignsContextValue {
   hst: Date
   telescopeLocation: { lat: number; lon: number }
   zenithSkyCoord: { ra: number; dec: number }
-  // 天頂座標（ラジアン）- AltAzグリッド用
-  zenithZaZd: { za: number; zd: number }
+  // 天頂座標（ラジアン）- AltAzグリッド用、カメラの天頂パラメータ用
+  zenithZaZd: { za: number; zd: number; zp: number }
   // 時計ドラッグ中フラグ（高度ソート更新抑制用）
   isDraggingClock: boolean
   setDraggingClock: (dragging: boolean) => void
@@ -162,14 +163,12 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     }
   }, [isDraggingClock, zenithSkyCoord])
 
-  // 天頂座標（ラジアン）- AltAzグリッド用
-  const zenithZaZd = useMemo(() => {
-    const { ra, dec } = zenithSkyCoord
-    return {
-      za: (ra * Math.PI) / 180,
-      zd: (dec * Math.PI) / 180,
-    }
-  }, [zenithSkyCoord])
+  // 天頂座標（ラジアン）- AltAzグリッド用、カメラの天頂パラメータ用
+  // stellar-globeのdateUtils.zenithSkyCoordを直接使用
+  const zenithZaZd = useMemo(
+    () => calculateZenithZaZd(now, telescopeLocation),
+    [now, telescopeLocation]
+  )
 
   // ページネーション状態
   const [offset, setOffset] = useState(0)
