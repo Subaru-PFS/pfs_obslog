@@ -266,7 +266,6 @@ export function DesignList() {
       </div>
 
       <div className={styles.list}>
-        <LoadingOverlay isLoading={isLoading || isFetching} />
         {groupedDesigns.map((group, groupIndex) => (
           <div key={groupIndex} className={styles.entryGroup}>
             {group.map((entry) => (
@@ -287,6 +286,8 @@ export function DesignList() {
           </div>
         ))}
       </div>
+
+      <LoadingOverlay isLoading={isLoading || isFetching} />
     </div>
   )
 }

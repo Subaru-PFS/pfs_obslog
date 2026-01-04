@@ -418,23 +418,26 @@ export function SkyViewer() {
     }
   }, [])
 
-  // 時刻変更時にAltAzグリッドを再描画（modelMatrix は ref を参照するので自動的に更新される）
+  // 時刻変更時にカメラの天頂パラメータを更新（天頂に対するカメラの相対位置は維持）
+  // これにより、時刻が変わっても星空は固定され、グリッドのみが天頂に追従する
   useEffect(() => {
     if (globeRef.current) {
       const globe = globeRef.current()
+      // カメラの天頂パラメータを新しい天頂位置に更新（アニメーションなしで瞬時に）
+      globe.camera.jumpTo({ za: zenithZaZd.za, zd: zenithZaZd.zd }, { duration: 0 })
       globe.requestRefresh()
     }
   }, [zenithZaZd])
 
-  // 天頂を中心に表示（AltAzグリッドの中心も更新）
+  // 天頂を中心に表示（AltAzグリッドの極が画面中央に来るようにする）
   const centerZenith = useCallback(() => {
     if (globeRef.current) {
       const globe = globeRef.current()
       const coord = SkyCoord.fromDeg(zenithSkyCoord.ra, zenithSkyCoord.dec)
-      // 天頂パラメータを更新してAltAzグリッドの中心を設定
-      // TILTを加えることで、天頂が画面中心に来るようにする
+      // グリッドのmodelMatrixでTILTを引いているので、カメラのzdもそれに合わせる
+      // zd: zenithZaZd.zd でグリッドの極（天頂）が画面中央に来る
       globe.camera.jumpTo(
-        { fovy: 2, za: zenithZaZd.za, zd: zenithZaZd.zd + TILT },
+        { fovy: 2, za: zenithZaZd.za, zd: zenithZaZd.zd },
         { coord, duration: 500 }
       )
     }
