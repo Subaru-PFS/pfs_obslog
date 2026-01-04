@@ -13,14 +13,14 @@ import {
   TouchLayer$,
   PathLayer$,
   ClickableMarkerLayer$,
-  PointMarkerLayer$,
+  MarkerLayer$,
   useGetGlobe,
   type GlobeHandle,
 } from '@stellar-globe/react-stellar-globe'
 import { angle, path, SkyCoord, GridLayer, matrixUtils, type Globe } from '@stellar-globe/stellar-globe'
 import { useDesignsContext, inTimeZone } from '../DesignsContext'
 import { HST_TZ_OFFSET, MARKER_FOV, type PfsDesignEntry } from '../types'
-import { targetTypeColors, fiberStatusColors } from '../legend'
+import { targetTypeColors } from '../legend'
 import { Clock } from './Clock'
 import styles from './SkyViewer.module.scss'
 
@@ -305,7 +305,6 @@ function DesignMarkers() {
         paths={markerPaths}
         blendMode="NORMAL"
         darkenNarrowLine={false}
-        minWidth={5}
       />
       {/* クリック/ホバー検出用レイヤー（透明） */}
       <ClickableMarkerLayer$
@@ -319,9 +318,11 @@ function DesignMarkers() {
       />
       {/* ファイバーマーカー（ポイント） */}
       {fiberMarkers.length > 0 && (
-        <PointMarkerLayer$
+        <MarkerLayer$
           markers={fiberMarkers}
           markerSize={3}
+          defaultColor={DEFAULT_FIBER_COLOR}
+          defaultType="circle"
         />
       )}
       {/* フォーカス/選択マーカー */}
@@ -329,7 +330,6 @@ function DesignMarkers() {
         paths={focusPaths}
         blendMode="NORMAL"
         darkenNarrowLine={false}
-        minWidth={7}
       />
     </>
   )
@@ -353,6 +353,7 @@ function EquatorialGrid() {
 export function SkyViewer() {
   const globeRef = useRef<GlobeHandle | null>(null)
   const altAzGridRef = useRef<GridLayer | null>(null)
+  const zenithZaZdRef = useRef({ za: 0, zd: Math.PI / 2 })
   const {
     jumpToSignal,
     setNow,
@@ -363,6 +364,11 @@ export function SkyViewer() {
     setShowFibers,
     setDraggingClock,
   } = useDesignsContext()
+
+  // zenithZaZd を ref に同期
+  useEffect(() => {
+    zenithZaZdRef.current = zenithZaZd
+  }, [zenithZaZd])
 
   // ジャンプシグナルを監視
   useEffect(() => {
@@ -390,10 +396,11 @@ export function SkyViewer() {
   // Globe初期化時のコールバック - AltAzグリッドを追加
   const handleGlobeInit = useCallback((globe: Globe) => {
     // 天頂を基準にしたAltAzグリッドを追加
+    // modelMatrix は ref を参照するので、zenithZaZd が変わると自動的に更新される
     const altAzGrid = new GridLayer(globe, (draft) => {
       draft.modelMatrix = () => {
-        const { za, zd, zp } = globe.camera
-        return matrixUtils.izenith4(za, zd - TILT, zp)
+        const { za, zd } = zenithZaZdRef.current
+        return matrixUtils.izenith4(za, zd - TILT, 0)
       }
       draft.defaultGridColor = [0, 0.25, 1, 1]
       draft.thetaLine.gridColors = { 9: [1, 0.5, 0, 1] }
@@ -411,16 +418,9 @@ export function SkyViewer() {
     }
   }, [])
 
-  // 時刻変更時にAltAzグリッドの中心のみを更新（カメラは動かさない）
+  // 時刻変更時にAltAzグリッドを再描画（modelMatrix は ref を参照するので自動的に更新される）
   useEffect(() => {
-    if (altAzGridRef.current && globeRef.current) {
-      // グリッドの変換行列を更新（天頂位置を反映）
-      altAzGridRef.current.modelMatrix = matrixUtils.izenith4(
-        zenithZaZd.za,
-        zenithZaZd.zd - TILT,
-        0
-      )
-      // 再描画をリクエスト
+    if (globeRef.current) {
       const globe = globeRef.current()
       globe.requestRefresh()
     }

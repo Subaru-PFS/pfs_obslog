@@ -175,6 +175,11 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   const [offset, setOffset] = useState(0)
   const [limit, setLimit] = useState(50)
 
+  // 検索・ソート状態（サーバーサイド）
+  const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState<SortBy>('altitude')
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
+
   // 高度ソート時に天頂座標が変わったらページをリセット
   const prevCommittedZenithRef = useRef(committedZenith)
   useEffect(() => {
@@ -187,11 +192,6 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     }
     prevCommittedZenithRef.current = committedZenith
   }, [sortBy, committedZenith])
-
-  // 検索・ソート状態（サーバーサイド）
-  const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState<SortBy>('altitude')
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
 
   // Design一覧取得（ページネーション付き）
   // sortBy が 'altitude' の場合は確定された天頂座標を渡す
