@@ -1,7 +1,7 @@
 /**
  * SkyViewer - WebGLベースの天球表示コンポーネント
  */
-import { useRef, useEffect, useCallback, useMemo } from 'react'
+import { useRef, useEffect, useCallback, useMemo, useState } from 'react'
 import {
   Globe$,
   HipparcosCatalogLayer$,
@@ -33,9 +33,18 @@ const DEFAULT_FIBER_COLOR: [number, number, number, number] = [0.5, 0.5, 0.5, 1]
 // マーカーサイズ（ピクセル単位）
 const MARKER_SIZE_PX = 24
 
+// ファイバーマーカーのサイズ（ピクセル単位）- ズームインした時に見やすいサイズ
+const FIBER_MARKER_SIZE_PX = 8
+
+// ズームインした時のマーカー透明度制御
+// fovyがこの値（ラジアン）以下になると透明度が下がり始める
+const DIM_FOV_THRESHOLD = angle.deg2rad(4) // デザインが視野の約1/3を占める程度
+// 最小透明度（5%）
+const DIM_MIN_ALPHA = 0.05
+
 // カメラ初期パラメータ（オブジェクト参照を安定させるためコンポーネント外で定義）
 const INITIAL_CAMERA_PARAMS = {
-  fovy: 2,
+  fovy: 4, // 初期視野を広めに設定
   theta: 0,
   phi: 0,
   za: 0,
@@ -175,6 +184,46 @@ function DesignMarkers() {
     designDetail,
   } = useDesignsContext()
   const getGlobe = useGetGlobe()
+  
+  // 現在のマーカー透明度（fovyに応じて変化）
+  const [markerAlpha, setMarkerAlpha] = useState(1)
+
+  // fovyを監視してマーカー透明度を更新
+  useEffect(() => {
+    let animationId: number
+    let lastAlpha = markerAlpha
+    
+    const updateAlpha = () => {
+      const globe = getGlobe()
+      const fovy = globe.camera.fovy
+      
+      // fovyがDIM_FOV_THRESHOLD以下になると透明度が下がり始める
+      // fovy >= DIM_FOV_THRESHOLD: alpha = 1
+      // fovy <= MARKER_FOV (1.4deg): alpha = DIM_MIN_ALPHA (5%)
+      // その間は線形補間
+      let newAlpha: number
+      if (fovy >= DIM_FOV_THRESHOLD) {
+        newAlpha = 1
+      } else if (fovy <= MARKER_FOV) {
+        newAlpha = DIM_MIN_ALPHA
+      } else {
+        // 線形補間: (fovy - MARKER_FOV) / (DIM_FOV_THRESHOLD - MARKER_FOV)
+        const t = (fovy - MARKER_FOV) / (DIM_FOV_THRESHOLD - MARKER_FOV)
+        newAlpha = DIM_MIN_ALPHA + t * (1 - DIM_MIN_ALPHA)
+      }
+      
+      // 閾値を超える変化があった場合のみ更新（パフォーマンス最適化）
+      if (Math.abs(newAlpha - lastAlpha) > 0.01) {
+        lastAlpha = newAlpha
+        setMarkerAlpha(newAlpha)
+      }
+      
+      animationId = requestAnimationFrame(updateAlpha)
+    }
+    
+    animationId = requestAnimationFrame(updateAlpha)
+    return () => cancelAnimationFrame(animationId)
+  }, [getGlobe, markerAlpha])
 
   // allPositionsからエントリのマップを作成（オブジェクトの参照を安定させる）
   const positionEntryMap = useMemo(() => {
@@ -185,12 +234,24 @@ function DesignMarkers() {
     return map
   }, [allPositions])
 
-  // 全マーカーのパス（円）を生成
+  // 全マーカーのパス（円）を生成 - 透明度を含む
   const markerPaths = useMemo(() => {
-    return allPositions.map((d) =>
-      createCirclePath(d.ra, d.dec, MARKER_COLOR, MARKER_FOV / 2)
-    )
-  }, [allPositions])
+    // 選択中のDesignのIDを取得
+    const selectedId = selectedDesign?.id
+    
+    return allPositions.map((d) => {
+      // 選択中のDesignは別レイヤーで描画するのでここではスキップ（透明に）
+      const isSelected = d.id === selectedId
+      const alpha = isSelected ? 0 : markerAlpha
+      const color: [number, number, number, number] = [
+        MARKER_COLOR[0],
+        MARKER_COLOR[1],
+        MARKER_COLOR[2],
+        MARKER_COLOR[3] * alpha,
+      ]
+      return createCirclePath(d.ra, d.dec, color, MARKER_FOV / 2)
+    })
+  }, [allPositions, markerAlpha, selectedDesign?.id])
 
   // マーカーデータを生成（クリック/ホバー検出用、透明）
   const markers = useMemo(() => {
@@ -258,6 +319,11 @@ function DesignMarkers() {
       )
     }
     if (selectedDesign) {
+      // 選択されたDesignは常にフル透明度で基本マーカーを描画
+      paths.push(
+        createCirclePath(selectedDesign.ra, selectedDesign.dec, MARKER_COLOR, MARKER_FOV / 2)
+      )
+      // その上にハイライト色を重ねる
       paths.push(
         createCirclePath(selectedDesign.ra, selectedDesign.dec, SELECTED_COLOR, MARKER_FOV / 2)
       )
@@ -266,10 +332,25 @@ function DesignMarkers() {
   }, [focusedDesign, selectedDesign])
 
   // ファイバーマーカー（選択中のdesignのファイバー位置を表示）
+  // fovyに応じて透明度が変化する
   const fiberMarkers = useMemo(() => {
     if (!showFibers || !designDetail) {
       return []
     }
+    
+    // markerAlphaを使ってファイバーマーカーの透明度を計算
+    // markerAlphaが1のときはズームアウト状態（fovy >= DIM_FOV_THRESHOLD）
+    // markerAlphaが小さいときはズームイン状態
+    // ファイバーマーカーはズームイン時に表示され、ズームアウト時に非表示になる
+    let fiberAlpha: number
+    if (markerAlpha >= 1) {
+      fiberAlpha = 0 // ズームアウト時はファイバーマーカーを非表示
+    } else {
+      // ズームイン時はファイバーマーカーを表示
+      // markerAlphaの逆数的な関係でファイバーの透明度を計算
+      fiberAlpha = Math.min(1, (1 - markerAlpha) * 2)
+    }
+    
     const markers: { position: [number, number, number]; color: [number, number, number, number] }[] = []
 
     // Design Data（ファイバー）
@@ -277,7 +358,13 @@ function DesignMarkers() {
     for (let i = 0; i < ra.length; i++) {
       const coord = SkyCoord.fromDeg(ra[i], dec[i])
       const colorEntry = targetTypeColors[targetType[i]]
-      const color = colorEntry ? colorToRgba(colorEntry.color) : DEFAULT_FIBER_COLOR
+      const baseColor = colorEntry ? colorToRgba(colorEntry.color) : DEFAULT_FIBER_COLOR
+      const color: [number, number, number, number] = [
+        baseColor[0],
+        baseColor[1],
+        baseColor[2],
+        baseColor[3] * fiberAlpha,
+      ]
       markers.push({
         position: coord.xyz as [number, number, number],
         color,
@@ -291,12 +378,12 @@ function DesignMarkers() {
       const coord = SkyCoord.fromDeg(guideRa[i], guideDec[i])
       markers.push({
         position: coord.xyz as [number, number, number],
-        color: [1, 0, 0, 1], // Red for guide stars
+        color: [1, 0, 0, fiberAlpha], // Red for guide stars
       })
     }
 
     return markers
-  }, [showFibers, designDetail])
+  }, [showFibers, designDetail, markerAlpha])
 
   return (
     <>
@@ -320,7 +407,7 @@ function DesignMarkers() {
       {fiberMarkers.length > 0 && (
         <MarkerLayer$
           markers={fiberMarkers}
-          markerSize={3}
+          markerSize={FIBER_MARKER_SIZE_PX}
           defaultColor={DEFAULT_FIBER_COLOR}
           defaultType="circle"
         />
@@ -451,7 +538,7 @@ export function SkyViewer() {
       const globe = globeRef.current()
       const coord = SkyCoord.fromDeg(zenithSkyCoord.ra, zenithSkyCoord.dec)
       globe.camera.jumpTo(
-        { fovy: 2 },
+        { fovy: 4 }, // 初期視野と同じ広さ
         { coord, duration: 500 }
       )
     }
