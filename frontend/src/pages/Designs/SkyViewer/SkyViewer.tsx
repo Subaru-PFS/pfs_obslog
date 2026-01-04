@@ -322,6 +322,19 @@ export function SkyViewer() {
     }
   }, [])
 
+  // 時刻変更時にAltAzグリッドの中心を更新（カメラも追随）
+  useEffect(() => {
+    if (globeRef.current) {
+      const globe = globeRef.current()
+      const coord = SkyCoord.fromDeg(zenithSkyCoord.ra, zenithSkyCoord.dec)
+      // 天頂パラメータを更新（アニメーションなしで即座に反映）
+      globe.camera.jumpTo(
+        { za: zenithZaZd.za, zd: zenithZaZd.zd + TILT },
+        { coord, duration: 0 }
+      )
+    }
+  }, [zenithSkyCoord, zenithZaZd])
+
   // 天頂を中心に表示（AltAzグリッドの中心も更新）
   const centerZenith = useCallback(() => {
     if (globeRef.current) {
