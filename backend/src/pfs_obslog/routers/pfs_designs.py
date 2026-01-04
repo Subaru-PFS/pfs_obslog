@@ -308,59 +308,29 @@ def list_pfs_designs(
         # バックグラウンドでキャッシュ更新
         background_tasks.add_task(_sync_cache_in_background)
 
-        # altitude ソートの場合は全件取得してPythonでソート
-        if sort_by == "altitude":
-            # 全件取得（フィルタリングはキャッシュ側で行う）
-            all_entries, total = cache.get_entries_paginated(
-                search=search,
-                sort_by="date_modified",  # 一旦デフォルトソートで取得
-                sort_order="desc",
-                offset=0,
-                limit=100000,  # 全件取得
-            )
+        # キャッシュから取得（高度ソートもキャッシュ側で処理）
+        entries, total = cache.get_entries_paginated(
+            search=search,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            offset=offset,
+            limit=limit,
+            zenith_ra=zenith_ra,
+            zenith_dec=zenith_dec,
+        )
 
-            # キャッシュが空の場合は同期を待つ（初回のみ）
-            if total == 0 and not search:
-                cache.sync()
-                all_entries, total = cache.get_entries_paginated(
-                    search=search,
-                    sort_by="date_modified",
-                    sort_order="desc",
-                    offset=0,
-                    limit=100000,
-                )
-
-            # 高度でソート
-            reverse = sort_order == "desc"
-            all_entries.sort(
-                key=lambda e: _calculate_altitude(
-                    e["ra"], e["dec"], zenith_ra, zenith_dec  # type: ignore
-                ),
-                reverse=reverse,
-            )
-
-            # ページネーション適用
-            entries = all_entries[offset : offset + limit]
-        else:
-            # キャッシュから取得
+        # キャッシュが空の場合は同期を待つ（初回のみ）
+        if total == 0 and not search:
+            cache.sync()
             entries, total = cache.get_entries_paginated(
                 search=search,
                 sort_by=sort_by,
                 sort_order=sort_order,
                 offset=offset,
                 limit=limit,
+                zenith_ra=zenith_ra,
+                zenith_dec=zenith_dec,
             )
-
-            # キャッシュが空の場合は同期を待つ（初回のみ）
-            if total == 0 and not search:
-                cache.sync()
-                entries, total = cache.get_entries_paginated(
-                    search=search,
-                    sort_by=sort_by,
-                    sort_order=sort_order,
-                    offset=offset,
-                    limit=limit,
-                )
 
         items = [
             PfsDesignEntry(

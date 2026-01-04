@@ -68,7 +68,7 @@ export type JumpToOptions = {
 }
 
 // ソートオプション
-export type SortBy = 'date_modified' | 'name' | 'id'
+export type SortBy = 'date_modified' | 'name' | 'id' | 'altitude'
 export type SortOrder = 'asc' | 'desc'
 
 interface DesignsContextValue {
@@ -76,6 +76,7 @@ interface DesignsContextValue {
   designs: PfsDesignEntry[]
   total: number
   isLoading: boolean
+  isFetching: boolean  // データ再取得中フラグ（ローディングオーバーレイ用）
   refetch: () => void
 
   // ページネーション状態
@@ -135,19 +136,69 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   const navigate = useNavigate()
   const { designId } = useParams<{ designId?: string }>()
 
+  // 時刻・位置（APIクエリより先に定義）
+  const [now, setNow] = useState(() => new Date())
+  const telescopeLocation = SUBARU_TELESCOPE_LOCATION
+  const [isDraggingClock, setDraggingClock] = useState(false)
+
+  // HST時刻
+  const hst = useMemo(() => inTimeZone(now, HST_TZ_OFFSET), [now])
+
+  // 天頂座標（度）- 表示用（リアルタイム更新）
+  const zenithSkyCoord = useMemo(
+    () => calculateZenithSkyCoord(now, telescopeLocation),
+    [now, telescopeLocation]
+  )
+
+  // 確定された天頂座標（APIクエリ用）- ドラッグ中は更新しない
+  const [committedZenith, setCommittedZenith] = useState(() =>
+    calculateZenithSkyCoord(new Date(), telescopeLocation)
+  )
+
+  // ドラッグ終了時に確定座標を更新
+  useEffect(() => {
+    if (!isDraggingClock) {
+      setCommittedZenith(zenithSkyCoord)
+    }
+  }, [isDraggingClock, zenithSkyCoord])
+
+  // 天頂座標（ラジアン）- AltAzグリッド用
+  const zenithZaZd = useMemo(() => {
+    const { ra, dec } = zenithSkyCoord
+    return {
+      za: (ra * Math.PI) / 180,
+      zd: (dec * Math.PI) / 180,
+    }
+  }, [zenithSkyCoord])
+
   // ページネーション状態
   const [offset, setOffset] = useState(0)
   const [limit, setLimit] = useState(50)
 
+  // 高度ソート時に天頂座標が変わったらページをリセット
+  const prevCommittedZenithRef = useRef(committedZenith)
+  useEffect(() => {
+    if (
+      sortBy === 'altitude' &&
+      (prevCommittedZenithRef.current.ra !== committedZenith.ra ||
+        prevCommittedZenithRef.current.dec !== committedZenith.dec)
+    ) {
+      setOffset(0)
+    }
+    prevCommittedZenithRef.current = committedZenith
+  }, [sortBy, committedZenith])
+
   // 検索・ソート状態（サーバーサイド）
   const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState<SortBy>('date_modified')
+  const [sortBy, setSortBy] = useState<SortBy>('altitude')
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
 
   // Design一覧取得（ページネーション付き）
+  // sortBy が 'altitude' の場合は確定された天頂座標を渡す
   const {
     data: listResponse,
     isLoading,
+    isFetching,
     refetch,
   } = useListPfsDesignsApiPfsDesignsGetQuery({
     search: search || undefined,
@@ -155,6 +206,8 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     sortOrder,
     offset,
     limit,
+    zenithRa: sortBy === 'altitude' ? committedZenith.ra : undefined,
+    zenithDec: sortBy === 'altitude' ? committedZenith.dec : undefined,
   })
 
   const designs = listResponse?.items ?? []
@@ -190,29 +243,6 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   // 天球ビュー制御
   const [jumpToSignal, setJumpToSignal] = useState<JumpToOptions | null>(null)
   const [showFibers, setShowFibers] = useState(true)
-
-  // 時刻・位置
-  const [now, setNow] = useState(() => new Date())
-  const telescopeLocation = SUBARU_TELESCOPE_LOCATION
-  const [isDraggingClock, setDraggingClock] = useState(false)
-
-  // HST時刻
-  const hst = useMemo(() => inTimeZone(now, HST_TZ_OFFSET), [now])
-
-  // 天頂座標（度）
-  const zenithSkyCoord = useMemo(
-    () => calculateZenithSkyCoord(now, telescopeLocation),
-    [now, telescopeLocation]
-  )
-
-  // 天頂座標（ラジアン）- AltAzグリッド用
-  const zenithZaZd = useMemo(() => {
-    const { ra, dec } = zenithSkyCoord
-    return {
-      za: (ra * Math.PI) / 180,
-      zd: (dec * Math.PI) / 180,
-    }
-  }, [zenithSkyCoord])
 
   // Design詳細取得
   const { data: designDetail, isLoading: isLoadingDetail } =
@@ -270,6 +300,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     designs,
     total,
     isLoading,
+    isFetching,
     refetch,
     offset,
     setOffset,

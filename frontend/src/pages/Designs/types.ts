@@ -25,9 +25,6 @@ export interface LegendEntry {
 // ID表示形式
 export type IdFormat = 'hex' | 'decimal'
 
-// クライアントサイドソート順（高度順はサーバーサイドでは計算不可）
-export type ClientSortOrder = 'altitude' | 'date_modified'
-
 // タイムゾーンオフセット（分単位）HST = UTC-10:00
 export const HST_TZ_OFFSET = 600
 

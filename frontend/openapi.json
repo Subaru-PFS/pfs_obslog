@@ -1280,7 +1280,8 @@
               "enum": [
                 "date_modified",
                 "name",
-                "id"
+                "id",
+                "altitude"
               ],
               "type": "string",
               "description": "Field to sort by",
@@ -1331,6 +1332,42 @@
               "title": "Limit"
             },
             "description": "Number of items to return"
+          },
+          {
+            "name": "zenith_ra",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Zenith RA in degrees (required for altitude sort)",
+              "title": "Zenith Ra"
+            },
+            "description": "Zenith RA in degrees (required for altitude sort)"
+          },
+          {
+            "name": "zenith_dec",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Zenith Dec in degrees (required for altitude sort)",
+              "title": "Zenith Dec"
+            },
+            "description": "Zenith Dec in degrees (required for altitude sort)"
           }
         ],
         "responses": {

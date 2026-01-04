@@ -51,6 +51,9 @@ class PfsDesignCache:
         file_mtime REAL NOT NULL,
         ra REAL,
         dec REAL,
+        x REAL,
+        y REAL,
+        z REAL,
         arms TEXT,
         num_design_rows INTEGER,
         num_photometry_rows INTEGER,
@@ -85,8 +88,37 @@ class PfsDesignCache:
         conn = sqlite3.connect(self.db_path)
         try:
             conn.executescript(self.SCHEMA)
+            # マイグレーション：x, y, zカラムがなければ追加
+            self._migrate_add_xyz_columns(conn)
         finally:
             conn.close()
+
+    def _migrate_add_xyz_columns(self, conn: sqlite3.Connection) -> None:
+        """x, y, zカラムを追加するマイグレーション
+
+        既存のDBにx, y, zカラムがない場合に追加します。
+        既にカラムが存在する場合は何もしません。
+        """
+        cursor = conn.execute("PRAGMA table_info(pfs_design_metadata)")
+        columns = {row[1] for row in cursor.fetchall()}
+
+        if "x" not in columns:
+            logger.info("Migrating: Adding x, y, z columns to pfs_design_metadata")
+            # カラムを追加
+            conn.execute("ALTER TABLE pfs_design_metadata ADD COLUMN x REAL")
+            conn.execute("ALTER TABLE pfs_design_metadata ADD COLUMN y REAL")
+            conn.execute("ALTER TABLE pfs_design_metadata ADD COLUMN z REAL")
+            # 既存データにx, y, zを計算して設定（ra, decが0の場合もあるので注意）
+            conn.execute(
+                """
+                UPDATE pfs_design_metadata
+                SET x = cos(dec * 3.141592653589793 / 180) * cos(ra * 3.141592653589793 / 180),
+                    y = cos(dec * 3.141592653589793 / 180) * sin(ra * 3.141592653589793 / 180),
+                    z = sin(dec * 3.141592653589793 / 180)
+                """
+            )
+            conn.commit()
+            logger.info("Migration complete: x, y, z columns added")
 
     @contextmanager
     def _get_connection(self) -> Generator[sqlite3.Connection, None, None]:
@@ -112,7 +144,7 @@ class PfsDesignCache:
         with self._get_connection() as conn:
             cursor = conn.execute(
                 """
-                SELECT id, frameid, name, file_mtime, ra, dec, arms,
+                SELECT id, frameid, name, file_mtime, ra, dec, x, y, z, arms,
                        num_design_rows, num_photometry_rows, num_guidestar_rows,
                        science_count, sky_count, fluxstd_count,
                        unassigned_count, engineering_count,
@@ -131,6 +163,9 @@ class PfsDesignCache:
                 "date_modified": datetime.datetime.fromtimestamp(row["file_mtime"]),
                 "ra": row["ra"] or 0.0,
                 "dec": row["dec"] or 0.0,
+                "x": row["x"],
+                "y": row["y"],
+                "z": row["z"],
                 "arms": row["arms"] or "-",
                 "num_design_rows": row["num_design_rows"] or 0,
                 "num_photometry_rows": row["num_photometry_rows"] or 0,
@@ -155,15 +190,19 @@ class PfsDesignCache:
         sort_order: str = "desc",
         offset: int = 0,
         limit: int = 50,
+        zenith_ra: float | None = None,
+        zenith_dec: float | None = None,
     ) -> tuple[list[dict], int]:
         """ページネーション、フィルタリング、ソート対応でエントリを取得
 
         Args:
             search: 検索文字列（name または id に部分一致）
-            sort_by: ソートキー（"date_modified", "name", "id"）
+            sort_by: ソートキー（"date_modified", "name", "id", "altitude"）
             sort_order: ソート順序（"asc", "desc"）
             offset: 取得開始位置
             limit: 取得件数
+            zenith_ra: 天頂のRA（度）- 高度ソート時に必要
+            zenith_dec: 天頂のDec（度）- 高度ソート時に必要
 
         Returns:
             (エントリリスト, 総件数) のタプル
@@ -171,13 +210,28 @@ class PfsDesignCache:
         if not self.design_dir.exists():
             return [], 0
 
+        import math
+
+        # 天頂の単位ベクトルを計算（高度ソート用）
+        zenith_x: float | None = None
+        zenith_y: float | None = None
+        zenith_z: float | None = None
+        if sort_by == "altitude" and zenith_ra is not None and zenith_dec is not None:
+            ra_rad = math.radians(zenith_ra)
+            dec_rad = math.radians(zenith_dec)
+            zenith_x = math.cos(dec_rad) * math.cos(ra_rad)
+            zenith_y = math.cos(dec_rad) * math.sin(ra_rad)
+            zenith_z = math.sin(dec_rad)
+
         # SQLクエリの構築
-        base_query = """
-            SELECT id, frameid, name, file_mtime, ra, dec, arms,
+        select_columns = """id, frameid, name, file_mtime, ra, dec, x, y, z, arms,
                    num_design_rows, num_photometry_rows, num_guidestar_rows,
                    science_count, sky_count, fluxstd_count,
                    unassigned_count, engineering_count,
-                   sunss_imaging_count, sunss_diffuse_count
+                   sunss_imaging_count, sunss_diffuse_count"""
+
+        base_query = f"""
+            SELECT {select_columns}
             FROM pfs_design_metadata
         """
         count_query = "SELECT COUNT(*) FROM pfs_design_metadata"
@@ -192,14 +246,20 @@ class PfsDesignCache:
             count_query += where_clause
 
         # ソート
-        sort_column_map = {
-            "date_modified": "file_mtime",
-            "name": "name",
-            "id": "id",
-        }
-        sort_column = sort_column_map.get(sort_by, "file_mtime")
         sort_dir = "ASC" if sort_order.lower() == "asc" else "DESC"
-        base_query += f" ORDER BY {sort_column} {sort_dir}"
+        if sort_by == "altitude" and zenith_x is not None:
+            # 高度はcos(角距離) = 内積で計算
+            # コサインが大きいほど天頂に近い（descで高度順）
+            base_query += f" ORDER BY (x * ? + y * ? + z * ?) {sort_dir}"
+            params.extend([zenith_x, zenith_y, zenith_z])
+        else:
+            sort_column_map = {
+                "date_modified": "file_mtime",
+                "name": "name",
+                "id": "id",
+            }
+            sort_column = sort_column_map.get(sort_by, "file_mtime")
+            base_query += f" ORDER BY {sort_column} {sort_dir}"
 
         # ページネーション
         base_query += " LIMIT ? OFFSET ?"
@@ -207,7 +267,8 @@ class PfsDesignCache:
 
         with self._get_connection() as conn:
             # 総件数を取得
-            cursor = conn.execute(count_query, params)
+            count_params = params[:2] if search else []  # 検索パラメータのみ（ソートパラメータは含めない）
+            cursor = conn.execute(count_query, count_params)
             total = cursor.fetchone()[0]
 
             # データを取得
@@ -222,6 +283,9 @@ class PfsDesignCache:
                 "date_modified": datetime.datetime.fromtimestamp(row["file_mtime"]),
                 "ra": row["ra"] or 0.0,
                 "dec": row["dec"] or 0.0,
+                "x": row["x"],
+                "y": row["y"],
+                "z": row["z"],
                 "arms": row["arms"] or "-",
                 "num_design_rows": row["num_design_rows"] or 0,
                 "num_photometry_rows": row["num_photometry_rows"] or 0,
@@ -378,6 +442,13 @@ class PfsDesignCache:
             dec = float(header.get("DEC", 0.0))
             arms = header.get("ARMS", "-")
 
+            # ra, decから単位ベクトルを計算（高度ソート用）
+            ra_rad = numpy.radians(ra)
+            dec_rad = numpy.radians(dec)
+            x = float(numpy.cos(dec_rad) * numpy.cos(ra_rad))
+            y = float(numpy.cos(dec_rad) * numpy.sin(ra_rad))
+            z = float(numpy.sin(dec_rad))
+
             # 行数を取得
             num_design_rows = len(hdul[1].data) if hdul[1].data is not None else 0  # type: ignore[union-attr]
             num_photometry_rows = len(hdul[2].data) if hdul[2].data is not None else 0  # type: ignore[union-attr]
@@ -404,13 +475,13 @@ class PfsDesignCache:
             conn.execute(
                 """
                 INSERT OR REPLACE INTO pfs_design_metadata (
-                    id, frameid, name, file_mtime, ra, dec, arms,
+                    id, frameid, name, file_mtime, ra, dec, x, y, z, arms,
                     num_design_rows, num_photometry_rows, num_guidestar_rows,
                     science_count, sky_count, fluxstd_count,
                     unassigned_count, engineering_count,
                     sunss_imaging_count, sunss_diffuse_count,
                     cached_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     design_id,
@@ -419,6 +490,9 @@ class PfsDesignCache:
                     mtime,
                     ra,
                     dec,
+                    x,
+                    y,
+                    z,
                     arms,
                     num_design_rows,
                     num_photometry_rows,

@@ -6,14 +6,14 @@ import { useLocalStorage } from 'react-use'
 import { IconButton } from '../../../components/Icon'
 import { Tooltip } from '../../../components/Tooltip'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
-import { useDesignsContext } from '../DesignsContext'
-import type { PfsDesignEntry, IdFormat, ClientSortOrder } from '../types'
+import { useDesignsContext, SortBy } from '../DesignsContext'
+import type { PfsDesignEntry, IdFormat } from '../types'
 import { DESIGN_CROSS_MATCH_COSINE } from '../types'
 import styles from './DesignList.module.scss'
 
 // localStorage キー
 const ID_FORMAT_KEY = '/DesignList/idFormat'
-const CLIENT_SORT_KEY = '/DesignList/clientSort'
+const SORT_BY_KEY = '/DesignList/sortBy'
 
 /**
  * 赤道座標をラジアンに変換
@@ -52,37 +52,19 @@ function formattedId(entry: PfsDesignEntry, idFormat: IdFormat): string {
   return String(BigInt(`0x${entry.id}`))
 }
 
-/**
- * 高度順の比較関数
- */
-function compareByAltitude(
-  aEntry: PfsDesignEntry,
-  bEntry: PfsDesignEntry,
-  zenithRa: number,
-  zenithDec: number
-): number {
-  const a = cosineAngle(aEntry.ra, aEntry.dec, zenithRa, zenithDec)
-  const b = cosineAngle(bEntry.ra, bEntry.dec, zenithRa, zenithDec)
-
-  if (Number.isNaN(a) && Number.isNaN(b)) {
-    return aEntry.id.localeCompare(bEntry.id)
-  }
-  if (Number.isNaN(a)) return 1
-  if (Number.isNaN(b)) return -1
-  return b - a // コサインが大きい方が天頂に近い
-}
-
 export function DesignList() {
   const {
     designs,
     total,
     isLoading,
+    isFetching,
     refetch,
     offset,
     setOffset,
     limit,
     search,
     setSearch,
+    sortBy,
     setSortBy,
     setSortOrder,
     selectedDesign,
@@ -95,8 +77,18 @@ export function DesignList() {
   } = useDesignsContext()
 
   const [idFormat, setIdFormat] = useLocalStorage<IdFormat>(ID_FORMAT_KEY, 'hex')
-  const [clientSort, setClientSort] = useLocalStorage<ClientSortOrder>(CLIENT_SORT_KEY, 'altitude')
+  // ソート設定をlocalStorageに保存（初回ロード時に復元）
+  const [storedSortBy, setStoredSortBy] = useLocalStorage<SortBy>(SORT_BY_KEY, 'altitude')
   const [searchInput, setSearchInput] = useState(search)
+
+  // 初回ロード時にlocalStorageからソート設定を復元
+  const initializedRef = useRef(false)
+  useEffect(() => {
+    if (!initializedRef.current && storedSortBy) {
+      setSortBy(storedSortBy)
+      initializedRef.current = true
+    }
+  }, [storedSortBy, setSortBy])
 
   // 検索テキスト変更時のデバウンス
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -114,24 +106,17 @@ export function DesignList() {
     [setSearch, setOffset]
   )
 
-  // クライアントサイドソート（高度順のみ、サーバーでは計算不可）
-  // 時計ドラッグ中は更新を抑制
+  // ソート済みデザインをキャッシュ（ドラッグ中の更新抑制用）
   const sortedDesignsRef = useRef<PfsDesignEntry[]>([])
   const sortedDesigns = useMemo(() => {
-    // ドラッグ中は前のソート結果を維持
-    if (isDraggingClock && clientSort === 'altitude') {
+    // 時計ドラッグ中は前のソート結果を維持（高度ソート時のみ）
+    if (isDraggingClock && sortBy === 'altitude') {
       return sortedDesignsRef.current
     }
-    const sorted = [...designs]
-    if ((clientSort ?? 'altitude') === 'altitude') {
-      sorted.sort((a, b) =>
-        compareByAltitude(a, b, zenithSkyCoord.ra, zenithSkyCoord.dec)
-      )
-    }
-    // date_modifiedはサーバーサイドでソート済み
-    sortedDesignsRef.current = sorted
-    return sorted
-  }, [designs, clientSort, zenithSkyCoord, isDraggingClock])
+    // サーバーサイドでソート済み
+    sortedDesignsRef.current = designs
+    return designs
+  }, [designs, sortBy, isDraggingClock])
 
   // グループ化（同一座標付近のDesignをまとめる）
   const groupedDesigns = useMemo(() => {
@@ -235,20 +220,25 @@ export function DesignList() {
           <label>
             <input
               type="radio"
-              checked={(clientSort ?? 'altitude') === 'altitude'}
-              onChange={() => setClientSort('altitude')}
+              checked={sortBy === 'altitude'}
+              onChange={() => {
+                setSortBy('altitude')
+                setSortOrder('desc')
+                setStoredSortBy('altitude')
+                setOffset(0)
+              }}
             />
             Altitude
           </label>
           <label>
             <input
               type="radio"
-              checked={(clientSort ?? 'altitude') === 'date_modified'}
+              checked={sortBy === 'date_modified'}
               onChange={() => {
-                setClientSort('date_modified')
-                // サーバーサイドソートも更新
                 setSortBy('date_modified')
                 setSortOrder('desc')
+                setStoredSortBy('date_modified')
+                setOffset(0)
               }}
             />
             Date Modified
@@ -276,7 +266,7 @@ export function DesignList() {
       </div>
 
       <div className={styles.list}>
-        <LoadingOverlay isLoading={isLoading} />
+        <LoadingOverlay isLoading={isLoading || isFetching} />
         {groupedDesigns.map((group, groupIndex) => (
           <div key={groupIndex} className={styles.entryGroup}>
             {group.map((entry) => (

@@ -13,12 +13,14 @@ import {
   TouchLayer$,
   PathLayer$,
   ClickableMarkerLayer$,
+  PointMarkerLayer$,
   useGetGlobe,
   type GlobeHandle,
 } from '@stellar-globe/react-stellar-globe'
 import { angle, path, SkyCoord, GridLayer, matrixUtils, type Globe } from '@stellar-globe/stellar-globe'
 import { useDesignsContext, inTimeZone } from '../DesignsContext'
 import { HST_TZ_OFFSET, MARKER_FOV, type PfsDesignEntry } from '../types'
+import { targetTypeColors, fiberStatusColors } from '../legend'
 import { Clock } from './Clock'
 import styles from './SkyViewer.module.scss'
 
@@ -26,6 +28,7 @@ import styles from './SkyViewer.module.scss'
 const MARKER_COLOR: [number, number, number, number] = [0.75, 0.75, 0.5, 1]
 const FOCUS_COLOR: [number, number, number, number] = [1, 0, 1, 0.75]
 const SELECTED_COLOR: [number, number, number, number] = [0, 1, 1, 1]
+const DEFAULT_FIBER_COLOR: [number, number, number, number] = [0.5, 0.5, 0.5, 1]
 
 // マーカーサイズ（ピクセル単位）
 const MARKER_SIZE_PX = 24
@@ -43,6 +46,26 @@ const INITIAL_CAMERA_PARAMS = {
 
 // 天頂からの傾き（グリッド表示用）
 const TILT = Math.PI / 2
+
+// CSSカラー名からRGBA配列への変換マップ
+const COLOR_TO_RGBA: { [key: string]: [number, number, number, number] } = {
+  lightsteelblue: [176 / 255, 196 / 255, 222 / 255, 1],
+  yellow: [1, 1, 0, 1],
+  magenta: [1, 0, 1, 1],
+  gray: [0.5, 0.5, 0.5, 1],
+  red: [1, 0, 0, 1],
+  olive: [128 / 255, 128 / 255, 0, 1],
+  blue: [0, 0, 1, 1],
+  orange: [1, 165 / 255, 0, 1],
+  purple: [128 / 255, 0, 128 / 255, 1],
+}
+
+/**
+ * CSSカラー名をRGBA配列に変換
+ */
+function colorToRgba(color: string): [number, number, number, number] {
+  return COLOR_TO_RGBA[color] ?? DEFAULT_FIBER_COLOR
+}
 
 // 日付フォーマット
 function formatDate(date: Date): string {
@@ -141,8 +164,16 @@ function createDummyEntry(position: { id: string; ra: number; dec: number }): Pf
 
 // Designマーカーコンポーネント
 function DesignMarkers() {
-  const { allPositions, focusedDesign, selectedDesign, setFocusedDesign, setSelectedDesign, jumpTo } =
-    useDesignsContext()
+  const {
+    allPositions,
+    focusedDesign,
+    selectedDesign,
+    setFocusedDesign,
+    setSelectedDesign,
+    jumpTo,
+    showFibers,
+    designDetail,
+  } = useDesignsContext()
   const getGlobe = useGetGlobe()
 
   // allPositionsからエントリのマップを作成（オブジェクトの参照を安定させる）
@@ -154,13 +185,20 @@ function DesignMarkers() {
     return map
   }, [allPositions])
 
-  // マーカーデータを生成（全位置情報から）
+  // 全マーカーのパス（円）を生成
+  const markerPaths = useMemo(() => {
+    return allPositions.map((d) =>
+      createCirclePath(d.ra, d.dec, MARKER_COLOR, MARKER_FOV / 2)
+    )
+  }, [allPositions])
+
+  // マーカーデータを生成（クリック/ホバー検出用、透明）
   const markers = useMemo(() => {
     return allPositions.map((d) => {
       const coord = SkyCoord.fromDeg(d.ra, d.dec)
       return {
         position: coord.xyz as [number, number, number],
-        color: MARKER_COLOR,
+        color: [0, 0, 0, 0] as [number, number, number, number], // 透明
         type: 'circle' as const,
       }
     })
@@ -227,21 +265,71 @@ function DesignMarkers() {
     return paths
   }, [focusedDesign, selectedDesign])
 
+  // ファイバーマーカー（選択中のdesignのファイバー位置を表示）
+  const fiberMarkers = useMemo(() => {
+    if (!showFibers || !designDetail) {
+      return []
+    }
+    const markers: { position: [number, number, number]; color: [number, number, number, number] }[] = []
+
+    // Design Data（ファイバー）
+    const { ra, dec, targetType } = designDetail.design_data
+    for (let i = 0; i < ra.length; i++) {
+      const coord = SkyCoord.fromDeg(ra[i], dec[i])
+      const colorEntry = targetTypeColors[targetType[i]]
+      const color = colorEntry ? colorToRgba(colorEntry.color) : DEFAULT_FIBER_COLOR
+      markers.push({
+        position: coord.xyz as [number, number, number],
+        color,
+      })
+    }
+
+    // Guide Stars（赤色で表示）
+    const guideRa = designDetail.guidestar_data.ra
+    const guideDec = designDetail.guidestar_data.dec
+    for (let i = 0; i < guideRa.length; i++) {
+      const coord = SkyCoord.fromDeg(guideRa[i], guideDec[i])
+      markers.push({
+        position: coord.xyz as [number, number, number],
+        color: [1, 0, 0, 1], // Red for guide stars
+      })
+    }
+
+    return markers
+  }, [showFibers, designDetail])
+
   return (
     <>
+      {/* 全デザインマーカー（円） */}
+      <PathLayer$
+        paths={markerPaths}
+        blendMode="NORMAL"
+        darkenNarrowLine={false}
+        minWidth={5}
+      />
+      {/* クリック/ホバー検出用レイヤー（透明） */}
       <ClickableMarkerLayer$
         markers={markers}
         markerSize={MARKER_SIZE_PX}
-        defaultColor={MARKER_COLOR}
+        defaultColor={[0, 0, 0, 0]}
         defaultType="circle"
-        dimmAlpha={0.5}
+        dimmAlpha={0}
         onClick={handleClick}
         onHoverChange={handleHoverChange}
       />
+      {/* ファイバーマーカー（ポイント） */}
+      {fiberMarkers.length > 0 && (
+        <PointMarkerLayer$
+          markers={fiberMarkers}
+          markerSize={3}
+        />
+      )}
+      {/* フォーカス/選択マーカー */}
       <PathLayer$
         paths={focusPaths}
         blendMode="NORMAL"
         darkenNarrowLine={false}
+        minWidth={7}
       />
     </>
   )
@@ -323,18 +411,20 @@ export function SkyViewer() {
     }
   }, [])
 
-  // 時刻変更時にAltAzグリッドの中心を更新（カメラも追随）
+  // 時刻変更時にAltAzグリッドの中心のみを更新（カメラは動かさない）
   useEffect(() => {
-    if (globeRef.current) {
-      const globe = globeRef.current()
-      const coord = SkyCoord.fromDeg(zenithSkyCoord.ra, zenithSkyCoord.dec)
-      // 天頂パラメータを更新（アニメーションなしで即座に反映）
-      globe.camera.jumpTo(
-        { za: zenithZaZd.za, zd: zenithZaZd.zd + TILT },
-        { coord, duration: 0 }
+    if (altAzGridRef.current && globeRef.current) {
+      // グリッドの変換行列を更新（天頂位置を反映）
+      altAzGridRef.current.modelMatrix = matrixUtils.izenith4(
+        zenithZaZd.za,
+        zenithZaZd.zd - TILT,
+        0
       )
+      // 再描画をリクエスト
+      const globe = globeRef.current()
+      globe.requestRefresh()
     }
-  }, [zenithSkyCoord, zenithZaZd])
+  }, [zenithZaZd])
 
   // 天頂を中心に表示（AltAzグリッドの中心も更新）
   const centerZenith = useCallback(() => {

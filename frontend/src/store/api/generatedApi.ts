@@ -238,6 +238,8 @@ const injectedRtkApi = api.injectEndpoints({
           sort_order: queryArg.sortOrder,
           offset: queryArg.offset,
           limit: queryArg.limit,
+          zenith_ra: queryArg.zenithRa,
+          zenith_dec: queryArg.zenithDec,
         },
       }),
     }),
@@ -474,13 +476,17 @@ export type ListPfsDesignsApiPfsDesignsGetApiArg = {
   /** Search string (matches name or id) */
   search?: string | null;
   /** Field to sort by */
-  sortBy?: "date_modified" | "name" | "id";
+  sortBy?: "date_modified" | "name" | "id" | "altitude";
   /** Sort order */
   sortOrder?: "asc" | "desc";
   /** Number of items to skip */
   offset?: number;
   /** Number of items to return */
   limit?: number;
+  /** Zenith RA in degrees (required for altitude sort) */
+  zenithRa?: number | null;
+  /** Zenith Dec in degrees (required for altitude sort) */
+  zenithDec?: number | null;
 };
 export type ListDesignPositionsApiPfsDesignsPositionsGetApiResponse =
   /** status 200 Successful Response */ PfsDesignPosition[];
