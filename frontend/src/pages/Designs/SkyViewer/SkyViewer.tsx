@@ -33,9 +33,6 @@ const DEFAULT_FIBER_COLOR: [number, number, number, number] = [0.5, 0.5, 0.5, 1]
 // マーカーサイズ（ピクセル単位）
 const MARKER_SIZE_PX = 24
 
-// ファイバーマーカーのサイズ（ピクセル単位）- ズームインした時に見やすいサイズ
-const FIBER_MARKER_SIZE_PX = 8
-
 // ズームインした時のマーカー透明度制御
 // fovyがこの値（ラジアン）以下になると透明度が下がり始める
 const DIM_FOV_THRESHOLD = angle.deg2rad(4) // デザインが視野の約1/3を占める程度
@@ -332,7 +329,7 @@ function DesignMarkers() {
   }, [focusedDesign, selectedDesign])
 
   // ファイバーマーカー（選択中のdesignのファイバー位置を表示）
-  // fovyに応じて透明度が変化する
+  // fovyに応じて透明度が変化する（既存プロジェクトと同様のロジック）
   const fiberMarkers = useMemo(() => {
     if (!showFibers || !designDetail) {
       return []
@@ -341,15 +338,9 @@ function DesignMarkers() {
     // markerAlphaを使ってファイバーマーカーの透明度を計算
     // markerAlphaが1のときはズームアウト状態（fovy >= DIM_FOV_THRESHOLD）
     // markerAlphaが小さいときはズームイン状態
-    // ファイバーマーカーはズームイン時に表示され、ズームアウト時に非表示になる
-    let fiberAlpha: number
-    if (markerAlpha >= 1) {
-      fiberAlpha = 0 // ズームアウト時はファイバーマーカーを非表示
-    } else {
-      // ズームイン時はファイバーマーカーを表示
-      // markerAlphaの逆数的な関係でファイバーの透明度を計算
-      fiberAlpha = Math.min(1, (1 - markerAlpha) * 2)
-    }
+    // ファイバーマーカーはズームイン時に表示、ズームアウト時にフェードアウト
+    // 既存プロジェクトの動作: 中程度のズームで最も見やすく、極端なズームで薄くなる
+    const fiberAlpha = Math.min(1, (1 - markerAlpha) * 2)
     
     const markers: { position: [number, number, number]; color: [number, number, number, number] }[] = []
 
@@ -407,7 +398,6 @@ function DesignMarkers() {
       {fiberMarkers.length > 0 && (
         <MarkerLayer$
           markers={fiberMarkers}
-          markerSize={FIBER_MARKER_SIZE_PX}
           defaultColor={DEFAULT_FIBER_COLOR}
           defaultType="circle"
         />
