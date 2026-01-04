@@ -61,6 +61,10 @@ export type JumpToOptions = {
   fovy?: number
   coord?: { ra: number; dec: number }
   duration?: number
+  // 天頂パラメータ（ラジアン）- AltAzグリッドの中心を設定
+  za?: number
+  zd?: number
+  zp?: number
 }
 
 // ソートオプション
@@ -114,6 +118,8 @@ interface DesignsContextValue {
   hst: Date
   telescopeLocation: { lat: number; lon: number }
   zenithSkyCoord: { ra: number; dec: number }
+  // 天頂座標（ラジアン）- AltAzグリッド用
+  zenithZaZd: { za: number; zd: number }
 }
 
 const DesignsContext = createContext<DesignsContextValue | null>(null)
@@ -189,11 +195,20 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   // HST時刻
   const hst = useMemo(() => inTimeZone(now, HST_TZ_OFFSET), [now])
 
-  // 天頂座標
+  // 天頂座標（度）
   const zenithSkyCoord = useMemo(
     () => calculateZenithSkyCoord(now, telescopeLocation),
     [now, telescopeLocation]
   )
+
+  // 天頂座標（ラジアン）- AltAzグリッド用
+  const zenithZaZd = useMemo(() => {
+    const { ra, dec } = zenithSkyCoord
+    return {
+      za: (ra * Math.PI) / 180,
+      zd: (dec * Math.PI) / 180,
+    }
+  }, [zenithSkyCoord])
 
   // Design詳細取得
   const { data: designDetail, isLoading: isLoadingDetail } =
@@ -279,6 +294,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     hst,
     telescopeLocation,
     zenithSkyCoord,
+    zenithZaZd,
   }
 
   return (

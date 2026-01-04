@@ -270,6 +270,7 @@ export function SkyViewer() {
     setNow,
     hst,
     zenithSkyCoord,
+    zenithZaZd,
     showFibers,
     setShowFibers,
   } = useDesignsContext()
@@ -278,14 +279,21 @@ export function SkyViewer() {
   useEffect(() => {
     if (jumpToSignal && globeRef.current) {
       const globe = globeRef.current()
+      // za, zd, zp が指定されている場合は天頂パラメータを更新
+      const params: Record<string, number> = {}
+      if (jumpToSignal.fovy !== undefined) params.fovy = jumpToSignal.fovy
+      if (jumpToSignal.za !== undefined) params.za = jumpToSignal.za
+      if (jumpToSignal.zd !== undefined) params.zd = jumpToSignal.zd
+      if (jumpToSignal.zp !== undefined) params.zp = jumpToSignal.zp
+
       if (jumpToSignal.coord) {
         const coord = SkyCoord.fromDeg(jumpToSignal.coord.ra, jumpToSignal.coord.dec)
         globe.camera.jumpTo(
-          { fovy: jumpToSignal.fovy ?? globe.camera.fovy },
+          { ...params, fovy: params.fovy ?? globe.camera.fovy },
           { coord, duration: jumpToSignal.duration ?? 1000 }
         )
-      } else if (jumpToSignal.fovy) {
-        globe.camera.jumpTo({ fovy: jumpToSignal.fovy }, { duration: jumpToSignal.duration ?? 0 })
+      } else if (Object.keys(params).length > 0) {
+        globe.camera.jumpTo(params, { duration: jumpToSignal.duration ?? 0 })
       }
     }
   }, [jumpToSignal])
@@ -314,14 +322,19 @@ export function SkyViewer() {
     }
   }, [])
 
-  // 天頂を中心に表示
+  // 天頂を中心に表示（AltAzグリッドの中心も更新）
   const centerZenith = useCallback(() => {
     if (globeRef.current) {
       const globe = globeRef.current()
       const coord = SkyCoord.fromDeg(zenithSkyCoord.ra, zenithSkyCoord.dec)
-      globe.camera.jumpTo({ fovy: 2 }, { coord, duration: 500 })
+      // 天頂パラメータを更新してAltAzグリッドの中心を設定
+      // TILTを加えることで、天頂が画面中心に来るようにする
+      globe.camera.jumpTo(
+        { fovy: 2, za: zenithZaZd.za, zd: zenithZaZd.zd + TILT },
+        { coord, duration: 500 }
+      )
     }
-  }, [zenithSkyCoord])
+  }, [zenithSkyCoord, zenithZaZd])
 
   // 現在時刻に設定
   const setToNow = useCallback(() => {
