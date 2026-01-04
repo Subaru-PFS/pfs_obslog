@@ -1,6 +1,9 @@
 import { useEffect, useRef, useCallback, type ReactNode } from 'react'
 // @ts-expect-error vanillajs-datepicker has no type definitions
 import { DateRangePicker as VanillaDateRangePicker } from 'vanillajs-datepicker'
+// Import pre-built CSS to avoid Sass @import deprecation warnings
+import 'vanillajs-datepicker/css/datepicker.css'
+// Import dark theme customizations
 import './DateRangePicker.scss'
 
 export type DateRange = [string | undefined, string | undefined]
