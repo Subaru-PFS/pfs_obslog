@@ -4,6 +4,7 @@ PFS Design ファイル（観測設計）の一覧表示、詳細取得、ダウ
 """
 
 import datetime
+import math
 import re
 from logging import getLogger
 from pathlib import Path
@@ -19,6 +20,46 @@ from pfs_obslog.routers.fits import FitsMeta, FitsHdu, FitsHeader, Card
 
 logger = getLogger(__name__)
 router = APIRouter(prefix="/api/pfs_designs", tags=["pfs_designs"])
+
+
+# ============================================================
+# Helper Functions
+# ============================================================
+
+
+def _deg2rad(deg: float) -> float:
+    """度からラジアンに変換"""
+    return deg * math.pi / 180.0
+
+
+def _calculate_altitude(
+    ra: float, dec: float, zenith_ra: float, zenith_dec: float
+) -> float:
+    """高度を計算（天頂との角距離のコサイン）
+
+    高度が高いほど値が大きくなる（1に近い）。
+    天頂との角距離が小さいほど高い位置にある。
+
+    Args:
+        ra: Design の赤経（度）
+        dec: Design の赤緯（度）
+        zenith_ra: 天頂の赤経（度）
+        zenith_dec: 天頂の赤緯（度）
+
+    Returns:
+        高度を表す値（天頂とのコサイン距離）
+    """
+    ra1 = _deg2rad(ra)
+    dec1 = _deg2rad(dec)
+    ra2 = _deg2rad(zenith_ra)
+    dec2 = _deg2rad(zenith_dec)
+
+    # 球面三角法による角距離のコサイン
+    cos_d = (
+        math.sin(dec1) * math.sin(dec2)
+        + math.cos(dec1) * math.cos(dec2) * math.cos(ra1 - ra2)
+    )
+    return cos_d
 
 
 # ============================================================
@@ -226,18 +267,34 @@ def list_pfs_designs(
     search: Optional[str] = Query(
         None, description="Search string (matches name or id)"
     ),
-    sort_by: Literal["date_modified", "name", "id"] = Query(
+    sort_by: Literal["date_modified", "name", "id", "altitude"] = Query(
         "date_modified", description="Field to sort by"
     ),
     sort_order: Literal["asc", "desc"] = Query("desc", description="Sort order"),
     offset: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(50, ge=1, le=1000, description="Number of items to return"),
+    zenith_ra: Optional[float] = Query(
+        None, description="Zenith RA in degrees (required for altitude sort)"
+    ),
+    zenith_dec: Optional[float] = Query(
+        None, description="Zenith Dec in degrees (required for altitude sort)"
+    ),
 ):
     """PFS Design の一覧を取得（ページネーション対応）
 
     キャッシュが有効な場合、SQLiteキャッシュから一覧を取得し、
     バックグラウンドでキャッシュを更新します。
+
+    altitude ソートの場合は zenith_ra, zenith_dec パラメータが必要です。
     """
+    # altitude ソートのバリデーション
+    if sort_by == "altitude":
+        if zenith_ra is None or zenith_dec is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="zenith_ra and zenith_dec are required for altitude sort",
+            )
+
     settings = get_settings()
     design_dir = settings.pfs_design_dir
 
@@ -251,18 +308,41 @@ def list_pfs_designs(
         # バックグラウンドでキャッシュ更新
         background_tasks.add_task(_sync_cache_in_background)
 
-        # キャッシュから取得
-        entries, total = cache.get_entries_paginated(
-            search=search,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            offset=offset,
-            limit=limit,
-        )
+        # altitude ソートの場合は全件取得してPythonでソート
+        if sort_by == "altitude":
+            # 全件取得（フィルタリングはキャッシュ側で行う）
+            all_entries, total = cache.get_entries_paginated(
+                search=search,
+                sort_by="date_modified",  # 一旦デフォルトソートで取得
+                sort_order="desc",
+                offset=0,
+                limit=100000,  # 全件取得
+            )
 
-        # キャッシュが空の場合は同期を待つ（初回のみ）
-        if total == 0 and not search:
-            cache.sync()
+            # キャッシュが空の場合は同期を待つ（初回のみ）
+            if total == 0 and not search:
+                cache.sync()
+                all_entries, total = cache.get_entries_paginated(
+                    search=search,
+                    sort_by="date_modified",
+                    sort_order="desc",
+                    offset=0,
+                    limit=100000,
+                )
+
+            # 高度でソート
+            reverse = sort_order == "desc"
+            all_entries.sort(
+                key=lambda e: _calculate_altitude(
+                    e["ra"], e["dec"], zenith_ra, zenith_dec  # type: ignore
+                ),
+                reverse=reverse,
+            )
+
+            # ページネーション適用
+            entries = all_entries[offset : offset + limit]
+        else:
+            # キャッシュから取得
             entries, total = cache.get_entries_paginated(
                 search=search,
                 sort_by=sort_by,
@@ -270,6 +350,17 @@ def list_pfs_designs(
                 offset=offset,
                 limit=limit,
             )
+
+            # キャッシュが空の場合は同期を待つ（初回のみ）
+            if total == 0 and not search:
+                cache.sync()
+                entries, total = cache.get_entries_paginated(
+                    search=search,
+                    sort_by=sort_by,
+                    sort_order=sort_order,
+                    offset=offset,
+                    limit=limit,
+                )
 
         items = [
             PfsDesignEntry(
@@ -321,6 +412,11 @@ def list_pfs_designs(
         design_list.sort(key=lambda d: d.name, reverse=reverse)
     elif sort_by == "id":
         design_list.sort(key=lambda d: d.id, reverse=reverse)
+    elif sort_by == "altitude" and zenith_ra is not None and zenith_dec is not None:
+        design_list.sort(
+            key=lambda d: _calculate_altitude(d.ra, d.dec, zenith_ra, zenith_dec),
+            reverse=reverse,
+        )
     else:  # date_modified
         design_list.sort(key=lambda d: d.date_modified, reverse=reverse)
 
