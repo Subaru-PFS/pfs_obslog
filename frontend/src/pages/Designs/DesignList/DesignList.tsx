@@ -158,6 +158,41 @@ export function DesignList() {
     }
   }, [focusedDesign])
 
+  // 選択されたDesignへスクロール（SkyViewerからの選択時など）
+  // リスト内にない場合は検索でそのDesignを表示
+  useEffect(() => {
+    if (!selectedDesign) return
+
+    // リスト内に選択されたDesignがあるか確認
+    const isInList = designs.some((d) => d.id === selectedDesign.id)
+    
+    if (isInList) {
+      // リスト内にあればスクロール
+      requestAnimationFrame(() => {
+        document
+          .querySelector(`[data-design-id="${selectedDesign.id}"]`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
+    } else {
+      // リスト内にない場合は検索でそのDesignを表示
+      // 検索クエリにDesign IDを設定してページをリセット
+      setSearch(selectedDesign.id)
+      setSearchInput(selectedDesign.id)
+      setOffset(0)
+    }
+  }, [selectedDesign, designs, setSearch, setOffset])
+
+  // 検索クエリが選択中のDesign IDと一致し、そのDesignがリストに表示されたらスクロール
+  useEffect(() => {
+    if (selectedDesign && search === selectedDesign.id && designs.some((d) => d.id === selectedDesign.id)) {
+      requestAnimationFrame(() => {
+        document
+          .querySelector(`[data-design-id="${selectedDesign.id}"]`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
+    }
+  }, [selectedDesign, search, designs])
+
   // エントリクリックハンドラ
   const handleEntryClick = useCallback(
     (entry: PfsDesignEntry) => {
