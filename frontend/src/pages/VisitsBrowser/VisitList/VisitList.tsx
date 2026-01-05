@@ -1042,7 +1042,7 @@ export function VisitList() {
           <Tooltip content="Syntax Docs">
             <button
               className={styles.toolbarButton}
-              onClick={() => window.open('/#/sql-syntax-help', '_blank')}
+              onClick={() => window.open('#sql-syntax-help', '_blank')}
             >
               <Icon name="help" size={18} />
             </button>
