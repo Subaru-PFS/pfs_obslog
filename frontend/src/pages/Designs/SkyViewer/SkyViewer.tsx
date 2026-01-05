@@ -42,14 +42,17 @@ function formatDate(date: Date): string {
   return `${y}-${m}-${d}`
 }
 
+// 赤道座標グリッドのオプション設定（コンポーネント外で定義して参照を安定させる）
+const equatorialGridOptions = (draft: Parameters<NonNullable<Parameters<typeof GridLayer$>[0]['optionsManipulate']>>[0]) => {
+  draft.defaultGridColor = [1, 1, 1, 0.125]
+  draft.phiLine.gridColors = {}
+}
+
 // 赤道座標グリッドレイヤー
 function EquatorialGrid() {
   return (
     <GridLayer$
-      optionsManipulate={(draft) => {
-        draft.defaultGridColor = [1, 1, 1, 0.125]
-        draft.phiLine.gridColors = {}
-      }}
+      optionsManipulate={equatorialGridOptions}
     />
   )
 }

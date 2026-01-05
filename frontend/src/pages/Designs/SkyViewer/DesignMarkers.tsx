@@ -24,6 +24,27 @@ const MARKER_SIZE_PX = 24
 // ファイバーマーカーのホバー時以外の透明度（0.8 = 80%）
 const FIBER_MARKER_DIMM_ALPHA = 0.8
 
+// Design circleのズームでフェードアウトする際の最小アルファ値
+const DESIGN_MARKER_MIN_ALPHA = 0.05
+
+/**
+ * Design circleのズームによるアルファ計算関数
+ * - デザインの視野が画面いっぱい（fovy ≈ MARKER_FOV）→ alpha = 0.05
+ * - デザインが視野の1/3ほど（fovy ≈ 3 * MARKER_FOV）→ alpha = 1
+ * 線形補間を使用
+ */
+function calcDesignMarkerAlpha(fovy: number): number {
+  const fovyMin = MARKER_FOV // alpha = 0.05
+  const fovyMax = 3 * MARKER_FOV // alpha = 1
+  
+  if (fovy >= fovyMax) return 1
+  if (fovy <= fovyMin) return DESIGN_MARKER_MIN_ALPHA
+  
+  // 線形補間: t=0 at fovyMin, t=1 at fovyMax
+  const t = (fovy - fovyMin) / (fovyMax - fovyMin)
+  return DESIGN_MARKER_MIN_ALPHA + t * (1 - DESIGN_MARKER_MIN_ALPHA)
+}
+
 // CSSカラー名からRGBA配列への変換マップ
 const COLOR_TO_RGBA: { [key: string]: [number, number, number, number] } = {
   lightsteelblue: [176 / 255, 196 / 255, 222 / 255, 1],
@@ -303,6 +324,7 @@ export function DesignMarkers() {
         paths={markerPaths}
         blendMode="NORMAL"
         darkenNarrowLine={false}
+        dimOnZoom={calcDesignMarkerAlpha}
       />
       {/* クリック/ホバー検出用レイヤー（透明） */}
       <ClickableMarkerLayer$
