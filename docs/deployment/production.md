@@ -73,7 +73,6 @@ make setup
 
 これにより以下が自動的に行われます：
 - セッション用シークレットキーの生成（`secrets/session_secret_key`）
-- 添付ファイルディレクトリの作成
 - ログディレクトリの作成
 
 ### 4. フロントエンドのビルド
@@ -109,8 +108,8 @@ cd ~/pfs-obslog2/frontend
 npm run dev
 ```
 
-ブラウザで `http://localhost:5173/obslog/` にアクセスして動作を確認します。
-APIリクエストは自動的にバックエンド（http://localhost:8000/obslog/api）にプロキシされます。
+ブラウザで `http://localhost:5173/` にアクセスして動作を確認します。
+APIリクエストは自動的にバックエンド（http://localhost:8000/api）にプロキシされます。
 
 #### 本番モード
 
@@ -123,7 +122,8 @@ cd ~/pfs-obslog2/backend
 make production
 ```
 
-ブラウザで `http://<hostname>:5000/obslog/` にアクセスして動作を確認します。
+ブラウザで `http://<hostname>:5000/` にアクセスして動作を確認します。
+**注意**: Nginx経由でアクセスする場合は `http://<hostname>/obslog/` を使用してください（Nginxが`/obslog`を除去してバックエンドに転送）。
 
 ### 6. systemd サービスの設定
 
@@ -205,21 +205,27 @@ systemdサービスファイル（`pfs-obslog2.service`）で以下の環境変�
 | `PFS_OBSLOG_app_env` | `production` | 環境（development/production） |
 | `PFS_OBSLOG_database_url` | - | PostgreSQL接続URL |
 | `PFS_OBSLOG_session_secret_key` | 自動生成 | セッション暗号化キー |
-| `PFS_OBSLOG_root_path` | `/obslog` | アプリケーションのURLプレフィックス |
+| `PFS_OBSLOG_root_path` | `""` (空文字列) | アプリケーションのURLプレフィックス |
 
 **URLプレフィックスについて:**
 
-アプリケーションは `/obslog` プレフィックスで動作するように設計されています。
-これにより、Nginxなどのリバースプロキシ経由で `/obslog` パスにマウントできます。
+アプリケーション自体はプレフィックスなし（`/`）で動作します。
+Nginx側で `/obslog` へのリクエストをパスから `/obslog` を除去してバックエンドに転送します。
 
-- バックエンドAPI: `/obslog/api/*`
-- フロントエンド: `/obslog/*`
-- OpenAPI ドキュメント: `/obslog/api/docs`
+```nginx
+# Nginxの設定例
+location /obslog/ {
+    proxy_pass http://localhost:5000/;  # 末尾の / で /obslog をストリップ
+    ...
+}
+```
 
-開発モード（`make dev`）でも同じプレフィックスを使用します（`http://localhost:5173/obslog/`）。
+この設定により：
+- ユーザーは `http://<hostname>/obslog/` でアクセス
+- Nginxが `/obslog/` を `/` に変換してバックエンドに転送
+- バックエンドは `/api/*`, `/` などのパスで動作
 
-プレフィックスを変更したい場合は、環境変数 `PFS_OBSLOG_root_path` を設定し、
-フロントエンドの `vite.config.ts` の `base` 設定も合わせて変更してください。
+開発モード（`make dev`）ではNginx不要で `http://localhost:5173/` で直接アクセスします。
 
 ### サービスファイルの編集
 
@@ -297,15 +303,10 @@ server {
     listen 80;
     server_name obslog.example.com;
 
-    # フロントエンド静的ファイル
+    # フロントエンド静的ファイルとバックエンドAPI
+    # /obslog/ 配下のリクエストを / に変換してバックエンドに転送
     location /obslog/ {
-        alias /home/pfs/pfs-obslog2/frontend/dist/;
-        try_files $uri $uri/ /obslog/index.html;
-    }
-
-    # バックエンドAPI
-    location /obslog/api/ {
-        proxy_pass http://obslog_backend;
+        proxy_pass http://obslog_backend/;  # 末尾の / で /obslog をストリップ
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

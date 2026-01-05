@@ -4,7 +4,7 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/obslog/',
+  base: '.',
   plugins: [react()],
   resolve: {
     alias: {
@@ -20,8 +20,8 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // /obslog/api へのリクエストをバックエンド開発サーバーにプロキシ
-      '/obslog/api': {
+      // /api へのリクエストをバックエンド開発サーバーにプロキシ
+      '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
       },

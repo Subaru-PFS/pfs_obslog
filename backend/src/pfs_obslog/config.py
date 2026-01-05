@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     # 本番環境では PFS_OBSLOG_app_env=production を設定
     app_env: Literal["development", "production"] = "development"
 
-    # APIのルートパス（デフォルト: /obslog）
-    root_path: str = "/obslog"
+    # APIのルートパス（Nginxが/obslogをストリップするため空文字列）
+    root_path: str = ""
 
     # セッション用の秘密鍵
     # 本番環境では必ず環境変数 PFS_OBSLOG_session_secret_key で設定してください
