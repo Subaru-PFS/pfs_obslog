@@ -119,37 +119,23 @@ class PfsDesignRankResponse(BaseModel):
 
 
 class DesignData(BaseModel):
-    """Design HDU データ"""
+    """Design HDU データ - 動的に全カラムを含む"""
 
+    model_config = {"extra": "allow"}  # 未定義のフィールドも許可
+
+    # 必須フィールド（最低限必要なもの）
     fiberId: list[int]
-    catId: list[int]
-    tract: list[int]
-    patch: list[str]
-    objId: list[str]  # JavaScriptの安全な整数範囲を超えるため文字列で返す
     ra: list[float]
     dec: list[float]
-    targetType: list[int]
-    fiberStatus: list[int]
-    pfiNominal: list[list[float]]
-    epoch: list[str]
-    pmRa: list[float]
-    pmDec: list[float]
-    parallax: list[float]
-    proposalId: list[str]
-    obCode: list[str]
 
 
 class PhotometryData(BaseModel):
-    """測光データ"""
+    """測光データ - 動的に全カラムを含む"""
 
+    model_config = {"extra": "allow"}  # 未定義のフィールドも許可
+
+    # 必須フィールド（最低限必要なもの）
     fiberId: list[int]
-    fiberFlux: list[float]
-    psfFlux: list[float]
-    totalFlux: list[float]
-    fiberFluxErr: list[float]
-    psfFluxErr: list[float]
-    totalFluxErr: list[float]
-    filterName: list[str]
 
 
 class GuidestarData(BaseModel):
@@ -633,48 +619,30 @@ def get_design(id_hex: str):
         with afits.open(filepath) as hdul:
             meta = _fits_meta_from_hdul(filepath.name, hdul)
 
-            # objIdはJavaScriptの安全な整数範囲を超える可能性があるため文字列に変換
-            objId_array = hdul[1].data.field("objId")  # type: ignore[union-attr]
-            objId_str_list = [str(x) for x in objId_array]
+            # HDU 1: Design Data - すべてのカラムを動的に取得
+            design_data_dict: dict[str, Any] = {}
+            for col_name in hdul[1].columns.names:  # type: ignore[union-attr]
+                data = hdul[1].data.field(col_name)  # type: ignore[union-attr]
+                # objId は大きな整数なので文字列に変換
+                if col_name == "objId":
+                    design_data_dict[col_name] = [str(x) for x in data]
+                # epoch も文字列に変換
+                elif col_name == "epoch":
+                    design_data_dict[col_name] = [str(x) for x in data]
+                else:
+                    design_data_dict[col_name] = data.tolist()
 
-            # epochフィールドの存在確認（古いデザインには存在しない場合がある）
-            hdu1_columns = hdul[1].columns.names  # type: ignore[union-attr]
-            if "epoch" in hdu1_columns:
-                epoch_list = [str(x) for x in hdul[1].data.field("epoch")]  # type: ignore[union-attr]
-            else:
-                # デフォルト値（J2000.0）
-                epoch_list = ["J2000.0"] * len(objId_str_list)
+            design_data = DesignData(**design_data_dict)
 
-            design_data = DesignData(
-                fiberId=hdul[1].data.field("fiberId").tolist(),  # type: ignore[union-attr]
-                catId=hdul[1].data.field("catId").tolist(),  # type: ignore[union-attr]
-                tract=hdul[1].data.field("tract").tolist(),  # type: ignore[union-attr]
-                patch=hdul[1].data.field("patch").tolist(),  # type: ignore[union-attr]
-                objId=objId_str_list,
-                ra=hdul[1].data.field("ra").tolist(),  # type: ignore[union-attr]
-                dec=hdul[1].data.field("dec").tolist(),  # type: ignore[union-attr]
-                targetType=hdul[1].data.field("targetType").tolist(),  # type: ignore[union-attr]
-                fiberStatus=hdul[1].data.field("fiberStatus").tolist(),  # type: ignore[union-attr]
-                pfiNominal=hdul[1].data.field("pfiNominal").tolist(),  # type: ignore[union-attr]
-                epoch=epoch_list,
-                pmRa=hdul[1].data.field("pmRa").tolist(),  # type: ignore[union-attr]
-                pmDec=hdul[1].data.field("pmDec").tolist(),  # type: ignore[union-attr]
-                parallax=hdul[1].data.field("parallax").tolist(),  # type: ignore[union-attr]
-                proposalId=hdul[1].data.field("proposalId").tolist(),  # type: ignore[union-attr]
-                obCode=hdul[1].data.field("obCode").tolist(),  # type: ignore[union-attr]
-            )
+            # HDU 2: Photometry Data - すべてのカラムを動的に取得
+            photometry_data_dict: dict[str, Any] = {}
+            for col_name in hdul[2].columns.names:  # type: ignore[union-attr]
+                data = hdul[2].data.field(col_name)  # type: ignore[union-attr]
+                photometry_data_dict[col_name] = data.tolist()
 
-            photometry_data = PhotometryData(
-                fiberId=hdul[2].data.field("fiberId").tolist(),  # type: ignore[union-attr]
-                fiberFlux=hdul[2].data.field("fiberFlux").tolist(),  # type: ignore[union-attr]
-                psfFlux=hdul[2].data.field("psfFlux").tolist(),  # type: ignore[union-attr]
-                totalFlux=hdul[2].data.field("totalFlux").tolist(),  # type: ignore[union-attr]
-                fiberFluxErr=hdul[2].data.field("fiberFluxErr").tolist(),  # type: ignore[union-attr]
-                psfFluxErr=hdul[2].data.field("psfFluxErr").tolist(),  # type: ignore[union-attr]
-                totalFluxErr=hdul[2].data.field("totalFluxErr").tolist(),  # type: ignore[union-attr]
-                filterName=hdul[2].data.field("filterName").tolist(),  # type: ignore[union-attr]
-            )
+            photometry_data = PhotometryData(**photometry_data_dict)
 
+            # HDU 3: Guidestar Data
             guidestar_data = GuidestarData(
                 ra=hdul[3].data.field("ra").tolist(),  # type: ignore[union-attr]
                 dec=hdul[3].data.field("dec").tolist(),  # type: ignore[union-attr]
