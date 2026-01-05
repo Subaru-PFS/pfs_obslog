@@ -637,6 +637,14 @@ def get_design(id_hex: str):
             objId_array = hdul[1].data.field("objId")  # type: ignore[union-attr]
             objId_str_list = [str(x) for x in objId_array]
 
+            # epochフィールドの存在確認（古いデザインには存在しない場合がある）
+            hdu1_columns = hdul[1].columns.names  # type: ignore[union-attr]
+            if "epoch" in hdu1_columns:
+                epoch_list = [str(x) for x in hdul[1].data.field("epoch")]  # type: ignore[union-attr]
+            else:
+                # デフォルト値（J2000.0）
+                epoch_list = ["J2000.0"] * len(objId_str_list)
+
             design_data = DesignData(
                 fiberId=hdul[1].data.field("fiberId").tolist(),  # type: ignore[union-attr]
                 catId=hdul[1].data.field("catId").tolist(),  # type: ignore[union-attr]
@@ -648,7 +656,7 @@ def get_design(id_hex: str):
                 targetType=hdul[1].data.field("targetType").tolist(),  # type: ignore[union-attr]
                 fiberStatus=hdul[1].data.field("fiberStatus").tolist(),  # type: ignore[union-attr]
                 pfiNominal=hdul[1].data.field("pfiNominal").tolist(),  # type: ignore[union-attr]
-                epoch=hdul[1].data.field("epoch").tolist(),  # type: ignore[union-attr]
+                epoch=epoch_list,
                 pmRa=hdul[1].data.field("pmRa").tolist(),  # type: ignore[union-attr]
                 pmDec=hdul[1].data.field("pmDec").tolist(),  # type: ignore[union-attr]
                 parallax=hdul[1].data.field("parallax").tolist(),  # type: ignore[union-attr]
