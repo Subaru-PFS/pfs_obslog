@@ -221,17 +221,20 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
   )
 
   // fiberIdがnullの場合は'-'を返す関数
-  const pickDesign = <T,>(list: T[], filter?: (item: T) => unknown): unknown => {
+  const pickDesign = <T,>(list: T[] | undefined, filter?: (item: T) => unknown): unknown => {
     if (fiberId === null) return '-'
+    if (!list) return '-'
     const indices = id2designIndex.get(fiberId)
     if (indices === undefined || indices.length === 0) return '-'
     const raw = list[indices[0]]
+    if (raw === undefined) return '-'
     const result = filter ? filter(raw) : raw
     return result ?? '-'  // filter結果がundefinedなら'-'
   }
 
-  const pickPhotometry = <T,>(list: T[], filter?: (item: T) => unknown): unknown[] => {
+  const pickPhotometry = <T,>(list: T[] | undefined, filter?: (item: T) => unknown): unknown[] => {
     if (fiberId === null) return ['-']
+    if (!list) return ['-']
     const indices = id2photometryIndex.get(fiberId)
     if (indices === undefined || indices.length === 0) return ['-']
     const raws = indices.map((index) => list[index])
