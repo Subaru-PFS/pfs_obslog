@@ -1,7 +1,9 @@
 export type Styles = {
   colorModeSelect: string;
   designDetailContainer: string;
-  detailTable: string;
+  detailArea: string;
+  fiberDetailArea: string;
+  fiberSection: string;
   focalPlaneSection: string;
   legendEntries: string;
   legendEntry: string;

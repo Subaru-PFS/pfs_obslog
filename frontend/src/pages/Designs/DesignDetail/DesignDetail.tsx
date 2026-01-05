@@ -137,16 +137,16 @@ export function DesignDetail() {
         <Legend colorMode={colorMode} />
       </div>
 
-      {/* 両方を常に表示 */}
+      {/* Design詳細 + Fiber詳細を縦に並べる */}
       {designDetail && (
-        <>
+        <div className={styles.detailArea}>
           <DesignSummary design={designDetail} />
           <FiberDetail
             design={designDetail}
             fiberId={focusedFiber?.fiberId ?? null}
             cobra={focusedCobra}
           />
-        </>
+        </div>
       )}
     </div>
   )
@@ -219,9 +219,10 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
   )
 
   return (
-    <div className={styles.detailTable}>
-      <details open>
-        <summary>Fiber {fiberId ?? '-'}</summary>
+    <div className={styles.fiberDetailArea}>
+      {/* Fiber基本情報 + Fiber Design */}
+      <div className={styles.fiberSection}>
+        <h4>Fiber {fiberId ?? '-'}</h4>
         <table>
           <tbody>
             <Tr label="Cobra Id" values={[cobra?.id ?? '-']} />
@@ -230,33 +231,19 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
             <Tr label="Sector ID" values={[cobra?.fieldId ?? '-']} />
           </tbody>
         </table>
-      </details>
-      <details open>
-        <summary>Fiber Design</summary>
+        <h4>Design</h4>
         <table>
           <tbody>
-            <Tr
-              label="catId"
-              values={[pickDesign(design.design_data.catId)]}
-            />
+            <Tr label="catId" values={[pickDesign(design.design_data.catId)]} />
             <Tr
               label="Tract/Patch"
               values={[
                 `${pickDesign(design.design_data.tract)}/${pickDesign(design.design_data.patch)}`,
               ]}
             />
-            <Tr
-              label="objId"
-              values={[pickDesign(design.design_data.objId)]}
-            />
-            <Tr
-              label="&alpha;"
-              values={[pickDesign(design.design_data.ra)]}
-            />
-            <Tr
-              label="&delta;"
-              values={[pickDesign(design.design_data.dec)]}
-            />
+            <Tr label="objId" values={[pickDesign(design.design_data.objId)]} />
+            <Tr label="&alpha;" values={[pickDesign(design.design_data.ra)]} />
+            <Tr label="&delta;" values={[pickDesign(design.design_data.dec)]} />
             <Tr
               label="Target Type"
               values={[
@@ -275,72 +262,32 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
             />
             <Tr
               label="pfiNominal"
-              values={[
-                pickDesign(design.design_data.pfiNominal, JSON.stringify),
-              ]}
+              values={[pickDesign(design.design_data.pfiNominal, JSON.stringify)]}
             />
-            <Tr
-              label="epoch"
-              values={[pickDesign(design.design_data.epoch)]}
-            />
-            <Tr
-              label="pmRa [mas/yr]"
-              values={[pickDesign(design.design_data.pmRa)]}
-            />
-            <Tr
-              label="pmDec [mas/yr]"
-              values={[pickDesign(design.design_data.pmDec)]}
-            />
-            <Tr
-              label="parallax [mas]"
-              values={[pickDesign(design.design_data.parallax)]}
-            />
-            <Tr
-              label="proposalId"
-              values={[pickDesign(design.design_data.proposalId)]}
-            />
-            <Tr
-              label="obCode"
-              values={[pickDesign(design.design_data.obCode)]}
-            />
+            <Tr label="epoch" values={[pickDesign(design.design_data.epoch)]} />
+            <Tr label="pmRa [mas/yr]" values={[pickDesign(design.design_data.pmRa)]} />
+            <Tr label="pmDec [mas/yr]" values={[pickDesign(design.design_data.pmDec)]} />
+            <Tr label="parallax [mas]" values={[pickDesign(design.design_data.parallax)]} />
+            <Tr label="proposalId" values={[pickDesign(design.design_data.proposalId)]} />
+            <Tr label="obCode" values={[pickDesign(design.design_data.obCode)]} />
           </tbody>
         </table>
-      </details>
-      <details open>
-        <summary>Photometry</summary>
+      </div>
+      {/* Photometry */}
+      <div className={styles.fiberSection}>
+        <h4>Photometry</h4>
         <table>
           <tbody>
-            <Tr
-              label="filterName"
-              values={pickPhotometry(design.photometry_data.filterName)}
-            />
-            <Tr
-              label="fiberFlux [nJy]"
-              values={pickPhotometry(design.photometry_data.fiberFlux)}
-            />
-            <Tr
-              label="fiberFluxErr [nJy]"
-              values={pickPhotometry(design.photometry_data.fiberFluxErr)}
-            />
-            <Tr
-              label="psfFlux [nJy]"
-              values={pickPhotometry(design.photometry_data.psfFlux)}
-            />
-            <Tr
-              label="psfFluxErr [nJy]"
-              values={pickPhotometry(design.photometry_data.psfFluxErr)}
-            />
-            <Tr
-              label="totalFlux [nJy]"
-              values={pickPhotometry(design.photometry_data.totalFlux)}
-            />
-            <Tr
-              label="totalFluxErr [nJy]"
-              values={pickPhotometry(design.photometry_data.totalFluxErr)}
-            />
+            <Tr label="filterName" values={pickPhotometry(design.photometry_data.filterName)} />
+            <Tr label="fiberFlux [nJy]" values={pickPhotometry(design.photometry_data.fiberFlux)} />
+            <Tr label="fiberFluxErr [nJy]" values={pickPhotometry(design.photometry_data.fiberFluxErr)} />
+            <Tr label="psfFlux [nJy]" values={pickPhotometry(design.photometry_data.psfFlux)} />
+            <Tr label="psfFluxErr [nJy]" values={pickPhotometry(design.photometry_data.psfFluxErr)} />
+            <Tr label="totalFlux [nJy]" values={pickPhotometry(design.photometry_data.totalFlux)} />
+            <Tr label="totalFluxErr [nJy]" values={pickPhotometry(design.photometry_data.totalFluxErr)} />
           </tbody>
         </table>
-      </details>
+      </div>
     </div>
   )
 }
