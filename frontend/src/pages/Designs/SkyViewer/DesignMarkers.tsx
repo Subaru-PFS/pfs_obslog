@@ -272,6 +272,10 @@ export function DesignMarkers() {
     }[] = []
 
     for (let i = 0; i < ra.length; i++) {
+      // NaN/null座標をスキップ（FITSデータに座標が無いファイバー）
+      if (ra[i] == null || dec[i] == null) {
+        continue
+      }
       const coord = SkyCoord.fromDeg(ra[i], dec[i])
       const colorEntry = targetTypeColors[targetType[i]]
       const color = colorEntry ? colorToRgba(colorEntry.color) : DEFAULT_FIBER_COLOR
@@ -286,6 +290,10 @@ export function DesignMarkers() {
     const guideRa = designDetail.guidestar_data.ra
     const guideDec = designDetail.guidestar_data.dec
     for (let i = 0; i < guideRa.length; i++) {
+      // NaN/null座標をスキップ
+      if (guideRa[i] == null || guideDec[i] == null) {
+        continue
+      }
       const coord = SkyCoord.fromDeg(guideRa[i], guideDec[i])
       markers.push({
         position: coord.xyz as [number, number, number],
@@ -307,6 +315,11 @@ export function DesignMarkers() {
     const { ra, dec, fiberId } = designDetail.design_data
     const index = fiberId.indexOf(focusedFiber.fiberId)
     if (index < 0) {
+      return null
+    }
+    
+    // NaN/null座標の場合はハイライトしない
+    if (ra[index] == null || dec[index] == null) {
       return null
     }
     
