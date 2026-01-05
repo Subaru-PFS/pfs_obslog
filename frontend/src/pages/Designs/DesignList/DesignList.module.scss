@@ -39,6 +39,47 @@
   }
 }
 
+.dateFilter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  font-size: small;
+}
+
+.dateRangePicker {
+  display: flex;
+  align-items: center;
+
+  input {
+    @include rounded-text-input;
+    width: 7em;
+    font-size: small;
+    padding: 2px 4px;
+    text-align: center;
+  }
+}
+
+.dateRangeSeparator {
+  margin: 0 2px;
+  color: #888;
+}
+
+.clearDateButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: #888;
+
+  &:hover {
+    color: #fff;
+  }
+}
+
 .pagination {
   display: flex;
   align-items: center;

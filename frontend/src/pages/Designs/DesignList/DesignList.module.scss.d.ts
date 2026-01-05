@@ -1,4 +1,8 @@
 export type Styles = {
+  clearDateButton: string;
+  dateFilter: string;
+  dateRangePicker: string;
+  dateRangeSeparator: string;
   entry: string;
   entryButtons: string;
   entryDate: string;

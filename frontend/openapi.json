@@ -1368,6 +1368,42 @@
               "title": "Zenith Dec"
             },
             "description": "Zenith Dec in degrees (required for altitude sort)"
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Start date filter (YYYY-MM-DD format)",
+              "title": "Date From"
+            },
+            "description": "Start date filter (YYYY-MM-DD format)"
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "End date filter (YYYY-MM-DD format)",
+              "title": "Date To"
+            },
+            "description": "End date filter (YYYY-MM-DD format)"
           }
         ],
         "responses": {
@@ -1400,20 +1436,254 @@
           "pfs_designs",
           "pfs_designs"
         ],
-        "summary": "Get all PFS Design positions",
-        "description": "Get positions (id, ra, dec) of all PFS Designs. This is a lightweight endpoint for visualization.",
+        "summary": "Get PFS Design positions",
+        "description": "Get positions (id, ra, dec) of PFS Designs. Supports filtering by search and date range.",
         "operationId": "list_design_positions_api_pfs_designs_positions_get",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search string (matches name or id)",
+              "title": "Search"
+            },
+            "description": "Search string (matches name or id)"
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Start date filter (YYYY-MM-DD format)",
+              "title": "Date From"
+            },
+            "description": "Start date filter (YYYY-MM-DD format)"
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "End date filter (YYYY-MM-DD format)",
+              "title": "Date To"
+            },
+            "description": "End date filter (YYYY-MM-DD format)"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/PfsDesignPosition"
                   },
-                  "type": "array",
                   "title": "Response List Design Positions Api Pfs Designs Positions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pfs_designs/rank/{design_id}": {
+      "get": {
+        "tags": [
+          "pfs_designs",
+          "pfs_designs"
+        ],
+        "summary": "Get design rank",
+        "description": "Get the rank (0-based index) of a design within the current filter/sort conditions.",
+        "operationId": "get_design_rank_api_pfs_designs_rank__design_id__get",
+        "parameters": [
+          {
+            "name": "design_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Design Id"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search string (matches name or id)",
+              "title": "Search"
+            },
+            "description": "Search string (matches name or id)"
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "date_modified",
+                "name",
+                "id",
+                "altitude"
+              ],
+              "type": "string",
+              "description": "Field to sort by",
+              "default": "date_modified",
+              "title": "Sort By"
+            },
+            "description": "Field to sort by"
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string",
+              "description": "Sort order",
+              "default": "desc",
+              "title": "Sort Order"
+            },
+            "description": "Sort order"
+          },
+          {
+            "name": "zenith_ra",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Zenith RA in degrees (required for altitude sort)",
+              "title": "Zenith Ra"
+            },
+            "description": "Zenith RA in degrees (required for altitude sort)"
+          },
+          {
+            "name": "zenith_dec",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Zenith Dec in degrees (required for altitude sort)",
+              "title": "Zenith Dec"
+            },
+            "description": "Zenith Dec in degrees (required for altitude sort)"
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Start date filter (YYYY-MM-DD format)",
+              "title": "Date From"
+            },
+            "description": "Start date filter (YYYY-MM-DD format)"
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "End date filter (YYYY-MM-DD format)",
+              "title": "Date To"
+            },
+            "description": "End date filter (YYYY-MM-DD format)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PfsDesignRankResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -3321,6 +3591,27 @@
         ],
         "title": "PfsDesignPosition",
         "description": "PFS Design \u4f4d\u7f6e\u60c5\u5831\uff08\u8efd\u91cf\u7248\uff09"
+      },
+      "PfsDesignRankResponse": {
+        "properties": {
+          "rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rank"
+        ],
+        "title": "PfsDesignRankResponse",
+        "description": "PFS Design \u30e9\u30f3\u30af\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
       "PhotometryData": {
         "properties": {

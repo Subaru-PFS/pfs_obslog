@@ -112,6 +112,12 @@ class PfsDesignPosition(BaseModel):
     dec: float  # 中心赤緯
 
 
+class PfsDesignRankResponse(BaseModel):
+    """PFS Design ランクレスポンス"""
+
+    rank: int | None  # 順位（0始まり）、見つからない場合はNone
+
+
 class DesignData(BaseModel):
     """Design HDU データ"""
 
@@ -279,6 +285,12 @@ def list_pfs_designs(
     zenith_dec: Optional[float] = Query(
         None, description="Zenith Dec in degrees (required for altitude sort)"
     ),
+    date_from: Optional[str] = Query(
+        None, description="Start date filter (YYYY-MM-DD format)"
+    ),
+    date_to: Optional[str] = Query(
+        None, description="End date filter (YYYY-MM-DD format)"
+    ),
 ):
     """PFS Design の一覧を取得（ページネーション対応）
 
@@ -317,10 +329,12 @@ def list_pfs_designs(
             limit=limit,
             zenith_ra=zenith_ra,
             zenith_dec=zenith_dec,
+            date_from=date_from,
+            date_to=date_to,
         )
 
         # キャッシュが空の場合は同期を待つ（初回のみ）
-        if total == 0 and not search:
+        if total == 0 and not search and not date_from and not date_to:
             cache.sync()
             entries, total = cache.get_entries_paginated(
                 search=search,
@@ -330,6 +344,8 @@ def list_pfs_designs(
                 limit=limit,
                 zenith_ra=zenith_ra,
                 zenith_dec=zenith_dec,
+                date_from=date_from,
+                date_to=date_to,
             )
 
         items = [
@@ -400,13 +416,25 @@ def list_pfs_designs(
 @router.get(
     "/positions",
     response_model=list[PfsDesignPosition],
-    summary="Get all PFS Design positions",
-    description="Get positions (id, ra, dec) of all PFS Designs. This is a lightweight endpoint for visualization.",
+    summary="Get PFS Design positions",
+    description="Get positions (id, ra, dec) of PFS Designs. Supports filtering by search and date range.",
 )
-def list_design_positions(background_tasks: BackgroundTasks):
-    """全Designの位置情報を取得（軽量版）
+def list_design_positions(
+    background_tasks: BackgroundTasks,
+    search: Optional[str] = Query(
+        None, description="Search string (matches name or id)"
+    ),
+    date_from: Optional[str] = Query(
+        None, description="Start date filter (YYYY-MM-DD format)"
+    ),
+    date_to: Optional[str] = Query(
+        None, description="End date filter (YYYY-MM-DD format)"
+    ),
+):
+    """Designの位置情報を取得
 
-    天球ビュー（SkyViewer）での全Design表示に使用します。
+    天球ビュー（SkyViewer）でのDesign表示に使用します。
+    検索条件・日付フィルターでフィルタリング可能です。
     """
     settings = get_settings()
     design_dir = settings.pfs_design_dir
@@ -421,13 +449,21 @@ def list_design_positions(background_tasks: BackgroundTasks):
         # バックグラウンドでキャッシュ更新
         background_tasks.add_task(_sync_cache_in_background)
 
-        # キャッシュから取得
-        positions = cache.get_all_positions()
-
-        # キャッシュが空の場合は同期を待つ（初回のみ）
-        if not positions:
-            cache.sync()
+        # フィルター条件がある場合はフィルター付きで取得
+        if search or date_from or date_to:
+            positions = cache.get_positions_filtered(
+                search=search,
+                date_from=date_from,
+                date_to=date_to,
+            )
+        else:
+            # キャッシュから取得
             positions = cache.get_all_positions()
+
+            # キャッシュが空の場合は同期を待つ（初回のみ）
+            if not positions:
+                cache.sync()
+                positions = cache.get_all_positions()
 
         return [
             PfsDesignPosition(id=p["id"], ra=p["ra"], dec=p["dec"]) for p in positions
@@ -458,6 +494,83 @@ def list_design_positions(background_tasks: BackgroundTasks):
                 continue
 
     return positions
+
+
+@router.get(
+    "/rank/{design_id}",
+    response_model=PfsDesignRankResponse,
+    summary="Get design rank",
+    description="Get the rank (0-based index) of a design within the current filter/sort conditions.",
+)
+def get_design_rank(
+    design_id: str,
+    background_tasks: BackgroundTasks,
+    search: Optional[str] = Query(
+        None, description="Search string (matches name or id)"
+    ),
+    sort_by: Literal["date_modified", "name", "id", "altitude"] = Query(
+        "date_modified", description="Field to sort by"
+    ),
+    sort_order: Literal["asc", "desc"] = Query("desc", description="Sort order"),
+    zenith_ra: Optional[float] = Query(
+        None, description="Zenith RA in degrees (required for altitude sort)"
+    ),
+    zenith_dec: Optional[float] = Query(
+        None, description="Zenith Dec in degrees (required for altitude sort)"
+    ),
+    date_from: Optional[str] = Query(
+        None, description="Start date filter (YYYY-MM-DD format)"
+    ),
+    date_to: Optional[str] = Query(
+        None, description="End date filter (YYYY-MM-DD format)"
+    ),
+):
+    """指定したDesign IDの順位を取得
+
+    現在のフィルター・ソート条件での順位（0始まり）を返します。
+    """
+    if not re.match(r"^[0-9a-fA-F]{16}$", design_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid design ID format: {design_id}",
+        )
+
+    # altitude ソートのバリデーション
+    if sort_by == "altitude":
+        if zenith_ra is None or zenith_dec is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="zenith_ra and zenith_dec are required for altitude sort",
+            )
+
+    settings = get_settings()
+    design_dir = settings.pfs_design_dir
+
+    if not design_dir.exists():
+        return PfsDesignRankResponse(rank=None)
+
+    # キャッシュが有効な場合
+    if settings.pfs_design_cache_enabled:
+        cache = get_pfs_design_cache(settings.pfs_design_cache_db, design_dir)
+
+        # バックグラウンドでキャッシュ更新
+        background_tasks.add_task(_sync_cache_in_background)
+
+        rank = cache.get_design_rank(
+            design_id=design_id.lower(),
+            search=search,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            zenith_ra=zenith_ra,
+            zenith_dec=zenith_dec,
+            date_from=date_from,
+            date_to=date_to,
+        )
+
+        return PfsDesignRankResponse(rank=rank)
+
+    # キャッシュが無効な場合はNoneを返す（フォールバックは未実装）
+    return PfsDesignRankResponse(rank=None)
 
 
 @router.get(

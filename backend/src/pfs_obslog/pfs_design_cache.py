@@ -192,6 +192,8 @@ class PfsDesignCache:
         limit: int = 50,
         zenith_ra: float | None = None,
         zenith_dec: float | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
     ) -> tuple[list[dict], int]:
         """ページネーション、フィルタリング、ソート対応でエントリを取得
 
@@ -203,6 +205,8 @@ class PfsDesignCache:
             limit: 取得件数
             zenith_ra: 天頂のRA（度）- 高度ソート時に必要
             zenith_dec: 天頂のDec（度）- 高度ソート時に必要
+            date_from: 日付範囲開始（YYYY-MM-DD形式）
+            date_to: 日付範囲終了（YYYY-MM-DD形式）
 
         Returns:
             (エントリリスト, 総件数) のタプル
@@ -235,15 +239,31 @@ class PfsDesignCache:
             FROM pfs_design_metadata
         """
         count_query = "SELECT COUNT(*) FROM pfs_design_metadata"
+        where_clauses: list[str] = []
         params: list = []
 
         # 検索条件
         if search:
-            where_clause = " WHERE (name LIKE ? OR id LIKE ?)"
+            where_clauses.append("(name LIKE ? OR id LIKE ?)")
             search_param = f"%{search}%"
             params.extend([search_param, search_param])
+
+        # 日付フィルター
+        if date_from:
+            where_clauses.append("date(file_mtime) >= ?")
+            params.append(date_from)
+        if date_to:
+            where_clauses.append("date(file_mtime) <= ?")
+            params.append(date_to)
+
+        # WHERE句を追加
+        if where_clauses:
+            where_clause = " WHERE " + " AND ".join(where_clauses)
             base_query += where_clause
             count_query += where_clause
+
+        # WHERE句のパラメータ数を記録（ソートパラメータ追加前）
+        count_params = params.copy()
 
         # ソート
         sort_dir = "ASC" if sort_order.lower() == "asc" else "DESC"
@@ -266,8 +286,7 @@ class PfsDesignCache:
         query_params = params + [limit, offset]
 
         with self._get_connection() as conn:
-            # 総件数を取得
-            count_params = params[:2] if search else []  # 検索パラメータのみ（ソートパラメータは含めない）
+            # 総件数を取得（WHERE句のパラメータのみ使用）
             cursor = conn.execute(count_query, count_params)
             total = cursor.fetchone()[0]
 
@@ -305,6 +324,102 @@ class PfsDesignCache:
 
         return entries, total
 
+    def get_design_rank(
+        self,
+        design_id: str,
+        search: str | None = None,
+        sort_by: str = "date_modified",
+        sort_order: str = "desc",
+        zenith_ra: float | None = None,
+        zenith_dec: float | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+    ) -> int | None:
+        """指定したDesign IDの順位（0始まり）を取得
+
+        現在のフィルター・ソート条件での順位を返します。
+        見つからない場合はNoneを返します。
+
+        Args:
+            design_id: Design ID（hex形式）
+            search: 検索文字列
+            sort_by: ソートキー
+            sort_order: ソート順序
+            zenith_ra: 天頂のRA（度）- 高度ソート時に必要
+            zenith_dec: 天頂のDec（度）- 高度ソート時に必要
+            date_from: 日付範囲開始（YYYY-MM-DD形式）
+            date_to: 日付範囲終了（YYYY-MM-DD形式）
+
+        Returns:
+            順位（0始まり）またはNone
+        """
+        if not self.design_dir.exists():
+            return None
+
+        import math
+
+        # 天頂の単位ベクトルを計算（高度ソート用）
+        zenith_x: float | None = None
+        zenith_y: float | None = None
+        zenith_z: float | None = None
+        if sort_by == "altitude" and zenith_ra is not None and zenith_dec is not None:
+            ra_rad = math.radians(zenith_ra)
+            dec_rad = math.radians(zenith_dec)
+            zenith_x = math.cos(dec_rad) * math.cos(ra_rad)
+            zenith_y = math.cos(dec_rad) * math.sin(ra_rad)
+            zenith_z = math.sin(dec_rad)
+
+        # サブクエリでソート順を定義し、ROW_NUMBER相当を計算
+        # SQLiteにはWINDOW関数があるのでROW_NUMBER()が使える
+        select_columns = "id"
+        base_query = f"""
+            SELECT {select_columns}
+            FROM pfs_design_metadata
+        """
+        where_clauses: list[str] = []
+        params: list = []
+
+        if search:
+            where_clauses.append("(name LIKE ? OR id LIKE ?)")
+            search_param = f"%{search}%"
+            params.extend([search_param, search_param])
+
+        if date_from:
+            where_clauses.append("date(file_mtime) >= ?")
+            params.append(date_from)
+
+        if date_to:
+            where_clauses.append("date(file_mtime) <= ?")
+            params.append(date_to)
+
+        if where_clauses:
+            base_query += " WHERE " + " AND ".join(where_clauses)
+
+        # ソート
+        sort_dir = "ASC" if sort_order.lower() == "asc" else "DESC"
+        if sort_by == "altitude" and zenith_x is not None:
+            base_query += f" ORDER BY (x * ? + y * ? + z * ?) {sort_dir}"
+            params.extend([zenith_x, zenith_y, zenith_z])
+        else:
+            sort_column_map = {
+                "date_modified": "file_mtime",
+                "name": "name",
+                "id": "id",
+            }
+            sort_column = sort_column_map.get(sort_by, "file_mtime")
+            base_query += f" ORDER BY {sort_column} {sort_dir}"
+
+        with self._get_connection() as conn:
+            cursor = conn.execute(base_query, params)
+            rows = cursor.fetchall()
+
+        # 順位を検索
+        for i, row in enumerate(rows):
+            if row["id"] == design_id:
+                return i
+
+        return None
+
     def get_all_positions(self) -> list[dict]:
         """全Designの位置情報を取得（軽量版）
 
@@ -321,6 +436,58 @@ class PfsDesignCache:
                 FROM pfs_design_metadata
                 """
             )
+            rows = cursor.fetchall()
+
+        return [
+            {
+                "id": row["id"],
+                "ra": row["ra"] or 0.0,
+                "dec": row["dec"] or 0.0,
+            }
+            for row in rows
+        ]
+
+    def get_positions_filtered(
+        self,
+        search: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+    ) -> list[dict]:
+        """フィルター条件に合うDesignの位置情報を取得
+
+        Args:
+            search: 検索文字列（name または id に部分一致）
+            date_from: 日付範囲開始（YYYY-MM-DD形式）
+            date_to: 日付範囲終了（YYYY-MM-DD形式）
+
+        Returns:
+            位置情報（id, ra, dec）のリスト
+        """
+        if not self.design_dir.exists():
+            return []
+
+        query = "SELECT id, ra, dec FROM pfs_design_metadata"
+        where_clauses: list[str] = []
+        params: list = []
+
+        if search:
+            where_clauses.append("(name LIKE ? OR id LIKE ?)")
+            search_param = f"%{search}%"
+            params.extend([search_param, search_param])
+
+        if date_from:
+            where_clauses.append("date(file_mtime) >= ?")
+            params.append(date_from)
+
+        if date_to:
+            where_clauses.append("date(file_mtime) <= ?")
+            params.append(date_to)
+
+        if where_clauses:
+            query += " WHERE " + " AND ".join(where_clauses)
+
+        with self._get_connection() as conn:
+            cursor = conn.execute(query, params)
             rows = cursor.fetchall()
 
         return [

@@ -17,6 +17,7 @@ import {
   useListPfsDesignsApiPfsDesignsGetQuery,
   useListDesignPositionsApiPfsDesignsPositionsGetQuery,
   useGetDesignApiPfsDesignsIdHexGetQuery,
+  useGetDesignRankApiPfsDesignsRankDesignIdGetQuery,
 } from '../../store/api/generatedApi'
 import type { PfsDesignEntry, PfsDesignDetail, PfsDesignPosition } from './types'
 import { SUBARU_TELESCOPE_LOCATION, HST_TZ_OFFSET } from './types'
@@ -99,6 +100,9 @@ interface DesignsContextValue {
   setSortBy: (sortBy: SortBy) => void
   sortOrder: SortOrder
   setSortOrder: (sortOrder: SortOrder) => void
+  // 日付フィルター
+  dateRange: [string | null, string | null]
+  setDateRange: (range: [string | null, string | null]) => void
 
   // 全Design位置情報（SkyViewer用）
   allPositions: PfsDesignPosition[]
@@ -188,6 +192,8 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState<SortBy>('altitude')
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
+  // 日付フィルター [YYYY-MM-DD, YYYY-MM-DD] or [null, null]
+  const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
 
   // 高度ソート時に天頂座標が変わったらページをリセット
   const prevCommittedZenithRef = useRef(committedZenith)
@@ -217,16 +223,22 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     limit,
     zenithRa: sortBy === 'altitude' ? committedZenith.ra : undefined,
     zenithDec: sortBy === 'altitude' ? committedZenith.dec : undefined,
+    dateFrom: dateRange[0] || undefined,
+    dateTo: dateRange[1] || undefined,
   })
 
   const designs = listResponse?.items ?? []
   const total = listResponse?.total ?? 0
 
-  // 全Design位置情報取得（SkyViewer用）
+  // Design位置情報取得（SkyViewer用）- 検索条件と日付フィルターを反映
   const {
     data: allPositions = [],
     isLoading: isLoadingPositions,
-  } = useListDesignPositionsApiPfsDesignsPositionsGetQuery()
+  } = useListDesignPositionsApiPfsDesignsPositionsGetQuery({
+    search: search || undefined,
+    dateFrom: dateRange[0] || undefined,
+    dateTo: dateRange[1] || undefined,
+  })
 
   // 選択・フォーカス状態
   const [selectedDesign, setSelectedDesignState] = useState<
@@ -275,6 +287,37 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
       { idHex: selectedDesign?.id ?? '' },
       { skip: !selectedDesign }
     )
+
+  // 選択されたDesignがリスト内にあるか確認
+  const isSelectedDesignInList = useMemo(
+    () => selectedDesign && designs.some((d) => d.id === selectedDesign.id),
+    [selectedDesign, designs]
+  )
+
+  // 選択されたDesignのランクを取得（リスト内にない場合のみ）
+  const { data: rankData } = useGetDesignRankApiPfsDesignsRankDesignIdGetQuery(
+    {
+      designId: selectedDesign?.id ?? '',
+      search: search || undefined,
+      sortBy,
+      sortOrder,
+      zenithRa: sortBy === 'altitude' ? committedZenith.ra : undefined,
+      zenithDec: sortBy === 'altitude' ? committedZenith.dec : undefined,
+      dateFrom: dateRange[0] || undefined,
+      dateTo: dateRange[1] || undefined,
+    },
+    { skip: !selectedDesign || isSelectedDesignInList }
+  )
+
+  // ランクが取得できたらページ遷移（リスト内にないDesignが選択された時）
+  useEffect(() => {
+    if (rankData?.rank != null && !isSelectedDesignInList) {
+      const targetOffset = Math.floor(rankData.rank / limit) * limit
+      if (targetOffset !== offset) {
+        setOffset(targetOffset)
+      }
+    }
+  }, [rankData, isSelectedDesignInList, limit, offset, setOffset])
 
   // カメラジャンプ
   const jumpTo = useCallback((options: JumpToOptions) => {
@@ -337,6 +380,8 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     setSortBy,
     sortOrder,
     setSortOrder,
+    dateRange,
+    setDateRange,
     allPositions,
     isLoadingPositions,
     selectedDesign,

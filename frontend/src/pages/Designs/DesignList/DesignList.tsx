@@ -3,9 +3,10 @@
  */
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useLocalStorage } from 'react-use'
-import { IconButton } from '../../../components/Icon'
+import { Icon, IconButton } from '../../../components/Icon'
 import { Tooltip } from '../../../components/Tooltip'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
+import { DateRangePicker, type DateRange } from '../../../components/DateRangePicker'
 import { useDesignsContext, type SortBy } from '../DesignsContext'
 import type { PfsDesignEntry, IdFormat } from '../types'
 import { DESIGN_CROSS_MATCH_COSINE } from '../types'
@@ -67,6 +68,8 @@ export function DesignList() {
     sortBy,
     setSortBy,
     setSortOrder,
+    dateRange,
+    setDateRange,
     selectedDesign,
     setSelectedDesign,
     focusedDesign,
@@ -159,39 +162,21 @@ export function DesignList() {
   }, [focusedDesign])
 
   // 選択されたDesignへスクロール（SkyViewerからの選択時など）
-  // リスト内にない場合は検索でそのDesignを表示
   useEffect(() => {
     if (!selectedDesign) return
 
-    // リスト内に選択されたDesignがあるか確認
+    // リスト内に選択されたDesignがあるか確認し、あればスクロール
     const isInList = designs.some((d) => d.id === selectedDesign.id)
     
     if (isInList) {
-      // リスト内にあればスクロール
-      requestAnimationFrame(() => {
-        document
-          .querySelector(`[data-design-id="${selectedDesign.id}"]`)
-          ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      })
-    } else {
-      // リスト内にない場合は検索でそのDesignを表示
-      // 検索クエリにDesign IDを設定してページをリセット
-      setSearch(selectedDesign.id)
-      setSearchInput(selectedDesign.id)
-      setOffset(0)
-    }
-  }, [selectedDesign, designs, setSearch, setOffset])
-
-  // 検索クエリが選択中のDesign IDと一致し、そのDesignがリストに表示されたらスクロール
-  useEffect(() => {
-    if (selectedDesign && search === selectedDesign.id && designs.some((d) => d.id === selectedDesign.id)) {
       requestAnimationFrame(() => {
         document
           .querySelector(`[data-design-id="${selectedDesign.id}"]`)
           ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       })
     }
-  }, [selectedDesign, search, designs])
+    // リスト内にない場合は何もしない（検索条件に合わないDesignは表示されない）
+  }, [selectedDesign, designs])
 
   // エントリクリックハンドラ
   const handleEntryClick = useCallback(
@@ -278,6 +263,38 @@ export function DesignList() {
             />
             Date Modified
           </label>
+        </div>
+        <div className={styles.dateFilter}>
+          <Icon name="date_range" size={16} />
+          <DateRangePicker
+            value={[dateRange[0] ?? undefined, dateRange[1] ?? undefined]}
+            onChange={(range: DateRange) => {
+              setDateRange([range[0] ?? null, range[1] ?? null])
+              setOffset(0)
+            }}
+            className={styles.dateRangePicker}
+          >
+            {(startInput, endInput) => (
+              <>
+                {startInput}
+                <span className={styles.dateRangeSeparator}>–</span>
+                {endInput}
+              </>
+            )}
+          </DateRangePicker>
+          {(dateRange[0] || dateRange[1]) && (
+            <Tooltip content="Clear date range">
+              <button
+                className={styles.clearDateButton}
+                onClick={() => {
+                  setDateRange([null, null])
+                  setOffset(0)
+                }}
+              >
+                <Icon name="close" size={14} />
+              </button>
+            </Tooltip>
+          )}
         </div>
         <div className={styles.pagination}>
           <span>

@@ -240,6 +240,8 @@ const injectedRtkApi = api.injectEndpoints({
           limit: queryArg.limit,
           zenith_ra: queryArg.zenithRa,
           zenith_dec: queryArg.zenithDec,
+          date_from: queryArg.dateFrom,
+          date_to: queryArg.dateTo,
         },
       }),
     }),
@@ -247,7 +249,31 @@ const injectedRtkApi = api.injectEndpoints({
       ListDesignPositionsApiPfsDesignsPositionsGetApiResponse,
       ListDesignPositionsApiPfsDesignsPositionsGetApiArg
     >({
-      query: () => ({ url: `/api/pfs_designs/positions` }),
+      query: (queryArg) => ({
+        url: `/api/pfs_designs/positions`,
+        params: {
+          search: queryArg.search,
+          date_from: queryArg.dateFrom,
+          date_to: queryArg.dateTo,
+        },
+      }),
+    }),
+    getDesignRankApiPfsDesignsRankDesignIdGet: build.query<
+      GetDesignRankApiPfsDesignsRankDesignIdGetApiResponse,
+      GetDesignRankApiPfsDesignsRankDesignIdGetApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/pfs_designs/rank/${queryArg.designId}`,
+        params: {
+          search: queryArg.search,
+          sort_by: queryArg.sortBy,
+          sort_order: queryArg.sortOrder,
+          zenith_ra: queryArg.zenithRa,
+          zenith_dec: queryArg.zenithDec,
+          date_from: queryArg.dateFrom,
+          date_to: queryArg.dateTo,
+        },
+      }),
     }),
     downloadDesignApiPfsDesignsIdHexFitsGet: build.query<
       DownloadDesignApiPfsDesignsIdHexFitsGetApiResponse,
@@ -487,10 +513,40 @@ export type ListPfsDesignsApiPfsDesignsGetApiArg = {
   zenithRa?: number | null;
   /** Zenith Dec in degrees (required for altitude sort) */
   zenithDec?: number | null;
+  /** Start date filter (YYYY-MM-DD format) */
+  dateFrom?: string | null;
+  /** End date filter (YYYY-MM-DD format) */
+  dateTo?: string | null;
 };
 export type ListDesignPositionsApiPfsDesignsPositionsGetApiResponse =
   /** status 200 Successful Response */ PfsDesignPosition[];
-export type ListDesignPositionsApiPfsDesignsPositionsGetApiArg = void;
+export type ListDesignPositionsApiPfsDesignsPositionsGetApiArg = {
+  /** Search string (matches name or id) */
+  search?: string | null;
+  /** Start date filter (YYYY-MM-DD format) */
+  dateFrom?: string | null;
+  /** End date filter (YYYY-MM-DD format) */
+  dateTo?: string | null;
+};
+export type GetDesignRankApiPfsDesignsRankDesignIdGetApiResponse =
+  /** status 200 Successful Response */ PfsDesignRankResponse;
+export type GetDesignRankApiPfsDesignsRankDesignIdGetApiArg = {
+  designId: string;
+  /** Search string (matches name or id) */
+  search?: string | null;
+  /** Field to sort by */
+  sortBy?: "date_modified" | "name" | "id" | "altitude";
+  /** Sort order */
+  sortOrder?: "asc" | "desc";
+  /** Zenith RA in degrees (required for altitude sort) */
+  zenithRa?: number | null;
+  /** Zenith Dec in degrees (required for altitude sort) */
+  zenithDec?: number | null;
+  /** Start date filter (YYYY-MM-DD format) */
+  dateFrom?: string | null;
+  /** End date filter (YYYY-MM-DD format) */
+  dateTo?: string | null;
+};
 export type DownloadDesignApiPfsDesignsIdHexFitsGetApiResponse =
   /** status 200 Successful Response */ any;
 export type DownloadDesignApiPfsDesignsIdHexFitsGetApiArg = {
@@ -799,6 +855,9 @@ export type PfsDesignPosition = {
   ra: number;
   dec: number;
 };
+export type PfsDesignRankResponse = {
+  rank: number | null;
+};
 export type DesignData = {
   fiberId: number[];
   catId: number[];
@@ -876,6 +935,7 @@ export const {
   useGetAgcFitsPreviewApiFitsVisitsVisitIdAgcExposureIdHduIndexPngGetQuery,
   useListPfsDesignsApiPfsDesignsGetQuery,
   useListDesignPositionsApiPfsDesignsPositionsGetQuery,
+  useGetDesignRankApiPfsDesignsRankDesignIdGetQuery,
   useDownloadDesignApiPfsDesignsIdHexFitsGetQuery,
   useGetDesignApiPfsDesignsIdHexGetQuery,
   useCreateAttachmentApiAttachmentsPostMutation,
