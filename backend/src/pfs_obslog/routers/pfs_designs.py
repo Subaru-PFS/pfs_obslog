@@ -131,6 +131,12 @@ class DesignData(BaseModel):
     targetType: list[int]
     fiberStatus: list[int]
     pfiNominal: list[list[float]]
+    epoch: list[str]
+    pmRa: list[float]
+    pmDec: list[float]
+    parallax: list[float]
+    proposalId: list[str]
+    obCode: list[str]
 
 
 class PhotometryData(BaseModel):
@@ -642,6 +648,12 @@ def get_design(id_hex: str):
                 targetType=hdul[1].data.field("targetType").tolist(),  # type: ignore[union-attr]
                 fiberStatus=hdul[1].data.field("fiberStatus").tolist(),  # type: ignore[union-attr]
                 pfiNominal=hdul[1].data.field("pfiNominal").tolist(),  # type: ignore[union-attr]
+                epoch=hdul[1].data.field("epoch").tolist(),  # type: ignore[union-attr]
+                pmRa=hdul[1].data.field("pmRa").tolist(),  # type: ignore[union-attr]
+                pmDec=hdul[1].data.field("pmDec").tolist(),  # type: ignore[union-attr]
+                parallax=hdul[1].data.field("parallax").tolist(),  # type: ignore[union-attr]
+                proposalId=hdul[1].data.field("proposalId").tolist(),  # type: ignore[union-attr]
+                obCode=hdul[1].data.field("obCode").tolist(),  # type: ignore[union-attr]
             )
 
             photometry_data = PhotometryData(

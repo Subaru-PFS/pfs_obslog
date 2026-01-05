@@ -279,6 +279,30 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
                 pickDesign(design.design_data.pfiNominal, JSON.stringify),
               ]}
             />
+            <Tr
+              label="epoch"
+              values={[pickDesign(design.design_data.epoch)]}
+            />
+            <Tr
+              label="pmRa [mas/yr]"
+              values={[pickDesign(design.design_data.pmRa)]}
+            />
+            <Tr
+              label="pmDec [mas/yr]"
+              values={[pickDesign(design.design_data.pmDec)]}
+            />
+            <Tr
+              label="parallax [mas]"
+              values={[pickDesign(design.design_data.parallax)]}
+            />
+            <Tr
+              label="proposalId"
+              values={[pickDesign(design.design_data.proposalId)]}
+            />
+            <Tr
+              label="obCode"
+              values={[pickDesign(design.design_data.obCode)]}
+            />
           </tbody>
         </table>
       </details>

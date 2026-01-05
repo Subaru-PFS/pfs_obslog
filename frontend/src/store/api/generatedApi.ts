@@ -287,48 +287,6 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: (queryArg) => ({ url: `/api/pfs_designs/${queryArg.idHex}` }),
     }),
-    createAttachmentApiAttachmentsPost: build.mutation<
-      CreateAttachmentApiAttachmentsPostApiResponse,
-      CreateAttachmentApiAttachmentsPostApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/attachments`,
-        method: "POST",
-        body: queryArg.bodyCreateAttachmentApiAttachmentsPost,
-      }),
-    }),
-    listAttachmentsApiAttachmentsGet: build.query<
-      ListAttachmentsApiAttachmentsGetApiResponse,
-      ListAttachmentsApiAttachmentsGetApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/attachments`,
-        params: {
-          start: queryArg.start,
-          per_page: queryArg.perPage,
-        },
-      }),
-    }),
-    getAttachmentApiAttachmentsAccountNameFileIdGet: build.query<
-      GetAttachmentApiAttachmentsAccountNameFileIdGetApiResponse,
-      GetAttachmentApiAttachmentsAccountNameFileIdGetApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/attachments/${queryArg.accountName}/${queryArg.fileId}`,
-        params: {
-          filename: queryArg.filename,
-        },
-      }),
-    }),
-    deleteAttachmentApiAttachmentsFileIdDelete: build.mutation<
-      DeleteAttachmentApiAttachmentsFileIdDeleteApiResponse,
-      DeleteAttachmentApiAttachmentsFileIdDeleteApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/attachments/${queryArg.fileId}`,
-        method: "DELETE",
-      }),
-    }),
     showMcsDataChartApiMcsDataFrameIdPngGet: build.query<
       ShowMcsDataChartApiMcsDataFrameIdPngGetApiResponse,
       ShowMcsDataChartApiMcsDataFrameIdPngGetApiArg
@@ -556,31 +514,6 @@ export type GetDesignApiPfsDesignsIdHexGetApiResponse =
   /** status 200 Successful Response */ PfsDesignDetail;
 export type GetDesignApiPfsDesignsIdHexGetApiArg = {
   idHex: string;
-};
-export type CreateAttachmentApiAttachmentsPostApiResponse =
-  /** status 201 Successful Response */ CreateAttachmentResponse;
-export type CreateAttachmentApiAttachmentsPostApiArg = {
-  bodyCreateAttachmentApiAttachmentsPost: BodyCreateAttachmentApiAttachmentsPost;
-};
-export type ListAttachmentsApiAttachmentsGetApiResponse =
-  /** status 200 Successful Response */ AttachmentList;
-export type ListAttachmentsApiAttachmentsGetApiArg = {
-  /** Start position */
-  start?: number;
-  /** Items per page */
-  perPage?: number;
-};
-export type GetAttachmentApiAttachmentsAccountNameFileIdGetApiResponse =
-  /** status 200 Successful Response */ any;
-export type GetAttachmentApiAttachmentsAccountNameFileIdGetApiArg = {
-  accountName: string;
-  fileId: number;
-  /** Override filename in response */
-  filename?: string | null;
-};
-export type DeleteAttachmentApiAttachmentsFileIdDeleteApiResponse = unknown;
-export type DeleteAttachmentApiAttachmentsFileIdDeleteApiArg = {
-  fileId: number;
 };
 export type ShowMcsDataChartApiMcsDataFrameIdPngGetApiResponse =
   /** status 200 Successful Response */ any;
@@ -869,6 +802,12 @@ export type DesignData = {
   targetType: number[];
   fiberStatus: number[];
   pfiNominal: number[][];
+  epoch: string[];
+  pmRa: number[];
+  pmDec: number[];
+  parallax: number[];
+  proposalId: string[];
+  obCode: string[];
 };
 export type PhotometryData = {
   fiberId: number[];
@@ -890,23 +829,6 @@ export type PfsDesignDetail = {
   design_data: DesignData;
   photometry_data: PhotometryData;
   guidestar_data: GuidestarData;
-};
-export type CreateAttachmentResponse = {
-  path: string;
-};
-export type BodyCreateAttachmentApiAttachmentsPost = {
-  file: Blob;
-};
-export type AttachmentEntry = {
-  id: number;
-  name: string;
-  account_name: string;
-  media_type: string;
-  exists: boolean;
-};
-export type AttachmentList = {
-  count: number;
-  entries: AttachmentEntry[];
 };
 export const {
   useHealthzApiHealthzGetQuery,
@@ -938,10 +860,6 @@ export const {
   useGetDesignRankApiPfsDesignsRankDesignIdGetQuery,
   useDownloadDesignApiPfsDesignsIdHexFitsGetQuery,
   useGetDesignApiPfsDesignsIdHexGetQuery,
-  useCreateAttachmentApiAttachmentsPostMutation,
-  useListAttachmentsApiAttachmentsGetQuery,
-  useGetAttachmentApiAttachmentsAccountNameFileIdGetQuery,
-  useDeleteAttachmentApiAttachmentsFileIdDeleteMutation,
   useShowMcsDataChartApiMcsDataFrameIdPngGetQuery,
   useRootApiGetQuery,
 } = injectedRtkApi;
