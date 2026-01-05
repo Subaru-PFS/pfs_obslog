@@ -8,7 +8,8 @@ dev:
 # プロダクションサーバーを起動
 production: setup
 	@echo "Starting production server..."
-	@HOST=$$(echo "$${BIND_ADDRESS:?BIND_ADDRESS is required}" | cut -d: -f1); \
+	@BIND_ADDRESS=$${BIND_ADDRESS:-0.0.0.0:5000}; \
+	HOST=$$(echo "$$BIND_ADDRESS" | cut -d: -f1); \
 	PORT=$$(echo "$$BIND_ADDRESS" | cut -d: -f2); \
 	export PFS_OBSLOG_session_secret_key=$$(cat secrets/session_secret_key); \
 	uv run gunicorn pfs_obslog.main:app \
