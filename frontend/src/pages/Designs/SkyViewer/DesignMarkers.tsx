@@ -334,23 +334,22 @@ export function DesignMarkers() {
   // ファイバーマーカーのホバーハンドラ
   const handleFiberHoverChange = useCallback(
     (e: { index: number | null }) => {
-      if (e.index !== null && designDetail) {
-        const { fiberId } = designDetail.design_data
-        // ガイドスターはfiberIdを持たないので、design_data範囲内のみ対象
-        if (e.index < fiberId.length) {
+      if (e.index !== null && fiberMarkers.length > 0) {
+        const marker = fiberMarkers[e.index]
+        // ガイドスター（fiberId: -1）の場合はクリア
+        if (marker && marker.fiberId >= 0) {
           setFocusedFiber({
-            fiberId: fiberId[e.index],
+            fiberId: marker.fiberId,
             source: 'skyViewer',
           })
         } else {
-          // ガイドスターの場合はクリア
           setFocusedFiber(undefined)
         }
       } else {
         setFocusedFiber(undefined)
       }
     },
-    [designDetail, setFocusedFiber]
+    [fiberMarkers, setFocusedFiber]
   )
 
   return (

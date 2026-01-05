@@ -152,15 +152,6 @@ export function DesignList() {
     }
   }, [offset, limit, total, setOffset])
 
-  // フォーカス中のDesignへスクロール
-  useEffect(() => {
-    if (focusedDesign) {
-      document
-        .querySelector(`[data-design-id="${focusedDesign.id}"]`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    }
-  }, [focusedDesign])
-
   // 選択されたDesignへスクロール（SkyViewerからの選択時など）
   useEffect(() => {
     if (!selectedDesign) return
