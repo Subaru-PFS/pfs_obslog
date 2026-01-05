@@ -144,11 +144,11 @@ export function SkyViewer() {
     
     const globe = globeRef.current()
     // カメラの天頂パラメータを更新（zd + TILTで地平線付近を基準に）
+    // duration を 300ms に設定して滑らかに動かす
     globe.camera.jumpTo(
       { za: zenithZaZd.za, zd: zenithZaZd.zd + TILT, zp: zenithZaZd.zp },
-      { duration: 0 }
+      { duration: 300 }
     )
-    globe.requestRefresh()
   }, [zenithZaZd])
 
   // 天頂を中心に表示
@@ -167,7 +167,9 @@ export function SkyViewer() {
   // 現在時刻に設定
   const setToNow = useCallback(() => {
     setNow(new Date())
-    requestAnimationFrame(() => centerZenith())
+    // 次のフレームで天頂を中心に表示
+    // 時刻が変わるとzenithZaZdが更新され、その後centerZenithが実行される
+    setTimeout(() => centerZenith(), 400)  // zenithZaZd更新のアニメーション(300ms)より少し後
   }, [setNow, centerZenith])
 
   // 時計のドラッグで時刻変更
