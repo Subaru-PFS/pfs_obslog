@@ -13,9 +13,8 @@
 | Visit Set Note | 3 | 0 | 100% |
 | FITS | 8 | 0 | 100% |
 | PFS Design | 3 | 0 | 100% |
-| Attachment | 4 | 0 | 100% |
 | Plot | 1 | 0 | 100% |
-| **合計** | **32** | **0** | **100%** |
+| **合計** | **28** | **0** | **100%** |
 
 ---
 
@@ -83,15 +82,6 @@
 | GET | `/api/pfs_designs/{id_hex}` | `/api/pfs_designs/{id_hex}` | ✅ 完了 | PFS Design詳細 |
 | GET | `/api/pfs_designs/{id_hex}.fits` | `/api/pfs_designs/{id_hex}.fits` | ✅ 完了 | PFS Design FITSダウンロード |
 
-### Attachment（添付ファイル）
-
-| メソッド | 既存エンドポイント | 新エンドポイント | 状態 | 備考 |
-|----------|-------------------|-----------------|------|------|
-| POST | `/api/attachments` | `/api/attachments` | ✅ 完了 | 添付ファイルアップロード（要認証） |
-| GET | `/api/attachments` | `/api/attachments` | ✅ 完了 | 添付ファイル一覧（自分のファイル） |
-| GET | `/api/attachments/{account_name}/{file_id}` | `/api/attachments/{account_name}/{file_id}` | ✅ 完了 | 添付ファイルダウンロード |
-| DELETE | `/api/attachments/{file_id}` | `/api/attachments/{file_id}` | ✅ 完了 | 添付ファイル削除（自分のファイルのみ） |
-
 ### Plot（チャート）
 
 | メソッド | 既存エンドポイント | 新エンドポイント | 状態 | 備考 |
@@ -114,4 +104,5 @@
 | 日付 | 内容 |
 |------|------|
 | 2024-12-30 | 初版作成 |
-| 2025-01-XX | Visit Note, Visit Set Note, FITS, PFS Design, Attachment API完了 |
+| 2025-01-XX | Visit Note, Visit Set Note, FITS, PFS Design API完了 |
+| 2025-01-04 | Attachment機能削除（実際には使用されていないため） |

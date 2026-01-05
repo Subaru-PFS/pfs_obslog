@@ -52,9 +52,6 @@ class Settings(BaseSettings):
         "ginga/detrend",
     ]
 
-    # 添付ファイル保存ディレクトリ
-    attachments_dir: Path = Path("./attachments")
-
     # PFS Design キャッシュ設定
     pfs_design_cache_enabled: bool = True  # SQLiteキャッシュを有効化
 

@@ -11,7 +11,6 @@ production: setup
 	@HOST=$$(echo "$${BIND_ADDRESS:?BIND_ADDRESS is required}" | cut -d: -f1); \
 	PORT=$$(echo "$$BIND_ADDRESS" | cut -d: -f2); \
 	export PFS_OBSLOG_session_secret_key=$$(cat secrets/session_secret_key); \
-	export PFS_OBSLOG_attachments_dir=$${PFS_OBSLOG_attachments_dir:-$${PWD}/attachments}; \
 	uv run gunicorn pfs_obslog.main:app \
 		--workers 8 \
 		--worker-class uvicorn.workers.UvicornWorker \
@@ -22,7 +21,7 @@ production: setup
 # 初期セットアップ（シークレットキー生成、ディレクトリ作成）
 setup:
 	@echo "Running initial setup..."
-	@mkdir -p secrets attachments ../logs
+	@mkdir -p secrets ../logs
 	@if [ ! -f secrets/session_secret_key ]; then \
 		echo "Generating session secret key..."; \
 		openssl rand -hex 64 > secrets/session_secret_key; \
