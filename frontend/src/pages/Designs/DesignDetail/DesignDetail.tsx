@@ -137,11 +137,17 @@ export function DesignDetail() {
         <Legend colorMode={colorMode} />
       </div>
 
-      {designDetail && focusedCobra ? (
-        <FiberDetail design={designDetail} cobra={focusedCobra} />
-      ) : designDetail ? (
-        <DesignSummary design={designDetail} />
-      ) : null}
+      {/* 両方を常に表示 */}
+      {designDetail && (
+        <>
+          <DesignSummary design={designDetail} />
+          <FiberDetail
+            design={designDetail}
+            fiberId={focusedFiber?.fiberId ?? null}
+            cobra={focusedCobra}
+          />
+        </>
+      )}
     </div>
   )
 }
@@ -171,10 +177,11 @@ function Legend({ colorMode }: LegendProps) {
 
 interface FiberDetailProps {
   design: PfsDesignDetail
-  cobra: Cobra
+  fiberId: number | null
+  cobra: Cobra | undefined  // FocalPlaneからのホバーでのみ設定される
 }
 
-function FiberDetail({ design, cobra }: FiberDetailProps) {
+function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
   const id2designIndex = useMemo(
     () => makeId2IndexMap(design.design_data.fiberId),
     [design]
@@ -184,18 +191,22 @@ function FiberDetail({ design, cobra }: FiberDetailProps) {
     [design]
   )
 
+  // fiberIdがnullの場合は'-'を返す関数
   const pickDesign = <T,>(list: T[], filter?: (item: T) => unknown): unknown => {
-    const indices = id2designIndex.get(cobra.fiberId)
-    if (indices === undefined || indices.length === 0) return undefined
+    if (fiberId === null) return '-'
+    const indices = id2designIndex.get(fiberId)
+    if (indices === undefined || indices.length === 0) return '-'
     const raw = list[indices[0]]
-    return filter ? filter(raw) : raw
+    const result = filter ? filter(raw) : raw
+    return result ?? '-'  // filter結果がundefinedなら'-'
   }
 
   const pickPhotometry = <T,>(list: T[], filter?: (item: T) => unknown): unknown[] => {
-    const indices = id2photometryIndex.get(cobra.fiberId)
-    if (indices === undefined) return []
+    if (fiberId === null) return ['-']
+    const indices = id2photometryIndex.get(fiberId)
+    if (indices === undefined || indices.length === 0) return ['-']
     const raws = indices.map((index) => list[index])
-    return filter ? raws.map(filter) : raws
+    return filter ? raws.map(r => filter(r) ?? '-') : raws
   }
 
   const Tr = ({ label, values }: { label: string; values: unknown[] }) => (
@@ -210,48 +221,48 @@ function FiberDetail({ design, cobra }: FiberDetailProps) {
   return (
     <div className={styles.detailTable}>
       <details open>
-        <summary>Fiber {cobra.fiberId}</summary>
+        <summary>Fiber {fiberId ?? '-'}</summary>
         <table>
           <tbody>
-            <Tr label="Cobra Id" values={[cobra.id]} />
-            <Tr label="Fiber Id" values={[cobra.fiberId]} />
-            <Tr label="Module ID" values={[cobra.moduleId]} />
-            <Tr label="Sector ID" values={[cobra.fieldId]} />
+            <Tr label="Cobra Id" values={[cobra?.id ?? '-']} />
+            <Tr label="Fiber Id" values={[fiberId ?? '-']} />
+            <Tr label="Module ID" values={[cobra?.moduleId ?? '-']} />
+            <Tr label="Sector ID" values={[cobra?.fieldId ?? '-']} />
           </tbody>
         </table>
       </details>
       <details open>
-        <summary>Design</summary>
+        <summary>Fiber Design</summary>
         <table>
           <tbody>
             <Tr
               label="catId"
-              values={[pickDesign(design.design_data.catId) ?? '-']}
+              values={[pickDesign(design.design_data.catId)]}
             />
             <Tr
               label="Tract/Patch"
               values={[
-                `${pickDesign(design.design_data.tract) ?? '-'}/${pickDesign(design.design_data.patch) ?? '-'}`,
+                `${pickDesign(design.design_data.tract)}/${pickDesign(design.design_data.patch)}`,
               ]}
             />
             <Tr
               label="objId"
-              values={[pickDesign(design.design_data.objId) ?? '-']}
+              values={[pickDesign(design.design_data.objId)]}
             />
             <Tr
               label="&alpha;"
-              values={[pickDesign(design.design_data.ra) ?? '-']}
+              values={[pickDesign(design.design_data.ra)]}
             />
             <Tr
               label="&delta;"
-              values={[pickDesign(design.design_data.dec) ?? '-']}
+              values={[pickDesign(design.design_data.dec)]}
             />
             <Tr
               label="Target Type"
               values={[
                 pickDesign(design.design_data.targetType, (t) =>
                   targetTypeColors[t as number]?.name
-                ) ?? '-',
+                ),
               ]}
             />
             <Tr
@@ -259,13 +270,13 @@ function FiberDetail({ design, cobra }: FiberDetailProps) {
               values={[
                 pickDesign(design.design_data.fiberStatus, (s) =>
                   fiberStatusColors[s as number]?.name
-                ) ?? '-',
+                ),
               ]}
             />
             <Tr
               label="pfiNominal"
               values={[
-                pickDesign(design.design_data.pfiNominal, JSON.stringify) ?? '-',
+                pickDesign(design.design_data.pfiNominal, JSON.stringify),
               ]}
             />
           </tbody>
