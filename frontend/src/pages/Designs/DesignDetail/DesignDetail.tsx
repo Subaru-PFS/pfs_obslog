@@ -215,25 +215,24 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
     )?.value
   }
 
-  // key-valueペアの配列を構築（グループ間に区切りを挿入）
-  const items: Array<{ key: string; value: string; isSeparator?: boolean }> = [
-    // Design情報
+  // key-valueペアの配列を構築（グループごとに見出しを挿入）
+  const items: Array<{ key: string; value: string; isHeader?: boolean }> = [
+    // Design Detail グループ
+    { key: 'Design Detail', value: '', isHeader: true },
     { key: 'Name', value: String(pickCard('DSGN_NAM', 0) ?? '-') },
     { key: 'Modified', value: design.date_modified },
     { key: 'α', value: String(pickCard('RA', 0) ?? '-') },
     { key: 'δ', value: String(pickCard('DEC', 0) ?? '-') },
     { key: 'Position Angle', value: String(pickCard('POSANG', 0) ?? '-') },
     { key: 'Arms', value: String(pickCard('ARMS', 0) ?? '-') },
-    // 区切り
-    { key: '', value: '', isSeparator: true },
-    // Fiber基本情報
+    // Fiber Detail グループ
+    { key: 'Fiber Detail', value: '', isHeader: true },
     { key: 'Fiber Id', value: String(fiberId ?? '-') },
     { key: 'Cobra Id', value: String(cobra?.id ?? '-') },
     { key: 'Module ID', value: String(cobra?.moduleId ?? '-') },
     { key: 'Sector ID', value: String(cobra?.fieldId ?? '-') },
-    // 区切り
-    { key: '', value: '', isSeparator: true },
-    // Fiber Design
+    // Fiber Design グループ
+    { key: 'Fiber Design', value: '', isHeader: true },
     { key: 'catId', value: String(pickDesign(design.design_data.catId)) },
     { key: 'Tract/Patch', value: `${pickDesign(design.design_data.tract)}/${pickDesign(design.design_data.patch)}` },
     { key: 'objId', value: String(pickDesign(design.design_data.objId)) },
@@ -258,9 +257,8 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
     { key: 'parallax [mas]', value: String(pickDesign(design.design_data.parallax)) },
     { key: 'proposalId', value: String(pickDesign(design.design_data.proposalId)) },
     { key: 'obCode', value: String(pickDesign(design.design_data.obCode)) },
-    // 区切り
-    { key: '', value: '', isSeparator: true },
-    // Photometry
+    // Photometry グループ
+    { key: 'Photometry', value: '', isHeader: true },
     ...pickPhotometry(design.photometry_data.filterName).flatMap((filterName, i) => [
       { key: `filterName[${i}]`, value: String(filterName) },
       { key: `fiberFlux[${i}] [nJy]`, value: String(pickPhotometry(design.photometry_data.fiberFlux)[i]) },
@@ -275,8 +273,8 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
   return (
     <div className={styles.detailArea}>
       {items.map((item, index) => {
-        if (item.isSeparator) {
-          return <div key={index} className={styles.separator} />
+        if (item.isHeader) {
+          return <h3 key={index} className={styles.groupHeader}>{item.key}</h3>
         }
         return (
           <div key={index} className={styles.keyValuePair}>

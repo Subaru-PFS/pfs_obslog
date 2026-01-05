@@ -58,6 +58,23 @@
   column-rule: 1px solid #ddd;
 }
 
+// グループヘッダー
+.groupHeader {
+  font-size: 11px;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 8px 0;
+  padding: 4px 0;
+  border-bottom: 1px solid #999;
+  break-before: column;  // ヘッダーの前で改カラム
+  break-after: avoid;    // ヘッダー直後では改カラムしない
+  
+  // 最初のヘッダーは改カラムしない
+  &:first-child {
+    break-before: auto;
+  }
+}
+
 // key-valueペア
 .keyValuePair {
   display: flex;
@@ -79,12 +96,4 @@
     color: #000;
     word-break: break-word;
   }
-}
-
-// グループ間の区切り
-.separator {
-  height: 1px;
-  background: #ccc;
-  margin: 12px 0;
-  break-after: column;  // 区切りの後で改カラム
 }

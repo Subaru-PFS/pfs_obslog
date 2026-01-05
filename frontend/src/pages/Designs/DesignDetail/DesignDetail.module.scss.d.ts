@@ -3,11 +3,11 @@ export type Styles = {
   designDetailContainer: string;
   detailArea: string;
   focalPlaneSection: string;
+  groupHeader: string;
   key: string;
   keyValuePair: string;
   legendEntries: string;
   legendEntry: string;
-  separator: string;
   value: string;
 };
 
