@@ -206,7 +206,7 @@ export function DesignMarkers() {
         const globe = getGlobe()
         if (globe.camera.fovy >= angle.deg2rad(4)) {
           jumpTo({
-            fovy: angle.deg2rad(0.8),
+            fovy: angle.deg2rad(1.6),  // Design視野(~1.4度)より少し広めに
             coord: { ra: position.ra, dec: position.dec },
             duration: 1000,
           })

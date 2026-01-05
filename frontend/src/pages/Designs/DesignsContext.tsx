@@ -352,9 +352,9 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
         if (design) {
           setSelectedDesignState(design)
         }
-        // 初期ジャンプ（位置情報から）
+        // 初期ジャンプ（位置情報から）- Design視野(~1.4度)より少し広めに
         jumpTo({
-          fovy: (0.8 * Math.PI) / 180,
+          fovy: (1.6 * Math.PI) / 180,
           coord: { ra: position.ra, dec: position.dec },
           duration: 0,
         })

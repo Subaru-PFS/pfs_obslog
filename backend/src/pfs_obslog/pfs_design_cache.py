@@ -248,12 +248,12 @@ class PfsDesignCache:
             search_param = f"%{search}%"
             params.extend([search_param, search_param])
 
-        # 日付フィルター
+        # 日付フィルター（file_mtimeはUNIXタイムスタンプなので変換が必要）
         if date_from:
-            where_clauses.append("date(file_mtime) >= ?")
+            where_clauses.append("date(file_mtime, 'unixepoch') >= ?")
             params.append(date_from)
         if date_to:
-            where_clauses.append("date(file_mtime) <= ?")
+            where_clauses.append("date(file_mtime, 'unixepoch') <= ?")
             params.append(date_to)
 
         # WHERE句を追加
@@ -385,11 +385,11 @@ class PfsDesignCache:
             params.extend([search_param, search_param])
 
         if date_from:
-            where_clauses.append("date(file_mtime) >= ?")
+            where_clauses.append("date(file_mtime, 'unixepoch') >= ?")
             params.append(date_from)
 
         if date_to:
-            where_clauses.append("date(file_mtime) <= ?")
+            where_clauses.append("date(file_mtime, 'unixepoch') <= ?")
             params.append(date_to)
 
         if where_clauses:
@@ -476,11 +476,11 @@ class PfsDesignCache:
             params.extend([search_param, search_param])
 
         if date_from:
-            where_clauses.append("date(file_mtime) >= ?")
+            where_clauses.append("date(file_mtime, 'unixepoch') >= ?")
             params.append(date_from)
 
         if date_to:
-            where_clauses.append("date(file_mtime) <= ?")
+            where_clauses.append("date(file_mtime, 'unixepoch') <= ?")
             params.append(date_to)
 
         if where_clauses:
