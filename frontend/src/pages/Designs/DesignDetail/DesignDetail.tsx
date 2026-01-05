@@ -137,16 +137,13 @@ export function DesignDetail() {
         <Legend colorMode={colorMode} />
       </div>
 
-      {/* Design詳細 + Fiber詳細を縦に並べる */}
+      {/* 3カラムレイアウト: Design詳細 + Fiber詳細 */}
       {designDetail && (
-        <div className={styles.detailArea}>
-          <DesignSummary design={designDetail} />
-          <FiberDetail
-            design={designDetail}
-            fiberId={focusedFiber?.fiberId ?? null}
-            cobra={focusedCobra}
-          />
-        </div>
+        <FiberDetail
+          design={designDetail}
+          fiberId={focusedFiber?.fiberId ?? null}
+          cobra={focusedCobra}
+        />
       )}
     </div>
   )
@@ -179,6 +176,38 @@ interface FiberDetailProps {
   design: PfsDesignDetail
   fiberId: number | null
   cobra: Cobra | undefined  // FocalPlaneからのホバーでのみ設定される
+}
+
+interface DesignSummaryProps {
+  design: PfsDesignDetail
+}
+
+function DesignSummary({ design }: DesignSummaryProps) {
+  const pickCard = (key: string, hduIndex: number): unknown => {
+    return design.fits_meta.hdul[hduIndex]?.header.cards.find(
+      (card) => card.key === key
+    )?.value
+  }
+
+  const Tr = ({ label, value }: { label: string; value: unknown }) => (
+    <tr>
+      <th dangerouslySetInnerHTML={{ __html: label }} />
+      <td>{String(value ?? '-')}</td>
+    </tr>
+  )
+
+  return (
+    <table className={styles.infoTable}>
+      <tbody>
+        <Tr label="Name" value={pickCard('DSGN_NAM', 0)} />
+        <Tr label="Modified" value={design.date_modified} />
+        <Tr label="&alpha;" value={pickCard('RA', 0)} />
+        <Tr label="&delta;" value={pickCard('DEC', 0)} />
+        <Tr label="Position Angle" value={pickCard('POSANG', 0)} />
+        <Tr label="Arms" value={pickCard('ARMS', 0)} />
+      </tbody>
+    </table>
+  )
 }
 
 function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
@@ -219,11 +248,13 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
   )
 
   return (
-    <div className={styles.fiberDetailArea}>
-      {/* Fiber基本情報 + Fiber Design */}
-      <div className={styles.fiberSection}>
+    <div className={styles.detailArea}>
+      {/* 左カラム: Design詳細 + Fiber基本情報 */}
+      <div className={styles.leftColumn}>
+        <h4>Design</h4>
+        <DesignSummary design={design} />
         <h4>Fiber {fiberId ?? '-'}</h4>
-        <table>
+        <table className={styles.infoTable}>
           <tbody>
             <Tr label="Cobra Id" values={[cobra?.id ?? '-']} />
             <Tr label="Fiber Id" values={[fiberId ?? '-']} />
@@ -231,8 +262,11 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
             <Tr label="Sector ID" values={[cobra?.fieldId ?? '-']} />
           </tbody>
         </table>
-        <h4>Design</h4>
-        <table>
+      </div>
+      {/* 中央カラム: Fiber Design */}
+      <div className={styles.dataColumn}>
+        <h4>Fiber Design</h4>
+        <table className={styles.infoTable}>
           <tbody>
             <Tr label="catId" values={[pickDesign(design.design_data.catId)]} />
             <Tr
@@ -273,10 +307,10 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
           </tbody>
         </table>
       </div>
-      {/* Photometry */}
-      <div className={styles.fiberSection}>
+      {/* 右カラム: Photometry */}
+      <div className={styles.dataColumn}>
         <h4>Photometry</h4>
-        <table>
+        <table className={styles.infoTable}>
           <tbody>
             <Tr label="filterName" values={pickPhotometry(design.photometry_data.filterName)} />
             <Tr label="fiberFlux [nJy]" values={pickPhotometry(design.photometry_data.fiberFlux)} />
@@ -292,34 +326,3 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
   )
 }
 
-interface DesignSummaryProps {
-  design: PfsDesignDetail
-}
-
-function DesignSummary({ design }: DesignSummaryProps) {
-  const pickCard = (key: string, hduIndex: number): unknown => {
-    return design.fits_meta.hdul[hduIndex]?.header.cards.find(
-      (card) => card.key === key
-    )?.value
-  }
-
-  const Tr = ({ label, value }: { label: string; value: unknown }) => (
-    <tr>
-      <th dangerouslySetInnerHTML={{ __html: label }} />
-      <td>{String(value ?? '-')}</td>
-    </tr>
-  )
-
-  return (
-    <table className={styles.summaryTable}>
-      <tbody>
-        <Tr label="Name" value={pickCard('DSGN_NAM', 0)} />
-        <Tr label="Modified" value={design.date_modified} />
-        <Tr label="&alpha;" value={pickCard('RA', 0)} />
-        <Tr label="&delta;" value={pickCard('DEC', 0)} />
-        <Tr label="Position Angle" value={pickCard('POSANG', 0)} />
-        <Tr label="Arms" value={pickCard('ARMS', 0)} />
-      </tbody>
-    </table>
-  )
-}

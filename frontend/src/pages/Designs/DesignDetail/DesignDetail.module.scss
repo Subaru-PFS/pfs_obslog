@@ -42,54 +42,38 @@
   }
 }
 
-// 右側のディテール領域（Design詳細 + Fiber詳細）
+// 右側のディテール領域（3カラムレイアウト）
+// +-----------------+--------------+------------+
+// | design detail   |              |            |
+// +-----------------+ fiber design | photometry |
+// | fiber detail    |              |            |
+// +-----------------+--------------+------------+
 .detailArea {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 16px;
   flex: 1;
   overflow: hidden;
   min-width: 0;
 }
 
-// Design概要テーブル（小さいフォント）
-.summaryTable {
-  font-size: 10px;
-  flex-shrink: 0;
-
-  table {
-    border-collapse: collapse;
-  }
-
-  th {
-    text-align: right;
-    padding-right: 8px;
-    white-space: nowrap;
-    color: #666;
-  }
-
-  td {
-    font-family: monospace;
-    white-space: nowrap;
-  }
-}
-
-// Fiber詳細領域（横に並ぶテーブル群）
-.fiberDetailArea {
+// 左カラム: Design詳細 + Fiber詳細（縦並び）
+.leftColumn {
   display: flex;
-  gap: 16px;
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 160px;
+  max-width: 200px;
+  flex-shrink: 0;
 }
 
-// 各テーブルセクション
-.fiberSection {
+// 中央・右カラム: Fiber Design / Photometry
+.dataColumn {
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-width: 200px;
-  max-width: 350px;
+  min-width: 150px;
+  max-width: 280px;
+  overflow-y: auto;
 
   h4 {
     margin: 0 0 4px 0;
@@ -98,6 +82,7 @@
     color: #444;
     border-bottom: 1px solid #ccc;
     padding-bottom: 2px;
+    flex-shrink: 0;
   }
 
   table {
@@ -111,7 +96,40 @@
     padding-right: 8px;
     white-space: nowrap;
     color: #666;
-    width: 80px;
+    width: 90px;
+  }
+
+  td {
+    font-family: monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// テーブル共通スタイル（小さいフォント）
+.infoTable {
+  font-size: 10px;
+
+  h4 {
+    margin: 0 0 4px 0;
+    font-size: 11px;
+    font-weight: bold;
+    color: #444;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 2px;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th {
+    text-align: right;
+    padding-right: 8px;
+    white-space: nowrap;
+    color: #666;
   }
 
   td {

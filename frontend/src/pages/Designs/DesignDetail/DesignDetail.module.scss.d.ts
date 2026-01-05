@@ -1,13 +1,13 @@
 export type Styles = {
   colorModeSelect: string;
+  dataColumn: string;
   designDetailContainer: string;
   detailArea: string;
-  fiberDetailArea: string;
-  fiberSection: string;
   focalPlaneSection: string;
+  infoTable: string;
+  leftColumn: string;
   legendEntries: string;
   legendEntry: string;
-  summaryTable: string;
 };
 
 export type ClassNames = keyof Styles;
