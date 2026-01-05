@@ -282,10 +282,13 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   const [showFibers, setShowFibers] = useState(true)
 
   // Design詳細取得
+  // selectedDesign がある場合はその ID を使う
+  // ない場合でも URL パラメータの designId があればそれを使う（初回ロード時）
+  const designIdForDetail = selectedDesign?.id ?? designId ?? ''
   const { data: designDetail, isLoading: isLoadingDetail } =
     useGetDesignApiPfsDesignsIdHexGetQuery(
-      { idHex: selectedDesign?.id ?? '' },
-      { skip: !selectedDesign }
+      { idHex: designIdForDetail },
+      { skip: !designIdForDetail }
     )
 
   // 選択されたDesignがリスト内にあるか確認
