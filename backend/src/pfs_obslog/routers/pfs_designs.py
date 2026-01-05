@@ -641,6 +641,13 @@ def get_design(id_hex: str):
                             return [[0.0, 0.0]] * length
                     return [default_value] * length
 
+            # ヘルパー関数: get_field() の結果を list に変換
+            # （カラムが存在する場合は numpy array、存在しない場合は Python list が返される）
+            def to_list(field_data: Any) -> list:
+                if hasattr(field_data, "tolist"):
+                    return field_data.tolist()
+                return list(field_data)
+
             # objId は大きな整数なので文字列に変換
             objId_data = get_field("objId")
             objId_str_list = [str(x) for x in objId_data]
@@ -651,21 +658,21 @@ def get_design(id_hex: str):
 
             design_data = DesignData(
                 fiberId=hdul[1].data.field("fiberId").tolist(),  # type: ignore[union-attr]
-                ra=get_field("ra").tolist(),
-                dec=get_field("dec").tolist(),
-                tract=get_field("tract").tolist(),
-                patch=get_field("patch").tolist(),
-                catId=get_field("catId").tolist(),
+                ra=to_list(get_field("ra")),
+                dec=to_list(get_field("dec")),
+                tract=to_list(get_field("tract")),
+                patch=to_list(get_field("patch")),
+                catId=to_list(get_field("catId")),
                 objId=objId_str_list,
-                targetType=get_field("targetType").tolist(),
+                targetType=to_list(get_field("targetType")),
                 epoch=epoch_str_list,
-                pmRa=get_field("pmRa").tolist(),
-                pmDec=get_field("pmDec").tolist(),
-                parallax=get_field("parallax").tolist(),
+                pmRa=to_list(get_field("pmRa")),
+                pmDec=to_list(get_field("pmDec")),
+                parallax=to_list(get_field("parallax")),
                 proposalId=[str(x) for x in get_field("proposalId")],
-                obCode=get_field("obCode").tolist(),
-                pfiNominal=get_field("pfiNominal").tolist(),
-                fiberStatus=get_field("fiberStatus").tolist(),
+                obCode=to_list(get_field("obCode")),
+                pfiNominal=to_list(get_field("pfiNominal")),
+                fiberStatus=to_list(get_field("fiberStatus")),
             )
 
             # HDU 3: Guidestar Data
