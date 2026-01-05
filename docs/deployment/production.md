@@ -36,7 +36,6 @@
     ├── pfs-datamodel/
     └── pfs_utils/
 ```
-```
 
 ## セットアップ手順
 
