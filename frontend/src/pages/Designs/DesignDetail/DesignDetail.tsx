@@ -183,10 +183,6 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
     () => makeId2IndexMap(design.design_data.fiberId),
     [design]
   )
-  const id2photometryIndex = useMemo(
-    () => makeId2IndexMap(design.photometry_data.fiberId),
-    [design]
-  )
 
   // fiberIdがnullの場合は'-'を返す関数
   const pickDesign = <T,>(list: T[] | undefined, filter?: (item: T) => unknown): unknown => {
@@ -198,15 +194,6 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
     if (raw === undefined) return '-'
     const result = filter ? filter(raw) : raw
     return result ?? '-'  // filter結果がundefinedなら'-'
-  }
-
-  const pickPhotometry = <T,>(list: T[] | undefined, filter?: (item: T) => unknown): unknown[] => {
-    if (fiberId === null) return ['-']
-    if (!list) return ['-']
-    const indices = id2photometryIndex.get(fiberId)
-    if (indices === undefined || indices.length === 0) return ['-']
-    const raws = indices.map((index) => list[index])
-    return filter ? raws.map(r => filter(r) ?? '-') : raws
   }
 
   const pickCard = (key: string, hduIndex: number): unknown => {
@@ -231,48 +218,33 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
     { key: 'Cobra Id', value: String(cobra?.id ?? '-') },
     { key: 'Module ID', value: String(cobra?.moduleId ?? '-') },
     { key: 'Sector ID', value: String(cobra?.fieldId ?? '-') },
-    // Fiber Design グループ - すべてのフィールドを動的に表示
+    // Fiber Design グループ
     { key: 'Fiber Design', value: '', isHeader: true },
+    { key: 'catId', value: String(pickDesign(design.design_data.catId)) },
+    { key: 'Tract/Patch', value: `${pickDesign(design.design_data.tract)}/${pickDesign(design.design_data.patch)}` },
+    { key: 'objId', value: String(pickDesign(design.design_data.objId)) },
+    { key: 'α', value: String(pickDesign(design.design_data.ra)) },
+    { key: 'δ', value: String(pickDesign(design.design_data.dec)) },
+    { 
+      key: 'Target Type', 
+      value: String(pickDesign(design.design_data.targetType, (t) =>
+        targetTypeColors[t as number]?.name
+      ))
+    },
+    { 
+      key: 'Fiber Status', 
+      value: String(pickDesign(design.design_data.fiberStatus, (s) =>
+        fiberStatusColors[s as number]?.name
+      ))
+    },
+    { key: 'pfiNominal', value: String(pickDesign(design.design_data.pfiNominal, JSON.stringify)) },
+    { key: 'epoch', value: String(pickDesign(design.design_data.epoch)) },
+    { key: 'pmRa [mas/yr]', value: String(pickDesign(design.design_data.pmRa)) },
+    { key: 'pmDec [mas/yr]', value: String(pickDesign(design.design_data.pmDec)) },
+    { key: 'parallax [mas]', value: String(pickDesign(design.design_data.parallax)) },
+    { key: 'proposalId', value: String(pickDesign(design.design_data.proposalId)) },
+    { key: 'obCode', value: String(pickDesign(design.design_data.obCode)) },
   ]
-
-  // design_data のすべてのフィールドを動的に追加
-  for (const key in design.design_data) {
-    const data = (design.design_data as Record<string, unknown>)[key]
-    if (Array.isArray(data)) {
-      // 特殊な表示処理
-      if (key === 'targetType') {
-        const value = pickDesign(data, (t) => targetTypeColors[t as number]?.name)
-        items.push({ key: 'Target Type', value: String(value) })
-      } else if (key === 'fiberStatus') {
-        const value = pickDesign(data, (s) => fiberStatusColors[s as number]?.name)
-        items.push({ key: 'Fiber Status', value: String(value) })
-      } else if (key === 'pfiNominal') {
-        const value = pickDesign(data, JSON.stringify)
-        items.push({ key, value: String(value) })
-      } else {
-        const value = pickDesign(data)
-        items.push({ key, value: String(value) })
-      }
-    }
-  }
-
-  // Photometry グループ - すべてのフィールドを動的に表示
-  items.push({ key: 'Photometry', value: '', isHeader: true })
-  
-  // photometry_data のフィールド名を取得
-  const photometryKeys = Object.keys(design.photometry_data).filter(k => k !== 'fiberId')
-  const numPhotometryRecords = design.photometry_data.fiberId?.length ?? 0
-  
-  // fiberIdごとのphotometryデータを表示
-  for (let i = 0; i < numPhotometryRecords; i++) {
-    for (const key of photometryKeys) {
-      const data = (design.photometry_data as Record<string, unknown>)[key]
-      if (Array.isArray(data)) {
-        const values = pickPhotometry(data)
-        items.push({ key: `${key}[${i}]`, value: String(values[i] ?? '-') })
-      }
-    }
-  }
 
   return (
     <div className={styles.detailArea}>
