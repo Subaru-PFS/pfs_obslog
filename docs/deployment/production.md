@@ -95,6 +95,27 @@ npm run build
 
 ### 5. 動作確認（手動起動）
 
+#### 開発モード
+
+開発モードでは、バックエンドとフロントエンドを別々に起動します：
+
+```bash
+# バックエンド（ターミナル1）
+cd ~/pfs-obslog2/backend
+make dev
+
+# フロントエンド（ターミナル2）
+cd ~/pfs-obslog2/frontend
+npm run dev
+```
+
+ブラウザで `http://localhost:5173/obslog/` にアクセスして動作を確認します。
+APIリクエストは自動的にバックエンド（http://localhost:8000/obslog/api）にプロキシされます。
+
+#### 本番モード
+
+本番モードでは、バックエンドが静的ファイルも配信します：
+
 ```bash
 cd ~/pfs-obslog2/backend
 
@@ -184,6 +205,21 @@ systemdサービスファイル（`pfs-obslog2.service`）で以下の環境変�
 | `PFS_OBSLOG_app_env` | `production` | 環境（development/production） |
 | `PFS_OBSLOG_database_url` | - | PostgreSQL接続URL |
 | `PFS_OBSLOG_session_secret_key` | 自動生成 | セッション暗号化キー |
+| `PFS_OBSLOG_root_path` | `/obslog` | アプリケーションのURLプレフィックス |
+
+**URLプレフィックスについて:**
+
+アプリケーションは `/obslog` プレフィックスで動作するように設計されています。
+これにより、Nginxなどのリバースプロキシ経由で `/obslog` パスにマウントできます。
+
+- バックエンドAPI: `/obslog/api/*`
+- フロントエンド: `/obslog/*`
+- OpenAPI ドキュメント: `/obslog/api/docs`
+
+開発モード（`make dev`）でも同じプレフィックスを使用します（`http://localhost:5173/obslog/`）。
+
+プレフィックスを変更したい場合は、環境変数 `PFS_OBSLOG_root_path` を設定し、
+フロントエンドの `vite.config.ts` の `base` 設定も合わせて変更してください。
 
 ### サービスファイルの編集
 
