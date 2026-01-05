@@ -32,9 +32,6 @@ class Settings(BaseSettings):
     # 本番環境では必ず環境変数 PFS_OBSLOG_session_secret_key で設定してください
     session_secret_key: str = secrets.token_hex(32)
 
-    # セッションクッキーの設定
-    session_https_only: bool = False  # 本番環境ではTrueを推奨
-
     # データベース接続設定
     # 開発用: postgresql://pfs@localhost:15432/opdb
     # 本番用: 環境変数 PFS_OBSLOG_database_url で設定

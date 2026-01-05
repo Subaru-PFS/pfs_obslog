@@ -185,7 +185,6 @@ systemdサービスファイル（`pfs-obslog2.service`）で以下の環境変�
 | `PFS_OBSLOG_app_env` | `production` | 環境（development/production） |
 | `PFS_OBSLOG_database_url` | - | PostgreSQL接続URL |
 | `PFS_OBSLOG_session_secret_key` | 自動生成 | セッション暗号化キー |
-| `PFS_OBSLOG_session_https_only` | `false` | HTTPSのみでクッキーを送信 |
 | `PFS_OBSLOG_attachments_dir` | `./attachments` | 添付ファイル保存ディレクトリ |
 
 ### サービスファイルの編集

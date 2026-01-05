@@ -1,4 +1,4 @@
-.PHONY: dev production setup test test-all cov typecheck openapi-for-frontend clean help
+.PHONY: dev production setup test test-all cov typecheck openapi-for-frontend logs logs-follow clean help
 
 # 開発サーバーを起動
 dev:
@@ -50,6 +50,16 @@ cov:
 openapi-for-frontend:
 	@uv run python -c "import json; from pfs_obslog.main import app; print(json.dumps(app.openapi(), indent=2))"
 
+# ログを表示（systemdサービスのログ）
+logs:
+	@echo "Displaying logs for pfs-obslog2 service..."
+	journalctl _UID=$$(id -u) -u pfs-obslog2 -n 100 --no-pager
+
+# ログをフォロー（リアルタイム）
+logs-follow:
+	@echo "Following logs for pfs-obslog2 service (Ctrl+C to exit)..."
+	journalctl _UID=$$(id -u) -u pfs-obslog2 -f
+
 # クリーンアップ
 clean:
 	rm -rf __pycache__ .pytest_cache .coverage htmlcov
@@ -66,4 +76,6 @@ help:
 	@echo "  make cov              - カバレッジ付きテスト（HTMLレポート生成）"
 	@echo "  make typecheck        - 型チェック（pyright）"
 	@echo "  make openapi-for-frontend - フロントエンド用にOpenAPIスキーマを出力"
+	@echo "  make logs             - サービスログを表示（最新100行）"
+	@echo "  make logs-follow      - サービスログをリアルタイムで表示"
 	@echo "  make clean            - 一時ファイルを削除"

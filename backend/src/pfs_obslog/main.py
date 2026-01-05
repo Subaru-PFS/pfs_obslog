@@ -40,13 +40,14 @@ app.add_middleware(AuthMiddleware)
 # セッションミドルウェア（クッキーセッション）
 # max_age=None でセッションクッキー（ブラウザを閉じると消える）
 # 認証ミドルウェアより先に処理される（後に追加 = 先に処理）
+# https_only=False: イントラネット用アプリなのHTTPで使用
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.session_secret_key,
     session_cookie="session",
     max_age=None,  # セッションクッキー
     same_site="lax",
-    https_only=settings.session_https_only,
+    https_only=False,
 )
 
 # ルーターを登録（/api配下に配置）
