@@ -6,15 +6,29 @@ dev:
 	uv run uvicorn pfs_obslog.main:app --reload --host 0.0.0.0 --port 8000
 
 # プロダクションサーバーを起動
-production:
-	BIND_ADDRESS=0.0.0.0:5000 \
-	PFS_OBSLOG_app_env=production \
-	PFS_OBSLOG_database_url=postgresql://pfs@133.40.164.48/opdb \
-	bash scripts/entrypoint.bash
+production: setup
+	@echo "Starting production server..."
+	@HOST=$$(echo "$${BIND_ADDRESS:?BIND_ADDRESS is required}" | cut -d: -f1); \
+	PORT=$$(echo "$$BIND_ADDRESS" | cut -d: -f2); \
+	export PFS_OBSLOG_session_secret_key=$$(cat secrets/session_secret_key); \
+	export PFS_OBSLOG_attachments_dir=$${PFS_OBSLOG_attachments_dir:-$${PWD}/attachments}; \
+	uv run gunicorn pfs_obslog.main:app \
+		--workers 8 \
+		--worker-class uvicorn.workers.UvicornWorker \
+		--bind "$$BIND_ADDRESS" \
+		--access-logfile ../logs/access.log \
+		--error-logfile ../logs/error.log
 
-# 初期セットアップ（シークレットキー生成など）
+# 初期セットアップ（シークレットキー生成、ディレクトリ作成）
 setup:
-	bash scripts/entrypoint.bash --setup
+	@echo "Running initial setup..."
+	@mkdir -p secrets attachments ../logs
+	@if [ ! -f secrets/session_secret_key ]; then \
+		echo "Generating session secret key..."; \
+		openssl rand -hex 64 > secrets/session_secret_key; \
+		chmod 600 secrets/session_secret_key; \
+	fi
+	@echo "Setup complete."
 
 # テストを実行（遅いテストをスキップ）
 test:

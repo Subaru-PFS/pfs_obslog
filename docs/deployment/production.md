@@ -22,8 +22,8 @@
 ```
 ~/pfs-obslog2/
 ├── backend/
+│   ├── Makefile                # ビルド・起動コマンド
 │   ├── scripts/
-│   │   ├── entrypoint.bash    # エントリーポイント
 │   │   └── pfs-obslog2.service # systemdサービスファイル
 │   ├── secrets/
 │   │   └── session_secret_key  # 自動生成
@@ -201,13 +201,14 @@ systemctl --user restart pfs-obslog2
 
 ### ワーカー数の調整
 
-`entrypoint.bash` の `--workers` オプションを変更します：
+`backend/Makefile` の `production` ターゲット内の `--workers` オプションを変更します：
 
-```bash
-# backend/scripts/entrypoint.bash
-exec uv run gunicorn pfs_obslog.main:app \
-    --workers 8 \  # ← ワーカー数を調整
-    ...
+```makefile
+# backend/Makefile
+production: setup
+	uv run gunicorn pfs_obslog.main:app \
+		--workers 8 \  # ← ワーカー数を調整
+		...
 ```
 
 推奨値: `(CPUコア数 × 2) + 1`
