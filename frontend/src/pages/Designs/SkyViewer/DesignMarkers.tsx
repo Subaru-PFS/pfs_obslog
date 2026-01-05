@@ -5,6 +5,7 @@ import { useCallback, useMemo } from 'react'
 import {
   PathLayer$,
   ClickableMarkerLayer$,
+  MarkerLayer$,
   useGetGlobe,
 } from '@stellar-globe/react-stellar-globe'
 import { angle, path, SkyCoord } from '@stellar-globe/stellar-globe'
@@ -22,7 +23,7 @@ const DEFAULT_FIBER_COLOR: [number, number, number, number] = [0.5, 0.5, 0.5, 1]
 const MARKER_SIZE_PX = 24
 
 // ファイバーマーカーのホバー時以外の透明度（0.8 = 80%）
-const FIBER_MARKER_DIMM_ALPHA = 0.8
+const FIBER_MARKER_DIMM_ALPHA = 0.5
 
 // Design circleのズームでフェードアウトする際の最小アルファ値
 const DESIGN_MARKER_MIN_ALPHA = 0.05
@@ -162,6 +163,7 @@ export function DesignMarkers() {
     jumpTo,
     showFibers,
     designDetail,
+    focusedFiber,
     setFocusedFiber,
   } = useDesignsContext()
   const getGlobe = useGetGlobe()
@@ -295,6 +297,27 @@ export function DesignMarkers() {
     return markers
   }, [showFibers, designDetail])
 
+  // focalPlaneからフォーカスされたファイバーをハイライトするマーカー
+  const highlightedFiberMarker = useMemo(() => {
+    // focalPlaneからのフォーカスでなければハイライトしない
+    if (!focusedFiber || focusedFiber.source !== 'focalPlane' || !designDetail) {
+      return null
+    }
+    
+    const { ra, dec, fiberId } = designDetail.design_data
+    const index = fiberId.indexOf(focusedFiber.fiberId)
+    if (index < 0) {
+      return null
+    }
+    
+    const coord = SkyCoord.fromDeg(ra[index], dec[index])
+    return {
+      position: coord.xyz as [number, number, number],
+      // ハイライト色：シアン
+      color: [0, 1, 1, 1] as [number, number, number, number],
+    }
+  }, [focusedFiber, designDetail])
+
   // ファイバーマーカーのホバーハンドラ
   const handleFiberHoverChange = useCallback(
     (e: { index: number | null }) => {
@@ -344,6 +367,15 @@ export function DesignMarkers() {
           defaultType="circle"
           dimmAlpha={FIBER_MARKER_DIMM_ALPHA}
           onHoverChange={handleFiberHoverChange}
+        />
+      )}
+      {/* focalPlaneからフォーカスされたファイバーのハイライト */}
+      {highlightedFiberMarker && (
+        <MarkerLayer$
+          markers={[highlightedFiberMarker]}
+          defaultColor={highlightedFiberMarker.color}
+          defaultType="circle"
+          markerSize={48}
         />
       )}
       {/* フォーカス/選択マーカー */}
