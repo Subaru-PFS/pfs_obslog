@@ -176,7 +176,7 @@ export function DesignList() {
     (entry: PfsDesignEntry) => {
       setSelectedDesign(entry)
       jumpTo({
-        fovy: (0.8 * Math.PI) / 180,
+        fovy: (1.6 * Math.PI) / 180,  // 2倍に拡大
         coord: { ra: entry.ra, dec: entry.dec },
         duration: 1000,
       })
