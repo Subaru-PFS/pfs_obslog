@@ -13,7 +13,7 @@ import {
   TouchLayer$,
   type GlobeHandle,
 } from '@stellar-globe/react-stellar-globe'
-import { GridLayer, matrixUtils, SkyCoord, type Globe } from '@stellar-globe/stellar-globe'
+import { easing, GridLayer, matrixUtils, SkyCoord, type Globe } from '@stellar-globe/stellar-globe'
 import { useDesignsContext, inTimeZone } from '../DesignsContext'
 import { HST_TZ_OFFSET } from '../types'
 import { Clock } from './Clock'
@@ -91,7 +91,7 @@ export function SkyViewer() {
         const coord = SkyCoord.fromDeg(jumpToSignal.coord.ra, jumpToSignal.coord.dec)
         globe.camera.jumpTo(
           { ...params, fovy: params.fovy ?? globe.camera.fovy },
-          { coord, duration: jumpToSignal.duration ?? 1000 }
+          { coord, duration: jumpToSignal.duration, easingFunction: easing.slowStartStop4 }
         )
       } else if (Object.keys(params).length > 0) {
         globe.camera.jumpTo(params, { duration: jumpToSignal.duration ?? 0 })
