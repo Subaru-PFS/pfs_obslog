@@ -96,7 +96,7 @@ function useColumnVisibility(): [ColumnVisibility, (key: ColumnKey, visible: boo
   const columns = useMemo(() => ({ ...DEFAULT_COLUMN_VISIBILITY, ...stored }), [stored])
 
   const setColumnVisibility = useCallback((key: ColumnKey, visible: boolean) => {
-    setStored((prev) => ({ ...prev, [key]: visible }))
+    setStored((prev) => ({ ...(prev ?? DEFAULT_COLUMN_VISIBILITY), [key]: visible }))
   }, [setStored])
 
   return [columns, setColumnVisibility]
