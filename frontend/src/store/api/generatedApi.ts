@@ -863,7 +863,7 @@ export type DesignData = {
   catId: number[];
   tract: number[];
   patch: string[];
-  objId: number[];
+  objId: string[];
   ra: number[];
   dec: number[];
   targetType: number[];

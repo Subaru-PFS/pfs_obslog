@@ -11,7 +11,7 @@ import {
   useRef,
   type ReactNode,
 } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { dateUtils, angle } from '@stellar-globe/stellar-globe'
 import {
   useListPfsDesignsApiPfsDesignsGetQuery,
@@ -150,6 +150,14 @@ interface DesignsProviderProps {
 export function DesignsProvider({ children }: DesignsProviderProps) {
   const navigate = useNavigate()
   const { designId } = useParams<{ designId?: string }>()
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // URLパラメータから初期値を取得
+  const urlSearch = searchParams.get('search') ?? ''
+  const urlSortBy = (searchParams.get('sortBy') as SortBy) || 'altitude'
+  const urlSortOrder = (searchParams.get('sortOrder') as SortOrder) || 'desc'
+  const urlDateFrom = searchParams.get('dateFrom')
+  const urlDateTo = searchParams.get('dateTo')
 
   // 時刻・位置（APIクエリより先に定義）
   const [now, setNow] = useState(() => new Date())
@@ -188,12 +196,76 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   const [offset, setOffset] = useState(0)
   const [limit, setLimit] = useState(50)
 
-  // 検索・ソート状態（サーバーサイド）
-  const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState<SortBy>('altitude')
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
+  // 検索・ソート状態（URLパラメータから初期化）
+  const [search, setSearchState] = useState(urlSearch)
+  const [sortBy, setSortByState] = useState<SortBy>(urlSortBy)
+  const [sortOrder, setSortOrderState] = useState<SortOrder>(urlSortOrder)
   // 日付フィルター [YYYY-MM-DD, YYYY-MM-DD] or [null, null]
-  const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
+  const [dateRange, setDateRangeState] = useState<[string | null, string | null]>([
+    urlDateFrom,
+    urlDateTo,
+  ])
+
+  // URLパラメータ更新ヘルパー（replaceで履歴を汚さない）
+  const updateSearchParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          for (const [key, value] of Object.entries(updates)) {
+            if (value === null || value === '') {
+              next.delete(key)
+            } else {
+              next.set(key, value)
+            }
+          }
+          return next
+        },
+        { replace: true }
+      )
+    },
+    [setSearchParams]
+  )
+
+  // 状態設定関数（URLも更新）
+  const setSearch = useCallback(
+    (value: string) => {
+      setSearchState(value)
+      setOffset(0) // 検索変更時はページをリセット
+      updateSearchParams({ search: value || null })
+    },
+    [updateSearchParams]
+  )
+
+  const setSortBy = useCallback(
+    (value: SortBy) => {
+      setSortByState(value)
+      setOffset(0) // ソート変更時はページをリセット
+      updateSearchParams({ sortBy: value === 'altitude' ? null : value })
+    },
+    [updateSearchParams]
+  )
+
+  const setSortOrder = useCallback(
+    (value: SortOrder) => {
+      setSortOrderState(value)
+      setOffset(0) // ソート変更時はページをリセット
+      updateSearchParams({ sortOrder: value === 'desc' ? null : value })
+    },
+    [updateSearchParams]
+  )
+
+  const setDateRange = useCallback(
+    (value: [string | null, string | null]) => {
+      setDateRangeState(value)
+      setOffset(0) // 日付変更時はページをリセット
+      updateSearchParams({
+        dateFrom: value[0],
+        dateTo: value[1],
+      })
+    },
+    [updateSearchParams]
+  )
 
   // 高度ソート時に天頂座標が変わったらページをリセット
   const prevCommittedZenithRef = useRef(committedZenith)

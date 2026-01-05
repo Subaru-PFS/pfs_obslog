@@ -125,7 +125,7 @@ class DesignData(BaseModel):
     catId: list[int]
     tract: list[int]
     patch: list[str]
-    objId: list[int]
+    objId: list[str]  # JavaScriptの安全な整数範囲を超えるため文字列で返す
     ra: list[float]
     dec: list[float]
     targetType: list[int]
@@ -627,12 +627,16 @@ def get_design(id_hex: str):
         with afits.open(filepath) as hdul:
             meta = _fits_meta_from_hdul(filepath.name, hdul)
 
+            # objIdはJavaScriptの安全な整数範囲を超える可能性があるため文字列に変換
+            objId_array = hdul[1].data.field("objId")  # type: ignore[union-attr]
+            objId_str_list = [str(x) for x in objId_array]
+
             design_data = DesignData(
                 fiberId=hdul[1].data.field("fiberId").tolist(),  # type: ignore[union-attr]
                 catId=hdul[1].data.field("catId").tolist(),  # type: ignore[union-attr]
                 tract=hdul[1].data.field("tract").tolist(),  # type: ignore[union-attr]
                 patch=hdul[1].data.field("patch").tolist(),  # type: ignore[union-attr]
-                objId=hdul[1].data.field("objId").tolist(),  # type: ignore[union-attr]
+                objId=objId_str_list,
                 ra=hdul[1].data.field("ra").tolist(),  # type: ignore[union-attr]
                 dec=hdul[1].data.field("dec").tolist(),  # type: ignore[union-attr]
                 targetType=hdul[1].data.field("targetType").tolist(),  # type: ignore[union-attr]

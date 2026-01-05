@@ -80,18 +80,9 @@ export function DesignList() {
   } = useDesignsContext()
 
   const [idFormat, setIdFormat] = useLocalStorage<IdFormat>(ID_FORMAT_KEY, 'hex')
-  // ソート設定をlocalStorageに保存（初回ロード時に復元）
-  const [storedSortBy, setStoredSortBy] = useLocalStorage<SortBy>(SORT_BY_KEY, 'altitude')
+  // ソート設定をlocalStorageに保存（変更時に保存するが、URLパラメータが優先される）
+  const [, setStoredSortBy] = useLocalStorage<SortBy>(SORT_BY_KEY, 'altitude')
   const [searchInput, setSearchInput] = useState(search)
-
-  // 初回ロード時にlocalStorageからソート設定を復元
-  const initializedRef = useRef(false)
-  useEffect(() => {
-    if (!initializedRef.current && storedSortBy) {
-      setSortBy(storedSortBy)
-      initializedRef.current = true
-    }
-  }, [storedSortBy, setSortBy])
 
   // 検索テキスト変更時のデバウンス
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -103,10 +94,10 @@ export function DesignList() {
       }
       searchTimeoutRef.current = setTimeout(() => {
         setSearch(value)
-        setOffset(0) // 検索時はページをリセット
+        // setOffset(0) は setSearch 内で呼ばれる
       }, 300)
     },
-    [setSearch, setOffset]
+    [setSearch]
   )
 
   // ソート済みデザインをキャッシュ（ドラッグ中の更新抑制用）
@@ -140,6 +131,10 @@ export function DesignList() {
   }, [sortedDesigns])
 
   // ページネーション
+  const handleFirstPage = useCallback(() => {
+    setOffset(0)
+  }, [setOffset])
+
   const handlePrevPage = useCallback(() => {
     if (offset > 0) {
       setOffset(Math.max(0, offset - limit))
@@ -151,6 +146,13 @@ export function DesignList() {
       setOffset(offset + limit)
     }
   }, [offset, limit, total, setOffset])
+
+  const handleLastPage = useCallback(() => {
+    if (total > 0) {
+      const lastPageOffset = Math.floor((total - 1) / limit) * limit
+      setOffset(lastPageOffset)
+    }
+  }, [total, limit, setOffset])
 
   // 選択されたDesignへスクロール（SkyViewerからの選択時など）
   useEffect(() => {
@@ -294,6 +296,12 @@ export function DesignList() {
               : '0 designs'}
           </span>
           <IconButton
+            icon="first_page"
+            onClick={handleFirstPage}
+            disabled={offset === 0}
+            title="First page"
+          />
+          <IconButton
             icon="chevron_left"
             onClick={handlePrevPage}
             disabled={offset === 0}
@@ -304,6 +312,12 @@ export function DesignList() {
             onClick={handleNextPage}
             disabled={offset + limit >= total}
             title="Next page"
+          />
+          <IconButton
+            icon="last_page"
+            onClick={handleLastPage}
+            disabled={offset + limit >= total}
+            title="Last page"
           />
         </div>
       </div>
