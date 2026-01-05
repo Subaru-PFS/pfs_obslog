@@ -178,38 +178,6 @@ interface FiberDetailProps {
   cobra: Cobra | undefined  // FocalPlaneからのホバーでのみ設定される
 }
 
-interface DesignSummaryProps {
-  design: PfsDesignDetail
-}
-
-function DesignSummary({ design }: DesignSummaryProps) {
-  const pickCard = (key: string, hduIndex: number): unknown => {
-    return design.fits_meta.hdul[hduIndex]?.header.cards.find(
-      (card) => card.key === key
-    )?.value
-  }
-
-  const Tr = ({ label, value }: { label: string; value: unknown }) => (
-    <tr>
-      <th dangerouslySetInnerHTML={{ __html: label }} />
-      <td>{String(value ?? '-')}</td>
-    </tr>
-  )
-
-  return (
-    <table className={styles.infoTable}>
-      <tbody>
-        <Tr label="Name" value={pickCard('DSGN_NAM', 0)} />
-        <Tr label="Modified" value={design.date_modified} />
-        <Tr label="&alpha;" value={pickCard('RA', 0)} />
-        <Tr label="&delta;" value={pickCard('DEC', 0)} />
-        <Tr label="Position Angle" value={pickCard('POSANG', 0)} />
-        <Tr label="Arms" value={pickCard('ARMS', 0)} />
-      </tbody>
-    </table>
-  )
-}
-
 function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
   const id2designIndex = useMemo(
     () => makeId2IndexMap(design.design_data.fiberId),
@@ -241,90 +209,82 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
     return filter ? raws.map(r => filter(r) ?? '-') : raws
   }
 
-  const Tr = ({ label, values }: { label: string; values: unknown[] }) => (
-    <tr>
-      <th dangerouslySetInnerHTML={{ __html: label }} />
-      {values.map((v, i) => (
-        <td key={i}>{String(v)}</td>
-      ))}
-    </tr>
-  )
+  const pickCard = (key: string, hduIndex: number): unknown => {
+    return design.fits_meta.hdul[hduIndex]?.header.cards.find(
+      (card) => card.key === key
+    )?.value
+  }
+
+  // key-valueペアの配列を構築（グループ間に区切りを挿入）
+  const items: Array<{ key: string; value: string; isSeparator?: boolean }> = [
+    // Design情報
+    { key: 'Name', value: String(pickCard('DSGN_NAM', 0) ?? '-') },
+    { key: 'Modified', value: design.date_modified },
+    { key: 'α', value: String(pickCard('RA', 0) ?? '-') },
+    { key: 'δ', value: String(pickCard('DEC', 0) ?? '-') },
+    { key: 'Position Angle', value: String(pickCard('POSANG', 0) ?? '-') },
+    { key: 'Arms', value: String(pickCard('ARMS', 0) ?? '-') },
+    // 区切り
+    { key: '', value: '', isSeparator: true },
+    // Fiber基本情報
+    { key: 'Fiber Id', value: String(fiberId ?? '-') },
+    { key: 'Cobra Id', value: String(cobra?.id ?? '-') },
+    { key: 'Module ID', value: String(cobra?.moduleId ?? '-') },
+    { key: 'Sector ID', value: String(cobra?.fieldId ?? '-') },
+    // 区切り
+    { key: '', value: '', isSeparator: true },
+    // Fiber Design
+    { key: 'catId', value: String(pickDesign(design.design_data.catId)) },
+    { key: 'Tract/Patch', value: `${pickDesign(design.design_data.tract)}/${pickDesign(design.design_data.patch)}` },
+    { key: 'objId', value: String(pickDesign(design.design_data.objId)) },
+    { key: 'α', value: String(pickDesign(design.design_data.ra)) },
+    { key: 'δ', value: String(pickDesign(design.design_data.dec)) },
+    { 
+      key: 'Target Type', 
+      value: String(pickDesign(design.design_data.targetType, (t) =>
+        targetTypeColors[t as number]?.name
+      ))
+    },
+    { 
+      key: 'Fiber Status', 
+      value: String(pickDesign(design.design_data.fiberStatus, (s) =>
+        fiberStatusColors[s as number]?.name
+      ))
+    },
+    { key: 'pfiNominal', value: String(pickDesign(design.design_data.pfiNominal, JSON.stringify)) },
+    { key: 'epoch', value: String(pickDesign(design.design_data.epoch)) },
+    { key: 'pmRa [mas/yr]', value: String(pickDesign(design.design_data.pmRa)) },
+    { key: 'pmDec [mas/yr]', value: String(pickDesign(design.design_data.pmDec)) },
+    { key: 'parallax [mas]', value: String(pickDesign(design.design_data.parallax)) },
+    { key: 'proposalId', value: String(pickDesign(design.design_data.proposalId)) },
+    { key: 'obCode', value: String(pickDesign(design.design_data.obCode)) },
+    // 区切り
+    { key: '', value: '', isSeparator: true },
+    // Photometry
+    ...pickPhotometry(design.photometry_data.filterName).flatMap((filterName, i) => [
+      { key: `filterName[${i}]`, value: String(filterName) },
+      { key: `fiberFlux[${i}] [nJy]`, value: String(pickPhotometry(design.photometry_data.fiberFlux)[i]) },
+      { key: `fiberFluxErr[${i}] [nJy]`, value: String(pickPhotometry(design.photometry_data.fiberFluxErr)[i]) },
+      { key: `psfFlux[${i}] [nJy]`, value: String(pickPhotometry(design.photometry_data.psfFlux)[i]) },
+      { key: `psfFluxErr[${i}] [nJy]`, value: String(pickPhotometry(design.photometry_data.psfFluxErr)[i]) },
+      { key: `totalFlux[${i}] [nJy]`, value: String(pickPhotometry(design.photometry_data.totalFlux)[i]) },
+      { key: `totalFluxErr[${i}] [nJy]`, value: String(pickPhotometry(design.photometry_data.totalFluxErr)[i]) },
+    ])
+  ]
 
   return (
     <div className={styles.detailArea}>
-      {/* 左カラム: Design詳細 + Fiber基本情報 */}
-      <div className={styles.leftColumn}>
-        <h4>Design</h4>
-        <DesignSummary design={design} />
-        <h4>Fiber {fiberId ?? '-'}</h4>
-        <table className={styles.infoTable}>
-          <tbody>
-            <Tr label="Cobra Id" values={[cobra?.id ?? '-']} />
-            <Tr label="Fiber Id" values={[fiberId ?? '-']} />
-            <Tr label="Module ID" values={[cobra?.moduleId ?? '-']} />
-            <Tr label="Sector ID" values={[cobra?.fieldId ?? '-']} />
-          </tbody>
-        </table>
-      </div>
-      {/* 中央カラム: Fiber Design */}
-      <div className={styles.dataColumn}>
-        <h4>Fiber Design</h4>
-        <table className={styles.infoTable}>
-          <tbody>
-            <Tr label="catId" values={[pickDesign(design.design_data.catId)]} />
-            <Tr
-              label="Tract/Patch"
-              values={[
-                `${pickDesign(design.design_data.tract)}/${pickDesign(design.design_data.patch)}`,
-              ]}
-            />
-            <Tr label="objId" values={[pickDesign(design.design_data.objId)]} />
-            <Tr label="&alpha;" values={[pickDesign(design.design_data.ra)]} />
-            <Tr label="&delta;" values={[pickDesign(design.design_data.dec)]} />
-            <Tr
-              label="Target Type"
-              values={[
-                pickDesign(design.design_data.targetType, (t) =>
-                  targetTypeColors[t as number]?.name
-                ),
-              ]}
-            />
-            <Tr
-              label="Fiber Status"
-              values={[
-                pickDesign(design.design_data.fiberStatus, (s) =>
-                  fiberStatusColors[s as number]?.name
-                ),
-              ]}
-            />
-            <Tr
-              label="pfiNominal"
-              values={[pickDesign(design.design_data.pfiNominal, JSON.stringify)]}
-            />
-            <Tr label="epoch" values={[pickDesign(design.design_data.epoch)]} />
-            <Tr label="pmRa [mas/yr]" values={[pickDesign(design.design_data.pmRa)]} />
-            <Tr label="pmDec [mas/yr]" values={[pickDesign(design.design_data.pmDec)]} />
-            <Tr label="parallax [mas]" values={[pickDesign(design.design_data.parallax)]} />
-            <Tr label="proposalId" values={[pickDesign(design.design_data.proposalId)]} />
-            <Tr label="obCode" values={[pickDesign(design.design_data.obCode)]} />
-          </tbody>
-        </table>
-      </div>
-      {/* 右カラム: Photometry */}
-      <div className={styles.dataColumn}>
-        <h4>Photometry</h4>
-        <table className={styles.infoTable}>
-          <tbody>
-            <Tr label="filterName" values={pickPhotometry(design.photometry_data.filterName)} />
-            <Tr label="fiberFlux [nJy]" values={pickPhotometry(design.photometry_data.fiberFlux)} />
-            <Tr label="fiberFluxErr [nJy]" values={pickPhotometry(design.photometry_data.fiberFluxErr)} />
-            <Tr label="psfFlux [nJy]" values={pickPhotometry(design.photometry_data.psfFlux)} />
-            <Tr label="psfFluxErr [nJy]" values={pickPhotometry(design.photometry_data.psfFluxErr)} />
-            <Tr label="totalFlux [nJy]" values={pickPhotometry(design.photometry_data.totalFlux)} />
-            <Tr label="totalFluxErr [nJy]" values={pickPhotometry(design.photometry_data.totalFluxErr)} />
-          </tbody>
-        </table>
-      </div>
+      {items.map((item, index) => {
+        if (item.isSeparator) {
+          return <div key={index} className={styles.separator} />
+        }
+        return (
+          <div key={index} className={styles.keyValuePair}>
+            <span className={styles.key} dangerouslySetInnerHTML={{ __html: item.key }} />
+            <span className={styles.value}>{item.value}</span>
+          </div>
+        )
+      })}
     </div>
   )
 }

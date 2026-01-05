@@ -1,13 +1,14 @@
 export type Styles = {
   colorModeSelect: string;
-  dataColumn: string;
   designDetailContainer: string;
   detailArea: string;
   focalPlaneSection: string;
-  infoTable: string;
-  leftColumn: string;
+  key: string;
+  keyValuePair: string;
   legendEntries: string;
   legendEntry: string;
+  separator: string;
+  value: string;
 };
 
 export type ClassNames = keyof Styles;
