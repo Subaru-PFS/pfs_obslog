@@ -12,6 +12,17 @@ import type { PfsDesignEntry, IdFormat } from '../types'
 import { DESIGN_CROSS_MATCH_COSINE } from '../types'
 import styles from './DesignList.module.scss'
 
+// Check if an element is visible within its scroll container
+const isElementInView = (element: Element, container: Element): boolean => {
+  const elementRect = element.getBoundingClientRect()
+  const containerRect = container.getBoundingClientRect()
+  
+  return (
+    elementRect.top >= containerRect.top &&
+    elementRect.bottom <= containerRect.bottom
+  )
+}
+
 // localStorage キー
 const ID_FORMAT_KEY = '/DesignList/idFormat'
 const SORT_BY_KEY = '/DesignList/sortBy'
@@ -84,6 +95,9 @@ export function DesignList() {
   const [, setStoredSortBy] = useLocalStorage<SortBy>(SORT_BY_KEY, 'altitude')
   const [searchInput, setSearchInput] = useState(search)
 
+  // スクロールコンテナのref
+  const listContainerRef = useRef<HTMLDivElement>(null)
+
   // 検索テキスト変更時のデバウンス
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const handleSearchChange = useCallback(
@@ -154,18 +168,19 @@ export function DesignList() {
     }
   }, [total, limit, setOffset])
 
-  // 選択されたDesignへスクロール（SkyViewerからの選択時など）
+  // 選択されたDesignへスクロール（SkyViewerからの選択時など、表示外の場合のみ）
   useEffect(() => {
-    if (!selectedDesign) return
+    if (!selectedDesign || !listContainerRef.current) return
 
-    // リスト内に選択されたDesignがあるか確認し、あればスクロール
+    // リスト内に選択されたDesignがあるか確認し、表示外ならスクロール
     const isInList = designs.some((d) => d.id === selectedDesign.id)
     
     if (isInList) {
       requestAnimationFrame(() => {
-        document
-          .querySelector(`[data-design-id="${selectedDesign.id}"]`)
-          ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        const element = document.querySelector(`[data-design-id="${selectedDesign.id}"]`)
+        if (element && listContainerRef.current && !isElementInView(element, listContainerRef.current)) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
       })
     }
     // リスト内にない場合は何もしない（検索条件に合わないDesignは表示されない）
@@ -322,7 +337,7 @@ export function DesignList() {
         </div>
       </div>
 
-      <div className={styles.list}>
+      <div className={styles.list} ref={listContainerRef}>
         {groupedDesigns.map((group, groupIndex) => (
           <div key={groupIndex} className={styles.entryGroup}>
             {group.map((entry) => (

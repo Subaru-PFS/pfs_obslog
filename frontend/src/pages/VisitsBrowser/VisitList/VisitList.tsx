@@ -28,6 +28,17 @@ import styles from './VisitList.module.scss'
 
 const PER_PAGE = 200
 
+// Check if an element is visible within its scroll container
+const isElementInView = (element: Element, container: Element): boolean => {
+  const elementRect = element.getBoundingClientRect()
+  const containerRect = container.getBoundingClientRect()
+  
+  return (
+    elementRect.top >= containerRect.top &&
+    elementRect.bottom <= containerRect.bottom
+  )
+}
+
 // =============================================================================
 // Column definitions
 // =============================================================================
@@ -38,6 +49,12 @@ type ColumnKey =
   | 'time'
   | 'exposures'
   | 'exptime'
+  | 'eet_b'
+  | 'eet_r'
+  | 'eet_n'
+  | 'eet_m'
+  | 'seeing'
+  | 'transparency'
   | 'pfs_design_id'
   | 'ra'
   | 'dec'
@@ -62,6 +79,12 @@ const COLUMN_DEFINITIONS: ColumnDef[] = [
   { key: 'time', label: '', icon: 'schedule', description: 'Time issued at', defaultVisible: true },
   { key: 'exposures', label: '', icon: 'tag', description: 'Number of {SpS | MCS | AGC} Exposures', defaultVisible: true },
   { key: 'exptime', label: '', icon: 'shutter_speed', description: 'Exposure Time [s]', defaultVisible: true },
+  { key: 'eet_b', label: '(b)', description: 'Effective Exposure Time b [s]', defaultVisible: false },
+  { key: 'eet_r', label: '(r)', description: 'Effective Exposure Time r [s]', defaultVisible: false },
+  { key: 'eet_n', label: '(n)', description: 'Effective Exposure Time n [s]', defaultVisible: false },
+  { key: 'eet_m', label: '(m)', description: 'Effective Exposure Time m [s]', defaultVisible: false },
+  { key: 'seeing', label: '', icon: 'details', description: 'Seeing Median [arcsec]', defaultVisible: true },
+  { key: 'transparency', label: '', icon: 'cloud', description: 'Transparency Median', defaultVisible: true },
   { key: 'pfs_design_id', label: '', icon: 'design_services', description: 'PFS Design ID (HEX)', defaultVisible: false },
   { key: 'ra', label: 'α', description: 'Right Ascension [°]', defaultVisible: false },
   { key: 'dec', label: 'δ', description: 'Declination [°]', defaultVisible: false },
@@ -96,7 +119,7 @@ function useColumnVisibility(): [ColumnVisibility, (key: ColumnKey, visible: boo
   const columns = useMemo(() => ({ ...DEFAULT_COLUMN_VISIBILITY, ...stored }), [stored])
 
   const setColumnVisibility = useCallback((key: ColumnKey, visible: boolean) => {
-    setStored((prev) => ({ ...(prev ?? DEFAULT_COLUMN_VISIBILITY), [key]: visible }))
+    setStored((prev) => ({ ...DEFAULT_COLUMN_VISIBILITY, ...prev, [key]: visible }))
   }, [setStored])
 
   return [columns, setColumnVisibility]
@@ -421,6 +444,12 @@ function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGrou
               {columns.time && <Tooltip content="Time issued at" as="th" className={styles.colTime}><Icon name="schedule" size={14} /></Tooltip>}
               {columns.exposures && <Tooltip content="Number of {SpS | MCS | AGC} Exposures" as="th" className={styles.colExposures}><Icon name="tag" size={14} /></Tooltip>}
               {columns.exptime && <Tooltip content="Exposure Time [s]" as="th" className={styles.colExptime}><Icon name="shutter_speed" size={14} /></Tooltip>}
+              {columns.eet_b && <Tooltip content="Effective Exposure Time b [s]" as="th" className={styles.colEet}>(b)</Tooltip>}
+              {columns.eet_r && <Tooltip content="Effective Exposure Time r [s]" as="th" className={styles.colEet}>(r)</Tooltip>}
+              {columns.eet_n && <Tooltip content="Effective Exposure Time n [s]" as="th" className={styles.colEet}>(n)</Tooltip>}
+              {columns.eet_m && <Tooltip content="Effective Exposure Time m [s]" as="th" className={styles.colEet}>(m)</Tooltip>}
+              {columns.seeing && <Tooltip content="Seeing Median [arcsec]" as="th" className={styles.colSeeing}><Icon name="details" size={14} /></Tooltip>}
+              {columns.transparency && <Tooltip content="Transparency Median" as="th" className={styles.colTransparency}><Icon name="cloud" size={14} /></Tooltip>}
               {columns.pfs_design_id && <Tooltip content="PFS Design ID (HEX)" as="th" className={styles.colDesign}><Icon name="design_services" size={14} /></Tooltip>}
               {columns.ra && <Tooltip content="Right Ascension [°]" as="th" className={styles.colCoord}>α</Tooltip>}
               {columns.dec && <Tooltip content="Declination [°]" as="th" className={styles.colCoord}>δ</Tooltip>}
@@ -466,6 +495,36 @@ function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGrou
                 {columns.exptime && (
                   <TruncatedCell content={visit.avg_exptime ? `${visit.avg_exptime.toFixed(3)} s` : ''} className={styles.colExptime}>
                     {visit.avg_exptime ? visit.avg_exptime.toFixed(1) : '-'}
+                  </TruncatedCell>
+                )}
+                {columns.eet_b && (
+                  <TruncatedCell content={visit.effective_exposure_time_b ? `${visit.effective_exposure_time_b.toFixed(3)} s` : ''} className={styles.colEet}>
+                    {visit.effective_exposure_time_b?.toFixed(1) ?? '-'}
+                  </TruncatedCell>
+                )}
+                {columns.eet_r && (
+                  <TruncatedCell content={visit.effective_exposure_time_r ? `${visit.effective_exposure_time_r.toFixed(3)} s` : ''} className={styles.colEet}>
+                    {visit.effective_exposure_time_r?.toFixed(1) ?? '-'}
+                  </TruncatedCell>
+                )}
+                {columns.eet_n && (
+                  <TruncatedCell content={visit.effective_exposure_time_n ? `${visit.effective_exposure_time_n.toFixed(3)} s` : ''} className={styles.colEet}>
+                    {visit.effective_exposure_time_n?.toFixed(1) ?? '-'}
+                  </TruncatedCell>
+                )}
+                {columns.eet_m && (
+                  <TruncatedCell content={visit.effective_exposure_time_m ? `${visit.effective_exposure_time_m.toFixed(3)} s` : ''} className={styles.colEet}>
+                    {visit.effective_exposure_time_m?.toFixed(1) ?? '-'}
+                  </TruncatedCell>
+                )}
+                {columns.seeing && (
+                  <TruncatedCell content={visit.seeing_median ? `${visit.seeing_median.toFixed(4)} arcsec` : ''} className={styles.colSeeing}>
+                    {visit.seeing_median?.toFixed(2) ?? '-'}
+                  </TruncatedCell>
+                )}
+                {columns.transparency && (
+                  <TruncatedCell content={visit.transparency_median ? `${visit.transparency_median.toFixed(4)}` : ''} className={styles.colTransparency}>
+                    {visit.transparency_median?.toFixed(2) ?? '-'}
                   </TruncatedCell>
                 )}
                 {columns.pfs_design_id && (
@@ -972,11 +1031,13 @@ export function VisitList() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [data, selectedVisitId, setSelectedVisitId, isFirstPage, isLastPage, handleLoadMoreNewer, handleLoadMoreOlder])
 
-  // Scroll to selected visit
+  // Scroll to selected visit (only if not already visible)
   useEffect(() => {
-    if (selectedVisitId) {
+    if (selectedVisitId && contentRef.current) {
       const element = document.querySelector(`[data-visit-id="${selectedVisitId}"]`)
-      element?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      if (element && !isElementInView(element, contentRef.current)) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }
     }
   }, [selectedVisitId])
 
@@ -1042,7 +1103,7 @@ export function VisitList() {
           <Tooltip content="Syntax Docs">
             <button
               className={styles.toolbarButton}
-              onClick={() => window.open('#sql-syntax-help', '_blank')}
+              onClick={() => window.open('/#/sql-syntax-help', '_blank')}
             >
               <Icon name="help" size={18} />
             </button>
@@ -1168,7 +1229,7 @@ export function VisitList() {
       </div>
 
       <div className={styles.content} ref={contentRef}>
-        <LoadingOverlay isLoading={isFetching || isLoadingMore} />
+        <LoadingOverlay isLoading={isFetching || isLoadingMore} stickyCenter />
 
         {/* Navigation at top - scrolls with content */}
         <div className={styles.paginationTop}>
