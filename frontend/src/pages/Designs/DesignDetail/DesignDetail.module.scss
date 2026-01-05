@@ -53,9 +53,11 @@
   font-size: 10px;
   
   // CSS multi-column layout
-  columns: 200px auto;  // 最小カラム幅200px、自動でカラム数を調整
+  columns: 350px auto;  // 最小カラム幅200px、自動でカラム数を調整
   column-gap: 24px;
   column-rule: 1px solid #ddd;
+  column-fill: auto;  // 上下方向にフルに使う（高さいっぱいまで埋める）
+  height: 100%;  // 親コンテナの高さいっぱいに広げる
 }
 
 // グループヘッダー
