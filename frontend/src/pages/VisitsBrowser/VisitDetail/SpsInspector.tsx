@@ -94,7 +94,8 @@ export function SpsInspector({ sps }: SpsInspectorProps) {
     return grid
   }, [exposures])
 
-  const arms = ['b', 'r', 'n', 'm']
+  // 表示順序: NIR, Red, Mid-Red, Blue（上から下）
+  const arms = ['n', 'r', 'm', 'b']
   const modules = [1, 2, 3, 4]
   const hasData = (arm: string) => exposureGrid[arm] && Object.keys(exposureGrid[arm]).length > 0
   const previewSize = PREVIEW_SIZES[imageScale]
