@@ -148,8 +148,8 @@ select {
   border-radius: 8px;
   border: none;
   box-shadow: var(--shadow-light);
-  padding: 0.5em 0.75em;
-  font-size: 1em;
+  padding: 0.3em 0.5em;
+  font-size: 0.875em;  /* 14px at 16px base */
   font-family: inherit;
   background-color: var(--background-color-input);
   color: var(--text-color);
