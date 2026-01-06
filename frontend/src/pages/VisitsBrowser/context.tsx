@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
 interface VisitsBrowserContextValue {
   /** 選択中のVisit ID */
@@ -21,6 +21,7 @@ interface VisitsBrowserProviderProps {
 export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) {
   const { visitId: visitIdParam } = useParams<{ visitId?: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   
   // URLパラメータからvisitIdを初期化
   const initialVisitId = visitIdParam ? parseInt(visitIdParam, 10) : null
@@ -37,15 +38,17 @@ export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) 
     }
   }, [visitIdParam, selectedVisitId])
 
-  // visitIdを設定すると同時にURLも更新する
+  // visitIdを設定すると同時にURLも更新する（検索パラメータを保持）
   const setSelectedVisitId = useCallback((id: number | null) => {
     setSelectedVisitIdState(id)
+    // 現在の検索パラメータを保持してナビゲート
+    const search = location.search
     if (id !== null) {
-      navigate(`/visits/${id}`, { replace: true })
+      navigate(`/visits/${id}${search}`, { replace: true })
     } else {
-      navigate('/visits', { replace: true })
+      navigate(`/visits${search}`, { replace: true })
     }
-  }, [navigate])
+  }, [navigate, location.search])
 
   const refresh = useCallback(() => {
     setRefreshKey((prev) => prev + 1)
