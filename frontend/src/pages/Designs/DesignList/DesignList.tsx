@@ -1,7 +1,7 @@
 /**
  * DesignList - PFS Design一覧サイドパネル
  */
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import { useState, useMemo, useCallback, useRef } from 'react'
 import { useLocalStorage } from 'react-use'
 import { Icon, IconButton } from '../../../components/Icon'
 import { Tooltip } from '../../../components/Tooltip'
@@ -11,17 +11,6 @@ import { useDesignsContext, type SortBy } from '../DesignsContext'
 import type { PfsDesignEntry, IdFormat } from '../types'
 import { DESIGN_CROSS_MATCH_COSINE } from '../types'
 import styles from './DesignList.module.scss'
-
-// Check if an element is visible within its scroll container
-const isElementInView = (element: Element, container: Element): boolean => {
-  const elementRect = element.getBoundingClientRect()
-  const containerRect = container.getBoundingClientRect()
-  
-  return (
-    elementRect.top >= containerRect.top &&
-    elementRect.bottom <= containerRect.bottom
-  )
-}
 
 // localStorage キー
 const ID_FORMAT_KEY = '/DesignList/idFormat'
@@ -82,8 +71,7 @@ export function DesignList() {
     dateRange,
     setDateRange,
     selectedDesign,
-    setSelectedDesignWithoutScroll,
-    consumeSkipDesignScroll,
+    setSelectedDesign,
     focusedDesign,
     setFocusedDesign,
     jumpTo,
@@ -169,42 +157,17 @@ export function DesignList() {
     }
   }, [total, limit, setOffset])
 
-  // 選択されたDesignへスクロール（SkyViewerからの選択時など、表示外の場合のみ）
-  useEffect(() => {
-    // ユーザーがリストから直接クリックした場合はスキップ
-    if (consumeSkipDesignScroll()) {
-      return
-    }
-    
-    if (!selectedDesign || !listContainerRef.current) return
-
-    // リスト内に選択されたDesignがあるか確認し、表示外ならスクロール
-    const isInList = designs.some((d) => d.id === selectedDesign.id)
-    
-    if (isInList) {
-      requestAnimationFrame(() => {
-        const element = document.querySelector(`[data-design-id="${selectedDesign.id}"]`)
-        if (element && listContainerRef.current && !isElementInView(element, listContainerRef.current)) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        }
-      })
-    }
-    // リスト内にない場合は何もしない（検索条件に合わないDesignは表示されない）
-    // Note: consumeSkipDesignScroll is intentionally not in deps - it's a ref-based function
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDesign, designs])
-
   // エントリクリックハンドラ
   const handleEntryClick = useCallback(
     (entry: PfsDesignEntry) => {
-      setSelectedDesignWithoutScroll(entry)
+      setSelectedDesign(entry)
       jumpTo({
         fovy: (1.6 * Math.PI) / 180,  // 2倍に拡大
         coord: { ra: entry.ra, dec: entry.dec },
         duration: 1000,
       })
     },
-    [setSelectedDesignWithoutScroll, jumpTo]
+    [setSelectedDesign, jumpTo]
   )
 
   // FITSダウンロード

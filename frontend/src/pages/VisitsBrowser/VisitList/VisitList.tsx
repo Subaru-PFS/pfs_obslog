@@ -407,7 +407,7 @@ interface VisitGroupComponentProps {
 }
 
 function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGroupComponentProps) {
-  const { selectedVisitId, setSelectedVisitIdWithoutScroll } = useVisitsBrowserContext()
+  const { selectedVisitId, setSelectedVisitId } = useVisitsBrowserContext()
   
   // Check if any visit in this group is selected
   const hasSelectedVisit = group.visits.some(v => v.id === selectedVisitId)
@@ -416,7 +416,7 @@ function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGrou
   const handleGroupClick = (e: React.MouseEvent) => {
     // Only handle clicks on the group container itself, not on child elements
     if (e.target === e.currentTarget && group.visits.length > 0) {
-      setSelectedVisitIdWithoutScroll(group.visits[0].id)
+      setSelectedVisitId(group.visits[0].id)
     }
   }
 
@@ -471,7 +471,7 @@ function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGrou
                 key={visit.id}
                 data-visit-id={visit.id}
                 className={isSelected ? styles.selected : ''}
-                onClick={() => setSelectedVisitIdWithoutScroll(visit.id)}
+                onClick={() => setSelectedVisitId(visit.id)}
               >
                 {columns.id && <td className={styles.colId}>{visit.id}</td>}
                 {columns.description && (
@@ -623,7 +623,7 @@ function parseUrlParams(searchParams: URLSearchParams) {
 }
 
 export function VisitList() {
-  const { selectedVisitId, setSelectedVisitId, consumeSkipScroll } = useVisitsBrowserContext()
+  const { selectedVisitId, setSelectedVisitId } = useVisitsBrowserContext()
   const [searchParams, setSearchParams] = useSearchParams()
   
   // Parse URL params once on mount and when they change externally
@@ -997,6 +997,16 @@ export function VisitList() {
     setLimit(PER_PAGE)
   }, [setDateRange])
 
+  // Helper to scroll a visit into view
+  const scrollToVisit = useCallback((visitId: number) => {
+    requestAnimationFrame(() => {
+      const element = document.querySelector(`[data-visit-id="${visitId}"]`)
+      if (element && contentRef.current && !isElementInView(element, contentRef.current)) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }
+    })
+  }, [])
+
   // キーボードナビゲーション
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1012,9 +1022,13 @@ export function VisitList() {
       if (e.key === 'ArrowDown') {
         e.preventDefault()
         if (currentIndex < allVisits.length - 1) {
-          setSelectedVisitId(allVisits[currentIndex + 1].id)
+          const newVisitId = allVisits[currentIndex + 1].id
+          setSelectedVisitId(newVisitId)
+          scrollToVisit(newVisitId)
         } else if (currentIndex === -1 && allVisits.length > 0) {
-          setSelectedVisitId(allVisits[0].id)
+          const newVisitId = allVisits[0].id
+          setSelectedVisitId(newVisitId)
+          scrollToVisit(newVisitId)
         } else if (currentIndex === allVisits.length - 1 && !isLastPage) {
           // At the end, load more older
           handleLoadMoreOlder()
@@ -1022,7 +1036,9 @@ export function VisitList() {
       } else if (e.key === 'ArrowUp') {
         e.preventDefault()
         if (currentIndex > 0) {
-          setSelectedVisitId(allVisits[currentIndex - 1].id)
+          const newVisitId = allVisits[currentIndex - 1].id
+          setSelectedVisitId(newVisitId)
+          scrollToVisit(newVisitId)
         } else if (currentIndex === 0 && !isFirstPage) {
           // At the start, load more newer
           handleLoadMoreNewer()
@@ -1032,25 +1048,7 @@ export function VisitList() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [data, selectedVisitId, setSelectedVisitId, isFirstPage, isLastPage, handleLoadMoreNewer, handleLoadMoreOlder])
-
-  // Scroll to selected visit (only if not already visible and not user-clicked)
-  useEffect(() => {
-    // Check and consume the skip flag
-    if (consumeSkipScroll()) {
-      return
-    }
-    
-    if (selectedVisitId && contentRef.current) {
-      const element = document.querySelector(`[data-visit-id="${selectedVisitId}"]`)
-      if (element && !isElementInView(element, contentRef.current)) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-      }
-    }
-    // Note: consumeSkipScroll is intentionally not in deps - it's a ref-based function
-    // that we only want to call when selectedVisitId changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedVisitId])
+  }, [data, selectedVisitId, setSelectedVisitId, scrollToVisit, isFirstPage, isLastPage, handleLoadMoreNewer, handleLoadMoreOlder])
 
   if (isLoading) {
     return (
