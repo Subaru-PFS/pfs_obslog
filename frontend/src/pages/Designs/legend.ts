@@ -6,7 +6,7 @@
 import type { LegendEntry } from './types'
 
 // Target Type色定義
-// https://github.com/Subaru-PFS/datamodel/blob/master/datamodel.txt#L336
+// https://github.com/Subaru-PFS/datamodel/blob/master/datamodel.txt#L489
 export const targetTypeColors: (LegendEntry | undefined)[] = [
   undefined,
   {
@@ -44,10 +44,35 @@ export const targetTypeColors: (LegendEntry | undefined)[] = [
     color: 'blue',
     doc: 'the fiber goes to the SuNSS diffuse leg',
   },
+  {
+    name: 'DCB',
+    color: 'teal',
+    doc: 'the fiber is fed by DCB/DCB2.',
+  },
+  {
+    name: 'HOME',
+    color: 'silver',
+    doc: 'cobra is going to its home position.',
+  },
+  {
+    name: 'BLACKSPOT',
+    color: 'black',
+    doc: 'cobra is going behind the black spot.',
+  },
+  {
+    name: 'AFL',
+    color: 'lime',
+    doc: 'the fiber is fed by all fiber lamp cable.',
+  },
+  {
+    name: 'SCIENCE_MASKED',
+    color: 'lightgray',
+    doc: 'the fiber is on a science target redacted for privacy.',
+  },
 ]
 
 // Fiber Status色定義
-// https://github.com/Subaru-PFS/datamodel/blob/master/datamodel.txt#L345
+// https://github.com/Subaru-PFS/datamodel/blob/master/datamodel.txt#L503
 export const fiberStatusColors: (LegendEntry | undefined)[] = [
   undefined,
   {
@@ -74,5 +99,20 @@ export const fiberStatusColors: (LegendEntry | undefined)[] = [
     name: 'UNILLUMINATED',
     color: 'blue',
     doc: 'the fiber is not being illuminated.',
+  },
+  {
+    name: 'BROKENCOBRA',
+    color: 'darkred',
+    doc: 'the cobra cannot move, but the fiber still carries flux.',
+  },
+  {
+    name: 'NOTCONVERGED',
+    color: 'gold',
+    doc: 'the cobra did not converge to the target.',
+  },
+  {
+    name: 'BAD_PSF',
+    color: 'maroon',
+    doc: 'the fiber is known to have a bad PSF.',
   },
 ]

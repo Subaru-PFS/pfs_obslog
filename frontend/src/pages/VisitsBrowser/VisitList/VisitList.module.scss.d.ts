@@ -71,6 +71,7 @@ export type Styles = {
   sequenceTypeArc: string;
   sequenceTypeFlat: string;
   sequenceTypeScience: string;
+  sequenceTypeTrace: string;
   sqlInput: string;
   status: string;
   statusError: string;

@@ -66,12 +66,25 @@ function getSpsPreviewUrl(
   return `${API_BASE_URL}/api/fits/visits/${visitId}/sps/${cameraId}.png?${params}`
 }
 
-function getSpsLargePreviewUrl(visitId: number, cameraId: number): string {
-  return `${API_BASE_URL}/api/fits/visits/${visitId}/sps/${cameraId}.png`
+function getSpsLargePreviewUrl(visitId: number, cameraId: number, imageType: SpsImageType): string {
+  const params = new URLSearchParams({ type: imageType })
+  return `${API_BASE_URL}/api/fits/visits/${visitId}/sps/${cameraId}.png?${params}`
 }
 
-function getSpsFitsDownloadUrl(visitId: number, cameraId: number): string {
-  return `${API_BASE_URL}/api/fits/visits/${visitId}/sps/${cameraId}.fits`
+function getSpsFitsDownloadUrl(visitId: number, cameraId: number, imageType: SpsImageType): string {
+  const params = new URLSearchParams({ type: imageType })
+  return `${API_BASE_URL}/api/fits/visits/${visitId}/sps/${cameraId}.fits?${params}`
+}
+
+function downloadAllSpsExposures(
+  visitId: number,
+  exposures: SpsExposure[],
+  imageType: SpsImageType
+): void {
+  for (const exp of exposures) {
+    const url = getSpsFitsDownloadUrl(visitId, exp.camera_id, imageType)
+    window.open(url)
+  }
 }
 
 export function SpsInspector({ sps }: SpsInspectorProps) {
@@ -174,6 +187,23 @@ export function SpsInspector({ sps }: SpsInspectorProps) {
             Large
           </label>
         </div>
+        <div className={styles.settingsGroup}>
+          <span className={styles.settingsLabel}>Download All:</span>
+          <button
+            className={styles.downloadButton}
+            onClick={() => selectedVisitId && downloadAllSpsExposures(selectedVisitId, exposures, 'raw')}
+            disabled={selectedVisitId === null}
+          >
+            Raw FITS
+          </button>
+          <button
+            className={styles.downloadButton}
+            onClick={() => selectedVisitId && downloadAllSpsExposures(selectedVisitId, exposures, 'postISRCCD')}
+            disabled={selectedVisitId === null}
+          >
+            postISRCCD FITS
+          </button>
+        </div>
       </div>
 
       <div className={styles.content}>
@@ -223,12 +253,17 @@ export function SpsInspector({ sps }: SpsInspectorProps) {
                                 <IconButton
                                   icon="visibility"
                                   tooltip="Open Large Preview"
-                                  onClick={() => window.open(getSpsLargePreviewUrl(selectedVisitId, exp.camera_id))}
+                                  onClick={() => window.open(getSpsLargePreviewUrl(selectedVisitId, exp.camera_id, imageType))}
                                 />
                                 <IconButton
                                   icon="download"
-                                  tooltip="Download FITS File"
-                                  onClick={() => { location.href = getSpsFitsDownloadUrl(selectedVisitId, exp.camera_id) }}
+                                  tooltip="Download Raw FITS"
+                                  onClick={() => { location.href = getSpsFitsDownloadUrl(selectedVisitId, exp.camera_id, 'raw') }}
+                                />
+                                <IconButton
+                                  icon="download"
+                                  tooltip="Download postISRCCD FITS"
+                                  onClick={() => { location.href = getSpsFitsDownloadUrl(selectedVisitId, exp.camera_id, 'postISRCCD') }}
                                 />
                               </div>
                             </div>

@@ -376,8 +376,9 @@ function getSequenceTypeClass(sequenceType: string): string {
   const baseClass = styles.sequenceType
   switch (sequenceType) {
     case 'scienceObject':
-    case 'scienceTrace':
       return `${baseClass} ${styles.sequenceTypeScience}`
+    case 'scienceTrace':
+      return `${baseClass} ${styles.sequenceTypeTrace}`
     case 'scienceArc':
     case 'ditheredArcs':
       return `${baseClass} ${styles.sequenceTypeArc}`

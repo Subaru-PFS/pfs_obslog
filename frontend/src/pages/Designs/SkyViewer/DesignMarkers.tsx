@@ -57,6 +57,14 @@ const COLOR_TO_RGBA: { [key: string]: [number, number, number, number] } = {
   blue: [0, 0, 1, 1],
   orange: [1, 165 / 255, 0, 1],
   purple: [128 / 255, 0, 128 / 255, 1],
+  teal: [0, 128 / 255, 128 / 255, 1],
+  silver: [192 / 255, 192 / 255, 192 / 255, 1],
+  black: [0, 0, 0, 1],
+  lime: [0, 1, 0, 1],
+  lightgray: [211 / 255, 211 / 255, 211 / 255, 1],
+  darkred: [139 / 255, 0, 0, 1],
+  gold: [1, 215 / 255, 0, 1],
+  maroon: [128 / 255, 0, 0, 1],
 }
 
 /**
@@ -269,6 +277,7 @@ export function DesignMarkers() {
       position: [number, number, number]
       color: [number, number, number, number]
       fiberId: number
+      type: 'circle' | 'triangle'
     }[] = []
 
     for (let i = 0; i < ra.length; i++) {
@@ -283,10 +292,11 @@ export function DesignMarkers() {
         position: coord.xyz as [number, number, number],
         color,
         fiberId: fiberId[i],
+        type: 'circle',
       })
     }
 
-    // Guide Stars（赤色で表示）
+    // Guide Stars（赤色で三角形表示）
     const guideRa = designDetail.guidestar_data.ra
     const guideDec = designDetail.guidestar_data.dec
     for (let i = 0; i < guideRa.length; i++) {
@@ -299,6 +309,7 @@ export function DesignMarkers() {
         position: coord.xyz as [number, number, number],
         color: [1, 0, 0, 1],
         fiberId: -1, // ガイドスターにはfiberIdがない
+        type: 'triangle',
       })
     }
 

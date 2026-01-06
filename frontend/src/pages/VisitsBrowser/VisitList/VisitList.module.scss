@@ -441,10 +441,16 @@ $pagination-border-radius: 12px;
     // Colors based on old-project colors.ts:
     // bgColor: baseColor.lighten(0.75), fgColor: baseColor.desaturate(0.25).darken(0.5)
 
-    // scienceObject/scienceTrace: baseColor = #07f (blue)
+    // scienceObject: baseColor = #07f (blue)
     &.sequenceTypeScience {
       background-color: #aaddff; // #07f lightened
       color: #003366; // #07f darkened & desaturated
+    }
+
+    // scienceTrace: baseColor = #00f (pure blue)
+    &.sequenceTypeTrace {
+      background-color: #BFBFFF; // #00f lightened
+      color: #101070; // #00f darkened & desaturated
     }
 
     // scienceArc/ditheredArcs: baseColor = #0f0 (green)

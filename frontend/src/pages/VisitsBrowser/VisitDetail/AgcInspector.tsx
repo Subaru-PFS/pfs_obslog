@@ -32,11 +32,11 @@ function getAgcPreviewUrl(visitId: number, exposureId: number, hduIndex: number,
     width: String(Math.floor(scale * CAMERA_SIZE.width)),
     height: String(Math.floor(scale * CAMERA_SIZE.height)),
   })
-  return `${API_BASE_URL}/api/fits/visits/${visitId}/agc/${exposureId}/${hduIndex}.png?${params}`
+  return `${API_BASE_URL}/api/fits/visits/${visitId}/agc/${exposureId}-${hduIndex}.png?${params}`
 }
 
 function getAgcLargePreviewUrl(visitId: number, exposureId: number, hduIndex: number): string {
-  return `${API_BASE_URL}/api/fits/visits/${visitId}/agc/${exposureId}/${hduIndex}.png`
+  return `${API_BASE_URL}/api/fits/visits/${visitId}/agc/${exposureId}-${hduIndex}.png`
 }
 
 function getAgcFitsDownloadUrl(visitId: number, exposureId: number): string {

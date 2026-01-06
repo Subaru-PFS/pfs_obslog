@@ -13,6 +13,7 @@ export type Styles = {
   commentsText: string;
   content: string;
   dataTable: string;
+  downloadButton: string;
   emptyCell: string;
   exposureCard: string;
   exposureCardActions: string;
