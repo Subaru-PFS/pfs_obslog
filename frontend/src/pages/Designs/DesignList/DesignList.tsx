@@ -136,28 +136,33 @@ export function DesignList() {
   }, [sortedDesigns])
 
   // ページネーション
+  // ページ移動時に選択を解除（選択されたDesignがあるとそのページに戻されてしまうため）
   const handleFirstPage = useCallback(() => {
+    setSelectedDesign(undefined)
     setOffset(0)
-  }, [setOffset])
+  }, [setSelectedDesign, setOffset])
 
   const handlePrevPage = useCallback(() => {
     if (offset > 0) {
+      setSelectedDesign(undefined)
       setOffset(Math.max(0, offset - limit))
     }
-  }, [offset, limit, setOffset])
+  }, [offset, limit, setSelectedDesign, setOffset])
 
   const handleNextPage = useCallback(() => {
     if (offset + limit < total) {
+      setSelectedDesign(undefined)
       setOffset(offset + limit)
     }
-  }, [offset, limit, total, setOffset])
+  }, [offset, limit, total, setSelectedDesign, setOffset])
 
   const handleLastPage = useCallback(() => {
     if (total > 0) {
+      setSelectedDesign(undefined)
       const lastPageOffset = Math.floor((total - 1) / limit) * limit
       setOffset(lastPageOffset)
     }
-  }, [total, limit, setOffset])
+  }, [total, limit, setSelectedDesign, setOffset])
 
   // エントリクリックハンドラ
   const handleEntryClick = useCallback(
