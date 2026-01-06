@@ -170,6 +170,50 @@ def _calexp_fits_path(visit: M.PfsVisit, camera_id: int, settings=None) -> Path:
     )
 
 
+@functools.cache
+def _get_butler():
+    """Butlerインスタンスを取得（キャッシュ）"""
+    from lsst.daf.butler import Butler
+
+    settings = get_settings()
+    butler = Butler(str(settings.butler_datastore), collections=settings.butler_collection)  # type: ignore[no-untyped-call]
+    return butler
+
+
+def _postISRCCD_fits_path(visit: M.PfsVisit, camera_id: int) -> Path:
+    """postISRCCD FITSファイルのパスを取得
+
+    ButlerからpostISRCCDのURIを取得してファイルパスに変換します。
+
+    Args:
+        visit: PfsVisitオブジェクト
+        camera_id: カメラID（1-16）
+
+    Returns:
+        FITSファイルのパス
+
+    Raises:
+        FileNotFoundError: ファイルが見つからない場合
+    """
+    camera_id -= 1
+    sm = camera_id // 4 + 1
+    arm = "brnm"[camera_id % 4]
+    butler = _get_butler()
+    try:
+        uri = str(butler.getURI("postISRCCD", visit=visit.pfs_visit_id, arm=arm, spectrograph=sm))  # type: ignore[no-untyped-call]
+    except Exception as e:
+        raise FileNotFoundError(
+            f"No postISRCCD file for visit={visit.pfs_visit_id} camera_id={camera_id}: {e}"
+        ) from e
+    # uri is a string like file:///data/drp/datastore/drpActor/reductions/20250320T071629Z/postISRCCD/postISRCCD_PFS_121237_r1_drpActor_reductions_20250320T071629Z.fits
+    prefix = "file://"
+    if not uri.startswith(prefix):
+        raise FileNotFoundError(
+            f"Unexpected URI format for postISRCCD: {uri}"
+        )
+    return Path(uri[len(prefix):])
+
+
 def _mcs_fits_path(visit: M.PfsVisit, frame_id: int, settings=None) -> Path:
     """MCS FITSファイルのパスを取得"""
     if settings is None:
@@ -378,10 +422,7 @@ async def download_sps_fits(
             case FitsType.calexp:
                 filepath = _calexp_fits_path(visit, camera_id, settings)
             case FitsType.postISRCCD:
-                raise HTTPException(
-                    status_code=status.HTTP_501_NOT_IMPLEMENTED,
-                    detail="postISRCCD type is not yet supported",
-                )
+                filepath = _postISRCCD_fits_path(visit, camera_id)
 
         if not filepath.exists():
             raise FileNotFoundError(f"File not found: {filepath}")
@@ -423,10 +464,7 @@ async def get_sps_fits_preview(
             case FitsType.calexp:
                 filepath = _calexp_fits_path(visit, camera_id, settings)
             case FitsType.postISRCCD:
-                raise HTTPException(
-                    status_code=status.HTTP_501_NOT_IMPLEMENTED,
-                    detail="postISRCCD type is not yet supported",
-                )
+                filepath = _postISRCCD_fits_path(visit, camera_id)
 
         if not filepath.exists():
             raise FileNotFoundError(f"File not found: {filepath}")
@@ -474,10 +512,7 @@ async def get_sps_fits_headers(
             case FitsType.calexp:
                 filepath = _calexp_fits_path(visit, camera_id, settings)
             case FitsType.postISRCCD:
-                raise HTTPException(
-                    status_code=status.HTTP_501_NOT_IMPLEMENTED,
-                    detail="postISRCCD type is not yet supported",
-                )
+                filepath = _postISRCCD_fits_path(visit, camera_id)
 
         if not filepath.exists():
             raise FileNotFoundError(f"File not found: {filepath}")

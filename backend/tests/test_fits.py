@@ -85,12 +85,11 @@ class TestFitsTypeParameter:
         assert response.status_code == 404  # Visit not found
 
     def test_sps_fits_postISRCCD_type(self, authenticated_client: TestClient):
-        """postISRCCDタイプはまだサポートされていない"""
-        # まずVisitが存在する場合のテストのため、既存のVisit IDが必要
+        """postISRCCDタイプのリクエスト（ファイルが見つからない場合は404）"""
         # テスト用DBに存在するVisitがない場合は404が返る
+        # Butlerが設定されていない場合もFileNotFoundErrorとなり404を返す
         response = authenticated_client.get("/api/fits/visits/1/sps/1.fits?type=postISRCCD")
-        # 404 (Visit not found) または 501 (Not implemented)
-        assert response.status_code in [404, 501]
+        assert response.status_code == 404  # Visit or file not found
 
 
 class TestSizeParameters:

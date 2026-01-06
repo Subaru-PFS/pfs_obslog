@@ -61,6 +61,10 @@ class Settings(BaseSettings):
     # PFS Design キャッシュ設定
     pfs_design_cache_enabled: bool = True  # SQLiteキャッシュを有効化
 
+    # Butler設定（postISRCCD用）
+    butler_datastore: Path = Path("/data/drp/datastore")
+    butler_collection: str = "drpActor/reductions"
+
     @property
     def pfs_design_cache_db(self) -> Path:
         """PFS Design キャッシュDBのパス"""

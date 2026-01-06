@@ -84,3 +84,8 @@ override-dependencies = [
 [tool.uv.sources]
 pfs-datamodel = { path = "../external/pfs-datamodel", editable = true }
 pfs-utils = { path = "../external/pfs_utils", editable = true }
+
+[tool.pyright]
+# lsst-daf-butlerは本番環境（Subaru）でのみ利用可能なパッケージのため
+# インポートエラーをwarningに設定
+reportMissingImports = "warning"
