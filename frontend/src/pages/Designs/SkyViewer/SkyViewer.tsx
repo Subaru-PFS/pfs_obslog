@@ -76,28 +76,39 @@ export function SkyViewer() {
   const zenithZaZdRef = useRef(zenithZaZd)
   zenithZaZdRef.current = zenithZaZd
 
+  // 最新のjumpToSignalをRefで保持（初期化コールバック内から参照するため）
+  const jumpToSignalRef = useRef(jumpToSignal)
+  jumpToSignalRef.current = jumpToSignal
+
+  // ジャンプを実行する関数（useEffectとhandleGlobeInitで共通利用）
+  const executeJump = useCallback((signal: typeof jumpToSignal, globe: Globe) => {
+    if (!signal) return
+
+    // za, zd, zp が指定されている場合は天頂パラメータを更新
+    const params: Record<string, number> = {}
+    if (signal.fovy !== undefined) params.fovy = signal.fovy
+    if (signal.za !== undefined) params.za = signal.za
+    if (signal.zd !== undefined) params.zd = signal.zd
+    if (signal.zp !== undefined) params.zp = signal.zp
+
+    if (signal.coord) {
+      const coord = SkyCoord.fromDeg(signal.coord.ra, signal.coord.dec)
+      globe.camera.jumpTo(
+        { ...params, fovy: params.fovy ?? globe.camera.fovy },
+        { coord, duration: signal.duration, easingFunction: easing.slowStartStop4 }
+      )
+    } else if (Object.keys(params).length > 0) {
+      globe.camera.jumpTo(params, { duration: signal.duration ?? 0 })
+    }
+  }, [])
+
   // ジャンプシグナルを監視
   useEffect(() => {
     if (jumpToSignal && globeRef.current) {
       const globe = globeRef.current()
-      // za, zd, zp が指定されている場合は天頂パラメータを更新
-      const params: Record<string, number> = {}
-      if (jumpToSignal.fovy !== undefined) params.fovy = jumpToSignal.fovy
-      if (jumpToSignal.za !== undefined) params.za = jumpToSignal.za
-      if (jumpToSignal.zd !== undefined) params.zd = jumpToSignal.zd
-      if (jumpToSignal.zp !== undefined) params.zp = jumpToSignal.zp
-
-      if (jumpToSignal.coord) {
-        const coord = SkyCoord.fromDeg(jumpToSignal.coord.ra, jumpToSignal.coord.dec)
-        globe.camera.jumpTo(
-          { ...params, fovy: params.fovy ?? globe.camera.fovy },
-          { coord, duration: jumpToSignal.duration, easingFunction: easing.slowStartStop4 }
-        )
-      } else if (Object.keys(params).length > 0) {
-        globe.camera.jumpTo(params, { duration: jumpToSignal.duration ?? 0 })
-      }
+      executeJump(jumpToSignal, globe)
     }
-  }, [jumpToSignal])
+  }, [jumpToSignal, executeJump])
 
   // Globe初期化時のコールバック - AltAzグリッドを追加
   const handleGlobeInit = useCallback((globe: Globe) => {
@@ -124,7 +135,16 @@ export function SkyViewer() {
       { duration: 0 }
     )
     isInitializedRef.current = true
-  }, [])
+
+    // 初期化前に保留されていたジャンプシグナルがあれば実行
+    // これにより初回のDesign選択でもアニメーションが発動する
+    if (jumpToSignalRef.current) {
+      // 初期カメラ位置設定後に実行するため次フレームで
+      requestAnimationFrame(() => {
+        executeJump(jumpToSignalRef.current, globe)
+      })
+    }
+  }, [executeJump])
 
   // Globe解放時のコールバック
   const handleGlobeRelease = useCallback(() => {
