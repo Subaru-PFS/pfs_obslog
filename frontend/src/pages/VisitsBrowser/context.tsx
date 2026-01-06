@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 
 interface VisitsBrowserContextValue {
@@ -6,6 +6,12 @@ interface VisitsBrowserContextValue {
   selectedVisitId: number | null
   /** Visit IDを選択（URLも更新される） */
   setSelectedVisitId: (id: number | null) => void
+  /** Visit IDを選択（スクロールをスキップ） */
+  setSelectedVisitIdWithoutScroll: (id: number | null) => void
+  /** スクロールをスキップするかどうかのフラグ */
+  skipScroll: boolean
+  /** スクロールスキップフラグをリセット */
+  resetSkipScroll: () => void
   /** 一覧をリフレッシュするためのトリガー */
   refreshKey: number
   /** リフレッシュを実行 */
@@ -28,6 +34,10 @@ export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) 
     initialVisitId && !isNaN(initialVisitId) ? initialVisitId : null
   )
   const [refreshKey, setRefreshKey] = useState(0)
+  
+  // Ref to track whether to skip scroll on selection change
+  const skipScrollRef = useRef(false)
+  const [skipScroll, setSkipScroll] = useState(false)
 
   // URLパラメータの変更を監視してstateを更新
   useEffect(() => {
@@ -46,6 +56,19 @@ export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) 
       navigate('/visits', { replace: true })
     }
   }, [navigate])
+  
+  // visitIdを設定（スクロールをスキップ）
+  const setSelectedVisitIdWithoutScroll = useCallback((id: number | null) => {
+    skipScrollRef.current = true
+    setSkipScroll(true)
+    setSelectedVisitId(id)
+  }, [setSelectedVisitId])
+  
+  // スクロールスキップフラグをリセット
+  const resetSkipScroll = useCallback(() => {
+    skipScrollRef.current = false
+    setSkipScroll(false)
+  }, [])
 
   const refresh = useCallback(() => {
     setRefreshKey((prev) => prev + 1)
@@ -56,6 +79,9 @@ export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) 
       value={{
         selectedVisitId,
         setSelectedVisitId,
+        setSelectedVisitIdWithoutScroll,
+        skipScroll,
+        resetSkipScroll,
         refreshKey,
         refresh,
       }}

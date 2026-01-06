@@ -111,6 +111,12 @@ interface DesignsContextValue {
   // 選択・フォーカス
   selectedDesign: PfsDesignEntry | undefined
   setSelectedDesign: (design: PfsDesignEntry | undefined) => void
+  /** Design選択（スクロールをスキップ） */
+  setSelectedDesignWithoutScroll: (design: PfsDesignEntry | undefined) => void
+  /** スクロールをスキップするかどうかのフラグ */
+  skipDesignScroll: boolean
+  /** スクロールスキップフラグをリセット */
+  resetSkipDesignScroll: () => void
   focusedDesign: PfsDesignEntry | undefined
   setFocusedDesign: (design: PfsDesignEntry | undefined) => void
 
@@ -322,6 +328,9 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   const [focusedFiber, setFocusedFiberState] = useState<
     FocusedFiber | undefined
   >()
+  
+  // スクロールスキップ用のフラグ
+  const [skipDesignScroll, setSkipDesignScroll] = useState(false)
 
   // フォーカス状態の設定（同じIDなら更新をスキップして不要な再レンダリングを防ぐ）
   const setFocusedDesign = useCallback(
@@ -407,6 +416,20 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     },
     [navigate]
   )
+  
+  // 選択状態の設定（スクロールをスキップ）
+  const setSelectedDesignWithoutScroll = useCallback(
+    (design: PfsDesignEntry | undefined) => {
+      setSkipDesignScroll(true)
+      setSelectedDesign(design)
+    },
+    [setSelectedDesign]
+  )
+  
+  // スクロールスキップフラグをリセット
+  const resetSkipDesignScroll = useCallback(() => {
+    setSkipDesignScroll(false)
+  }, [])
 
   // 初期ジャンプが完了したかを追跡
   const initialJumpDoneRef = useRef(false)
@@ -461,6 +484,9 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     isLoadingPositions,
     selectedDesign,
     setSelectedDesign,
+    setSelectedDesignWithoutScroll,
+    skipDesignScroll,
+    resetSkipDesignScroll,
     focusedDesign,
     setFocusedDesign,
     focusedFiber,

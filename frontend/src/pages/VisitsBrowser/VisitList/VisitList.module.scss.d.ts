@@ -4,12 +4,15 @@ export type Styles = {
   colDate: string;
   colDescription: string;
   colDesign: string;
+  colEet: string;
   colExposures: string;
   colExptime: string;
   colId: string;
   colNotesContent: string;
   colNotesCount: string;
+  colSeeing: string;
   colTime: string;
+  colTransparency: string;
   columnSelector: string;
   columnsRow: string;
   command: string;

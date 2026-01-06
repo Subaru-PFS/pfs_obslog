@@ -407,7 +407,7 @@ interface VisitGroupComponentProps {
 }
 
 function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGroupComponentProps) {
-  const { selectedVisitId, setSelectedVisitId } = useVisitsBrowserContext()
+  const { selectedVisitId, setSelectedVisitIdWithoutScroll } = useVisitsBrowserContext()
   
   // Check if any visit in this group is selected
   const hasSelectedVisit = group.visits.some(v => v.id === selectedVisitId)
@@ -416,7 +416,7 @@ function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGrou
   const handleGroupClick = (e: React.MouseEvent) => {
     // Only handle clicks on the group container itself, not on child elements
     if (e.target === e.currentTarget && group.visits.length > 0) {
-      setSelectedVisitId(group.visits[0].id)
+      setSelectedVisitIdWithoutScroll(group.visits[0].id)
     }
   }
 
@@ -471,7 +471,7 @@ function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGrou
                 key={visit.id}
                 data-visit-id={visit.id}
                 className={isSelected ? styles.selected : ''}
-                onClick={() => setSelectedVisitId(visit.id)}
+                onClick={() => setSelectedVisitIdWithoutScroll(visit.id)}
               >
                 {columns.id && <td className={styles.colId}>{visit.id}</td>}
                 {columns.description && (
@@ -623,7 +623,7 @@ function parseUrlParams(searchParams: URLSearchParams) {
 }
 
 export function VisitList() {
-  const { selectedVisitId, setSelectedVisitId } = useVisitsBrowserContext()
+  const { selectedVisitId, setSelectedVisitId, skipScroll, resetSkipScroll } = useVisitsBrowserContext()
   const [searchParams, setSearchParams] = useSearchParams()
   
   // Parse URL params once on mount and when they change externally
@@ -638,10 +638,12 @@ export function VisitList() {
   // Exposure filters (synced with URL)
   const exposureFilters = urlParams.exposureFilters
   
-  const [offset, setOffset] = useState(0)
-  const [limit, setLimit] = useState(PER_PAGE)
+  // Refs
   const contentRef = useRef<HTMLDivElement>(null)
   const scrollHeightBeforeLoadRef = useRef<number | null>(null)
+
+  const [offset, setOffset] = useState(0)
+  const [limit, setLimit] = useState(PER_PAGE)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [searchError, setSearchError] = useState<string | null>(null)
   const [shouldScrollToTop, setShouldScrollToTop] = useState(false)
@@ -1032,15 +1034,21 @@ export function VisitList() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [data, selectedVisitId, setSelectedVisitId, isFirstPage, isLastPage, handleLoadMoreNewer, handleLoadMoreOlder])
 
-  // Scroll to selected visit (only if not already visible)
+  // Scroll to selected visit (only if not already visible and not user-clicked)
   useEffect(() => {
+    // Skip if this selection was made by user clicking directly
+    if (skipScroll) {
+      resetSkipScroll()
+      return
+    }
+    
     if (selectedVisitId && contentRef.current) {
       const element = document.querySelector(`[data-visit-id="${selectedVisitId}"]`)
       if (element && !isElementInView(element, contentRef.current)) {
         element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       }
     }
-  }, [selectedVisitId])
+  }, [selectedVisitId, skipScroll, resetSkipScroll])
 
   if (isLoading) {
     return (

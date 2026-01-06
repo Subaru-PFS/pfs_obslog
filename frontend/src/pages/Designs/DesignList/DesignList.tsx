@@ -82,7 +82,9 @@ export function DesignList() {
     dateRange,
     setDateRange,
     selectedDesign,
-    setSelectedDesign,
+    setSelectedDesignWithoutScroll,
+    skipDesignScroll,
+    resetSkipDesignScroll,
     focusedDesign,
     setFocusedDesign,
     jumpTo,
@@ -170,6 +172,12 @@ export function DesignList() {
 
   // 選択されたDesignへスクロール（SkyViewerからの選択時など、表示外の場合のみ）
   useEffect(() => {
+    // ユーザーがリストから直接クリックした場合はスキップ
+    if (skipDesignScroll) {
+      resetSkipDesignScroll()
+      return
+    }
+    
     if (!selectedDesign || !listContainerRef.current) return
 
     // リスト内に選択されたDesignがあるか確認し、表示外ならスクロール
@@ -184,19 +192,19 @@ export function DesignList() {
       })
     }
     // リスト内にない場合は何もしない（検索条件に合わないDesignは表示されない）
-  }, [selectedDesign, designs])
+  }, [selectedDesign, designs, skipDesignScroll, resetSkipDesignScroll])
 
   // エントリクリックハンドラ
   const handleEntryClick = useCallback(
     (entry: PfsDesignEntry) => {
-      setSelectedDesign(entry)
+      setSelectedDesignWithoutScroll(entry)
       jumpTo({
         fovy: (1.6 * Math.PI) / 180,  // 2倍に拡大
         coord: { ra: entry.ra, dec: entry.dec },
         duration: 1000,
       })
     },
-    [setSelectedDesign, jumpTo]
+    [setSelectedDesignWithoutScroll, jumpTo]
   )
 
   // FITSダウンロード

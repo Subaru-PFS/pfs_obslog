@@ -87,6 +87,7 @@ $toolbar-input-height: 32px;
 // =============================================================================
 .filterRow {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -98,6 +99,7 @@ $toolbar-input-height: 32px;
 
 .filterRowLeft {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
 }
@@ -633,6 +635,27 @@ $pagination-border-radius: 12px;
     width: 60px;
     text-align: right;
     font-family: monospace;
+  }
+
+  .colEet {
+    width: 55px;
+    text-align: right;
+    font-family: monospace;
+    font-size: 0.8rem;
+  }
+
+  .colSeeing {
+    width: 55px;
+    text-align: right;
+    font-family: monospace;
+    font-size: 0.8rem;
+  }
+
+  .colTransparency {
+    width: 55px;
+    text-align: right;
+    font-family: monospace;
+    font-size: 0.8rem;
   }
 
   .colDesign {
