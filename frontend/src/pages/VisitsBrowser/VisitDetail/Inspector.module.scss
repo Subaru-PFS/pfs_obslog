@@ -353,7 +353,9 @@
   background-color: #fafafa;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
-  flex-shrink: 0;
+  // 幅を100%にして、親要素の幅いっぱいに表示（カメラ画像のwrapを有効にする）
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .exposureCardHeader {
