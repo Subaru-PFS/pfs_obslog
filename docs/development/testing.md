@@ -1,59 +1,58 @@
-# 遅いテストの調査レポート
+# Slow Test Investigation Report
 
-## 概要
+## Overview
 
-バックエンドテストで特に遅いテストについて調査した結果をまとめます。
+This document summarizes the investigation results for particularly slow tests in the backend test suite.
 
-## 遅いテスト一覧
+## Slow Tests List
 
-| テスト名 | タイムアウト | 原因 |
-|---------|-------------|------|
-| `test_list_pfs_designs` | 60秒（120秒でもタイムアウト） | NFS経由のFITSファイル一括読み込み |
+| Test Name | Timeout | Cause |
+|-----------|---------|-------|
+| `test_list_pfs_designs` | 60s (still times out at 120s) | Bulk reading of FITS files over NFS |
 
-## 詳細分析: `test_list_pfs_designs`
+## Detailed Analysis: `test_list_pfs_designs`
 
-### 環境情報
+### Environment Information
 
-- **FITSファイル数**: 3,886ファイル
-- **合計サイズ**: 約2.5GB（1.1GB使用中）
-- **平均ファイルサイズ**: 651KB
-- **ストレージ**: NFSマウント（`nfs-ics:/datapool/proddata`）
-- **プロトコル**: NFS4.1、TCP、rsize/wsize=1MB
+- **Number of FITS files**: 3,886 files
+- **Total size**: ~2.5GB (1.1GB in use)
+- **Average file size**: 651KB
+- **Storage**: NFS mount (`nfs-ics:/datapool/proddata`)
+- **Protocol**: NFS4.1, TCP, rsize/wsize=1MB
 
-### ボトルネック分析
+### Bottleneck Analysis
 
-#### 1. ファイルアクセス速度（基準）
+#### 1. File Access Speed (Baseline)
 
-| 処理 | 時間 | スループット |
-|-----|------|-------------|
-| 単一ファイル読み込み（キャッシュあり） | 0.006秒 | 1.5GB/s |
-| 100ファイルのstatアクセス | 0.54秒 | 185 files/s |
-| 10ファイル完全読み込み | 0.12秒 | 83 files/s |
+| Operation | Time | Throughput |
+|-----------|------|------------|
+| Single file read (cached) | 0.006s | 1.5GB/s |
+| stat access for 100 files | 0.54s | 185 files/s |
+| Full read of 10 files | 0.12s | 83 files/s |
 
-#### 2. Python/astropy での読み込み
+#### 2. Python/astropy Reading
 
-| 処理 | 時間/ファイル | 3,886ファイル推定 |
-|-----|-------------|-----------------|
-| 素のastropy読み込み（最小限のデータ取得） | 7.1ms | 27.5秒 |
-| `_read_design_entry`関数（全ヘッダー変換） | 23.7ms | 92秒 |
+| Operation | Time/File | Estimated for 3,886 files |
+|-----------|-----------|---------------------------|
+| Raw astropy read (minimal data) | 7.1ms | 27.5s |
+| `_read_design_entry` function (full header conversion) | 23.7ms | 92s |
 
-#### 3. オーバーヘッドの内訳
+#### 3. Overhead Breakdown
 
 ```
-素のFITS読み込み:           7.1ms/ファイル (27.5秒)
-_fits_meta_from_hdul:      12.9ms/ファイル (50.1秒)  ← 主要なボトルネック
-その他のPydantic変換:        3.7ms/ファイル (14.4秒)
+Raw FITS read:               7.1ms/file (27.5s)
+_fits_meta_from_hdul:       12.9ms/file (50.1s)  ← Main bottleneck
+Other Pydantic conversions:  3.7ms/file (14.4s)
 ────────────────────────────────────────────────
-合計:                      23.7ms/ファイル (92秒)
+Total:                      23.7ms/file (92s)
 ```
 
-### 主要なボトルネック: `_fits_meta_from_hdul`
+### Main Bottleneck: `_fits_meta_from_hdul`
 
-この関数は各FITSファイルの全HDU（4個）の全ヘッダーカード（約214カード）を
-Pydanticオブジェクトに変換しています。
+This function converts all header cards from all HDUs (4 per file, ~214 cards total) to Pydantic objects.
 
 ```python
-# 問題のコード（概要）
+# Problem code (overview)
 def _fits_meta_from_hdul(filename: str, hdul) -> FitsMeta:
     return FitsMeta(
         filename=filename,
@@ -63,68 +62,68 @@ def _fits_meta_from_hdul(filename: str, hdul) -> FitsMeta:
                 header=FitsHeader(
                     cards=[
                         Card(key=keyword, value=_stringify(value), comment=comment)
-                        for keyword, value, comment in hdu.header.cards  # 214回/ファイル
+                        for keyword, value, comment in hdu.header.cards  # 214 times/file
                     ]
                 ),
             )
-            for i, hdu in enumerate(hdul)  # 4回/ファイル
+            for i, hdu in enumerate(hdul)  # 4 times/file
         ],
     )
 ```
 
-- **1ファイルあたり**: 4 HDU × 約50カード = 約200個のPydanticオブジェクト生成
-- **全ファイル**: 200 × 3,886 = 約77万オブジェクト
+- **Per file**: 4 HDUs × ~50 cards = ~200 Pydantic objects created
+- **All files**: 200 × 3,886 = ~770,000 objects
 
-### I/Oスループットの妥当性評価
+### I/O Throughput Evaluation
 
-#### NFS読み込み速度
+#### NFS Read Speed
 
 ```
-理論値（NFS4.1 TCP）:  ~100MB/s（一般的なNFS環境）
-実測値（キャッシュあり）: 1.5GB/s（OSキャッシュ利用）
-実測値（シーケンシャル）: ~80MB/s（3,886ファイル、2.5GB / 27.5秒）
+Theoretical (NFS4.1 TCP):  ~100MB/s (typical NFS environment)
+Actual (cached):           1.5GB/s (OS cache utilized)
+Actual (sequential):       ~80MB/s (3,886 files, 2.5GB / 27.5s)
 ```
 
-**結論**: I/O自体は妥当な速度。ボトルネックはPythonでの処理オーバーヘッド。
+**Conclusion**: I/O itself is reasonably fast. The bottleneck is Python processing overhead.
 
-#### 処理時間の内訳
+#### Processing Time Breakdown
 
-| 処理 | 割合 |
-|-----|-----|
-| ファイルI/O + astropy解析 | 30% (27.5秒) |
-| Pydanticオブジェクト生成 | 70% (64.5秒) |
+| Processing | Percentage |
+|------------|------------|
+| File I/O + astropy parsing | 30% (27.5s) |
+| Pydantic object creation | 70% (64.5s) |
 
-## 改善提案
+## Improvement Proposals
 
-### 短期的対策（実施済み）
+### Short-term Measures (Implemented)
 
-1. **テストの分離**: `@pytest.mark.slow` マーカーで遅いテストを分離
-2. **デフォルトスキップ**: `make test` で slow テストをスキップ
-3. **個別タイムアウト**: 遅いテストには長めのタイムアウト（60秒）を設定
+1. **Test isolation**: Separate slow tests with `@pytest.mark.slow` marker
+2. **Skip by default**: `make test` skips slow tests
+3. **Individual timeout**: Set longer timeout (60s) for slow tests
 
-### 中長期的改善案
+### Medium/Long-term Improvements
 
-1. **ヘッダー変換の遅延評価**
-   - 一覧取得時は必要最小限のヘッダーのみ読み込み
-   - 詳細取得時のみ全ヘッダーを変換
+1. **Lazy header conversion**
+   - Read only minimum required headers when fetching list
+   - Convert full headers only when fetching details
 
-2. **キャッシュの導入**
-   - ファイルの更新日時をキーにしたメモリキャッシュ
-   - Redisなどの外部キャッシュ
+2. **Cache introduction**
+   - Memory cache keyed by file modification time
+   - External cache like Redis
 
-3. **インデックスファイル**
-   - Design一覧のメタデータをJSONファイルにキャッシュ
-   - ファイル変更検出時のみ再生成
+3. **Index file**
+   - Cache Design list metadata in JSON file
+   - Regenerate only on file change detection
 
-4. **ページネーション**
-   - 一度に全ファイルを読まず、必要な分だけ読み込み
-   - フロントエンドでの仮想スクロール対応
+4. **Pagination**
+   - Don't read all files at once, read only what's needed
+   - Virtual scroll support on frontend
 
-## まとめ
+## Summary
 
-| 項目 | 値 |
-|-----|---|
-| **主原因** | Pydanticオブジェクトの大量生成（77万オブジェクト） |
-| **I/O速度** | 妥当（NFS経由で80MB/s） |
-| **改善可能性** | 高（ヘッダー変換の最適化で3倍高速化可能） |
-| **現状の対応** | slow マーカーで通常テストから除外 |
+| Item | Value |
+|------|-------|
+| **Root cause** | Massive Pydantic object creation (770,000 objects) |
+| **I/O speed** | Reasonable (~80MB/s over NFS) |
+| **Improvement potential** | High (3x speedup possible with header conversion optimization) |
+| **Current mitigation** | Excluded from regular tests via slow marker |

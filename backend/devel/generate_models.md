@@ -1,35 +1,35 @@
-# モデル自動生成スクリプト
+# Model Auto-generation Script
 
-DBスキーマからSQLAlchemy 2.0スタイルのモデルを自動生成するスクリプトです。
+A script that auto-generates SQLAlchemy 2.0 style models from the DB schema.
 
-## 使用方法
+## Usage
 
-### テスト用DBからモデルを生成
+### Generate models from test DB
 
 ```bash
 cd backend
 uv run python devel/generate_models.py --env test
 ```
 
-### 本番DBからモデルを生成
+### Generate models from production DB
 
 ```bash
 cd backend
 uv run python devel/generate_models.py --env production
 ```
 
-※本番DBへの接続には `~/.pgpass` の設定が必要です。
+※ Connecting to production DB requires `~/.pgpass` configuration.
 
-## オプション
+## Options
 
-| オプション | 説明 | デフォルト |
-|-----------|------|----------|
-| `--env` | 接続先環境 (`test` / `production`) | `test` |
-| `--password` | DBパスワード（`~/.pgpass`を使わない場合） | - |
-| `--output`, `-o` | 出力ファイルパス | `src/pfs_obslog/models.py` |
-| `--schemas` | 対象スキーマ（複数指定可） | 全スキーマ |
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--env` | Target environment (`test` / `production`) | `test` |
+| `--password` | DB password (when not using `~/.pgpass`) | - |
+| `--output`, `-o` | Output file path | `src/pfs_obslog/models.py` |
+| `--schemas` | Target schemas (can specify multiple) | All schemas |
 
-## 出力例
+## Output Example
 
 ```
 Running: python -m sqlacodegen [db_url] --generator dataclasses --outfile src/pfs_obslog/models.py
@@ -37,15 +37,15 @@ Models generated successfully: src/pfs_obslog/models.py
 Generated 54 model classes
 ```
 
-## 生成されるモデルについて
+## About Generated Models
 
-- SQLAlchemy 2.0の`DeclarativeBase`スタイルで生成
-- `Mapped[]`型アノテーション付き
-- リレーションシップも自動生成
+- Generated in SQLAlchemy 2.0 `DeclarativeBase` style
+- Includes `Mapped[]` type annotations
+- Relationships are also auto-generated
 
-## DB接続情報
+## DB Connection Information
 
-| 環境 | ホスト | ポート | データベース | ユーザー |
-|------|--------|--------|-------------|---------|
+| Environment | Host | Port | Database | User |
+|-------------|------|------|----------|------|
 | test | localhost | 15432 | opdb | pfs |
 | production | 133.40.164.48 | 5432 | opdb | pfs |

@@ -1,91 +1,91 @@
-# Sky Viewer カメラ・天頂・時刻の関係
+# Sky Viewer Camera, Zenith, and Time Relationships
 
-このドキュメントでは、Design Viewer の Sky Viewer コンポーネントにおけるカメラ、天頂、時刻の関係について説明します。
+This document explains the relationships between camera, zenith, and time in the Sky Viewer component of Design Viewer.
 
-## 概要
+## Overview
 
-Sky Viewerは、指定された時刻のすばる望遠鏡から見た星空を表示します。天頂からの相対位置（仰角・方位角）は時刻が変わっても固定され、星空が動くように見えます。
+Sky Viewer displays the starry sky as seen from the Subaru Telescope at a specified time. The relative position from the zenith (altitude/azimuth) remains fixed as time changes, making the starry sky appear to move.
 
-## stellar-globe ライブラリのカメラパラメータ
+## stellar-globe Library Camera Parameters
 
-`stellar-globe` ライブラリのカメラは以下のパラメータで構成されます：
+The `stellar-globe` library camera consists of the following parameters:
 
-### 視点パラメータ
+### View Parameters
 
-| パラメータ | 説明 |
-|-----------|------|
-| `theta` | 天頂からの角度（0=天頂、π/2=地平線） |
-| `phi` | 方位角 |
-| `fovy` | 視野角（ラジアン） |
-| `roll` | ロール角 |
+| Parameter | Description |
+|-----------|-------------|
+| `theta` | Angle from zenith (0=zenith, π/2=horizon) |
+| `phi` | Azimuth angle |
+| `fovy` | Field of view angle (radians) |
+| `roll` | Roll angle |
 
-### 天頂パラメータ
+### Zenith Parameters
 
-| パラメータ | 説明 |
-|-----------|------|
-| `za` | 天頂の赤経（α、ラジアン） |
-| `zd` | 天頂の赤緯（δ、ラジアン） |
-| `zp` | 天頂周りの回転角 |
+| Parameter | Description |
+|-----------|-------------|
+| `za` | Zenith's right ascension (α, radians) |
+| `zd` | Zenith's declination (δ, radians) |
+| `zp` | Rotation angle around zenith |
 
 ## dateUtils.zenithSkyCoord
 
-`dateUtils.zenithSkyCoord({ when, where })` は、指定された時刻と観測地点から天頂の赤道座標を計算します。
+`dateUtils.zenithSkyCoord({ when, where })` calculates the zenith's equatorial coordinates from the specified time and observation location.
 
 ```typescript
 const { za, zd, zp } = dateUtils.zenithSkyCoord({
   when: new Date(),
-  where: { lat: 19.825, lon: -155.476 }  // すばる望遠鏡の位置
+  where: { lat: 19.825, lon: -155.476 }  // Subaru Telescope location
 })
 ```
 
-返り値：
-- `za`: 天頂の赤経（ラジアン）
-- `zd`: 天頂の赤緯（ラジアン）
-- `zp`: 天頂周りの回転角（ラジアン）
+Return values:
+- `za`: Zenith's right ascension (radians)
+- `zd`: Zenith's declination (radians)
+- `zp`: Rotation angle around zenith (radians)
 
-## 実装の詳細
+## Implementation Details
 
-### 初期化時
+### At Initialization
 
-1. カメラの天頂パラメータを設定: `{ za, zd: zd + TILT, zp }`
-   - `TILT = π/2` を加えることで、カメラは天頂ではなく地平線付近を向く
-   - これにより、星空の全体像が見やすくなる
+1. Set camera zenith parameters: `{ za, zd: zd + TILT, zp }`
+   - Adding `TILT = π/2` makes the camera point toward the horizon instead of zenith
+   - This makes the overall starry sky easier to view
 
-2. AltAz グリッドを追加:
+2. Add AltAz grid:
    ```typescript
    draft.modelMatrix = () => {
      const { za, zd, zp } = globe.camera
      return matrixUtils.izenith4(za, zd - TILT, zp)
    }
    ```
-   - グリッドのモデル行列はカメラの天頂パラメータを参照
-   - `zd - TILT` により、グリッドは天頂が極になるように表示される
+   - Grid model matrix references camera zenith parameters
+   - `zd - TILT` makes the grid display with zenith as the pole
 
-### グリッドの色
+### Grid Colors
 
-| グリッド | 色 | 意味 |
-|---------|-----|------|
-| デフォルト | 青 `[0, 0.25, 1, 1]` | AltAz グリッド |
-| thetaLine[9] | オレンジ `[1, 0.5, 0, 1]` | 地平線（theta = 90°） |
-| phiLine[12] | 赤 `[1, 0, 0, 1]` | 方位角の基準線 |
-| 赤道座標グリッド | 薄い白 `[1, 1, 1, 0.125]` | RA/Dec グリッド |
+| Grid | Color | Meaning |
+|------|-------|---------|
+| Default | Blue `[0, 0.25, 1, 1]` | AltAz grid |
+| thetaLine[9] | Orange `[1, 0.5, 0, 1]` | Horizon (theta = 90°) |
+| phiLine[12] | Red `[1, 0, 0, 1]` | Azimuth reference line |
+| Equatorial grid | Faint white `[1, 1, 1, 0.125]` | RA/Dec grid |
 
-### 時刻変更時
+### On Time Change
 
-時刻が変わると、`zenithZaZd` が更新されます。このとき：
+When time changes, `zenithZaZd` is updated. At this point:
 
-1. カメラの `za`, `zd`, `zp` のみを更新
-2. `theta`, `phi` は維持される
-3. グリッドのモデル行列はカメラの値を参照しているため、自動的に更新される
+1. Only update camera's `za`, `zd`, `zp`
+2. `theta`, `phi` are maintained
+3. Grid model matrix references camera values, so it updates automatically
 
-結果：
-- カメラの仰角・方位角（`theta`, `phi`）は固定
-- 星空が時間とともに動く
-- 青いAltAzグリッドは常に天頂を中心に表示（カメラ視点に対して固定）
+Result:
+- Camera altitude/azimuth (`theta`, `phi`) are fixed
+- Starry sky moves with time
+- Blue AltAz grid always displays centered on zenith (fixed relative to camera view)
 
 ### Center Zenith
 
-「Center Zenith」ボタンをクリックすると：
+When clicking the "Center Zenith" button:
 
 ```typescript
 const coord = SkyCoord.fromDeg(zenithSkyCoord.ra, zenithSkyCoord.dec)
@@ -95,20 +95,20 @@ globe.camera.jumpTo(
 )
 ```
 
-- `coord` オプションを使って、指定した赤道座標にカメラを向ける
-- これにより、`theta`, `phi` が更新され、カメラが天頂を向く
+- Use `coord` option to point camera at specified equatorial coordinates
+- This updates `theta`, `phi` to point camera at zenith
 
-## 座標系の関係図
+## Coordinate System Relationship Diagram
 
 ```
-          天頂 (zenith)
+          Zenith
             ↑
-            |  theta (天頂からの角度)
+            |  theta (angle from zenith)
             |
-    ←----- カメラ視点 -----→  phi (方位角)
+    ←----- Camera view -----→  phi (azimuth)
             |
             |
-          -------- 地平線 (theta = π/2)
+          -------- Horizon (theta = π/2)
 ```
 
-カメラの天頂パラメータ（za, zd, zp）を時刻に応じて更新することで、星空の見え方が変化します。`theta` と `phi` を維持することで、天頂からの相対位置は固定されます。
+By updating camera zenith parameters (za, zd, zp) according to time, the appearance of the starry sky changes. Maintaining `theta` and `phi` keeps the relative position from zenith fixed.

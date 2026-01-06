@@ -1,150 +1,150 @@
-# PFS Design Viewer リファクタリング調査
+# PFS Design Viewer Refactoring Investigation
 
-このドキュメントは PFS Design Viewer の現状把握と今後のリファクタリング検討のための調査結果をまとめたものです。
+This document summarizes the investigation results for understanding the current state of PFS Design Viewer and considering future refactoring.
 
-## 概要
+## Overview
 
-Design Viewerは、PFS（Prime Focus Spectrograph）の観測設計（PFS Design）を可視化・管理するための機能です。
+Design Viewer is a feature for visualizing and managing PFS (Prime Focus Spectrograph) observation designs.
 
-### 現在の実装状況
+### Current Implementation Status
 
-**バックエンドAPI**: ✅ 実装完了
-**フロントエンド**: ✅ 実装完了（SolidJS → React移植済み）
+**Backend API**: ✅ Implementation complete
+**Frontend**: ✅ Implementation complete (ported from SolidJS to React)
 
 ---
 
-## 1. API エンドポイント一覧
+## 1. API Endpoint List
 
-### バックエンド実装ファイル
+### Backend Implementation File
 
 - [backend/src/pfs_obslog/routers/pfs_designs.py](../../backend/src/pfs_obslog/routers/pfs_designs.py)
 
-### エンドポイント
+### Endpoints
 
-| メソッド | エンドポイント | 説明 | 認証 |
-|---------|--------------|------|------|
-| GET | `/api/pfs_designs` | Design一覧取得 | 不要 |
-| GET | `/api/pfs_designs/{id_hex}` | Design詳細取得 | 不要 |
-| GET | `/api/pfs_designs/{id_hex}.fits` | FITSファイルダウンロード | 不要 |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/pfs_designs` | Get Design list | No |
+| GET | `/api/pfs_designs/{id_hex}` | Get Design detail | No |
+| GET | `/api/pfs_designs/{id_hex}.fits` | Download FITS file | No |
 
-### レスポンススキーマ
+### Response Schema
 
-#### PfsDesignEntry（一覧用）
+#### PfsDesignEntry (for list)
 
 ```python
 class PfsDesignEntry(BaseModel):
-    id: str              # Design ID（16進数文字列）
-    frameid: str         # ファイル名
-    name: str            # Design名
-    date_modified: datetime  # 更新日時
-    ra: float            # 中心赤経
-    dec: float           # 中心赤緯
-    arms: str            # 使用するアーム
-    num_design_rows: int # Design行数
+    id: str              # Design ID (hexadecimal string)
+    frameid: str         # Filename
+    name: str            # Design name
+    date_modified: datetime  # Modified date
+    ra: float            # Center RA
+    dec: float           # Center Dec
+    arms: str            # Used arms
+    num_design_rows: int # Design row count
     num_photometry_rows: int
     num_guidestar_rows: int
-    design_rows: DesignRows  # ターゲットタイプ別行数
+    design_rows: DesignRows  # Row count by target type
 ```
 
-#### PfsDesignDetail（詳細用）
+#### PfsDesignDetail (for detail)
 
 ```python
 class PfsDesignDetail(BaseModel):
-    fits_meta: FitsMeta  # FITSメタデータ
+    fits_meta: FitsMeta  # FITS metadata
     date_modified: datetime
-    design_data: DesignData      # ファイバー配置データ
-    photometry_data: PhotometryData  # 測光データ
-    guidestar_data: GuidestarData    # ガイド星データ
+    design_data: DesignData      # Fiber placement data
+    photometry_data: PhotometryData  # Photometry data
+    guidestar_data: GuidestarData    # Guide star data
 ```
 
 ---
 
-## 2. フロントエンドコンポーネント構成
+## 2. Frontend Component Structure
 
-### ディレクトリ構造
+### Directory Structure
 
 ```
 frontend/src/pages/Designs/
-├── Designs.tsx           # メインページ
-├── DesignsContext.tsx    # 状態管理（React Context）
-├── types.ts              # 型定義
-├── legend.ts             # 色凡例定義
+├── Designs.tsx           # Main page
+├── DesignsContext.tsx    # State management (React Context)
+├── types.ts              # Type definitions
+├── legend.ts             # Color legend definitions
 ├── DesignList/
-│   ├── DesignList.tsx    # Design一覧サイドパネル
+│   ├── DesignList.tsx    # Design list side panel
 │   └── DesignList.module.scss
 ├── SkyViewer/
-│   ├── SkyViewer.tsx     # 天球表示（WebGL）
-│   ├── Clock.tsx         # アナログ時計UI
+│   ├── SkyViewer.tsx     # Sky display (WebGL)
+│   ├── Clock.tsx         # Analog clock UI
 │   └── SkyViewer.module.scss
 └── DesignDetail/
-    ├── DesignDetail.tsx  # 焦点面ビュー
+    ├── DesignDetail.tsx  # Focal plane view
     └── DesignDetail.module.scss
 ```
 
-### 画面レイアウト
+### Screen Layout
 
 ```
 +------------------+------------------------------------------+
 |                  |                                          |
 |   DesignList     |           SkyViewer                      |
-|   (左サイド)     |           (天球表示)                     |
+|   (Left side)    |           (Sky display)                  |
 |                  |                                          |
 |                  +------------------------------------------+
 |                  |                                          |
 |                  |           DesignDetail                   |
-|                  |           (焦点面ビュー)                 |
+|                  |           (Focal plane view)             |
 +------------------+------------------------------------------+
 ```
 
 ---
 
-## 3. 主要コンポーネントの機能
+## 3. Main Component Features
 
-### 3.1 DesignList（Design一覧）
+### 3.1 DesignList (Design List)
 
-**機能:**
-- Design一覧の表示（検索、ソート、グループ化）
-- ID表示形式の切り替え（Hex/Decimal）
-- ソート順の切り替え（高度順/更新日時順）
-- FITSダウンロード、IDコピー
+**Features:**
+- Display Design list (search, sort, grouping)
+- Toggle ID display format (Hex/Decimal)
+- Toggle sort order (altitude/modified date)
+- FITS download, ID copy
 
-**状態管理:**
-- `idFormat`: localStorage保存
-- `sortOrder`: localStorage保存
-- `searchText`: ローカルstate
+**State management:**
+- `idFormat`: localStorage saved
+- `sortOrder`: localStorage saved
+- `searchText`: local state
 
-### 3.2 SkyViewer（天球表示）
+### 3.2 SkyViewer (Sky Display)
 
-**技術スタック:**
-- `@stellar-globe/react-stellar-globe`: WebGL天球可視化
-- Pan-STARRS DR1 HiPS画像をバックグラウンドに表示
+**Tech stack:**
+- `@stellar-globe/react-stellar-globe`: WebGL sky visualization
+- Pan-STARRS DR1 HiPS images as background
 
-**表示レイヤー:**
-1. HipparcosCatalogLayer（恒星）
-2. ConstellationLayer（星座線）
-3. HipsSimpleLayer（Pan-STARRS画像）
-4. GridLayer（AltAz / Equatorial）
-5. ClickableMarkerLayer（Designマーカー）
-6. PathLayer（選択/フォーカスハイライト）
+**Display layers:**
+1. HipparcosCatalogLayer (stars)
+2. ConstellationLayer (constellation lines)
+3. HipsSimpleLayer (Pan-STARRS images)
+4. GridLayer (AltAz / Equatorial)
+5. ClickableMarkerLayer (Design markers)
+6. PathLayer (selected/focused highlight)
 
-**操作:**
-- マウスドラッグ: 視点移動
-- スクロール: ズーム
-- マーカークリック: Design選択
-- 時刻コントロール: 日付選択、アナログ時計
+**Controls:**
+- Mouse drag: Pan view
+- Scroll: Zoom
+- Marker click: Select Design
+- Time control: Date picker, analog clock
 
-### 3.3 DesignDetail（焦点面ビュー）
+### 3.3 DesignDetail (Focal Plane View)
 
-**機能:**
-- FocalPlaneコンポーネントでファイバー配置を可視化
-- 色分けモード切り替え（Target Type / Fiber Status）
-- ファイバーホバー時に詳細情報表示
-- Design概要表示
+**Features:**
+- Visualize fiber placement with FocalPlane component
+- Toggle coloring mode (Target Type / Fiber Status)
+- Show detailed info on fiber hover
+- Design summary display
 
-**色分け定義:**
+**Color coding:**
 
-| Target Type | 色 |
-|-------------|-----|
+| Target Type | Color |
+|-------------|-------|
 | SCIENCE | lightsteelblue |
 | SKY | yellow |
 | FLUXSTD | magenta |
@@ -155,35 +155,35 @@ frontend/src/pages/Designs/
 
 ---
 
-## 4. 状態管理（DesignsContext）
+## 4. State Management (DesignsContext)
 
-React Contextを使用してページ全体の状態を管理:
+Manages page-wide state with React Context:
 
-| 状態 | 型 | 説明 |
-|------|-----|------|
-| `designs` | `PfsDesignEntry[]` | Design一覧 |
-| `selectedDesign` | `PfsDesignEntry \| undefined` | 選択中Design |
-| `focusedDesign` | `PfsDesignEntry \| undefined` | フォーカス中Design |
-| `designDetail` | `PfsDesignDetail \| undefined` | 選択中Designの詳細 |
-| `jumpToSignal` | `JumpToOptions \| null` | カメラジャンプ指示 |
-| `showFibers` | `boolean` | ファイバーマーカー表示 |
-| `now` | `Date` | 表示時刻 |
-| `zenithSkyCoord` | `{ ra, dec }` | 天頂の赤道座標 |
-
----
-
-## 5. 外部依存ライブラリ
-
-| ライブラリ | 用途 | パス |
-|-----------|------|------|
-| `@stellar-globe/react-stellar-globe` | 天球可視化 | `external/stellar-globe/react-stellar-globe` |
-| `react-use` | `useLocalStorage`フック | npm |
+| State | Type | Description |
+|-------|------|-------------|
+| `designs` | `PfsDesignEntry[]` | Design list |
+| `selectedDesign` | `PfsDesignEntry \| undefined` | Selected Design |
+| `focusedDesign` | `PfsDesignEntry \| undefined` | Focused Design |
+| `designDetail` | `PfsDesignDetail \| undefined` | Selected Design detail |
+| `jumpToSignal` | `JumpToOptions \| null` | Camera jump command |
+| `showFibers` | `boolean` | Show fiber markers |
+| `now` | `Date` | Display time |
+| `zenithSkyCoord` | `{ ra, dec }` | Zenith equatorial coordinates |
 
 ---
 
-## 6. 既存プロジェクトとの差分
+## 5. External Dependencies
 
-### SolidJS → React 変換
+| Library | Usage | Path |
+|---------|-------|------|
+| `@stellar-globe/react-stellar-globe` | Sky visualization | `external/stellar-globe/react-stellar-globe` |
+| `react-use` | `useLocalStorage` hook | npm |
+
+---
+
+## 6. Differences from Old Project
+
+### SolidJS → React Conversion
 
 | SolidJS | React |
 |---------|-------|
@@ -192,51 +192,51 @@ React Contextを使用してページ全体の状態を管理:
 | `createMemo` | `useMemo` |
 | `createResource` | RTK Query |
 | `For` | `Array.map` |
-| `Show` | 条件付きレンダリング |
+| `Show` | Conditional rendering |
 
-### 旧プロジェクトにあって新プロジェクトにない機能
+### Features in Old Project Not in New Project
 
-1. **`/api/pfs_designs.png` エンドポイント**: Design位置をmatplotlibでプロットする機能
-   - 旧: `PlotDesignTask`で実装
-   - 新: 未実装（SkyViewerで代替可能）
+1. **`/api/pfs_designs.png` endpoint**: Feature to plot Design positions with matplotlib
+   - Old: Implemented with `PlotDesignTask`
+   - New: Not implemented (can be replaced by SkyViewer)
 
-2. **キャッシュ機構**: FITSファイル読み込みのキャッシュ
-   - 旧: `PickleCache`を使用
-   - 新: 未実装（必要に応じて追加）
+2. **Cache mechanism**: FITS file reading cache
+   - Old: Used `PickleCache`
+   - New: Not implemented (add as needed)
 
 ---
 
-## 7. リファクタリング検討事項
+## 7. Refactoring Considerations
 
-### 7.1 メタデータのSQLite化（優先度: 高）
+### 7.1 SQLite Metadata (Priority: High)
 
-**課題:**
-現在の実装では、Design一覧を取得する際に以下の処理を行っています：
-1. ディレクトリ内の全FITSファイルをglob
-2. 各FITSファイルを個別にオープンしてヘッダーを読み込み
-3. メタデータを抽出
+**Issue:**
+Current implementation when fetching Design list:
+1. Glob all FITS files in directory
+2. Open each FITS file individually and read headers
+3. Extract metadata
 
-これはDesignファイルが大量（数百～数千）になると非常に遅くなります。
+This becomes very slow when Design files are numerous (hundreds to thousands).
 
-**解決策:**
-メタデータをSQLiteデータベースにキャッシュし、一覧取得を高速化します。
+**Solution:**
+Cache metadata in SQLite database to speed up list retrieval.
 
-#### 設計案
+#### Design Proposal
 
-**データベーススキーマ:**
+**Database Schema:**
 ```sql
 CREATE TABLE pfs_design_metadata (
-    id TEXT PRIMARY KEY,           -- Design ID (16進数)
-    frameid TEXT NOT NULL,         -- ファイル名
-    name TEXT,                      -- Design名
-    file_mtime REAL NOT NULL,      -- FITSファイルの更新時刻（UNIX timestamp）
-    ra REAL,                        -- 中心赤経
-    dec REAL,                       -- 中心赤緯
-    arms TEXT,                      -- 使用アーム
-    num_design_rows INTEGER,       -- Design行数
-    num_photometry_rows INTEGER,   -- 測光行数
-    num_guidestar_rows INTEGER,    -- ガイド星行数
-    -- ターゲットタイプ別カウント
+    id TEXT PRIMARY KEY,           -- Design ID (hexadecimal)
+    frameid TEXT NOT NULL,         -- Filename
+    name TEXT,                      -- Design name
+    file_mtime REAL NOT NULL,      -- FITS file modification time (UNIX timestamp)
+    ra REAL,                        -- Center RA
+    dec REAL,                       -- Center Dec
+    arms TEXT,                      -- Used arms
+    num_design_rows INTEGER,       -- Design row count
+    num_photometry_rows INTEGER,   -- Photometry row count
+    num_guidestar_rows INTEGER,    -- Guide star row count
+    -- Target type counts
     science_count INTEGER,
     sky_count INTEGER,
     fluxstd_count INTEGER,
@@ -244,79 +244,79 @@ CREATE TABLE pfs_design_metadata (
     engineering_count INTEGER,
     sunss_imaging_count INTEGER,
     sunss_diffuse_count INTEGER,
-    -- 管理用
-    cached_at REAL NOT NULL        -- キャッシュ作成時刻
+    -- Management
+    cached_at REAL NOT NULL        -- Cache creation time
 );
 
 CREATE INDEX idx_pfs_design_mtime ON pfs_design_metadata(file_mtime);
 ```
 
-**更新ロジック:**
+**Update Logic:**
 ```
-1. ディレクトリ内のFITSファイル一覧を取得（os.scandir使用）
-2. 各ファイルのmtimeを確認
-3. DBに存在しない or mtimeが更新されているファイルのみFITSを読み込み
-4. DBを更新
-5. DBから一覧を返却
+1. Get FITS file list in directory (using os.scandir)
+2. Check mtime for each file
+3. Read FITS only for files not in DB or with updated mtime
+4. Update DB
+5. Return list from DB
 
-同時に:
-- DBに存在するがファイルが消えているレコードを削除
+Simultaneously:
+- Delete records in DB where file no longer exists
 ```
 
-**実装モジュール構成:**
+**Implementation Module Structure:**
 ```
 backend/src/pfs_obslog/
-├── pfs_design_cache.py      # SQLiteキャッシュ管理
+├── pfs_design_cache.py      # SQLite cache management
 └── routers/
-    └── pfs_designs.py       # 既存（キャッシュ使用に変更）
+    └── pfs_designs.py       # Existing (modify to use cache)
 ```
 
-**クラス設計:**
+**Class Design:**
 ```python
 class PfsDesignCache:
     def __init__(self, db_path: Path, design_dir: Path):
         ...
     
     def get_all_entries(self) -> list[PfsDesignEntry]:
-        """キャッシュを更新し、全エントリを返却"""
+        """Update cache and return all entries"""
         ...
     
     def sync(self) -> None:
-        """ファイルシステムとDBを同期"""
+        """Sync filesystem with DB"""
         ...
     
     def _needs_update(self, path: Path) -> bool:
-        """ファイルの更新が必要か判定"""
+        """Determine if file needs update"""
         ...
 ```
 
-**設定:**
+**Configuration:**
 ```python
 # config.py
 pfs_design_cache_db: Path = Path("~/.cache/pfs-obslog/pfs_design.db")
 ```
 
-### 7.2 パフォーマンス改善（その他）
+### 7.2 Other Performance Improvements
 
-- [ ] 検索のデバウンス処理追加（フロントエンド）
-- [ ] ファイバーマーカー描画の最適化
+- [ ] Add search debounce processing (frontend)
+- [ ] Optimize fiber marker rendering
 
-### 7.3 機能追加案
+### 7.3 Feature Addition Ideas
 
-- [ ] Design比較機能
-- [ ] フィルタリング強化（アーム、ターゲットタイプ）
-- [ ] エクスポート機能（CSV、JSONなど）
+- [ ] Design comparison feature
+- [ ] Enhanced filtering (by arm, target type)
+- [ ] Export feature (CSV, JSON, etc.)
 
-### 7.4 UI/UX改善
+### 7.4 UI/UX Improvements
 
-- [ ] レスポンシブデザイン対応
-- [ ] キーボードショートカット
-- [ ] ツールチップの情報充実
+- [ ] Responsive design support
+- [ ] Keyboard shortcuts
+- [ ] Enriched tooltip information
 
 ---
 
-## 8. 関連ドキュメント
+## 8. Related Documents
 
-- [Design Viewer仕様書](../migration/design-viewer.md) - 詳細な仕様
-- [バックエンドAPI移行状況](../migration/backend-api.md)
-- [フロントエンドコンポーネント移行状況](../migration/frontend-components.md)
+- [Design Viewer Specification](../migration/design-viewer.md) - Detailed specification
+- [Backend API Migration Status](../migration/backend-api.md)
+- [Frontend Component Migration Status](../migration/frontend-components.md)

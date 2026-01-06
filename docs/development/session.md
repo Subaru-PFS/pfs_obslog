@@ -1,105 +1,105 @@
-# セッション管理
+# Session Management
 
-## 概要
+## Overview
 
-このシステムでは、Starletteの`SessionMiddleware`を使用したクッキーベースのセッション管理を採用しています。
-また、デフォルトで全てのAPIエンドポイントに認証を要求する`AuthMiddleware`を使用しています。
+This system uses cookie-based session management via Starlette's `SessionMiddleware`.
+Additionally, an `AuthMiddleware` is used to require authentication for all API endpoints by default.
 
-## 認証フロー
+## Authentication Flow
 
 ```
-リクエスト → SessionMiddleware → AuthMiddleware → ルーター → レスポンス
+Request → SessionMiddleware → AuthMiddleware → Router → Response
 ```
 
-1. **SessionMiddleware**: クッキーからセッションデータを読み取り、`request.session`にセット
-2. **AuthMiddleware**: `request.session`をチェックし、未認証なら401を返す（公開パスは除く）
-3. **ルーター**: 認証済みのリクエストを処理
+1. **SessionMiddleware**: Reads session data from cookie and sets `request.session`
+2. **AuthMiddleware**: Checks `request.session` and returns 401 if unauthenticated (except for public paths)
+3. **Router**: Processes authenticated requests
 
-## 仕組み
+## Mechanism
 
-### セッションクッキー
+### Session Cookie
 
-- **ミドルウェア**: `starlette.middleware.sessions.SessionMiddleware`
-- **クッキー名**: `session`
-- **有効期限**: `max_age=None`（セッションクッキー）
-  - ブラウザを閉じるとクッキーが削除される
-- **SameSite**: `lax`（CSRF対策）
+- **Middleware**: `starlette.middleware.sessions.SessionMiddleware`
+- **Cookie Name**: `session`
+- **Expiration**: `max_age=None` (session cookie)
+  - Cookie is deleted when browser is closed
+- **SameSite**: `lax` (CSRF protection)
 
-### 認証ミドルウェア
+### Authentication Middleware
 
-認証ミドルウェア（`AuthMiddleware`）は、デフォルトで全てのAPIエンドポイントに認証を要求します。
-以下のパスは例外として認証なしでアクセスできます：
+The authentication middleware (`AuthMiddleware`) requires authentication for all API endpoints by default.
+The following paths are exceptions and can be accessed without authentication:
 
-| パスパターン | 説明 |
-|------------|------|
-| `/api/auth/login` | ログインエンドポイント |
-| `/api/auth/logout` | ログアウトエンドポイント |
-| `/api/auth/status` | 認証状態確認 |
-| `/api/auth/me` | ユーザー情報取得（ルーターレベルで認証） |
-| `/api/healthz` | ヘルスチェック |
-| `/api/readyz` | レディネスチェック |
-| `/api/docs*` | Swagger UIドキュメント |
-| `/api/redoc*` | ReDocドキュメント |
-| `/api/openapi.json` | OpenAPIスキーマ |
-| `/api/attachments/{user}/{id}` | 添付ファイルダウンロード |
-| 静的ファイル（`/api/`以外） | フロントエンドの静的ファイル |
+| Path Pattern | Description |
+|--------------|-------------|
+| `/api/auth/login` | Login endpoint |
+| `/api/auth/logout` | Logout endpoint |
+| `/api/auth/status` | Authentication status check |
+| `/api/auth/me` | User info retrieval (authenticated at router level) |
+| `/api/healthz` | Health check |
+| `/api/readyz` | Readiness check |
+| `/api/docs*` | Swagger UI documentation |
+| `/api/redoc*` | ReDoc documentation |
+| `/api/openapi.json` | OpenAPI schema |
+| `/api/attachments/{user}/{id}` | Attachment file download |
+| Static files (not `/api/`) | Frontend static files |
 
-**注意**: 新しいAPIエンドポイントを追加した場合、デフォルトで認証が必要になります。
-公開エンドポイントにする場合は、`backend/src/pfs_obslog/auth/middleware.py`の`DEFAULT_PUBLIC_PATTERNS`に追加してください。
+**Note**: When adding new API endpoints, authentication is required by default.
+To make an endpoint public, add it to `DEFAULT_PUBLIC_PATTERNS` in `backend/src/pfs_obslog/auth/middleware.py`.
 
-### セッションデータ
+### Session Data
 
-セッションデータは署名付きクッキーとして保存されます：
+Session data is stored as a signed cookie:
 
-1. セッションデータはJSON形式でシリアライズ
-2. `itsdangerous`ライブラリで署名（改ざん検出）
-3. Base64エンコードしてクッキーに保存
+1. Session data is serialized as JSON
+2. Signed with `itsdangerous` library (tampering detection)
+3. Base64 encoded and stored in cookie
 
-**注意**: セッションデータは暗号化されていません。機密情報（パスワードなど）をセッションに保存しないでください。
+**Note**: Session data is not encrypted. Do not store sensitive information (passwords, etc.) in the session.
 
-### 秘密鍵
+### Secret Key
 
-セッションの署名に使用する秘密鍵は：
+The secret key used for session signing is:
 
-- 環境変数`SESSION_SECRET_KEY`から取得
-- 未設定の場合はランダムに生成（開発環境用）
+- Retrieved from the `SESSION_SECRET_KEY` environment variable
+- Randomly generated if not set (for development environment)
 
-**本番環境では必ず固定の秘密鍵を設定してください。**
+**Always set a fixed secret key in production environment.**
 
 ```bash
 export SESSION_SECRET_KEY="your-secret-key-here"
 ```
 
-## APIエンドポイント
+## API Endpoints
 
-| エンドポイント | メソッド | 認証 | 説明 |
-|--------------|--------|-----|------|
-| `/auth/login` | POST | 不要 | ログイン |
-| `/auth/logout` | POST | 不要 | ログアウト |
-| `/auth/me` | GET | 必要 | 現在のユーザー情報取得 |
-| `/auth/status` | GET | 不要 | 認証状態確認 |
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/auth/login` | POST | No | Login |
+| `/auth/logout` | POST | No | Logout |
+| `/auth/me` | GET | Yes | Get current user info |
+| `/auth/status` | GET | No | Check authentication status |
 
-## 使用例
+## Usage Examples
 
-### 認証が必要なエンドポイントの作成
+### Creating an Authenticated Endpoint
 
 ```python
 from pfs_obslog.auth.session import RequireUser
 
 @router.get("/protected")
 async def protected_endpoint(user_id: RequireUser):
-    # user_id にはログイン中のユーザーIDが入る
+    # user_id contains the logged-in user's ID
     return {"message": f"Hello, {user_id}"}
 ```
 
-### 認証がオプションのエンドポイント
+### Optional Authentication Endpoint
 
 ```python
 from pfs_obslog.auth.session import CurrentUser
 
 @router.get("/optional")
 async def optional_endpoint(user_id: CurrentUser):
-    # user_id はログイン中ならユーザーID、未ログインならNone
+    # user_id is the user ID if logged in, None if not
     if user_id:
         return {"message": f"Hello, {user_id}"}
     return {"message": "Hello, guest"}

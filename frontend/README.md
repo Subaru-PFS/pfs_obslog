@@ -1,82 +1,82 @@
 # Frontend
 
-React + TypeScript + Vite のフロントエンドプロジェクトです。
+A frontend project built with React + TypeScript + Vite.
 
-## 技術スタック
+## Tech Stack
 
-- **React 19** - UIライブラリ
-- **TypeScript** - 型安全な開発
-- **Vite** - 高速なビルドツール
-- **RTK Query** - データフェッチング・キャッシング
-- **React Router** - ルーティング
-- **Vitest** - テストフレームワーク
-- **typed-scss-modules** - SCSSモジュールの型生成
+- **React 19** - UI library
+- **TypeScript** - Type-safe development
+- **Vite** - Fast build tool
+- **RTK Query** - Data fetching and caching
+- **React Router** - Routing
+- **Vitest** - Testing framework
+- **typed-scss-modules** - SCSS module type generation
 
-## 開発コマンド
+## Development Commands
 
 ```bash
-# 依存関係のインストール
+# Install dependencies
 npm install
 
-# 開発サーバーの起動
+# Start development server
 npm run dev
 
-# ビルド
+# Build
 npm run build
 
-# プレビュー
+# Preview
 npm run preview
 
-# リント
+# Lint
 npm run lint
 ```
 
-## テスト
+## Testing
 
 ```bash
-# テストをウォッチモードで実行
+# Run tests in watch mode
 npm run test
 
-# テストを一度だけ実行
+# Run tests once
 npm run test:run
 
-# カバレッジ付きでテスト実行
+# Run tests with coverage
 npm run test:coverage
 ```
 
-## SCSS モジュールの型生成
+## SCSS Module Type Generation
 
-このプロジェクトでは [typed-scss-modules](https://github.com/skovy/typed-scss-modules) を使用して、SCSSモジュールの型定義を自動生成しています。
+This project uses [typed-scss-modules](https://github.com/skovy/typed-scss-modules) to automatically generate type definitions for SCSS modules.
 
-### 設定
+### Configuration
 
-設定ファイル: `typed-scss-modules.config.ts`
+Configuration file: `typed-scss-modules.config.ts`
 
 ```typescript
 import type { Config } from 'typed-scss-modules'
 
 const config: Config = {
-  exportType: 'default',  // default export を使用
-  nameFormat: 'camel',    // クラス名をキャメルケースに変換
-  implementation: 'sass', // sass を使用
+  exportType: 'default',  // Use default export
+  nameFormat: 'camel',    // Convert class names to camelCase
+  implementation: 'sass', // Use sass
 }
 
 export default config
 ```
 
-### 型ファイルの生成
+### Generating Type Files
 
 ```bash
-# 一度だけ生成
+# Generate once
 npm run scss:types
 
-# ファイル変更を監視して自動生成
+# Watch for file changes and auto-generate
 npm run scss:watch
 ```
 
-### 使用例
+### Usage Example
 
-1. SCSSモジュールファイルを作成:
+1. Create an SCSS module file:
 
 ```scss
 // Example.module.scss
@@ -89,10 +89,10 @@ npm run scss:watch
 }
 ```
 
-2. 型生成コマンドを実行すると、`Example.module.scss.d.ts` が生成されます:
+2. Running the type generation command creates `Example.module.scss.d.ts`:
 
 ```typescript
-// Example.module.scss.d.ts (自動生成)
+// Example.module.scss.d.ts (auto-generated)
 declare const styles: {
   readonly container: string;
   readonly containerTitle: string;
@@ -100,7 +100,7 @@ declare const styles: {
 export default styles;
 ```
 
-3. コンポーネントで型安全にインポート:
+3. Import with type safety in your component:
 
 ```tsx
 import styles from './Example.module.scss'
@@ -114,57 +114,57 @@ export function Example() {
 }
 ```
 
-### 注意事項
+### Notes
 
-- SCSSファイルを追加・変更した場合は、`npm run scss:types` を実行して型ファイルを再生成してください
-- 開発中は `npm run scss:watch` を実行しておくと、ファイル変更時に自動で型が更新されます
-- 生成された `.d.ts` ファイルはコミットしてください
+- When adding or modifying SCSS files, run `npm run scss:types` to regenerate type files
+- During development, run `npm run scss:watch` to automatically update types on file changes
+- Generated `.d.ts` files should be committed
 
-## ディレクトリ構造
+## Directory Structure
 
 ```
 src/
-├── components/       # UIコンポーネント
+├── components/       # UI components
 │   └── Example/
 │       ├── Example.tsx
 │       ├── Example.module.scss
-│       ├── Example.module.scss.d.ts  # 自動生成
+│       ├── Example.module.scss.d.ts  # Auto-generated
 │       ├── Example.test.tsx
 │       └── index.ts
-├── router/           # ルーティング設定
+├── router/           # Routing configuration
 │   └── index.tsx
 ├── store/            # Redux store
 │   ├── api/
-│   │   ├── emptyApi.ts       # RTK Query ベースAPI
-│   │   ├── generatedApi.ts   # 自動生成されたエンドポイント
-│   │   └── apiSlice.ts       # 再エクスポート
+│   │   ├── emptyApi.ts       # RTK Query base API
+│   │   ├── generatedApi.ts   # Auto-generated endpoints
+│   │   └── apiSlice.ts       # Re-exports
 │   ├── hooks.ts
 │   ├── store.ts
 │   └── index.ts
-├── test/             # テスト設定
+├── test/             # Test configuration
 │   └── setup.ts
-├── main.tsx          # エントリーポイント
-└── App.tsx           # ルートコンポーネント
+├── main.tsx          # Entry point
+└── App.tsx           # Root component
 ```
 
-## RTK Query とOpenAPI
+## RTK Query and OpenAPI
 
-このプロジェクトでは [@rtk-query/codegen-openapi](https://github.com/reduxjs/redux-toolkit/tree/master/packages/rtk-query-codegen-openapi) を使用して、バックエンドのOpenAPIスキーマからRTK Queryのエンドポイントを自動生成しています。
+This project uses [@rtk-query/codegen-openapi](https://github.com/reduxjs/redux-toolkit/tree/master/packages/rtk-query-codegen-openapi) to auto-generate RTK Query endpoints from the backend's OpenAPI schema.
 
-### APIコードの生成
+### Generating API Code
 
 ```bash
 npm run generate-api
 ```
 
-このコマンドは以下を実行します：
-1. バックエンドからOpenAPIスキーマ (`openapi.json`) を取得
-2. `@rtk-query/codegen-openapi` でRTK Queryのコードを生成
-3. 生成されたコードは `src/store/api/generatedApi.ts` に出力
+This command performs the following:
+1. Fetches the OpenAPI schema (`openapi.json`) from the backend
+2. Generates RTK Query code using `@rtk-query/codegen-openapi`
+3. Outputs the generated code to `src/store/api/generatedApi.ts`
 
-### 設定ファイル
+### Configuration File
 
-設定ファイル: `openapi-config.cjs`
+Configuration file: `openapi-config.cjs`
 
 ```javascript
 /** @type {import('@rtk-query/codegen-openapi').ConfigFile} */
@@ -180,9 +180,9 @@ const config = {
 module.exports = config;
 ```
 
-### 使用方法
+### Usage
 
-生成されたフックを使用してAPIを呼び出します：
+Use the generated hooks to call APIs:
 
 ```typescript
 import { useHealthzHealthzGetQuery } from '../store'
@@ -197,61 +197,61 @@ export function HealthStatus() {
 }
 ```
 
-### 注意事項
+### Notes
 
-- バックエンドのAPIが変更された場合は、`npm run generate-api` を実行して再生成してください
-- 生成された `generatedApi.ts` は直接編集しないでください
-- カスタマイズが必要な場合は、`emptyApi.ts` の `tagTypes` や `baseQuery` を変更してください
+- Run `npm run generate-api` to regenerate when backend APIs change
+- Do not directly edit the generated `generatedApi.ts`
+- For customization, modify `tagTypes` or `baseQuery` in `emptyApi.ts`
 
-## Stellar Globe（天球ビューワー）
+## Stellar Globe (Sky Viewer)
 
-このプロジェクトでは [stellar-globe](https://github.com/michitaro/stellar-globe/) を git submodule として利用しています。WebGLベースの天球ビューワーで、React コンポーネントとして使用できます。
+This project uses [stellar-globe](https://github.com/michitaro/stellar-globe/) as a git submodule. It's a WebGL-based sky viewer that can be used as a React component.
 
-### 依存関係
+### Dependencies
 
-stellar-globe 内のパッケージ間には以下の依存関係があります：
+There are internal dependencies between stellar-globe packages:
 
 ```mermaid
 graph TD
     react-stellar-globe --> stellar-globe
 ```
 
-したがって、ビルドは以下の順序で行う必要があります：
+Therefore, builds must be performed in this order:
 
-1. `stellar-globe`（コアライブラリ）
-2. `react-stellar-globe`（React ラッパー）
+1. `stellar-globe` (core library)
+2. `react-stellar-globe` (React wrapper)
 
-### 初回セットアップ
+### Initial Setup
 
-submodule を初期化し、stellar-globe をビルドします：
+Initialize the submodule and build stellar-globe:
 
 ```bash
-# リポジトリをクローンした直後の場合、submodule を初期化
+# If you just cloned the repository, initialize the submodule
 git submodule update --init --recursive
 
-# stellar-globe パッケージをビルド
+# Build stellar-globe packages
 npm run build:stellar-globe
 ```
 
-または、手動で各パッケージをビルドする場合：
+Or, to manually build each package:
 
 ```bash
-# 1. stellar-globe（コアライブラリ）をビルド
+# 1. Build stellar-globe (core library)
 cd ../external/stellar-globe/stellar-globe
 npm install
 npm run build
 
-# 2. react-stellar-globe（React ラッパー）をビルド
+# 2. Build react-stellar-globe (React wrapper)
 cd ../react-stellar-globe
 npm install
 npm run build
 
-# 3. frontend に戻る
+# 3. Return to frontend
 cd ../../../frontend
 npm install
 ```
 
-### 使用例
+### Usage Example
 
 ```tsx
 import { Globe$, GridLayer$, PanLayer$, ZoomLayer$, ConstellationLayer$ } from '@stellar-globe/react-stellar-globe'
@@ -270,20 +270,20 @@ export function SkyViewer() {
 }
 ```
 
-### 主要コンポーネント
+### Main Components
 
-- **`Globe$`**: ビューワーのルートコンテナ
-- **`PanLayer$`, `ZoomLayer$`, `RollLayer$`**: 操作系レイヤー
-- **`GridLayer$`**: 座標グリッドレイヤー
-- **`ConstellationLayer$`**: 星座レイヤー
-- **`MarkerLayer$`**: マーカーレイヤー
-- **`TractTileLayer$`**: タイル画像レイヤー
+- **`Globe$`**: Viewer root container
+- **`PanLayer$`, `ZoomLayer$`, `RollLayer$`**: Interaction layers
+- **`GridLayer$`**: Coordinate grid layer
+- **`ConstellationLayer$`**: Constellation layer
+- **`MarkerLayer$`**: Marker layer
+- **`TractTileLayer$`**: Tile image layer
 
-詳細は [react-stellar-globe README](../external/stellar-globe/react-stellar-globe/README.md) を参照してください。
+See [react-stellar-globe README](../external/stellar-globe/react-stellar-globe/README.md) for details.
 
-### stellar-globe の更新
+### Updating stellar-globe
 
-submodule を最新に更新する場合：
+To update the submodule to the latest version:
 
 ```bash
 cd ../external/stellar-globe
@@ -291,4 +291,3 @@ git pull origin main
 cd ../../frontend
 npm run build:stellar-globe
 ```
-

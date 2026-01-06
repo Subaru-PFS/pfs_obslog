@@ -1,45 +1,45 @@
-# プロダクション環境セットアップ
+# Production Environment Setup
 
-このドキュメントでは、PFS Obslog 2をプロダクション環境で実行するための手順を説明します。
+This document explains the procedure for running PFS Obslog 2 in a production environment.
 
-## 概要
+## Overview
 
-プロダクション環境では以下の構成で動作します：
+The production environment operates with the following configuration:
 
-- **Webサーバー:** Gunicorn + Uvicorn Worker（8プロセス）
-- **プロセス管理:** systemd（ユーザーモード）
-- **ポート:** 5000（デフォルト）
+- **Web Server:** Gunicorn + Uvicorn Worker (8 processes)
+- **Process Management:** systemd (user mode)
+- **Port:** 5000 (default)
 
-## 前提条件
+## Prerequisites
 
-- Python 3.13 以上
-- uv（パッケージマネージャー）
-- systemd が利用可能なLinux環境
-- PostgreSQL（本番DB）への接続権限
+- Python 3.13 or higher
+- uv (package manager)
+- Linux environment with systemd available
+- Connection permission to PostgreSQL (production DB)
 
-## ディレクトリ構造
+## Directory Structure
 
 ```
 ~/pfs-obslog2/
 ├── backend/
-│   ├── Makefile                # ビルド・起動コマンド
+│   ├── Makefile                # Build and startup commands
 │   ├── scripts/
-│   │   └── pfs-obslog2.service # systemdサービスファイル
+│   │   └── pfs-obslog2.service # systemd service file
 │   └── secrets/
-│       └── session_secret_key  # 自動生成
+│       └── session_secret_key  # Auto-generated
 ├── frontend/
-│   └── dist/                   # ビルド済みフロントエンド
+│   └── dist/                   # Built frontend
 ├── logs/
-│   ├── access.log              # アクセスログ
-│   └── error.log               # エラーログ
+│   ├── access.log              # Access log
+│   └── error.log               # Error log
 └── external/
     ├── pfs-datamodel/
     └── pfs_utils/
 ```
 
-## セットアップ手順
+## Setup Procedure
 
-### 1. リポジトリのクローン
+### 1. Clone the Repository
 
 ```bash
 cd ~
@@ -47,7 +47,7 @@ git clone <repository-url> pfs-obslog2
 cd pfs-obslog2
 ```
 
-### 2. 外部依存関係のセットアップ
+### 2. External Dependencies Setup
 
 ```bash
 # pfs-datamodel
@@ -59,246 +59,246 @@ cd ../pfs_utils
 git submodule update --init
 ```
 
-### 3. バックエンドのセットアップ
+### 3. Backend Setup
 
 ```bash
 cd ~/pfs-obslog2/backend
 
-# 依存関係のインストール
+# Install dependencies
 uv sync
 
-# 初期セットアップ（シークレットキー生成など）
+# Initial setup (secret key generation, etc.)
 make setup
 ```
 
-これにより以下が自動的に行われます：
-- セッション用シークレットキーの生成（`secrets/session_secret_key`）
-- ログディレクトリの作成
+This automatically performs the following:
+- Session secret key generation (`secrets/session_secret_key`)
+- Log directory creation
 
-### 4. フロントエンドのビルド
+### 4. Frontend Build
 
 ```bash
 cd ~/pfs-obslog2/frontend
 
-# 依存関係のインストール
+# Install dependencies
 npm install
 
-# stellar-globeのビルド（初回のみ）
+# Build stellar-globe (first time only)
 npm run build:stellar-globe
 
-# 本番用ビルド
+# Production build
 npm run build
 ```
 
-ビルド成果物は `dist/` ディレクトリに生成されます。
+Build output is generated in the `dist/` directory.
 
-### 5. 動作確認（手動起動）
+### 5. Manual Startup Verification
 
-#### 開発モード
+#### Development Mode
 
-開発モードでは、バックエンドとフロントエンドを別々に起動します：
+In development mode, start backend and frontend separately:
 
 ```bash
-# バックエンド（ターミナル1）
+# Backend (Terminal 1)
 cd ~/pfs-obslog2/backend
 make dev
 
-# フロントエンド（ターミナル2）
+# Frontend (Terminal 2)
 cd ~/pfs-obslog2/frontend
 npm run dev
 ```
 
-ブラウザで `http://localhost:5173/` にアクセスして動作を確認します。
-APIリクエストは自動的にバックエンド（http://localhost:8000/api）にプロキシされます。
+Access `http://localhost:5173/` in your browser to verify operation.
+API requests are automatically proxied to the backend (http://localhost:8000/api).
 
-#### 本番モード
+#### Production Mode
 
-本番モードでは、バックエンドが静的ファイルも配信します：
+In production mode, the backend also serves static files:
 
 ```bash
 cd ~/pfs-obslog2/backend
 
-# プロダクションモードで起動
+# Start in production mode
 make production
 ```
 
-ブラウザで `http://<hostname>:5000/` にアクセスして動作を確認します。
-**注意**: Nginx経由でアクセスする場合は `http://<hostname>/obslog/` を使用してください（Nginxが`/obslog`を除去してバックエンドに転送）。
+Access `http://<hostname>:5000/` in your browser to verify operation.
+**Note**: When accessing via Nginx, use `http://<hostname>/obslog/` (Nginx strips `/obslog` and forwards to backend).
 
-### 6. systemd サービスの設定
+### 6. systemd Service Configuration
 
 ```bash
-# サービスファイルをユーザーsystemdにリンク
+# Link service file to user systemd
 mkdir -p ~/.config/systemd/user
 ln -sf ~/pfs-obslog2/backend/scripts/pfs-obslog2.service ~/.config/systemd/user/
 
-# systemdをリロード
+# Reload systemd
 systemctl --user daemon-reload
 
-# サービスを起動
+# Start service
 systemctl --user start pfs-obslog2
 
-# 状態確認
+# Check status
 systemctl --user status pfs-obslog2
 
-# ログを確認（下記「ログ確認について」を参照）
+# Check logs (see "About Log Checking" below)
 journalctl _UID=$(id -u) -u pfs-obslog2 -f
 ```
 
-### 7. 自動起動の設定
+### 7. Auto-start Configuration
 
 ```bash
-# ログイン時に自動起動を有効化
+# Enable auto-start on login
 systemctl --user enable pfs-obslog2
 
-# システム起動時にユーザーサービスを起動するために
-# lingering を有効化（再起動後もサービスが動作）
+# Enable lingering to start user services at system boot
+# (service runs even after reboot)
 loginctl enable-linger $USER
 ```
 
-## サービス管理コマンド
+## Service Management Commands
 
 ```bash
-# 起動
+# Start
 systemctl --user start pfs-obslog2
 
-# 停止
+# Stop
 systemctl --user stop pfs-obslog2
 
-# 再起動
+# Restart
 systemctl --user restart pfs-obslog2
 
-# 状態確認
+# Check status
 systemctl --user status pfs-obslog2
 
-# ログ確認（下記「ログ確認について」を参照）
+# Check logs (see "About Log Checking" below)
 journalctl _UID=$(id -u) -u pfs-obslog2 -f
 
-# アプリケーションログの直接確認
+# Direct application log check
 tail -f ~/pfs-obslog2/logs/access.log
 tail -f ~/pfs-obslog2/logs/error.log
 ```
 
-### ログ確認について
+### About Log Checking
 
-**注意:** 一部の環境では `journalctl --user` がログを表示しない場合があります。これは、ユーザー専用のジャーナルファイルが存在せず、すべてのログがシステムジャーナルに統合されているためです。
+**Note:** In some environments, `journalctl --user` may not display logs. This is because user-specific journal files don't exist and all logs are integrated into the system journal.
 
-その場合は、ユーザーIDでフィルタリングする方法を使用してください：
+In that case, use user ID filtering:
 
 ```bash
-# --user の代わりに _UID=$(id -u) を使用
+# Use _UID=$(id -u) instead of --user
 journalctl _UID=$(id -u) -u pfs-obslog2 -f
 
-# 最新100行を表示
+# Show latest 100 lines
 journalctl _UID=$(id -u) -u pfs-obslog2 -n 100 --no-pager
 ```
 
-## 設定のカスタマイズ
+## Configuration Customization
 
-### 環境変数
+### Environment Variables
 
-systemdサービスファイル（`pfs-obslog2.service`）で以下の環境変数を設定できます：
+The following environment variables can be set in the systemd service file (`pfs-obslog2.service`):
 
-| 環境変数 | デフォルト値 | 説明 |
-|----------|-------------|------|
-| `BIND_ADDRESS` | `0.0.0.0:5000` | バインドするアドレスとポート |
-| `PFS_OBSLOG_app_env` | `production` | 環境（development/production） |
-| `PFS_OBSLOG_database_url` | - | PostgreSQL接続URL |
-| `PFS_OBSLOG_qadb_url` | - | QAデータベース接続URL（seeing, transparency等） |
-| `PFS_OBSLOG_session_secret_key` | 自動生成 | セッション暗号化キー |
-| `PFS_OBSLOG_root_path` | `""` (空文字列) | アプリケーションのURLプレフィックス |
+| Environment Variable | Default Value | Description |
+|---------------------|---------------|-------------|
+| `BIND_ADDRESS` | `0.0.0.0:5000` | Address and port to bind |
+| `PFS_OBSLOG_app_env` | `production` | Environment (development/production) |
+| `PFS_OBSLOG_database_url` | - | PostgreSQL connection URL |
+| `PFS_OBSLOG_qadb_url` | - | QA database connection URL (for seeing, transparency, etc.) |
+| `PFS_OBSLOG_session_secret_key` | Auto-generated | Session encryption key |
+| `PFS_OBSLOG_root_path` | `""` (empty string) | Application URL prefix |
 
-**QAデータベースについて:**
+**About QA Database:**
 
-`PFS_OBSLOG_qadb_url` は systemd サービスファイルで設定します。
-開発環境では、デフォルトでローカルの qadb（`postgresql://pfs@localhost:15432/qadb`）に接続します。
+`PFS_OBSLOG_qadb_url` is set in the systemd service file.
+In development environment, it connects to local qadb by default (`postgresql://pfs@localhost:15432/qadb`).
 
-**URLプレフィックスについて:**
+**About URL Prefix:**
 
-アプリケーション自体はプレフィックスなし（`/`）で動作します。
-Nginx側で `/obslog` へのリクエストをパスから `/obslog` を除去してバックエンドに転送します。
+The application itself operates without a prefix (`/`).
+Nginx strips `/obslog` from requests and forwards them to the backend.
 
 ```nginx
-# Nginxの設定例
+# Nginx configuration example
 location /obslog/ {
-    proxy_pass http://localhost:5000/;  # 末尾の / で /obslog をストリップ
+    proxy_pass http://localhost:5000/;  # Trailing / strips /obslog
     ...
 }
 ```
 
-この設定により：
-- ユーザーは `http://<hostname>/obslog/` でアクセス
-- Nginxが `/obslog/` を `/` に変換してバックエンドに転送
-- バックエンドは `/api/*`, `/` などのパスで動作
+With this configuration:
+- Users access via `http://<hostname>/obslog/`
+- Nginx converts `/obslog/` to `/` and forwards to backend
+- Backend operates with paths like `/api/*`, `/`
 
-開発モード（`make dev`）ではNginx不要で `http://localhost:5173/` で直接アクセスします。
+Development mode (`make dev`) doesn't require Nginx and can be accessed directly at `http://localhost:5173/`.
 
-### サービスファイルの編集
+### Editing the Service File
 
 ```bash
-# 直接編集する場合
+# To edit directly
 vi ~/pfs-obslog2/backend/scripts/pfs-obslog2.service
 
-# 編集後はリロードして再起動
+# After editing, reload and restart
 systemctl --user daemon-reload
 systemctl --user restart pfs-obslog2
 ```
 
-### ワーカー数の調整
+### Adjusting Worker Count
 
-`backend/Makefile` の `production` ターゲット内の `--workers` オプションを変更します：
+Modify the `--workers` option in the `production` target in `backend/Makefile`:
 
 ```makefile
 # backend/Makefile
 production: setup
 	uv run gunicorn pfs_obslog.main:app \
-		--workers 8 \  # ← ワーカー数を調整
+		--workers 8 \  # ← Adjust worker count
 		...
 ```
 
-推奨値: `(CPUコア数 × 2) + 1`
+Recommended value: `(CPU cores × 2) + 1`
 
-## 開発環境と本番環境でのディレクトリ共有
+## Directory Sharing Between Development and Production
 
-同一ディレクトリで開発サーバー（`make dev`）と本番サーバー（`make production`）を同時に動作させる場合、以下の点に注意してください。
+When running both development server (`make dev`) and production server (`make production`) in the same directory simultaneously, note the following:
 
-### キャッシュディレクトリ
+### Cache Directory
 
-キャッシュディレクトリは `/tmp/$USER/obslog/cache` に配置され、ユーザーごとに自動的に分離されます。
+The cache directory is placed at `/tmp/$USER/obslog/cache` and is automatically separated per user.
 
-**注意**: 同一ユーザーで開発・本番の両方を実行する場合、キャッシュが共有されます。
-キャッシュには書き込みも行われるため、両方のサーバーが同時にキャッシュを更新する可能性があります。
-ただし、キャッシュの更新処理は冪等であり、SQLiteのロック機構により整合性が保たれるため、通常は問題ありません。
+**Note**: When running both development and production as the same user, the cache is shared.
+Since the cache is written to by both servers, they may update the cache simultaneously.
+However, cache update processing is idempotent and consistency is maintained by SQLite's locking mechanism, so this is usually not a problem.
 
-より厳密に分離したい場合は、異なるユーザーで実行するか、環境変数で`cache_dir`をオーバーライドしてください（現在は未対応）。
+For stricter isolation, run as different users or override `cache_dir` via environment variable (currently not supported).
 
-### ログディレクトリ
+### Log Directory
 
-開発サーバー（`make dev`）は標準出力にログを出力します。
-本番サーバー（`make production`）は `~/pfs-obslog2/logs/` にログファイルを作成します。
-そのため、ログは自動的に分離されます。
+Development server (`make dev`) outputs logs to stdout.
+Production server (`make production`) creates log files in `~/pfs-obslog2/logs/`.
+Therefore, logs are automatically separated.
 
-### セッションシークレットキー
+### Session Secret Key
 
-開発サーバー（`make dev`）はハードコードされた仮のキー（`'???'`）を使用します。
-本番サーバー（`make production`）は `backend/secrets/session_secret_key` を使用します。
-そのため、セッションは自動的に分離されます。
+Development server (`make dev`) uses a hardcoded temporary key (`'???'`).
+Production server (`make production`) uses `backend/secrets/session_secret_key`.
+Therefore, sessions are automatically separated.
 
-### ポートの衝突
+### Port Conflicts
 
-開発サーバー（デフォルト: 8000）と本番サーバー（デフォルト: 5000）は異なるポートを使用するため、
-デフォルト設定のまま同時に起動できます。
+Development server (default: 8000) and production server (default: 5000) use different ports,
+so they can run simultaneously with default settings.
 
-### 依存関係の管理
+### Dependency Management
 
-`uv sync` でインストールされる依存関係は `.venv/` に保存され、開発・本番で共有されます。
-これは通常問題ありませんが、異なるバージョンの依存関係が必要な場合は、別のディレクトリにクローンしてください。
+Dependencies installed via `uv sync` are saved in `.venv/` and shared between development and production.
+This is usually not a problem, but if different dependency versions are needed, clone to a separate directory.
 
-## Webサーバー（Nginx）との連携
+## Web Server (Nginx) Integration
 
-本番環境では、Nginx をリバースプロキシとして使用することを推奨します。
+In production, using Nginx as a reverse proxy is recommended.
 
-### Nginx 設定例
+### Nginx Configuration Example
 
 ```nginx
 upstream obslog_backend {
@@ -309,10 +309,10 @@ server {
     listen 80;
     server_name obslog.example.com;
 
-    # フロントエンド静的ファイルとバックエンドAPI
-    # /obslog/ 配下のリクエストを / に変換してバックエンドに転送
+    # Frontend static files and backend API
+    # Convert requests under /obslog/ to / and forward to backend
     location /obslog/ {
-        proxy_pass http://obslog_backend/;  # 末尾の / で /obslog をストリップ
+        proxy_pass http://obslog_backend/;  # Trailing / strips /obslog
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -321,60 +321,60 @@ server {
 }
 ```
 
-## トラブルシューティング
+## Troubleshooting
 
-### サービスが起動しない
+### Service Won't Start
 
 ```bash
-# 詳細なログを確認
+# Check detailed logs
 journalctl _UID=$(id -u) -u pfs-obslog2 -n 100 --no-pager
 
-# 手動で起動してエラーを確認
+# Start manually to check errors
 cd ~/pfs-obslog2/backend
 make production
 ```
 
-### データベース接続エラー
+### Database Connection Error
 
 ```bash
-# 接続テスト
+# Connection test
 psql -h 133.40.164.48 -U pfs opdb -c "SELECT 1"
 
-# ~/.pgpass の確認
+# Check ~/.pgpass
 cat ~/.pgpass
 chmod 600 ~/.pgpass
 ```
 
-### ポートが使用中
+### Port Already in Use
 
 ```bash
-# 使用中のポートを確認
+# Check ports in use
 ss -tlnp | grep 5000
 
-# 別プロセスを終了するか、ポートを変更
+# Kill another process or change port
 ```
 
-## 既存プロジェクトからの移行
+## Migration from Existing Project
 
-既存の pfs-obslog（旧プロジェクト）から移行する場合：
+When migrating from the existing pfs-obslog (old project):
 
-1. 旧サービスを停止
+1. Stop old service
    ```bash
    systemctl --user stop pfs-obslog
    ```
 
-2. 新サービスを起動
+2. Start new service
    ```bash
    systemctl --user start pfs-obslog2
    ```
 
-3. 動作確認後、旧サービスの自動起動を無効化
+3. After verifying operation, disable old service auto-start
    ```bash
    systemctl --user disable pfs-obslog
    ```
 
-## 関連ドキュメント
+## Related Documents
 
-- [バックエンド開発ガイド](../copilot/backend.md)
-- [フロントエンド開発ガイド](../copilot/frontend.md)
+- [Backend Development Guide](../development/backend.md)
+- [Frontend Development Guide](../development/frontend.md)
 - [README](../README.md)

@@ -1,90 +1,90 @@
-# フィルター言語仕様
+# Filter Language Specification
 
-このドキュメントでは、Visit一覧のフィルタリングで使用可能な仮想テーブル・仮想カラムの仕様を定義します。
+This document defines the virtual tables and virtual columns available for filtering in the Visit list.
 
-> **重要**: このドキュメントは `backend/src/pfs_obslog/visitquery/` 配下のコードと同期して更新する必要があります。
+> **Important**: This document must be kept in sync with the code under `backend/src/pfs_obslog/visitquery/`.
 
-## 概要
+## Overview
 
-Visit一覧エンドポイント (`GET /api/visits`) では、`sql` パラメータでSQLライクなWHERE句を指定してフィルタリングできます。
-このフィルタリング機能は仮想テーブル `visits` に対してクエリを実行するイメージで設計されています。
+The Visit list endpoint (`GET /api/visits`) allows filtering by specifying SQL-like WHERE clauses via the `sql` parameter.
+This filtering feature is designed as if querying a virtual table `visits`.
 
 ```sql
--- 例: Visit ID が 100〜200 の範囲で、SpS露出があるもの
+-- Example: Visit IDs between 100-200 with SpS exposures
 WHERE id BETWEEN 100 AND 200 AND is_sps_visit
 ```
 
-## 仮想カラム一覧
+## Virtual Column List
 
-### 基本情報
+### Basic Information
 
-| カラム名 | 型 | 説明 | マッピング先 | 必要なJOIN |
-|----------|------|------|-------------|-----------|
-| `visit_id` | INTEGER | Visit ID | `pfs_visit.pfs_visit_id` | なし |
-| `id` | INTEGER | Visit ID（エイリアス） | `pfs_visit.pfs_visit_id` | なし |
-| `issued_at` | TIMESTAMP | 発行日時 | `pfs_visit.issued_at` | なし |
+| Column Name | Type | Description | Maps To | Required JOINs |
+|-------------|------|-------------|---------|----------------|
+| `visit_id` | INTEGER | Visit ID | `pfs_visit.pfs_visit_id` | None |
+| `id` | INTEGER | Visit ID (alias) | `pfs_visit.pfs_visit_id` | None |
+| `issued_at` | TIMESTAMP | Issue timestamp | `pfs_visit.issued_at` | None |
 
-### シーケンス情報
+### Sequence Information
 
-| カラム名 | 型 | 説明 | マッピング先 | 必要なJOIN |
-|----------|------|------|-------------|-----------|
-| `sequence_type` | TEXT | シーケンスタイプ | `iic_sequence.sequence_type` | visit_set, iic_sequence |
-| `comments` | TEXT | シーケンスのコメント | `iic_sequence.comments` | visit_set, iic_sequence |
-| `visit_set_id` | INTEGER | シーケンスID | `iic_sequence.iic_sequence_id` | visit_set, iic_sequence |
-| `status` | TEXT | シーケンスステータス | `iic_sequence_status.cmd_output` | visit_set, iic_sequence, iic_sequence_status |
+| Column Name | Type | Description | Maps To | Required JOINs |
+|-------------|------|-------------|---------|----------------|
+| `sequence_type` | TEXT | Sequence type | `iic_sequence.sequence_type` | visit_set, iic_sequence |
+| `comments` | TEXT | Sequence comments | `iic_sequence.comments` | visit_set, iic_sequence |
+| `visit_set_id` | INTEGER | Sequence ID | `iic_sequence.iic_sequence_id` | visit_set, iic_sequence |
+| `status` | TEXT | Sequence status | `iic_sequence_status.cmd_output` | visit_set, iic_sequence, iic_sequence_status |
 
-### グループ情報
+### Group Information
 
-| カラム名 | 型 | 説明 | マッピング先 | 必要なJOIN |
-|----------|------|------|-------------|-----------|
-| `sequence_group_id` | INTEGER | シーケンスグループID | `sequence_group.group_id` | visit_set, iic_sequence, sequence_group |
-| `sequence_group_name` | TEXT | シーケンスグループ名 | `sequence_group.group_name` | visit_set, iic_sequence, sequence_group |
+| Column Name | Type | Description | Maps To | Required JOINs |
+|-------------|------|-------------|---------|----------------|
+| `sequence_group_id` | INTEGER | Sequence group ID | `sequence_group.group_id` | visit_set, iic_sequence, sequence_group |
+| `sequence_group_name` | TEXT | Sequence group name | `sequence_group.group_name` | visit_set, iic_sequence, sequence_group |
 
-### メモ関連
+### Note Related
 
-| カラム名 | 型 | 説明 | マッピング先 | 必要なJOIN |
-|----------|------|------|-------------|-----------|
-| `visit_note` | TEXT | Visitメモ本文 | `obslog_visit_note.body` | obslog_visit_note |
-| `visit_note_user` | TEXT | Visitメモ作成者 | `obslog_user.account_name` | obslog_visit_note, visit_note_user |
-| `visit_set_note` | TEXT | シーケンスメモ本文 | `obslog_visit_set_note.body` | visit_set, obslog_visit_set_note |
-| `visit_set_note_user` | TEXT | シーケンスメモ作成者 | `obslog_user.account_name` | visit_set, obslog_visit_set_note, visit_set_note_user |
+| Column Name | Type | Description | Maps To | Required JOINs |
+|-------------|------|-------------|---------|----------------|
+| `visit_note` | TEXT | Visit note body | `obslog_visit_note.body` | obslog_visit_note |
+| `visit_note_user` | TEXT | Visit note author | `obslog_user.account_name` | obslog_visit_note, visit_note_user |
+| `visit_set_note` | TEXT | Sequence note body | `obslog_visit_set_note.body` | visit_set, obslog_visit_set_note |
+| `visit_set_note_user` | TEXT | Sequence note author | `obslog_user.account_name` | visit_set, obslog_visit_set_note, visit_set_note_user |
 
-### 露出判定カラム（計算カラム）
+### Exposure Detection Columns (Computed Columns)
 
-これらのカラムは実際のテーブルカラムではなく、関連テーブルの存在をチェックする計算式として実装されています。
+These columns are not actual table columns but are implemented as expressions that check for the existence of related tables.
 
-| カラム名 | 型 | 説明 | 計算式 | 必要なJOIN |
-|----------|------|------|--------|-----------|
-| `is_sps_visit` | BOOLEAN | SpS露出があるか | `sps_visit.pfs_visit_id IS NOT NULL` | sps_visit |
-| `is_mcs_visit` | BOOLEAN | MCS露出があるか | `mcs_exposure.pfs_visit_id IS NOT NULL` | mcs_exposure |
-| `is_agc_visit` | BOOLEAN | AGC露出があるか | `agc_exposure.pfs_visit_id IS NOT NULL` | agc_exposure |
+| Column Name | Type | Description | Expression | Required JOINs |
+|-------------|------|-------------|------------|----------------|
+| `is_sps_visit` | BOOLEAN | Has SpS exposure | `sps_visit.pfs_visit_id IS NOT NULL` | sps_visit |
+| `is_mcs_visit` | BOOLEAN | Has MCS exposure | `mcs_exposure.pfs_visit_id IS NOT NULL` | mcs_exposure |
+| `is_agc_visit` | BOOLEAN | Has AGC exposure | `agc_exposure.pfs_visit_id IS NOT NULL` | agc_exposure |
 
-### FITSヘッダー
+### FITS Header
 
-| カラム名 | 型 | 説明 | マッピング先 | 必要なJOIN |
-|----------|------|------|-------------|-----------|
-| `fits_header` | JSONB | FITSヘッダー（配列アクセス用） | `obslog_fits_header.cards_dict` | obslog_fits_header |
+| Column Name | Type | Description | Maps To | Required JOINs |
+|-------------|------|-------------|---------|----------------|
+| `fits_header` | JSONB | FITS header (for array access) | `obslog_fits_header.cards_dict` | obslog_fits_header |
 
-**使用例:**
+**Usage Example:**
 ```sql
--- FITSヘッダーの OBSERVER フィールドを検索
+-- Search OBSERVER field in FITS header
 WHERE fits_header['OBSERVER'] LIKE '%Tamura%'
 ```
 
-### プロポーザル
+### Proposal
 
-| カラム名 | 型 | 説明 | マッピング先 | 必要なJOIN |
-|----------|------|------|-------------|-----------|
-| `proposal_id` | TEXT | プロポーザルID | `pfs_design_fiber.proposal_id` | pfs_design_fiber |
+| Column Name | Type | Description | Maps To | Required JOINs |
+|-------------|------|-------------|---------|----------------|
+| `proposal_id` | TEXT | Proposal ID | `pfs_design_fiber.proposal_id` | pfs_design_fiber |
 
-### 全文検索
+### Full-text Search
 
-| カラム名 | 型 | 説明 | 必要なJOIN |
-|----------|------|------|-----------|
-| `any_column` | 特殊 | 複数カラムを対象としたテキスト検索 | 多数（下記参照） |
+| Column Name | Type | Description | Required JOINs |
+|-------------|------|-------------|----------------|
+| `any_column` | Special | Text search across multiple columns | Multiple (see below) |
 
-**`any_column` の検索対象カラム:**
-- `pfs_visit.pfs_visit_id`（文字列にキャスト）
+**`any_column` Search Target Columns:**
+- `pfs_visit.pfs_visit_id` (cast to string)
 - `pfs_visit.pfs_visit_description`
 - `obslog_visit_note.body`
 - `obslog_visit_set_note.body`
@@ -95,136 +95,136 @@ WHERE fits_header['OBSERVER'] LIKE '%Tamura%'
 - `obslog_mcs_exposure_note.body`
 - `pfs_design_fiber.proposal_id`
 
-**使用例:**
+**Usage Example:**
 ```sql
--- 複数カラムから 'test' を検索
+-- Search for 'test' across multiple columns
 WHERE any_column LIKE '%test%'
 ```
 
-### 集約カラム
+### Aggregate Columns
 
-これらのカラムは各Visitに関連するレコード数や平均値を計算します。
-集約カラムはサブクエリとして実装されており、メインクエリにJOINされません。
+These columns calculate counts or averages of records related to each Visit.
+Aggregate columns are implemented as subqueries and are not JOINed to the main query.
 
-| カラム名 | 型 | 説明 | 集約対象 | 集約関数 |
-|----------|------|------|---------|---------|
-| `sps_count` | INTEGER | SPS露出の数 | `sps_exposure` | COUNT |
-| `sps_avg_exptime` | FLOAT | SPS露出の平均露出時間 | `sps_exposure.exptime` | AVG |
-| `mcs_count` | INTEGER | MCS露出の数 | `mcs_exposure` | COUNT |
-| `mcs_avg_exptime` | FLOAT | MCS露出の平均露出時間 | `mcs_exposure.mcs_exptime` | AVG |
-| `agc_count` | INTEGER | AGC露出の数 | `agc_exposure` | COUNT |
-| `agc_avg_exptime` | FLOAT | AGC露出の平均露出時間 | `agc_exposure.agc_exptime` | AVG |
+| Column Name | Type | Description | Aggregates | Function |
+|-------------|------|-------------|------------|----------|
+| `sps_count` | INTEGER | Number of SPS exposures | `sps_exposure` | COUNT |
+| `sps_avg_exptime` | FLOAT | Average exposure time of SPS exposures | `sps_exposure.exptime` | AVG |
+| `mcs_count` | INTEGER | Number of MCS exposures | `mcs_exposure` | COUNT |
+| `mcs_avg_exptime` | FLOAT | Average exposure time of MCS exposures | `mcs_exposure.mcs_exptime` | AVG |
+| `agc_count` | INTEGER | Number of AGC exposures | `agc_exposure` | COUNT |
+| `agc_avg_exptime` | FLOAT | Average exposure time of AGC exposures | `agc_exposure.agc_exptime` | AVG |
 
-**使用例:**
+**Usage Examples:**
 ```sql
--- SPS露出が5件以上のVisit
+-- Visits with 5 or more SPS exposures
 WHERE sps_count >= 5
 
--- 平均露出時間が30秒以上のVisit
+-- Visits with average exposure time of 30 seconds or more
 WHERE sps_avg_exptime >= 30
 
--- 複数の集約条件を組み合わせ
+-- Combining multiple aggregate conditions
 WHERE sps_count > 0 AND mcs_count > 0
 
--- 通常の条件と組み合わせ
+-- Combining with regular conditions
 WHERE id > 10000 AND sps_count >= 5
 ```
 
-**制限事項:**
-- 集約カラムは `OR` 式の中では使用できません
-- 集約カラムは `NOT` 式の中では使用できません
-- 集約カラムは `AND` 式で他の条件と組み合わせることができます
+**Restrictions:**
+- Aggregate columns cannot be used in `OR` expressions
+- Aggregate columns cannot be used in `NOT` expressions
+- Aggregate columns can be combined with other conditions using `AND`
 
 ---
 
-## サポートされる構文
+## Supported Syntax
 
-### 比較演算子
+### Comparison Operators
 
-| 演算子 | 説明 | 例 |
-|--------|------|-----|
-| `=` | 等しい | `id = 100` |
-| `<>`, `!=` | 等しくない | `status <> 'SUCCESS'` |
-| `<` | より小さい | `id < 1000` |
-| `>` | より大きい | `id > 500` |
-| `<=` | 以下 | `sps_count <= 10` |
-| `>=` | 以上 | `sps_avg_exptime >= 30.0` |
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `=` | Equal | `id = 100` |
+| `<>`, `!=` | Not equal | `status <> 'SUCCESS'` |
+| `<` | Less than | `id < 1000` |
+| `>` | Greater than | `id > 500` |
+| `<=` | Less than or equal | `sps_count <= 10` |
+| `>=` | Greater than or equal | `sps_avg_exptime >= 30.0` |
 
 ### LIKE / ILIKE
 
-| 構文 | 説明 | 例 |
-|------|------|-----|
-| `LIKE` | パターンマッチ（大文字小文字区別） | `sequence_type LIKE '%domeflat%'` |
-| `NOT LIKE` | パターンマッチの否定 | `visit_note NOT LIKE '%test%'` |
-| `ILIKE` | パターンマッチ（大文字小文字区別なし） | `status ILIKE '%success%'` |
+| Syntax | Description | Example |
+|--------|-------------|---------|
+| `LIKE` | Pattern match (case-sensitive) | `sequence_type LIKE '%domeflat%'` |
+| `NOT LIKE` | Negated pattern match | `visit_note NOT LIKE '%test%'` |
+| `ILIKE` | Pattern match (case-insensitive) | `status ILIKE '%success%'` |
 
-**ワイルドカード:**
-- `%` - 任意の0文字以上
-- `_` - 任意の1文字
+**Wildcards:**
+- `%` - Any 0 or more characters
+- `_` - Any single character
 
 ### BETWEEN
 
 ```sql
--- 範囲検索
+-- Range search
 WHERE id BETWEEN 100 AND 200
 WHERE issued_at BETWEEN '2024-01-01' AND '2024-12-31'
 ```
 
-### 論理演算子
+### Logical Operators
 
-| 演算子 | 説明 | 例 |
-|--------|------|-----|
-| `AND` | 論理積 | `is_sps_visit AND id > 100` |
-| `OR` | 論理和 | `is_mcs_visit OR is_agc_visit` |
-| `NOT` | 論理否定 | `NOT is_mcs_visit` |
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `AND` | Logical AND | `is_sps_visit AND id > 100` |
+| `OR` | Logical OR | `is_mcs_visit OR is_agc_visit` |
+| `NOT` | Logical NOT | `NOT is_mcs_visit` |
 
-### NULL判定
+### NULL Check
 
 ```sql
--- NULLかどうか
+-- Check if NULL
 WHERE status IS NULL
 WHERE visit_note IS NOT NULL
 ```
 
-### 型キャスト
+### Type Casting
 
-| キャスト | 説明 | 例 |
-|---------|------|-----|
-| `::date` | DATE型にキャスト | `issued_at::date = '2024-01-01'` |
-| `::float`, `::float8` | FLOAT型にキャスト | `fits_header['EXPTIME']::float > 30` |
-| `::int`, `::integer` | INTEGER型にキャスト | `fits_header['VISIT']::int = 100` |
+| Cast | Description | Example |
+|------|-------------|---------|
+| `::date` | Cast to DATE | `issued_at::date = '2024-01-01'` |
+| `::float`, `::float8` | Cast to FLOAT | `fits_header['EXPTIME']::float > 30` |
+| `::int`, `::integer` | Cast to INTEGER | `fits_header['VISIT']::int = 100` |
 
-### 配列/JSONBアクセス
+### Array/JSONB Access
 
 ```sql
--- FITSヘッダーのキーにアクセス
+-- Access FITS header key
 WHERE fits_header['OBSERVER'] LIKE '%Tamura%'
 WHERE fits_header['EXPTIME']::float > 30.0
 ```
 
-### 許可される関数
+### Allowed Functions
 
-セキュリティのため、使用できる関数は以下に制限されています：
+For security, only the following functions are allowed:
 
-| 関数 | 説明 | 例 |
-|------|------|-----|
-| `date()` | 日付変換 | `date(issued_at) = '2024-01-01'` |
-| `lower()` | 小文字変換 | `lower(sequence_type) = 'sciencetrace'` |
-| `upper()` | 大文字変換 | `upper(status) = 'SUCCESS'` |
-| `trim()` | 空白除去 | `trim(comments) <> ''` |
-| `coalesce()` | NULL置換 | `coalesce(status, 'UNKNOWN') = 'SUCCESS'` |
+| Function | Description | Example |
+|----------|-------------|---------|
+| `date()` | Date conversion | `date(issued_at) = '2024-01-01'` |
+| `lower()` | Lowercase conversion | `lower(sequence_type) = 'sciencetrace'` |
+| `upper()` | Uppercase conversion | `upper(status) = 'SUCCESS'` |
+| `trim()` | Whitespace removal | `trim(comments) <> ''` |
+| `coalesce()` | NULL replacement | `coalesce(status, 'UNKNOWN') = 'SUCCESS'` |
 
 ---
 
-## JOIN依存関係
+## JOIN Dependencies
 
-仮想カラムを使用すると、バックグラウンドで必要なテーブルが自動的にJOINされます。
-以下はJOINの依存関係を示しています。
+When using virtual columns, required tables are automatically JOINed in the background.
+Below shows the JOIN dependency structure.
 
 ```
-pfs_visit (ベーステーブル)
+pfs_visit (base table)
 ├── obslog_visit_note
-│   └── visit_note_user (ObslogUser のエイリアス)
+│   └── visit_note_user (alias for ObslogUser)
 ├── sps_visit
 │   ├── sps_exposure
 │   │   └── sps_annotation
@@ -233,10 +233,10 @@ pfs_visit (ベーステーブル)
 │   │   ├── iic_sequence_status
 │   │   └── sequence_group
 │   ├── obslog_visit_set_note
-│   │   └── visit_set_note_user (ObslogUser のエイリアス)
+│   │   └── visit_set_note_user (alias for ObslogUser)
 ├── mcs_exposure
 │   ├── obslog_mcs_exposure_note
-│   │   └── mcs_exposure_note_user (ObslogUser のエイリアス)
+│   │   └── mcs_exposure_note_user (alias for ObslogUser)
 ├── agc_exposure
 ├── pfs_design_fiber
 └── obslog_fits_header
@@ -244,130 +244,130 @@ pfs_visit (ベーステーブル)
 
 ---
 
-## クエリ例
+## Query Examples
 
-### 基本的なフィルタリング
+### Basic Filtering
 
 ```sql
--- 特定のVisit IDを取得
+-- Get specific Visit ID
 WHERE id = 12345
 
--- Visit ID の範囲
+-- Visit ID range
 WHERE id BETWEEN 10000 AND 20000
 
--- 日付でフィルタリング
+-- Filter by date
 WHERE issued_at::date = '2024-06-15'
 WHERE issued_at >= '2024-06-01' AND issued_at < '2024-07-01'
 ```
 
-### シーケンス関連
+### Sequence Related
 
 ```sql
--- 特定のシーケンスタイプ
+-- Specific sequence type
 WHERE sequence_type = 'scienceTrace'
 
--- シーケンスタイプを部分一致で検索
+-- Partial match search for sequence type
 WHERE sequence_type LIKE '%domeflat%'
 
--- 特定のステータス
+-- Specific status
 WHERE status = 'SUCCESS'
-WHERE status IS NULL  -- ステータスが未設定
+WHERE status IS NULL  -- Status not set
 ```
 
-### 露出の有無で絞り込み
+### Filter by Exposure Presence
 
 ```sql
--- SpS露出があるVisit
+-- Visits with SpS exposure
 WHERE is_sps_visit
 
--- MCS露出のみのVisit
+-- Visits with only MCS exposure
 WHERE is_mcs_visit AND NOT is_sps_visit
 
--- いずれかの露出があるVisit
+-- Visits with any exposure type
 WHERE is_sps_visit OR is_mcs_visit OR is_agc_visit
 ```
 
-### 露出数や露出時間で絞り込み
+### Filter by Exposure Count or Time
 
 ```sql
--- SPS露出が10件以上のVisit
+-- Visits with 10 or more SPS exposures
 WHERE sps_count >= 10
 
--- MCS露出の平均露出時間が1秒以上
+-- MCS exposures with average time of 1 second or more
 WHERE mcs_avg_exptime >= 1.0
 
--- 複合条件
+-- Combined conditions
 WHERE sps_count >= 5 AND sps_avg_exptime >= 30
 ```
 
-### メモの検索
+### Note Search
 
 ```sql
--- Visitメモに特定のキーワードを含む
+-- Visit notes containing specific keyword
 WHERE visit_note LIKE '%calibration%'
 
--- 特定のユーザーのメモがあるVisit
+-- Visits with notes from specific user
 WHERE visit_note_user = 'yamada'
 
--- シーケンスメモの検索
+-- Sequence note search
 WHERE visit_set_note LIKE '%weather%'
 ```
 
-### FITSヘッダーの検索
+### FITS Header Search
 
 ```sql
--- 特定の観測者
+-- Specific observer
 WHERE fits_header['OBSERVER'] LIKE '%Tamura%'
 
--- 露出時間が一定以上
+-- Exposure time above threshold
 WHERE fits_header['EXPTIME']::float > 60.0
 
--- 特定のプログラムID
+-- Specific program ID
 WHERE fits_header['PROP-ID'] = 'S24A-001'
 ```
 
-### 全文検索
+### Full-text Search
 
 ```sql
--- 複数のカラムから横断検索
+-- Cross-column search
 WHERE any_column LIKE '%calibration%'
 ```
 
-### 複合条件
+### Complex Conditions
 
 ```sql
--- SpS露出があり、特定の日付範囲で、メモに 'good' が含まれるVisit
+-- Visits with SpS exposure, in specific date range, with 'good' in notes
 WHERE is_sps_visit 
   AND issued_at::date BETWEEN '2024-06-01' AND '2024-06-30'
   AND visit_note LIKE '%good%'
 
--- シーケンスタイプが scienceTrace で、ステータスが SUCCESS のもの
+-- scienceTrace sequence type with SUCCESS status
 WHERE sequence_type = 'scienceTrace' AND status = 'SUCCESS'
 ```
 
 ---
 
-## セキュリティ制限
+## Security Restrictions
 
-以下の構文は禁止されています：
+The following syntax is prohibited:
 
-- **サブクエリ**: `WHERE id IN (SELECT ...)`
-- **DML文**: INSERT, UPDATE, DELETE
-- **DDL文**: CREATE, DROP, TRUNCATE
-- **未許可の関数**: システム関数、ユーザー定義関数
+- **Subqueries**: `WHERE id IN (SELECT ...)`
+- **DML statements**: INSERT, UPDATE, DELETE
+- **DDL statements**: CREATE, DROP, TRUNCATE
+- **Disallowed functions**: System functions, user-defined functions
 
 ---
 
-## 実装ファイル
+## Implementation Files
 
-このフィルター言語は以下のファイルで実装されています：
+This filter language is implemented in the following files:
 
-| ファイル | 役割 |
-|---------|------|
-| [columns.py](../backend/src/pfs_obslog/visitquery/columns.py) | 仮想カラム定義 (`VIRTUAL_COLUMNS`) |
-| [parser.py](../backend/src/pfs_obslog/visitquery/parser.py) | pglastによるWHERE句パース |
-| [evaluator.py](../backend/src/pfs_obslog/visitquery/evaluator.py) | ASTをSQLAlchemy式に変換 |
-| [joins.py](../backend/src/pfs_obslog/visitquery/joins.py) | JOIN最適化ロジック |
+| File | Role |
+|------|------|
+| [columns.py](../backend/src/pfs_obslog/visitquery/columns.py) | Virtual column definitions (`VIRTUAL_COLUMNS`) |
+| [parser.py](../backend/src/pfs_obslog/visitquery/parser.py) | WHERE clause parsing with pglast |
+| [evaluator.py](../backend/src/pfs_obslog/visitquery/evaluator.py) | AST to SQLAlchemy expression conversion |
+| [joins.py](../backend/src/pfs_obslog/visitquery/joins.py) | JOIN optimization logic |
 
-**関連ドキュメント:**
-- [SQLフィルタリング概要](./sql-filtering.md) - アーキテクチャと実装の詳細
+**Related Documentation:**
+- [SQL Filtering Overview](./sql-filtering.md) - Architecture and implementation details

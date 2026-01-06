@@ -1,96 +1,96 @@
-# バックエンド開発ガイド
+# Backend Development Guide
 
-## 概要
+## Overview
 
-- **フレームワーク:** FastAPI
+- **Framework:** FastAPI
 - **ORM:** SQLAlchemy 2.0
-- **Python バージョン:** 3.13
-- **パッケージ管理:** uv
+- **Python Version:** 3.13
+- **Package Manager:** uv
 
-## パッケージ構造
+## Package Structure
 
 ```
 backend/
 ├── src/
-│   └── pfs_obslog/    # メインパッケージ
+│   └── pfs_obslog/    # Main package
 │       ├── main.py
 │       ├── models.py
-│       ├── auth/      # 認証関連
-│       └── routers/   # APIルーター
-├── tests/             # テストディレクトリ
-└── devel/             # 開発ツール
+│       ├── auth/      # Authentication
+│       └── routers/   # API routers
+├── tests/             # Test directory
+└── devel/             # Development tools
 ```
 
-- `import pfs_obslog.module` でモジュールをインポート可能
-- `__init__.py` なしでもインポート可能（implicit namespace packages）
+- Modules can be imported with `import pfs_obslog.module`
+- Import works without `__init__.py` (implicit namespace packages)
 
-## データベース接続情報
+## Database Connection Information
 
-### 本番DB
+### Production DB
 
 ```bash
 psql -h 133.40.164.48 -U pfs opdb
 ```
 
-認証情報は `~/.pgpass` を参照してください。
+See `~/.pgpass` for authentication credentials.
 
-### テスト用DB（開発用）
+### Test DB (Development)
 
 ```bash
-# 接続
+# Connect
 psql -p 15432 opdb
 
-# 起動
+# Start
 pg_ctl -D ~/pgdata_for_pfs_obslog_test -l ~/pgdata_for_pfs_obslog_test/logfile start
 
-# 停止
+# Stop
 pg_ctl -D ~/pgdata_for_pfs_obslog_test stop
 ```
 
-**接続情報:**
+**Connection Info:**
 - Host: localhost
 - Port: 15432
 - Database: opdb
-- User: pfs（trust認証）
+- User: pfs (trust authentication)
 
-### テスト用DBの再作成
+### Recreating the Test DB
 
 ```bash
 cd backend/devel/make_test_db
 ./run.sh
 ```
 
-## 開発コマンド
+## Development Commands
 
 ```bash
 cd backend
 
-# 依存関係のインストール（開発用パッケージ含む）
-# pfs-datamodel と pfs-utils も external/ から自動インストールされる
+# Install dependencies (including dev packages)
+# pfs-datamodel and pfs-utils are also auto-installed from external/
 uv sync --all-extras
 
-# 開発サーバーの起動
+# Start development server
 uv run uvicorn pfs_obslog.main:app --reload --port 8000
 
-# テストの実行
+# Run tests
 uv run pytest
 
-# カバレッジ付きテスト
+# Run tests with coverage
 uv run pytest --cov=pfs_obslog --cov-report=html
 ```
 
-## SQLAlchemyモデルの自動生成
+## SQLAlchemy Model Auto-generation
 
-DBスキーマからSQLAlchemy 2.0スタイルのモデルを自動生成できます。
+You can auto-generate SQLAlchemy 2.0 style models from the DB schema.
 
 ```bash
 cd backend
 
-# テスト用DBからモデルを生成
+# Generate models from test DB
 uv run python devel/generate_models.py --env test
 
-# 本番DBからモデルを生成
+# Generate models from production DB
 uv run python devel/generate_models.py --env production
 ```
 
-詳細は [backend/devel/generate_models.md](../backend/devel/generate_models.md) を参照。
+See [backend/devel/generate_models.md](../backend/devel/generate_models.md) for details.

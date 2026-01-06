@@ -1,116 +1,116 @@
-# pfs-obslog2 開発ガイド
+# pfs-obslog2 Development Guide
 
-## プロジェクト概要
+## Project Overview
 
-このプロジェクトは既存のpfs-obslogプロジェクト（`./old-project/codebase`が既存プロジェクトへのリンク）のリファクタリングです。
+This project is a refactoring of the existing pfs-obslog project (`./old-project/codebase` is a link to the existing project).
 
-### 技術スタック
+### Tech Stack
 
 - **Backend:** FastAPI, SQLAlchemy
 - **Frontend:** React, TypeScript, Vite, RTK Query
 
-## 詳細ドキュメント
+## Detailed Documentation
 
-バックエンド・フロントエンドの詳細な開発情報は以下を参照してください：
+For detailed development information on backend and frontend, refer to:
 
-- [ドキュメント一覧](../docs/README.md) - 全ドキュメントの目次
-- [バックエンド開発ガイド](../docs/development/backend.md) - DB接続情報、開発コマンド、モデル生成など
-- [フロントエンド開発ガイド](../docs/development/frontend.md) - 開発コマンド、SCSS型生成、RTK Query API生成など
-- [プロジェクトREADME](../README.md) - セットアップ手順、開発サーバーの起動方法
+- [Documentation Index](../docs/README.md) - Table of contents for all documentation
+- [Backend Development Guide](../docs/development/backend.md) - DB connection info, development commands, model generation, etc.
+- [Frontend Development Guide](../docs/development/frontend.md) - Development commands, SCSS type generation, RTK Query API generation, etc.
+- [Project README](../README.md) - Setup instructions, how to start development servers
 
-## 言語ポリシー
+## Language Policy
 
-- **フロントエンド（ユーザー向けUI）:** 英語のみを使用してください
-- **バックエンド（エラーメッセージ）:** ユーザーに伝わるエラーメッセージは英語を使用してください
-- **コード内のコメント・ドキュメント:** 日本語でも英語でも可
+- **Frontend (User-facing UI):** Use English only
+- **Backend (Error messages):** Use English for error messages that are shown to users
+- **Code comments and documentation:** Either Japanese or English is acceptable
 
-## 自動生成ファイル
+## Auto-generated Files
 
-以下のファイルは自動生成されるため、直接編集しないでください：
+The following files are auto-generated, so do not edit them directly:
 
-- **`backend/src/pfs_obslog/models.py`**: `backend/devel/generate_models.py` によりDBスキーマから自動生成
-- **`frontend/src/store/api/generatedApi.ts`**: OpenAPIスキーマから自動生成
+- **`backend/src/pfs_obslog/models.py`**: Auto-generated from DB schema by `backend/devel/generate_models.py`
+- **`frontend/src/store/api/generatedApi.ts`**: Auto-generated from OpenAPI schema
 
-## 作業について
+## Work Guidelines
 
-以下を守ってください。
+Please follow these rules:
 
-- ひとまとまりの作業が完了したらその作業についてのgit commitを行う。
-- `git add -A` は使わない
-  - 複数のエージェントが並行して動作していることがある。`-A` を使うと関係ないファイルもコミットしてしまう。
-  - 代わりに `git add <ファイルパス>` で個別にステージングする。
-- コマンド内で`>`は避ける（自動許可されないため）
-- 指示者への確認は `./copilot/ask_for_instructions` を使用
-  - 作業が進められない場合や各項目完了時のレビュー依頼に活用
-- **バックエンド作業完了時には `make typecheck` で型チェックを実行する**
-  - 型エラーがある場合は修正してからコミットする
+- Commit to git when a unit of work is completed.
+- Do not use `git add -A`
+  - Multiple agents may be running in parallel. Using `-A` may commit unrelated files.
+  - Instead, stage files individually with `git add <filepath>`.
+- Avoid using `>` in commands (not auto-approved)
+- Use `./copilot/ask_for_instructions` to confirm with the instructor
+  - Use when work cannot proceed or for review requests upon completion of each item
+- **Run `make typecheck` for type checking when backend work is completed**
+  - Fix any type errors before committing
 
-## 機能の移植状況管理
+## Migration Status Management
 
-バックエンドAPIの移植状況は [docs/migration/backend-api.md](../docs/migration/backend-api.md) で管理しています。
-フロントエンドコンポーネントの移植状況は [docs/migration/frontend-components.md](../docs/migration/frontend-components.md) で管理しています。
+Backend API migration status is managed in [docs/migration/backend-api.md](../docs/migration/backend-api.md).
+Frontend component migration status is managed in [docs/migration/frontend-components.md](../docs/migration/frontend-components.md).
 
-### バックエンド移植状況の更新ルール
+### Backend Migration Status Update Rules
 
-以下の場合は必ず `docs/migration/backend-api.md` を更新してください：
+Update `docs/migration/backend-api.md` in the following cases:
 
-1. **新しいAPIエンドポイントを実装した場合**
-   - 該当エンドポイントの「状態」を `⏳ 未実装` から `✅ 完了` に変更
-   - 「新エンドポイント」欄にパスを記入
-   - 必要に応じて「備考」を更新
+1. **When a new API endpoint is implemented**
+   - Change the "Status" of the endpoint from `⏳ Not Started` to `✅ Done`
+   - Enter the path in the "New Endpoint" column
+   - Update "Notes" as needed
 
-2. **APIの実装を開始した場合**
-   - 該当エンドポイントの「状態」を `🚧 作業中` に変更
+2. **When API implementation is started**
+   - Change the "Status" of the endpoint to `🚧 In Progress`
 
-3. **移行しないことが決定した場合**
-   - 該当エンドポイントの「状態」を `❌ 移行しない` に変更
-   - 「備考」に理由を記入
+3. **When it is decided not to migrate**
+   - Change the "Status" of the endpoint to `❌ Won't Migrate`
+   - Enter the reason in "Notes"
 
-4. **サマリーテーブルの更新**
-   - エンドポイントの状態を変更した際は、ページ上部のサマリーテーブルも更新
+4. **Update summary table**
+   - When changing endpoint status, also update the summary table at the top of the page
 
-### フロントエンド移植状況の更新ルール
+### Frontend Migration Status Update Rules
 
-以下の場合は必ず `docs/migration/frontend-components.md` を更新してください：
+Update `docs/migration/frontend-components.md` in the following cases:
 
-1. **新しいコンポーネント/ページを実装した場合**
-   - 該当コンポーネントの「状態」を `⏳ 未実装` から `✅ 完了` に変更
-   - 「新コンポーネント」欄にパスを記入
-   - 必要に応じて「備考」を更新
+1. **When a new component/page is implemented**
+   - Change the "Status" of the component from `⏳ Not Started` to `✅ Done`
+   - Enter the path in the "New Component" column
+   - Update "Notes" as needed
 
-2. **部分的に実装が完了した場合**
-   - 該当コンポーネントの「状態」を `🔶 一部完了` に変更
-   - 未実装の機能を「備考」に記入
+2. **When implementation is partially completed**
+   - Change the "Status" of the component to `🔶 Partial`
+   - Enter unimplemented features in "Notes"
 
-3. **コンポーネントの実装を開始した場合**
-   - 該当コンポーネントの「状態」を `🚧 作業中` に変更
+3. **When component implementation is started**
+   - Change the "Status" of the component to `🚧 In Progress`
 
-4. **移行しないことが決定した場合**
-   - 該当コンポーネントの「状態」を `❌ 移行しない` に変更
-   - 「備考」に理由を記入
+4. **When it is decided not to migrate**
+   - Change the "Status" of the component to `❌ Won't Migrate`
+   - Enter the reason in "Notes"
 
-5. **サマリーテーブルの更新**
-   - コンポーネントの状態を変更した際は、ページ上部のサマリーテーブルも更新
+5. **Update summary table**
+   - When changing component status, also update the summary table at the top of the page
 
-### フィルター言語仕様書の更新ルール
+### Filter Language Specification Update Rules
 
-フィルター言語の仕様は [docs/filter-language.md](../docs/filter-language.md) で管理しています。
+Filter language specification is managed in [docs/filter-language.md](../docs/filter-language.md).
 
-以下のファイルを編集した場合は、必ず `docs/filter-language.md` も更新してください：
+When editing the following files, be sure to update `docs/filter-language.md` as well:
 
 1. **`backend/src/pfs_obslog/visitquery/columns.py`**
-   - 新しい仮想カラムを追加した場合 → 該当セクションにカラム定義を追加
-   - カラム定義を変更した場合 → 対応する説明を更新
-   - 集約カラムを追加した場合 → 「集約カラム」セクションを更新
+   - When adding new virtual columns → Add column definition to the relevant section
+   - When changing column definitions → Update corresponding description
+   - When adding aggregate columns → Update "Aggregate Columns" section
 
 2. **`backend/src/pfs_obslog/visitquery/evaluator.py`**
-   - 新しい構文をサポートした場合 → 「サポートされる構文」セクションを更新
-   - `_get_any_column_columns()` を変更した場合 → `any_column` の検索対象カラムを更新
-   - 型キャストを追加した場合 → 「型キャスト」セクションを更新
+   - When supporting new syntax → Update "Supported Syntax" section
+   - When changing `_get_any_column_columns()` → Update search target columns for `any_column`
+   - When adding type casts → Update "Type Casting" section
 
 3. **`backend/src/pfs_obslog/visitquery/parser.py`**
-   - 許可する関数を変更した場合 → 「許可される関数」セクションを更新
-   - セキュリティ制限を変更した場合 → 「セキュリティ制限」セクションを更新
+   - When changing allowed functions → Update "Allowed Functions" section
+   - When changing security restrictions → Update "Security Restrictions" section
 
 4. **`backend/src/pfs_obslog/visitquery/joins.py`**
-   - JOIN依存関係を変更した場合 → 「JOIN依存関係」セクションを更新
+   - When changing JOIN dependencies → Update "JOIN Dependencies" section

@@ -1,56 +1,56 @@
-# PFS Design API 高速化提案
+# PFS Design API Performance Optimization Proposal
 
-## 概要
+## Overview
 
-PFS Design関連のAPIで発生している性能問題の分析と高速化提案をまとめます。
+This document summarizes the analysis and optimization proposals for performance issues occurring in PFS Design-related APIs.
 
-## 問題のあるエンドポイント
+## Problematic Endpoints
 
-| エンドポイント | 処理時間（推定） | 主原因 |
-|---------------|-----------------|--------|
-| `GET /api/pfs_designs` | ~92秒（3,886ファイル時） | FITSファイル一括読み込み + Pydanticオブジェクト大量生成 |
+| Endpoint | Processing Time (est.) | Main Cause |
+|----------|------------------------|------------|
+| `GET /api/pfs_designs` | ~92s (3,886 files) | Bulk FITS file reading + massive Pydantic object generation |
 
 ---
 
-## 1. Design一覧 API (`GET /api/pfs_designs`)
+## 1. Design List API (`GET /api/pfs_designs`)
 
-### 現状の問題
+### Current Issues
 
-1. **全FITSファイルをシーケンシャルに読み込み**
-   - 3,886ファイル × 23.7ms/ファイル = 約92秒
+1. **Sequential reading of all FITS files**
+   - 3,886 files × 23.7ms/file = ~92 seconds
 
-2. **Pydanticオブジェクトの大量生成**（主要ボトルネック）
-   - `_fits_meta_from_hdul()` が全HDUの全ヘッダーカードを変換
-   - 1ファイルあたり: 4 HDU × 約50カード = 約200オブジェクト
-   - 全ファイル: 約77万Pydanticオブジェクト生成
+2. **Massive Pydantic object generation** (main bottleneck)
+   - `_fits_meta_from_hdul()` converts all header cards from all HDUs
+   - Per file: 4 HDUs × ~50 cards = ~200 objects
+   - All files: ~770,000 Pydantic objects generated
 
-3. **一覧表示に不要なデータの読み込み**
-   - 一覧に必要なのは基本的なメタデータのみ
-   - 全ヘッダーカードは詳細表示でのみ必要
+3. **Reading unnecessary data for list display**
+   - Only basic metadata needed for list
+   - Full header cards only needed for detail display
 
-### 処理時間の内訳
+### Processing Time Breakdown
 
 ```
-処理                        時間/ファイル    全ファイル(3,886件)
+Processing                    Time/File    All Files (3,886)
 ─────────────────────────────────────────────────────────────
-ファイルI/O + astropy解析     7.1ms          27.5秒 (30%)
-_fits_meta_from_hdul         12.9ms          50.1秒 (54%)  ← 主要ボトルネック
-その他のPydantic変換           3.7ms          14.4秒 (16%)
+File I/O + astropy parsing     7.1ms       27.5s (30%)
+_fits_meta_from_hdul          12.9ms       50.1s (54%)  ← Main bottleneck
+Other Pydantic conversions     3.7ms       14.4s (16%)
 ─────────────────────────────────────────────────────────────
-合計                         23.7ms          92秒
+Total                         23.7ms       92s
 ```
 
-### 高速化提案
+### Optimization Proposals
 
-#### 提案1: ヘッダー変換の遅延評価（推奨、効果大）
+#### Proposal 1: Lazy Header Conversion (Recommended, High Impact)
 
-一覧取得時は`FitsMeta`を生成せず、必要最小限のヘッダーのみ直接読み取る。
+Don't generate `FitsMeta` when fetching list, read only minimum required headers directly.
 
-**現状のコード:**
+**Current code:**
 ```python
 def _read_design_entry(path: Path) -> PfsDesignEntry:
     with afits.open(path) as hdul:
-        meta = _fits_meta_from_hdul(path.name, hdul)  # 全ヘッダーを変換（遅い）
+        meta = _fits_meta_from_hdul(path.name, hdul)  # Converts all headers (slow)
         return PfsDesignEntry(
             name=meta.hdul[0].header.value("DSGN_NAM") or "",
             ra=float(meta.hdul[0].header.value("RA") or 0.0),
@@ -58,11 +58,11 @@ def _read_design_entry(path: Path) -> PfsDesignEntry:
         )
 ```
 
-**改善案:**
+**Improved version:**
 ```python
 def _read_design_entry(path: Path) -> PfsDesignEntry:
     with afits.open(path) as hdul:
-        header = hdul[0].header  # ヘッダーを直接参照
+        header = hdul[0].header  # Direct header reference
         return PfsDesignEntry(
             id=_pick_id(path.name),
             frameid=path.name,
@@ -74,41 +74,41 @@ def _read_design_entry(path: Path) -> PfsDesignEntry:
         )
 ```
 
-**期待される効果:**
-- `_fits_meta_from_hdul` の呼び出し削除で **約50秒短縮**
-- 推定処理時間: 92秒 → 約42秒（**54%削減**）
+**Expected effect:**
+- Removing `_fits_meta_from_hdul` call saves **~50 seconds**
+- Estimated processing time: 92s → ~42s (**54% reduction**)
 
-#### 提案2: ファイルベースキャッシュの導入（推奨、効果大）
+#### Proposal 2: File-based Cache Introduction (Recommended, High Impact)
 
-旧プロジェクトで実装されていた `PickleCache` を移植し、Design一覧をキャッシュする。
+Port the `PickleCache` implemented in the old project to cache Design list.
 
-**実装方針:**
-1. SQLiteベースのキャッシュメタデータ管理
-2. ファイル更新日時（`st_mtime`）による無効化
-3. 総サイズ制限とLRU eviction
+**Implementation approach:**
+1. SQLite-based cache metadata management
+2. Invalidation by file modification time (`st_mtime`)
+3. Total size limit and LRU eviction
 
-**キャッシュキー設計:**
+**Cache key design:**
 ```python
 cache_key = f"design_entry:{path.name}"
 valid_after = path.stat().st_mtime
 ```
 
-**期待される効果:**
-- 2回目以降のリクエスト: 92秒 → **数百ミリ秒**（キャッシュヒット時）
-- 初回は提案1と組み合わせて約42秒
+**Expected effect:**
+- 2nd request onwards: 92s → **hundreds of milliseconds** (cache hit)
+- First request: ~42s combined with Proposal 1
 
-#### 提案3: 並列処理の導入（効果中）
+#### Proposal 3: Parallel Processing Introduction (Medium Impact)
 
-旧プロジェクトでは`asyncio.gather` + スレッドプールで並列化していた。
+The old project parallelized with `asyncio.gather` + thread pool.
 
 ```python
-# 旧プロジェクトの実装
+# Old project implementation
 design_list = list(await asyncio.gather(*(
     background_thread(DesignEntryTask(p)) for p in paths
 )))
 ```
 
-**実装案:**
+**Implementation proposal:**
 ```python
 from concurrent.futures import ThreadPoolExecutor
 
@@ -121,21 +121,21 @@ def list_pfs_designs():
     return sorted(design_list, key=lambda d: d.date_modified, reverse=True)
 ```
 
-**期待される効果:**
-- I/Oバウンドな処理の並列化で**2〜4倍高速化**
-- 提案1と組み合わせ: 42秒 → 約10〜20秒
+**Expected effect:**
+- **2-4x speedup** for I/O-bound processing parallelization
+- Combined with Proposal 1: 42s → ~10-20s
 
-#### 提案4: ページネーションの導入（効果中）
+#### Proposal 4: Pagination Introduction (Medium Impact)
 
-全ファイルを一度に読み込まず、必要な分だけ読み込む。
+Don't read all files at once, read only what's needed.
 
-**課題:**
-- 日付順ソートには全ファイルの`st_mtime`取得が必要
-- `stat()`のみなら高速（3,886ファイルで約0.5秒）
+**Challenge:**
+- Need all files' `st_mtime` for date sorting
+- `stat()` only is fast (~0.5s for 3,886 files)
 
-**実装案:**
-1. 全ファイルの`(path, st_mtime)`リストを取得（高速）
-2. ソートしてページ分だけFITSを読み込み
+**Implementation proposal:**
+1. Get `(path, st_mtime)` list for all files (fast)
+2. Sort and read FITS only for the page needed
 
 ```python
 @router.get("")
@@ -143,26 +143,26 @@ def list_pfs_designs(
     offset: int = 0,
     limit: int = 100,
 ):
-    # 1. 全ファイルのstat情報を取得（高速）
+    # 1. Get stat info for all files (fast)
     files = [(p, p.stat().st_mtime) for p in design_dir.glob("pfsDesign-0x*.fits")]
     files.sort(key=lambda x: x[1], reverse=True)
     
-    # 2. 必要なページ分だけFITSを読み込み
+    # 2. Read FITS only for needed page
     page_files = files[offset:offset + limit]
     return [_read_design_entry(p) for p, _ in page_files]
 ```
 
-**期待される効果:**
-- 100件表示時: 92秒 → 約2.4秒（limit=100の場合）
+**Expected effect:**
+- When showing 100 items: 92s → ~2.4s (limit=100)
 
-#### 提案5: インデックスファイルの生成（効果大、複雑度高）
+#### Proposal 5: Index File Generation (High Impact, High Complexity)
 
-Design一覧のメタデータをJSONファイルに事前キャッシュする。
+Pre-cache Design list metadata in a JSON file.
 
-**実装案:**
-1. バックグラウンドジョブで定期的にインデックスを更新
-2. ファイル変更検出（inotify/watchdog）で差分更新
-3. APIはインデックスファイルを読み込むだけ
+**Implementation proposal:**
+1. Periodically update index via background job
+2. Differential update on file change detection (inotify/watchdog)
+3. API just reads the index file
 
 ```json
 // /var/cache/pfs-obslog/pfs_designs_index.json
@@ -180,53 +180,53 @@ Design一覧のメタデータをJSONファイルに事前キャッシュする�
 }
 ```
 
-**期待される効果:**
-- API応答時間: **数十ミリ秒**
-- 要件: バックグラウンドプロセスの運用
+**Expected effect:**
+- API response time: **tens of milliseconds**
+- Requirement: Background process operation
 
 ---
 
-## 実装優先度
+## Implementation Priority
 
-| 優先度 | 提案 | 対象API | 効果 | 工数 |
-|--------|------|---------|------|------|
-| 1 | ヘッダー変換の遅延評価 | 一覧 | 大（54%削減） | 小 |
-| 2 | ファイルベースキャッシュ | 一覧 | 大（2回目以降99%削減） | 中 |
-| 3 | 並列処理 | 一覧 | 中（2-4倍） | 小 |
-| 4 | ページネーション | 一覧 | 中 | 中 |
-| 5 | インデックスファイル | 一覧 | 大 | 大 |
+| Priority | Proposal | Target API | Impact | Effort |
+|----------|----------|------------|--------|--------|
+| 1 | Lazy header conversion | List | High (54% reduction) | Low |
+| 2 | File-based cache | List | High (99% reduction after 2nd) | Medium |
+| 3 | Parallel processing | List | Medium (2-4x) | Low |
+| 4 | Pagination | List | Medium | Medium |
+| 5 | Index file | List | High | High |
 
-### 推奨実装順序
+### Recommended Implementation Order
 
-1. **フェーズ1**（即効性重視）
-   - 提案1: ヘッダー変換の遅延評価
-   - 提案3: 並列処理の導入
-   - **期待結果**: 92秒 → 10〜20秒
+1. **Phase 1** (Quick wins)
+   - Proposal 1: Lazy header conversion
+   - Proposal 3: Parallel processing introduction
+   - **Expected result**: 92s → 10-20s
 
-2. **フェーズ2**（キャッシュ基盤）
-   - 提案2: ファイルベースキャッシュの導入
-   - **期待結果**: 2回目以降 → 数百ミリ秒
+2. **Phase 2** (Cache foundation)
+   - Proposal 2: File-based cache introduction
+   - **Expected result**: 2nd onwards → hundreds of milliseconds
 
-3. **フェーズ3**（将来対応）
-   - 提案4: ページネーション（フロントエンド対応も必要）
-   - 提案5: インデックスファイル（運用要件に応じて）
-
----
-
-## 補足: 旧プロジェクトとの比較
-
-| 項目 | 旧プロジェクト | 新プロジェクト（現状） |
-|------|---------------|----------------------|
-| キャッシュ | PickleCache（SQLite + ファイル） | なし |
-| 並列処理 | asyncio + ThreadPoolExecutor | なし（シーケンシャル） |
-| ヘッダー変換 | 全ヘッダー変換（同様の問題あり） | 全ヘッダー変換 |
-
-旧プロジェクトでもヘッダー変換の遅延評価は実装されていなかったが、キャッシュにより実用的な速度を実現していた。新プロジェクトではキャッシュ基盤の導入が必要。
+3. **Phase 3** (Future work)
+   - Proposal 4: Pagination (requires frontend changes)
+   - Proposal 5: Index file (depending on operational requirements)
 
 ---
 
-## 参考資料
+## Appendix: Comparison with Old Project
 
-- [docs/slowtests.md](slowtests.md) - 遅いテストの調査レポート
-- 旧プロジェクト実装: `old-project/codebase/backend/src/pfs_obslog/app/routers/pfsdesign.py`
-- 旧プロジェクトキャッシュ: `old-project/codebase/backend/src/pfs_obslog/filecache/__init__.py`
+| Item | Old Project | New Project (current) |
+|------|-------------|----------------------|
+| Cache | PickleCache (SQLite + file) | None |
+| Parallel processing | asyncio + ThreadPoolExecutor | None (sequential) |
+| Header conversion | Full header conversion (same issue) | Full header conversion |
+
+The old project also didn't implement lazy header conversion, but achieved practical speed through caching. The new project needs cache infrastructure.
+
+---
+
+## References
+
+- [docs/testing.md](../development/testing.md) - Slow test investigation report
+- Old project implementation: `old-project/codebase/backend/src/pfs_obslog/app/routers/pfsdesign.py`
+- Old project cache: `old-project/codebase/backend/src/pfs_obslog/filecache/__init__.py`

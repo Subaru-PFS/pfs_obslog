@@ -1,122 +1,122 @@
 # PFS Obslog 2
 
-PFS観測ログシステムのリファクタリングプロジェクトです。
+A refactoring project for the PFS observation log system.
 
-## 技術スタック
+## Tech Stack
 
 **Backend:** FastAPI, SQLAlchemy  
 **Frontend:** React, TypeScript, Vite, RTK Query, React Router
 
-## 開発環境のセットアップ
+## Development Environment Setup
 
-### 前提条件
+### Prerequisites
 
 - Python 3.13 + [uv](https://github.com/astral-sh/uv)
 - Node.js + npm
 - PostgreSQL
 
-### 1. 開発用DBのセットアップ
+### 1. Development Database Setup
 
-開発用DB（テスト用DB）は、本番DBからスキーマとサンプルデータをコピーしたローカルPostgreSQLインスタンスです。本番環境に影響を与えずに開発・テストを行うために使用します。
+The development database (test DB) is a local PostgreSQL instance that copies the schema and sample data from the production database. It allows development and testing without affecting the production environment.
 
 ```bash
 cd backend/devel/make_test_db
 ./run.sh
 ```
 
-このスクリプトは以下を実行します：
-1. 既存のテスト用PostgreSQLを停止・削除
-2. 新しいPostgreSQLクラスタを初期化
-3. 本番DBからスキーマをコピー
-4. 本番DBから各テーブルの新しいレコードの5%（最大1000件）をインポート
+This script performs the following:
+1. Stops and removes the existing test PostgreSQL
+2. Initializes a new PostgreSQL cluster
+3. Copies the schema from the production DB
+4. Imports 5% of the newest records from each table in the production DB (max 1000 records)
 
-詳細は [backend/devel/make_test_db/README.md](backend/devel/make_test_db/README.md) を参照してください。
+See [backend/devel/make_test_db/README.md](backend/devel/make_test_db/README.md) for details.
 
-#### 開発用DBへの接続
+#### Connecting to the Development Database
 
 ```bash
-# 接続
+# Connect
 psql -p 15432 opdb
 
-# データディレクトリ
+# Data directory
 ~/pgdata_for_pfs_obslog_test
 
-# 起動（停止している場合）
+# Start (if stopped)
 pg_ctl -D ~/pgdata_for_pfs_obslog_test -l ~/pgdata_for_pfs_obslog_test/logfile start
 
-# 停止
+# Stop
 pg_ctl -D ~/pgdata_for_pfs_obslog_test stop
 ```
 
-**接続情報:**
+**Connection Info:**
 - Host: localhost
 - Port: 15432
 - Database: opdb
-- User: pfs（ローカルはtrust認証のためパスワード不要）
+- User: pfs (local uses trust authentication, no password required)
 
-### 2. バックエンドのセットアップ
+### 2. Backend Setup
 
 ```bash
 cd backend
 uv sync --all-extras
 ```
 
-詳細は [backend/README.md](backend/README.md) を参照してください。
+See [backend/README.md](backend/README.md) for details.
 
-### 3. フロントエンドのセットアップ
+### 3. Frontend Setup
 
 ```bash
 cd frontend
 npm install
 ```
 
-詳細は [frontend/README.md](frontend/README.md) を参照してください。
+See [frontend/README.md](frontend/README.md) for details.
 
-## 開発サーバーの起動
+## Starting Development Servers
 
-開発サーバーはローカルマシンで動作するサーバーで、コード変更時に自動でリロードされます。
+Development servers run on the local machine and automatically reload when code changes are detected.
 
-### バックエンド開発サーバー
+### Backend Development Server
 
 ```bash
 cd backend
 make dev
 ```
 
-アクセス: http://localhost:8000
+Access: http://localhost:8000
 
-- API ドキュメント: http://localhost:8000/docs
-- OpenAPI スキーマ: http://localhost:8000/openapi.json
+- API Documentation: http://localhost:8000/docs
+- OpenAPI Schema: http://localhost:8000/openapi.json
 
-### フロントエンド開発サーバー
+### Frontend Development Server
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-アクセス: http://localhost:5173
+Access: http://localhost:5173
 
-## テストの実行
+## Running Tests
 
-### バックエンド
+### Backend
 
 ```bash
 cd backend
 make test
 ```
 
-### フロントエンド
+### Frontend
 
 ```bash
 cd frontend
 npm run test
 ```
 
-## ドキュメント
+## Documentation
 
-- [ドキュメント一覧](docs/README.md) - 全ドキュメントの目次
-- [バックエンド詳細](backend/README.md)
-- [フロントエンド詳細](frontend/README.md)
-- [テスト用DB作成](backend/devel/make_test_db/README.md)
-- [SQLAlchemyモデル自動生成](backend/devel/generate_models.md)
+- [Documentation Index](docs/README.md) - Table of contents for all documentation
+- [Backend Details](backend/README.md)
+- [Frontend Details](frontend/README.md)
+- [Test Database Creation](backend/devel/make_test_db/README.md)
+- [SQLAlchemy Model Auto-generation](backend/devel/generate_models.md)

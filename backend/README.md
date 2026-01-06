@@ -1,39 +1,38 @@
 # PFS Obslog Backend
 
-## セットアップ
+## Setup
 
 ```bash
 cd backend
 uv sync --all-extras
 ```
 
-`pfs-datamodel` と `pfs-utils` は `pyproject.toml` の `[tool.uv.sources]` で
-`external/` ディレクトリから自動的にインストールされます。
+`pfs-datamodel` and `pfs-utils` are automatically installed from the `external/` directory via `[tool.uv.sources]` in `pyproject.toml`.
 
-## 開発
+## Development
 
-### テストの実行
+### Running Tests
 
 ```bash
 uv run pytest
 ```
 
-### カバレッジ付きテスト
+### Tests with Coverage
 
 ```bash
 uv run pytest --cov=pfs_obslog --cov-report=html
 ```
 
-## パッケージ構造
+## Package Structure
 
 ```
 backend/
 ├── src/
-│   └── pfs_obslog/    # メインパッケージ
+│   └── pfs_obslog/    # Main package
 │       └── module.py
-├── tests/             # テストディレクトリ
+├── tests/             # Test directory
 │   └── test_module.py
 └── pyproject.toml
 ```
 
-`import pfs_obslog.module` でモジュールをインポートできます。
+Modules can be imported with `import pfs_obslog.module`.

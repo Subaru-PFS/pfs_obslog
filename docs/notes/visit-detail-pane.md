@@ -1,75 +1,75 @@
-# Visit詳細ペイン 調査レポート
+# Visit Detail Pane Investigation Report
 
-## 概要
+## Overview
 
-Homeページの右側に表示されるVisit詳細ペインの実装について、既存プロジェクト（`old-project/codebase`）の調査結果をまとめる。
+This document summarizes the implementation of the Visit detail pane displayed on the right side of the Home page, based on investigation of the existing project (`old-project/codebase`).
 
-## 現在の状態
+## Current State
 
-### フロントエンド
+### Frontend
 
-- [Home.tsx](../frontend/src/pages/Home/Home.tsx): 右ペインに placeholder を表示
-- `selectedVisitId` がある場合「Visit #xxx の詳細（未実装）」と表示
-- 選択なしの場合「左のリストからVisitを選択してください」と表示
+- [Home.tsx](../frontend/src/pages/Home/Home.tsx): Displays placeholder in right pane
+- When `selectedVisitId` exists, shows "Visit #xxx details (not implemented)"
+- When no selection, shows "Select a Visit from the list on the left"
 
-### バックエンド
+### Backend
 
-- `/api/visits`: Visit一覧取得APIは実装済み
-- `/api/visits/{id}`: Visit詳細取得APIは**未実装**
+- `/api/visits`: Visit list API is implemented
+- `/api/visits/{id}`: Visit detail API is **not implemented**
 
 ---
 
-## 既存プロジェクトの構造
+## Existing Project Structure
 
-### ファイル構成
+### File Structure
 
 ```
 old-project/codebase/webui/src/pages/Home/VisitDetail/
-├── index.tsx              # メインコンポーネント
-├── context.tsx            # FitsIdの状態管理
-├── types.ts               # 型定義
-├── VisitInspector/        # Visit情報表示
-│   ├── index.tsx          # タブ切り替え＋サマリー
+├── index.tsx              # Main component
+├── context.tsx            # FitsId state management
+├── types.ts               # Type definitions
+├── VisitInspector/        # Visit info display
+│   ├── index.tsx          # Tab switching + summary
 │   ├── styles.module.scss
-│   ├── SpsInspector/      # SpS露出詳細
-│   ├── McsInspector/      # MCS露出詳細
-│   ├── AgcInspector/      # AGC露出詳細
-│   ├── IicSequence/       # シーケンス情報
-│   └── SequenceGroup/     # シーケンスグループ情報
-└── FitsHeaderInfo/        # FITSヘッダー表示
+│   ├── SpsInspector/      # SpS exposure details
+│   ├── McsInspector/      # MCS exposure details
+│   ├── AgcInspector/      # AGC exposure details
+│   ├── IicSequence/       # Sequence info
+│   └── SequenceGroup/     # Sequence group info
+└── FitsHeaderInfo/        # FITS header display
     ├── index.tsx
     └── styles.module.scss
 ```
 
-### レイアウト
+### Layout
 
-詳細ペインは**上下分割**されている：
+The detail pane is **split vertically**:
 
-1. **上部（VisitInspector）**: Visitのサマリー＋タブ切り替えの露出情報
-2. **下部（FitsHeaderInfo）**: 選択したFITSファイルのヘッダー情報
+1. **Top (VisitInspector)**: Visit summary + tabbed exposure info
+2. **Bottom (FitsHeaderInfo)**: Selected FITS file header info
 
-`split-grid`ライブラリで分割バーをドラッグ可能にしている。
+The `split-grid` library enables draggable split bar.
 
 ---
 
-## コンポーネント詳細
+## Component Details
 
-### 1. VisitDetail（メインコンポーネント）
+### 1. VisitDetail (Main Component)
 
 ```tsx
-// API呼び出し
+// API call
 const api = fetcher.path('/api/visits/{id}').method('get').create()
 const [detail, { refetch }] = createResource(() => props.id, async id => (await api({ id })).data)
 ```
 
-- `split-grid`で上下分割
-- 上部: `VisitInspector`
-- 下部: `FitsHeaderInfo`
-- 初期比率: `1fr 8px 250px`（下部固定250px）
+- Vertical split with `split-grid`
+- Top: `VisitInspector`
+- Bottom: `FitsHeaderInfo`
+- Initial ratio: `1fr 8px 250px` (bottom fixed at 250px)
 
 ### 2. VisitDetailContext
 
-選択中のFITSファイル情報を保持：
+Holds selected FITS file info:
 
 ```typescript
 type FitsId = {
@@ -81,82 +81,82 @@ type FitsId = {
 
 ### 3. VisitInspector
 
-#### サマリー表示
+#### Summary Display
 
-| 項目 | 内容 |
-|------|------|
-| ID | Visit IDと左リストへの遷移ボタン |
+| Item | Content |
+|------|---------|
+| ID | Visit ID and navigation button to left list |
 | Description | pfs_visit_description |
-| Issued at | 発行日時 |
-| Number of Exposures | SpS/MCS/AGC の露出数 |
-| Notes | Visitに紐づくメモ（追加・編集・削除可能） |
+| Issued at | Issue timestamp |
+| Number of Exposures | SpS/MCS/AGC exposure counts |
+| Notes | Notes associated with Visit (add/edit/delete) |
 
-#### タブ
+#### Tabs
 
-1. **SpS**: SpS露出一覧（画像表示あり）
-2. **MCS**: MCS露出一覧（画像表示あり）
-3. **AGC**: AGC露出一覧（画像表示あり）
-4. **IIC Sequence**: シーケンス情報
-5. **Sequence Group**: シーケンスグループ情報
+1. **SpS**: SpS exposure list (with images)
+2. **MCS**: MCS exposure list (with images)
+3. **AGC**: AGC exposure list (with images)
+4. **IIC Sequence**: Sequence info
+5. **Sequence Group**: Sequence group info
 
-タブ切り替え時に`setFitsId`を呼び出してFitsHeaderInfoの表示を更新。
+Tab switching calls `setFitsId` to update FitsHeaderInfo display.
 
 ### 4. SpsInspector
 
-- 露出タイプ、露出数、平均露出時間を表示
-- Image Type選択（Raw / postISRCCD）
-- Image Size選択（Small / Medium / Large）
-- Download All（FITSファイル一括ダウンロード）
-- **4x4グリッドテーブル**で露出画像を表示
-  - 行: arm（n, r, m, b）
-  - 列: module（1-4）
-  - 各セルにカメラID、画像プレビュー、ダウンロードボタン
+- Display exposure type, count, average exposure time
+- Image Type selection (Raw / postISRCCD)
+- Image Size selection (Small / Medium / Large)
+- Download All (bulk FITS download)
+- **4x4 grid table** for exposure images
+  - Rows: arm (n, r, m, b)
+  - Columns: module (1-4)
+  - Each cell: camera ID, image preview, download button
 
 ### 5. McsInspector
 
-- 露出数、平均露出時間を表示
-- Image Type選択（Plot / Raw）
-- Image Size選択
-- **リスト形式**で各露出を表示
+- Display exposure count, average exposure time
+- Image Type selection (Plot / Raw)
+- Image Size selection
+- **List format** for each exposure
   - Frame ID
-  - Plot画像（`/api/mcs_data/{frame_id}.png`）
-  - Raw画像（`/api/fits/visits/{visit_id}/mcs/{frame_id}.png`）
-  - FITSヘッダー表示ボタン
-  - FITSダウンロードボタン
-  - JSONプレビューボタン
+  - Plot image (`/api/mcs_data/{frame_id}.png`)
+  - Raw image (`/api/fits/visits/{visit_id}/mcs/{frame_id}.png`)
+  - FITS header display button
+  - FITS download button
+  - JSON preview button
 
 ### 6. AgcInspector
 
-- 露出数、平均露出時間を表示
-- Image Size選択
-- **ページネーション**あり（1ページ20件）
-- 各露出に6カメラの画像を表示
+- Display exposure count, average exposure time
+- Image Size selection
+- **Pagination** (20 per page)
+- Display 6 camera images for each exposure
   - Exposure ID
-  - 6つのHDU（カメラ）の画像プレビュー
+  - Image preview for 6 HDUs (cameras)
 
 ### 7. IicSequence
 
-- Visit Set ID、Name、Type、Statusを表示
-- コマンド文字列（cmd_str）を表示
-- コメントを表示
-- **メモ機能**（追加・編集・削除）
+- Display Visit Set ID, Name, Type, Status
+- Display command string (cmd_str)
+- Display comments
+- **Notes feature** (add/edit/delete)
 
 ### 8. SequenceGroup
 
-- Group ID、Name、Created atを表示
+- Display Group ID, Name, Created at
 
 ### 9. FitsHeaderInfo
 
-- 選択されたFITSファイルのヘッダー情報を表示
-- HDU選択（0, 1, 2, ...）
-- Key/Value/Commentの検索フィルター
-- テーブル形式で表示
+- Display selected FITS file header info
+- HDU selection (0, 1, 2, ...)
+- Key/Value/Comment search filter
+- Table format display
 
 ---
 
-## バックエンドAPI
+## Backend API
 
-### `/api/visits/{id}` レスポンス
+### `/api/visits/{id}` Response
 
 ```typescript
 interface VisitDetail {
@@ -193,7 +193,7 @@ interface McsExposure {
   altitude: number | null
   azimuth: number | null
   insrot: number | null
-  // ... その他の環境情報
+  // ... other environment info
   taken_at: string
   notes: McsExposureNote[]
 }
@@ -208,7 +208,7 @@ interface AgcExposure {
   altitude: number | null
   azimuth: number | null
   insrot: number | null
-  // ... その他の環境情報
+  // ... other environment info
   taken_at: string | null
   guide_offset: AgcGuideOffset | null
 }
@@ -220,70 +220,70 @@ interface IicSequenceDetail extends IicSequence {
 }
 ```
 
-### 画像取得API（既存プロジェクト）
+### Image Retrieval APIs (Existing Project)
 
-| エンドポイント | 説明 |
-|--------------|------|
-| `/api/fits/visits/{visit_id}/sps/{camera_id}.png` | SpS露出の画像プレビュー |
-| `/api/fits/visits/{visit_id}/sps/{camera_id}.fits` | SpS露出のFITSダウンロード |
-| `/api/fits/visits/{visit_id}/mcs/{frame_id}.png` | MCS露出の画像プレビュー |
-| `/api/fits/visits/{visit_id}/mcs/{frame_id}.fits` | MCS露出のFITSダウンロード |
-| `/api/fits/visits/{visit_id}/agc/{exposure_id}.png` | AGC露出の画像プレビュー |
-| `/api/fits/visits/{visit_id}/agc/{exposure_id}.fits` | AGC露出のFITSダウンロード |
-| `/api/mcs_data/{frame_id}.png` | MCSプロット画像 |
-| `/api/fits/visits/{visit_id}/{exposure_type}/{fits_id}/meta` | FITSヘッダー情報 |
-
----
-
-## 実装の優先順位（提案）
-
-### Phase 1: 基本構造
-
-1. `/api/visits/{id}` エンドポイント実装（バックエンド）
-2. `VisitDetail` コンポーネント作成（タブなし、サマリーのみ）
-3. 基本情報（ID、Description、Issued at、露出数）の表示
-
-### Phase 2: 露出情報タブ
-
-1. `SpsInspector` の実装（画像なし、テーブルのみ）
-2. `McsInspector` の実装（画像なし、リストのみ）
-3. `AgcInspector` の実装（画像なし、リストのみ）
-4. `IicSequence` の実装
-5. `SequenceGroup` の実装
-
-### Phase 3: 画像機能
-
-1. FITS画像APIの実装（バックエンド）
-2. 画像プレビュー機能
-3. FITSダウンロード機能
-
-### Phase 4: FITSヘッダー
-
-1. FITSヘッダーAPI実装（バックエンド）
-2. `FitsHeaderInfo` コンポーネント実装
-3. 上下分割レイアウト
-
-### Phase 5: メモ機能
-
-1. メモCRUD API（既存の`VisitNote`を活用）
-2. メモUI実装
+| Endpoint | Description |
+|----------|-------------|
+| `/api/fits/visits/{visit_id}/sps/{camera_id}.png` | SpS exposure image preview |
+| `/api/fits/visits/{visit_id}/sps/{camera_id}.fits` | SpS exposure FITS download |
+| `/api/fits/visits/{visit_id}/mcs/{frame_id}.png` | MCS exposure image preview |
+| `/api/fits/visits/{visit_id}/mcs/{frame_id}.fits` | MCS exposure FITS download |
+| `/api/fits/visits/{visit_id}/agc/{exposure_id}.png` | AGC exposure image preview |
+| `/api/fits/visits/{visit_id}/agc/{exposure_id}.fits` | AGC exposure FITS download |
+| `/api/mcs_data/{frame_id}.png` | MCS plot image |
+| `/api/fits/visits/{visit_id}/{exposure_type}/{fits_id}/meta` | FITS header info |
 
 ---
 
-## 使用ライブラリ（既存プロジェクト）
+## Implementation Priority (Proposal)
 
-- **split-grid**: 上下分割のリサイズ
-- **tippy.js**: ツールチップ
-- **SolidJS**: UIフレームワーク（新プロジェクトはReact）
+### Phase 1: Basic Structure
+
+1. Implement `/api/visits/{id}` endpoint (backend)
+2. Create `VisitDetail` component (no tabs, summary only)
+3. Display basic info (ID, Description, Issued at, exposure counts)
+
+### Phase 2: Exposure Info Tabs
+
+1. Implement `SpsInspector` (no images, table only)
+2. Implement `McsInspector` (no images, list only)
+3. Implement `AgcInspector` (no images, list only)
+4. Implement `IicSequence`
+5. Implement `SequenceGroup`
+
+### Phase 3: Image Features
+
+1. Implement FITS image API (backend)
+2. Image preview feature
+3. FITS download feature
+
+### Phase 4: FITS Header
+
+1. Implement FITS header API (backend)
+2. Implement `FitsHeaderInfo` component
+3. Vertical split layout
+
+### Phase 5: Notes Feature
+
+1. Notes CRUD API (use existing `VisitNote`)
+2. Notes UI implementation
 
 ---
 
-## 注意事項
+## Libraries Used (Existing Project)
 
-- 既存プロジェクトはSolidJSで書かれているため、Reactへの移植が必要
+- **split-grid**: Vertical split resizing
+- **tippy.js**: Tooltips
+- **SolidJS**: UI framework (new project uses React)
+
+---
+
+## Notes
+
+- Existing project is written in SolidJS, requires porting to React
 - `createSignal` → `useState`
 - `createResource` → RTK Query
 - `createMemo` → `useMemo`
 - `createEffect` → `useEffect`
 - `For` → `map`
-- `Show` → 条件付きレンダリング
+- `Show` → Conditional rendering

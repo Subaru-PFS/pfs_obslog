@@ -1,81 +1,81 @@
-# フロントエンド開発ガイド
+# Frontend Development Guide
 
-## 概要
+## Overview
 
-- **UIライブラリ:** React 19
-- **言語:** TypeScript
-- **ビルドツール:** Vite
-- **データフェッチ:** RTK Query
-- **ルーティング:** React Router
-- **スタイル:** SCSS Modules + typed-scss-modules
+- **UI Library:** React 19
+- **Language:** TypeScript
+- **Build Tool:** Vite
+- **Data Fetching:** RTK Query
+- **Routing:** React Router
+- **Styling:** SCSS Modules + typed-scss-modules
 
-## ディレクトリ構造
+## Directory Structure
 
 ```
 frontend/src/
-├── components/       # UIコンポーネント
+├── components/       # UI components
 │   └── Example/
 │       ├── Example.tsx
 │       ├── Example.module.scss
-│       ├── Example.module.scss.d.ts  # 自動生成
+│       ├── Example.module.scss.d.ts  # Auto-generated
 │       └── index.ts
-├── router/           # ルーティング設定
+├── router/           # Routing configuration
 ├── store/            # Redux store
 │   └── api/          # RTK Query API
-├── test/             # テスト設定
-└── main.tsx          # エントリーポイント
+├── test/             # Test configuration
+└── main.tsx          # Entry point
 ```
 
-## 開発コマンド
+## Development Commands
 
 ```bash
 cd frontend
 
-# 依存関係のインストール
+# Install dependencies
 npm install
 
-# 開発サーバーの起動
+# Start development server
 npm run dev
 
-# ビルド
+# Build
 npm run build
 
-# リント
+# Lint
 npm run lint
 
-# テスト
+# Run tests
 npm run test:run
 
-# npm run test は対話モード
+# npm run test is interactive mode
 
-# カバレッジ付きテスト
+# Run tests with coverage
 npm run test:coverage
 ```
 
-## SCSS モジュールの型生成
+## SCSS Module Type Generation
 
-SCSSファイルを追加・変更した場合は型ファイルを再生成してください。
+When adding or modifying SCSS files, regenerate the type files.
 
 ```bash
-# 一度だけ生成
+# Generate once
 npm run scss:types
 
-# 監視モード（開発中に使用）
+# Watch mode (use during development)
 npm run scss:watch
 ```
 
-生成された `.d.ts` ファイルはコミットしてください。
+Generated `.d.ts` files should be committed.
 
-## RTK Query APIの生成
+## RTK Query API Generation
 
-バックエンドのOpenAPIスキーマからRTK Queryのコードを自動生成します。
+Auto-generate RTK Query code from the backend's OpenAPI schema.
 
 ```bash
 npm run generate-api
 ```
 
-- バックエンドAPIが変更された場合は再生成が必要
-- 生成された `generatedApi.ts` は直接編集しない
-- カスタマイズは `emptyApi.ts` で行う
+- Regenerate when backend APIs change
+- Do not directly edit the generated `generatedApi.ts`
+- Customize in `emptyApi.ts`
 
-詳細は [frontend/README.md](../frontend/README.md) を参照。
+See [frontend/README.md](../frontend/README.md) for details.
