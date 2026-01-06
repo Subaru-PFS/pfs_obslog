@@ -1,7 +1,7 @@
 /**
  * DesignList - PFS Design一覧サイドパネル
  */
-import { useState, useMemo, useCallback, useRef } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useLocalStorage } from 'react-use'
 import { Icon, IconButton } from '../../../components/Icon'
 import { Tooltip } from '../../../components/Tooltip'
@@ -77,6 +77,8 @@ export function DesignList() {
     jumpTo,
     zenithSkyCoord,
     isDraggingClock,
+    pendingScrollDesignId,
+    clearPendingScrollDesignId,
   } = useDesignsContext()
 
   const [idFormat, setIdFormat] = useLocalStorage<IdFormat>(ID_FORMAT_KEY, 'hex')
@@ -182,6 +184,24 @@ export function DesignList() {
     },
     [idFormat]
   )
+
+  // ロード完了後に保留中のスクロールを実行
+  useEffect(() => {
+    if (!isFetching && pendingScrollDesignId && listContainerRef.current) {
+      // デザインがリスト内にあるか確認
+      const isInList = designs.some((d) => d.id === pendingScrollDesignId)
+      if (isInList) {
+        // 要素を探してスクロール
+        const element = listContainerRef.current.querySelector(
+          `[data-design-id="${pendingScrollDesignId}"]`
+        )
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        }
+      }
+      clearPendingScrollDesignId()
+    }
+  }, [isFetching, pendingScrollDesignId, designs, clearPendingScrollDesignId])
 
   return (
     <div className={styles.listContainer}>

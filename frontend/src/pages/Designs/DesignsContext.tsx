@@ -139,6 +139,10 @@ interface DesignsContextValue {
   // 時計ドラッグ中フラグ（高度ソート更新抑制用）
   isDraggingClock: boolean
   setDraggingClock: (dragging: boolean) => void
+
+  // 保留中のスクロール対象（ロード完了後にDesignListでスクロール）
+  pendingScrollDesignId: string | null
+  clearPendingScrollDesignId: () => void
 }
 
 const DesignsContext = createContext<DesignsContextValue | null>(null)
@@ -323,6 +327,12 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     FocusedFiber | undefined
   >()
 
+  // 保留中のスクロール対象（ロード完了後にDesignListでスクロール）
+  const [pendingScrollDesignId, setPendingScrollDesignId] = useState<string | null>(null)
+  const clearPendingScrollDesignId = useCallback(() => {
+    setPendingScrollDesignId(null)
+  }, [])
+
   // フォーカス状態の設定（同じIDなら更新をスキップして不要な再レンダリングを防ぐ）
   const setFocusedDesign = useCallback(
     (design: PfsDesignEntry | undefined) => {
@@ -386,13 +396,15 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
 
   // ランクが取得できたらページ遷移（リスト内にないDesignが選択された時）
   useEffect(() => {
-    if (rankData?.rank != null && !isSelectedDesignInList) {
+    if (rankData?.rank != null && !isSelectedDesignInList && selectedDesign) {
       const targetOffset = Math.floor(rankData.rank / limit) * limit
       if (targetOffset !== offset) {
         setOffset(targetOffset)
+        // ロード完了後にスクロールするようにIDを保存
+        setPendingScrollDesignId(selectedDesign.id)
       }
     }
-  }, [rankData, isSelectedDesignInList, limit, offset, setOffset])
+  }, [rankData, isSelectedDesignInList, limit, offset, setOffset, selectedDesign])
 
   // カメラジャンプ
   const jumpTo = useCallback((options: JumpToOptions) => {
@@ -479,6 +491,8 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     zenithZaZd,
     isDraggingClock,
     setDraggingClock,
+    pendingScrollDesignId,
+    clearPendingScrollDesignId,
   }
 
   return (
