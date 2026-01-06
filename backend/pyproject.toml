@@ -29,6 +29,7 @@ dependencies = [
     "lsst-utils>=29.0.0",
     "pfs-datamodel",
     "pfs-utils",
+    "lsst-daf-butler>=30.2026.100",
 ]
 
 [project.optional-dependencies]
