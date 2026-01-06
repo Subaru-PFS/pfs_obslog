@@ -213,7 +213,7 @@ export function SpsInspector({ sps }: SpsInspectorProps) {
               <tr>
                 <th></th>
                 {modules.map(m => (
-                  <th key={m}>SM{m}</th>
+                  <th key={m}>{m}</th>
                 ))}
               </tr>
             </thead>
