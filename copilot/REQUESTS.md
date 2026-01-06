@@ -6,6 +6,8 @@
 
   修正内容が不明な場合は指示者に確認してください。
 
+  * [x] visit detailのAGCのサムネールが表示されません。（勘違いでした）
+
   * [x] Thumbnail and header of AG images are missing.
     * ~~確かにエラー表示が起きている。例えばvisit=135826など。~~
     * 対応済み: URL形式を修正（スラッシュ→ハイフン）
