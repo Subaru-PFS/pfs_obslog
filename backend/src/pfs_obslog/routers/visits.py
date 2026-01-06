@@ -9,13 +9,14 @@ from typing import Sequence
 
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import Response
-from sqlalchemy import func, select
+from sqlalchemy import Connection, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.elements import ColumnElement
 
 from pfs_obslog import models as M
 from pfs_obslog.database import DbSession
+from pfs_obslog.qadb import QADBConnection, collect_qa_info
 from pfs_obslog.visitquery import (
     AggregateCondition,
     QueryEvaluator,
@@ -53,6 +54,7 @@ router = APIRouter(prefix="/visits", tags=["visits"])
 @router.get("", response_model=VisitList)
 async def list_visits(
     db: DbSession,
+    qadb: QADBConnection,
     offset: int = Query(default=0, ge=0, description="ページネーションのオフセット"),
     limit: int = Query(default=50, ge=-1, le=1000, description="取得件数上限（-1で無制限）"),
     sql: str | None = Query(default=None, description="SQLライクなフィルタ条件（例: where id > 100）"),
@@ -88,7 +90,7 @@ async def list_visits(
 
     # Visit一覧を取得
     visits, count = await _fetch_visits(
-        db, effective_limit, offset, where_condition, required_joins, join_builder, aggregate_conditions
+        db, qadb, effective_limit, offset, where_condition, required_joins, join_builder, aggregate_conditions
     )
 
     # 関連するIicSequenceを取得
@@ -103,6 +105,7 @@ async def list_visits(
 
 async def _fetch_visits(
     db: AsyncSession,
+    qadb: Connection | None,
     limit: int | None,
     offset: int,
     where_condition: ColumnElement | None = None,
@@ -114,6 +117,7 @@ async def _fetch_visits(
 
     Args:
         db: DBセッション
+        qadb: QAデータベース接続（Noneの場合はQA情報をスキップ）
         limit: 取得件数上限（Noneで無制限）
         offset: オフセット
         where_condition: SQLAlchemy WHERE条件（オプション）
@@ -167,7 +171,7 @@ async def _fetch_visits(
         return [], count
 
     # Visit詳細を取得
-    visits = await _build_visit_list_entries(db, ids)
+    visits = await _build_visit_list_entries(db, ids, qadb)
     return visits, count
 
 
@@ -252,18 +256,24 @@ def _apply_aggregate_conditions(
     return base_query
 
 
-async def _build_visit_list_entries(db: AsyncSession, visit_ids: list[int]) -> list[VisitListEntry]:
+async def _build_visit_list_entries(
+    db: AsyncSession, visit_ids: list[int], qadb: Connection | None = None
+) -> list[VisitListEntry]:
     """VisitIDリストからVisitListEntryを構築
 
     Args:
         db: DBセッション
         visit_ids: VisitIDリスト
+        qadb: QAデータベース接続（オプション）
 
     Returns:
         VisitListEntryリスト
     """
     if not visit_ids:  # pragma: no cover
         return []
+
+    # QA情報を取得
+    qa_info = collect_qa_info(qadb, visit_ids)
 
     # 各種集計サブクエリ
     # MCS露出の集計
@@ -384,6 +394,9 @@ async def _build_visit_list_entries(db: AsyncSession, visit_ids: list[int]) -> l
             for note in pfs_visit.obslog_visit_note
         ]
 
+        # QA情報を取得
+        qa = qa_info.get(pfs_visit.pfs_visit_id)
+
         visits.append(
             VisitListEntry(
                 id=pfs_visit.pfs_visit_id,
@@ -400,6 +413,12 @@ async def _build_visit_list_entries(db: AsyncSession, visit_ids: list[int]) -> l
                 avg_dec=row.avg_dec,
                 avg_insrot=row.avg_insrot,
                 notes=notes,
+                seeing_median=qa.seeing_median if qa else None,
+                transparency_median=qa.transparency_median if qa else None,
+                effective_exposure_time_b=qa.effective_exposure_time_b if qa else None,
+                effective_exposure_time_r=qa.effective_exposure_time_r if qa else None,
+                effective_exposure_time_n=qa.effective_exposure_time_n if qa else None,
+                effective_exposure_time_m=qa.effective_exposure_time_m if qa else None,
                 pfs_design_id=hex(pfs_visit.pfs_design_id) if pfs_visit.pfs_design_id else None,
             )
         )
@@ -884,6 +903,7 @@ csv_router = APIRouter(tags=["visits"])
 @csv_router.get("/visits.csv")
 async def export_visits_csv(
     db: DbSession,
+    qadb: QADBConnection,
     offset: int = Query(default=0, ge=0, description="ページネーションのオフセット"),
     limit: int = Query(default=10000, ge=-1, le=100000, description="取得件数上限（-1で無制限）"),
     sql: str | None = Query(default=None, description="SQLライクなフィルタ条件（例: where id > 100）"),
@@ -892,6 +912,7 @@ async def export_visits_csv(
 
     Args:
         db: DBセッション
+        qadb: QAデータベース接続
         offset: オフセット
         limit: 取得件数上限
         sql: SQLライクなフィルタ条件
@@ -922,7 +943,7 @@ async def export_visits_csv(
 
     # Visit一覧を取得
     visits, _count = await _fetch_visits(
-        db, effective_limit, offset, where_condition, required_joins, join_builder, aggregate_conditions
+        db, qadb, effective_limit, offset, where_condition, required_joins, join_builder, aggregate_conditions
     )
 
     # 関連するIicSequenceを取得
@@ -963,6 +984,12 @@ def _visit_to_csv_dict(visit: VisitListEntry, iic_sequence: IicSequence | None) 
             "n_mcs_exposures": visit.n_mcs_exposures,
             "n_agc_exposures": visit.n_agc_exposures,
             "avg_exptime": visit.avg_exptime,
+            "eet_b": visit.effective_exposure_time_b,
+            "eet_r": visit.effective_exposure_time_r,
+            "eet_n": visit.effective_exposure_time_n,
+            "eet_m": visit.effective_exposure_time_m,
+            "seeing_median": visit.seeing_median,
+            "transparency_median": visit.transparency_median,
             "pfs_design_id": visit.pfs_design_id,
             "avg_azimuth": visit.avg_azimuth,
             "avg_altitude": visit.avg_altitude,

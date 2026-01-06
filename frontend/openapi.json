@@ -351,7 +351,7 @@
           "visits"
         ],
         "summary": "Export Visits Csv",
-        "description": "Visit\u4e00\u89a7\u3092CSV\u5f62\u5f0f\u3067\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\n\nArgs:\n    db: DB\u30bb\u30c3\u30b7\u30e7\u30f3\n    offset: \u30aa\u30d5\u30bb\u30c3\u30c8\n    limit: \u53d6\u5f97\u4ef6\u6570\u4e0a\u9650\n    sql: SQL\u30e9\u30a4\u30af\u306a\u30d5\u30a3\u30eb\u30bf\u6761\u4ef6\n\nReturns:\n    CSV\u5f62\u5f0f\u306e\u30ec\u30b9\u30dd\u30f3\u30b9",
+        "description": "Visit\u4e00\u89a7\u3092CSV\u5f62\u5f0f\u3067\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\n\nArgs:\n    db: DB\u30bb\u30c3\u30b7\u30e7\u30f3\n    qadb: QA\u30c7\u30fc\u30bf\u30d9\u30fc\u30b9\u63a5\u7d9a\n    offset: \u30aa\u30d5\u30bb\u30c3\u30c8\n    limit: \u53d6\u5f97\u4ef6\u6570\u4e0a\u9650\n    sql: SQL\u30e9\u30a4\u30af\u306a\u30d5\u30a3\u30eb\u30bf\u6761\u4ef6\n\nReturns:\n    CSV\u5f62\u5f0f\u306e\u30ec\u30b9\u30dd\u30f3\u30b9",
         "operationId": "export_visits_csv_api_visits_csv_get",
         "parameters": [
           {
@@ -1777,218 +1777,6 @@
         }
       }
     },
-    "/api/attachments": {
-      "post": {
-        "tags": [
-          "attachments",
-          "attachments"
-        ],
-        "summary": "Upload attachment",
-        "description": "Upload a new attachment file. Requires authentication.",
-        "operationId": "create_attachment_api_attachments_post",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_create_attachment_api_attachments_post"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateAttachmentResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "attachments",
-          "attachments"
-        ],
-        "summary": "List attachments",
-        "description": "List attachments for the authenticated user.",
-        "operationId": "list_attachments_api_attachments_get",
-        "parameters": [
-          {
-            "name": "start",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "description": "Start position",
-              "default": 1,
-              "title": "Start"
-            },
-            "description": "Start position"
-          },
-          {
-            "name": "per_page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 1000,
-              "minimum": 1,
-              "description": "Items per page",
-              "default": 100,
-              "title": "Per Page"
-            },
-            "description": "Items per page"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AttachmentList"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/attachments/{account_name}/{file_id}": {
-      "get": {
-        "tags": [
-          "attachments",
-          "attachments"
-        ],
-        "summary": "Download attachment",
-        "description": "Download an attachment file.",
-        "operationId": "get_attachment_api_attachments__account_name___file_id__get",
-        "parameters": [
-          {
-            "name": "account_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "pattern": "^(\\w+|\\w+@\\w+)$",
-              "title": "Account Name"
-            }
-          },
-          {
-            "name": "file_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "title": "File Id"
-            }
-          },
-          {
-            "name": "filename",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Override filename in response",
-              "title": "Filename"
-            },
-            "description": "Override filename in response"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/attachments/{file_id}": {
-      "delete": {
-        "tags": [
-          "attachments",
-          "attachments"
-        ],
-        "summary": "Delete attachment",
-        "description": "Delete an attachment. Only the owner can delete their own files.",
-        "operationId": "delete_attachment_api_attachments__file_id__delete",
-        "parameters": [
-          {
-            "name": "file_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "title": "File Id"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/mcs_data/{frame_id}.png": {
       "get": {
         "tags": [
@@ -2432,62 +2220,6 @@
         "title": "AgcVisitDetail",
         "description": "AGC Visit\u8a73\u7d30"
       },
-      "AttachmentEntry": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "account_name": {
-            "type": "string",
-            "title": "Account Name"
-          },
-          "media_type": {
-            "type": "string",
-            "title": "Media Type"
-          },
-          "exists": {
-            "type": "boolean",
-            "title": "Exists"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "account_name",
-          "media_type",
-          "exists"
-        ],
-        "title": "AttachmentEntry",
-        "description": "\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30eb\u30a8\u30f3\u30c8\u30ea"
-      },
-      "AttachmentList": {
-        "properties": {
-          "count": {
-            "type": "integer",
-            "title": "Count"
-          },
-          "entries": {
-            "items": {
-              "$ref": "#/components/schemas/AttachmentEntry"
-            },
-            "type": "array",
-            "title": "Entries"
-          }
-        },
-        "type": "object",
-        "required": [
-          "count",
-          "entries"
-        ],
-        "title": "AttachmentList",
-        "description": "\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30eb\u4e00\u89a7"
-      },
       "AuthStatusResponse": {
         "properties": {
           "authenticated": {
@@ -2531,20 +2263,6 @@
         "title": "AuthUser",
         "description": "\u8a8d\u8a3c\u30e6\u30fc\u30b6\u30fc\u60c5\u5831"
       },
-      "Body_create_attachment_api_attachments_post": {
-        "properties": {
-          "file": {
-            "type": "string",
-            "format": "binary",
-            "title": "File"
-          }
-        },
-        "type": "object",
-        "required": [
-          "file"
-        ],
-        "title": "Body_create_attachment_api_attachments_post"
-      },
       "Card": {
         "properties": {
           "key": {
@@ -2568,20 +2286,6 @@
         "title": "Card",
         "description": "FITS\u30d8\u30c3\u30c0\u30fc\u30ab\u30fc\u30c9"
       },
-      "CreateAttachmentResponse": {
-        "properties": {
-          "path": {
-            "type": "string",
-            "title": "Path"
-          }
-        },
-        "type": "object",
-        "required": [
-          "path"
-        ],
-        "title": "CreateAttachmentResponse",
-        "description": "\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30eb\u4f5c\u6210\u30ec\u30b9\u30dd\u30f3\u30b9"
-      },
       "DesignData": {
         "properties": {
           "fiberId": {
@@ -2590,34 +2294,6 @@
             },
             "type": "array",
             "title": "Fiberid"
-          },
-          "catId": {
-            "items": {
-              "type": "integer"
-            },
-            "type": "array",
-            "title": "Catid"
-          },
-          "tract": {
-            "items": {
-              "type": "integer"
-            },
-            "type": "array",
-            "title": "Tract"
-          },
-          "patch": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Patch"
-          },
-          "objId": {
-            "items": {
-              "type": "integer"
-            },
-            "type": "array",
-            "title": "Objid"
           },
           "ra": {
             "items": {
@@ -2633,6 +2309,34 @@
             "type": "array",
             "title": "Dec"
           },
+          "tract": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Tract"
+          },
+          "patch": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Patch"
+          },
+          "catId": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Catid"
+          },
+          "objId": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Objid"
+          },
           "targetType": {
             "items": {
               "type": "integer"
@@ -2640,12 +2344,47 @@
             "type": "array",
             "title": "Targettype"
           },
-          "fiberStatus": {
+          "epoch": {
             "items": {
-              "type": "integer"
+              "type": "string"
             },
             "type": "array",
-            "title": "Fiberstatus"
+            "title": "Epoch"
+          },
+          "pmRa": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Pmra"
+          },
+          "pmDec": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Pmdec"
+          },
+          "parallax": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Parallax"
+          },
+          "proposalId": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Proposalid"
+          },
+          "obCode": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Obcode"
           },
           "pfiNominal": {
             "items": {
@@ -2656,20 +2395,33 @@
             },
             "type": "array",
             "title": "Pfinominal"
+          },
+          "fiberStatus": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Fiberstatus"
           }
         },
         "type": "object",
         "required": [
           "fiberId",
-          "catId",
-          "tract",
-          "patch",
-          "objId",
           "ra",
           "dec",
+          "tract",
+          "patch",
+          "catId",
+          "objId",
           "targetType",
-          "fiberStatus",
-          "pfiNominal"
+          "epoch",
+          "pmRa",
+          "pmDec",
+          "parallax",
+          "proposalId",
+          "obCode",
+          "pfiNominal",
+          "fiberStatus"
         ],
         "title": "DesignData",
         "description": "Design HDU \u30c7\u30fc\u30bf"
@@ -3454,9 +3206,6 @@
           "design_data": {
             "$ref": "#/components/schemas/DesignData"
           },
-          "photometry_data": {
-            "$ref": "#/components/schemas/PhotometryData"
-          },
           "guidestar_data": {
             "$ref": "#/components/schemas/GuidestarData"
           }
@@ -3466,7 +3215,6 @@
           "fits_meta",
           "date_modified",
           "design_data",
-          "photometry_data",
           "guidestar_data"
         ],
         "title": "PfsDesignDetail",
@@ -3612,79 +3360,6 @@
         ],
         "title": "PfsDesignRankResponse",
         "description": "PFS Design \u30e9\u30f3\u30af\u30ec\u30b9\u30dd\u30f3\u30b9"
-      },
-      "PhotometryData": {
-        "properties": {
-          "fiberId": {
-            "items": {
-              "type": "integer"
-            },
-            "type": "array",
-            "title": "Fiberid"
-          },
-          "fiberFlux": {
-            "items": {
-              "type": "number"
-            },
-            "type": "array",
-            "title": "Fiberflux"
-          },
-          "psfFlux": {
-            "items": {
-              "type": "number"
-            },
-            "type": "array",
-            "title": "Psfflux"
-          },
-          "totalFlux": {
-            "items": {
-              "type": "number"
-            },
-            "type": "array",
-            "title": "Totalflux"
-          },
-          "fiberFluxErr": {
-            "items": {
-              "type": "number"
-            },
-            "type": "array",
-            "title": "Fiberfluxerr"
-          },
-          "psfFluxErr": {
-            "items": {
-              "type": "number"
-            },
-            "type": "array",
-            "title": "Psffluxerr"
-          },
-          "totalFluxErr": {
-            "items": {
-              "type": "number"
-            },
-            "type": "array",
-            "title": "Totalfluxerr"
-          },
-          "filterName": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Filtername"
-          }
-        },
-        "type": "object",
-        "required": [
-          "fiberId",
-          "fiberFlux",
-          "psfFlux",
-          "totalFlux",
-          "fiberFluxErr",
-          "psfFluxErr",
-          "totalFluxErr",
-          "filterName"
-        ],
-        "title": "PhotometryData",
-        "description": "\u6e2c\u5149\u30c7\u30fc\u30bf"
       },
       "SequenceGroup": {
         "properties": {
@@ -4144,6 +3819,72 @@
             "type": "array",
             "title": "Notes",
             "default": []
+          },
+          "seeing_median": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seeing Median"
+          },
+          "transparency_median": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transparency Median"
+          },
+          "effective_exposure_time_b": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective Exposure Time B"
+          },
+          "effective_exposure_time_r": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective Exposure Time R"
+          },
+          "effective_exposure_time_n": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective Exposure Time N"
+          },
+          "effective_exposure_time_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective Exposure Time M"
           },
           "pfs_design_id": {
             "anyOf": [

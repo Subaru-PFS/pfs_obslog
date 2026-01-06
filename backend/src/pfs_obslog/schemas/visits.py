@@ -106,13 +106,13 @@ class VisitListEntry(BaseModel):
     # メモ
     notes: list[VisitNote] = []
 
-    # QA情報（将来実装）
-    # seeing_median: float | None = None
-    # transparency_median: float | None = None
-    # effective_exposure_time_b: float | None = None
-    # effective_exposure_time_r: float | None = None
-    # effective_exposure_time_n: float | None = None
-    # effective_exposure_time_m: float | None = None
+    # QA情報（QAデータベースから取得）
+    seeing_median: float | None = None
+    transparency_median: float | None = None
+    effective_exposure_time_b: float | None = None
+    effective_exposure_time_r: float | None = None
+    effective_exposure_time_n: float | None = None
+    effective_exposure_time_m: float | None = None
 
     # 設計ID（16進数文字列）
     pfs_design_id: str | None = None

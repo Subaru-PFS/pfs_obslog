@@ -589,6 +589,12 @@ export type VisitListEntry = {
   avg_dec?: number | null;
   avg_insrot?: number | null;
   notes?: VisitNote[];
+  seeing_median?: number | null;
+  transparency_median?: number | null;
+  effective_exposure_time_b?: number | null;
+  effective_exposure_time_r?: number | null;
+  effective_exposure_time_n?: number | null;
+  effective_exposure_time_m?: number | null;
   pfs_design_id?: string | null;
 };
 export type SequenceGroup = {
@@ -793,31 +799,21 @@ export type PfsDesignRankResponse = {
 };
 export type DesignData = {
   fiberId: number[];
-  catId: number[];
-  tract: number[];
-  patch: string[];
-  objId: string[];
   ra: number[];
   dec: number[];
+  tract: number[];
+  patch: string[];
+  catId: number[];
+  objId: string[];
   targetType: number[];
-  fiberStatus: number[];
-  pfiNominal: number[][];
   epoch: string[];
   pmRa: number[];
   pmDec: number[];
   parallax: number[];
   proposalId: string[];
   obCode: string[];
-};
-export type PhotometryData = {
-  fiberId: number[];
-  fiberFlux: number[];
-  psfFlux: number[];
-  totalFlux: number[];
-  fiberFluxErr: number[];
-  psfFluxErr: number[];
-  totalFluxErr: number[];
-  filterName: string[];
+  pfiNominal: number[][];
+  fiberStatus: number[];
 };
 export type GuidestarData = {
   ra: number[];
@@ -827,7 +823,6 @@ export type PfsDesignDetail = {
   fits_meta: FitsMeta;
   date_modified: string;
   design_data: DesignData;
-  photometry_data: PhotometryData;
   guidestar_data: GuidestarData;
 };
 export const {
