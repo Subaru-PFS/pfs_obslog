@@ -1047,7 +1047,10 @@ export function VisitList() {
         element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       }
     }
-  }, [selectedVisitId, consumeSkipScroll])
+    // Note: consumeSkipScroll is intentionally not in deps - it's a ref-based function
+    // that we only want to call when selectedVisitId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedVisitId])
 
   if (isLoading) {
     return (
@@ -1170,8 +1173,6 @@ export function VisitList() {
             filters={exposureFilters}
             onChange={setExposureFilters}
           />
-          <div className={styles.filterSeparator} />
-          <Icon name="date_range" size={18} />
           <DateRangePicker
             value={dateRange}
             onChange={handleDateRangeChange}

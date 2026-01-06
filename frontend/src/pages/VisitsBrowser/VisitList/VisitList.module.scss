@@ -603,7 +603,7 @@ $pagination-border-radius: 12px;
 
   // Column widths
   .colId {
-    width: 60px;
+    width: 55px;
     font-family: monospace;
     text-align: right;
   }
@@ -616,43 +616,43 @@ $pagination-border-radius: 12px;
   }
 
   .colDate {
-    width: 80px;
+    width: 75px;
     white-space: nowrap;
   }
 
   .colTime {
-    width: 50px;
+    width: 42px;
     white-space: nowrap;
   }
 
   .colExposures {
-    width: 70px;
+    width: 55px;
     text-align: center;
     font-family: monospace;
   }
 
   .colExptime {
-    width: 50px;
+    width: 45px;
     text-align: right;
     font-family: monospace;
   }
 
   .colEet {
-    width: 45px;
+    width: 40px;
     text-align: right;
     font-family: monospace;
     font-size: 0.7rem;
   }
 
   .colSeeing {
-    width: 45px;
+    width: 40px;
     text-align: right;
     font-family: monospace;
     font-size: 0.7rem;
   }
 
   .colTransparency {
-    width: 45px;
+    width: 40px;
     text-align: right;
     font-family: monospace;
     font-size: 0.7rem;

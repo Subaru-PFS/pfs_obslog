@@ -190,7 +190,9 @@ export function DesignList() {
       })
     }
     // リスト内にない場合は何もしない（検索条件に合わないDesignは表示されない）
-  }, [selectedDesign, designs, consumeSkipDesignScroll])
+    // Note: consumeSkipDesignScroll is intentionally not in deps - it's a ref-based function
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDesign, designs])
 
   // エントリクリックハンドラ
   const handleEntryClick = useCallback(
