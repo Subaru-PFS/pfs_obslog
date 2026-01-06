@@ -1050,6 +1050,16 @@ export function VisitList() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [data, selectedVisitId, setSelectedVisitId, scrollToVisit, isFirstPage, isLastPage, handleLoadMoreNewer, handleLoadMoreOlder])
 
+  // リストが更新されたとき、選択中のvisitがリストに含まれていればスクロール
+  useEffect(() => {
+    if (!selectedVisitId || !data) return
+    // 選択中のvisitがリストに含まれているか確認
+    const isInList = data.visits.some((v) => v.id === selectedVisitId)
+    if (!isInList) return
+
+    scrollToVisit(selectedVisitId)
+  }, [data, selectedVisitId, scrollToVisit])
+
   if (isLoading) {
     return (
       <div className={styles.visitList}>

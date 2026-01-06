@@ -1,7 +1,7 @@
 /**
  * DesignList - PFS Design一覧サイドパネル
  */
-import { useState, useMemo, useCallback, useRef } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useLocalStorage } from 'react-use'
 import { Icon, IconButton } from '../../../components/Icon'
 import { Tooltip } from '../../../components/Tooltip'
@@ -182,6 +182,22 @@ export function DesignList() {
     },
     [idFormat]
   )
+
+  // リストが更新されたとき、選択中のdesignがリストに含まれていればスクロール
+  useEffect(() => {
+    if (!selectedDesign || !listContainerRef.current) return
+    // 選択中のdesignがリストに含まれているか確認
+    const isInList = designs.some((d) => d.id === selectedDesign.id)
+    if (!isInList) return
+
+    // 要素を探してスクロール
+    const element = listContainerRef.current.querySelector(
+      `[data-design-id="${selectedDesign.id}"]`
+    )
+    if (element) {
+      element.scrollIntoView({ block: 'nearest' })
+    }
+  }, [designs, selectedDesign])
 
   return (
     <div className={styles.listContainer}>
