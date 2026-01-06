@@ -169,11 +169,15 @@ class QueryEvaluator:
             raise QueryParseError(f"Unknown column: {col_name}")
 
         vcol = VIRTUAL_COLUMNS[col_name]
-        self.required_joins.update(vcol.required_joins)
 
-        # any_columnの場合は特殊なマーカーを返す
+        # any_columnは遅いため無効化
         if col_name == "any_column":
-            return "__any_column__"
+            raise QueryParseError(
+                "any_column is disabled due to performance issues. "
+                "Please use specific columns like visit_note instead."
+            )
+
+        self.required_joins.update(vcol.required_joins)
 
         # 集約カラムの場合は特殊なマーカーを返す
         if vcol.is_aggregate:
@@ -467,29 +471,11 @@ class QueryEvaluator:
         ):
             raise QueryParseError("Indirection is only supported for fits_header")
 
-        # 必要なJOINを追加
-        self.required_joins.update(VIRTUAL_COLUMNS["fits_header"].required_joins)
-
-        # インデックスを取得
-        if len(node.indirection) != 1:  # type: ignore[arg-type]
-            raise QueryParseError("fits_header requires exactly one key access")
-
-        idx = node.indirection[0]  # type: ignore[index]
-        if not isinstance(idx, ast.A_Indices):
-            raise QueryParseError(f"Invalid indirection type: {type(idx).__name__}")
-
-        key_const = idx.uidx
-        if (
-            not isinstance(key_const, ast.A_Const)
-            or not isinstance(key_const.val, ast.String)
-        ):
-            raise QueryParseError("fits_header key must be a string")
-
-        key = key_const.val.sval
-
-        # JSONB アクセスを返す
-        fits_header_col = self._column_map["fits_header"]
-        return fits_header_col[key].astext
+        # fits_headerは遅いため無効化
+        raise QueryParseError(
+            "fits_header is disabled due to performance issues. "
+            "This feature may be re-enabled in the future."
+        )
 
     def eval_TypeCast(self, node: ast.TypeCast) -> ColumnElement[Any]:
         """型キャスト"""

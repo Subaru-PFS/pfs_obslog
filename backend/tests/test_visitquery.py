@@ -159,7 +159,6 @@ class TestVirtualColumns:
         assert VIRTUAL_COLUMNS["is_sps_visit"].is_computed
         assert VIRTUAL_COLUMNS["is_mcs_visit"].is_computed
         assert VIRTUAL_COLUMNS["is_agc_visit"].is_computed
-        assert VIRTUAL_COLUMNS["any_column"].is_computed
 
     def test_join_dependencies(self):
         """JOINの依存関係が正しく設定されている"""
@@ -209,12 +208,14 @@ class TestQueryEvaluatorRequiredJoins:
         assert "sps_visit" in evaluator.required_joins
 
     def test_join_for_any_column(self):
-        """any_columnは複数のJOINが必要"""
-        # any_columnはVIRTUAL_COLUMNSの定義から必要なJOINが設定される
-        from pfs_obslog.visitquery.columns import VIRTUAL_COLUMNS
-        any_col = VIRTUAL_COLUMNS["any_column"]
-        # any_columnは多くのテーブルをJOINする必要がある
-        assert len(any_col.required_joins) > 5
+        """any_columnは無効化されている"""
+        from pfs_obslog import models as M
+
+        ast = parse_where_clause("where any_column like '%test%'")
+        evaluator = QueryEvaluator(M)
+        # any_columnは無効化されている
+        with pytest.raises(QueryParseError, match="any_column is disabled"):
+            evaluator.evaluate(ast)
 
 
 class TestQueryEvaluatorErrors:

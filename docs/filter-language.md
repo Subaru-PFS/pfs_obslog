@@ -59,47 +59,11 @@ These columns are not actual table columns but are implemented as expressions th
 | `is_mcs_visit` | BOOLEAN | Has MCS exposure | `mcs_exposure.pfs_visit_id IS NOT NULL` | mcs_exposure |
 | `is_agc_visit` | BOOLEAN | Has AGC exposure | `agc_exposure.pfs_visit_id IS NOT NULL` | agc_exposure |
 
-### FITS Header
-
-| Column Name | Type | Description | Maps To | Required JOINs |
-|-------------|------|-------------|---------|----------------|
-| `fits_header` | JSONB | FITS header (for array access) | `obslog_fits_header.cards_dict` | obslog_fits_header |
-
-**Usage Example:**
-```sql
--- Search OBSERVER field in FITS header
-WHERE fits_header['OBSERVER'] LIKE '%Tamura%'
-```
-
 ### Proposal
 
 | Column Name | Type | Description | Maps To | Required JOINs |
 |-------------|------|-------------|---------|----------------|
 | `proposal_id` | TEXT | Proposal ID | `pfs_design_fiber.proposal_id` | pfs_design_fiber |
-
-### Full-text Search
-
-| Column Name | Type | Description | Required JOINs |
-|-------------|------|-------------|----------------|
-| `any_column` | Special | Text search across multiple columns | Multiple (see below) |
-
-**`any_column` Search Target Columns:**
-- `pfs_visit.pfs_visit_id` (cast to string)
-- `pfs_visit.pfs_visit_description`
-- `obslog_visit_note.body`
-- `obslog_visit_set_note.body`
-- `iic_sequence.name`
-- `iic_sequence.sequence_type`
-- `iic_sequence_status.cmd_output`
-- `sps_annotation.notes`
-- `obslog_mcs_exposure_note.body`
-- `pfs_design_fiber.proposal_id`
-
-**Usage Example:**
-```sql
--- Search for 'test' across multiple columns
-WHERE any_column LIKE '%test%'
-```
 
 ### Aggregate Columns
 
@@ -191,16 +155,8 @@ WHERE visit_note IS NOT NULL
 | Cast | Description | Example |
 |------|-------------|---------|
 | `::date` | Cast to DATE | `issued_at::date = '2024-01-01'` |
-| `::float`, `::float8` | Cast to FLOAT | `fits_header['EXPTIME']::float > 30` |
-| `::int`, `::integer` | Cast to INTEGER | `fits_header['VISIT']::int = 100` |
-
-### Array/JSONB Access
-
-```sql
--- Access FITS header key
-WHERE fits_header['OBSERVER'] LIKE '%Tamura%'
-WHERE fits_header['EXPTIME']::float > 30.0
-```
+| `::float`, `::float8` | Cast to FLOAT | `sps_avg_exptime::float > 30` |
+| `::int`, `::integer` | Cast to INTEGER | `sps_count::int > 5` |
 
 ### Allowed Functions
 
@@ -238,8 +194,7 @@ pfs_visit (base table)
 │   ├── obslog_mcs_exposure_note
 │   │   └── mcs_exposure_note_user (alias for ObslogUser)
 ├── agc_exposure
-├── pfs_design_fiber
-└── obslog_fits_header
+└── pfs_design_fiber
 ```
 
 ---
@@ -311,26 +266,6 @@ WHERE visit_note_user = 'yamada'
 
 -- Sequence note search
 WHERE visit_set_note LIKE '%weather%'
-```
-
-### FITS Header Search
-
-```sql
--- Specific observer
-WHERE fits_header['OBSERVER'] LIKE '%Tamura%'
-
--- Exposure time above threshold
-WHERE fits_header['EXPTIME']::float > 60.0
-
--- Specific program ID
-WHERE fits_header['PROP-ID'] = 'S24A-001'
-```
-
-### Full-text Search
-
-```sql
--- Cross-column search
-WHERE any_column LIKE '%calibration%'
 ```
 
 ### Complex Conditions

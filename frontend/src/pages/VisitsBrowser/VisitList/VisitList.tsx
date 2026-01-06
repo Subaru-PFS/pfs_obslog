@@ -942,8 +942,8 @@ export function VisitList() {
       // Direct SQL query
       setAppliedSql(query)
     } else {
-      // Simple text search - wrap with any_column LIKE
-      setAppliedSql(`where any_column like '%${query}%'`)
+      // Simple text search - use visit_note LIKE (any_column is disabled for performance)
+      setAppliedSql(`where visit_note like '%${query}%'`)
     }
     
     // Reset pagination (setAppliedSql already handles offset reset and scroll)
@@ -1216,9 +1216,6 @@ export function VisitList() {
       </div>
 
       <div className={styles.content} ref={contentRef}>
-        {/* 自動リフレッシュ時（データ取得済み&ポーリング中）はLoading Overlayを非表示 */}
-        <LoadingOverlay isLoading={(isFetching || isLoadingMore) && !(shouldAutoRefresh && data)} stickyCenter />
-
         {/* Navigation at top - scrolls with content */}
         <div className={styles.paginationTop}>
           <Tooltip content="Next newer visits">
@@ -1249,6 +1246,9 @@ export function VisitList() {
             </button>
           </Tooltip>
         </div>
+
+        {/* Loading overlay - positioned after paginationTop to avoid gap */}
+        <LoadingOverlay isLoading={(isFetching || isLoadingMore) && !(shouldAutoRefresh && data)} />
 
         {visitGroups.length === 0 ? (
           <div className={styles.empty}>No visits found</div>

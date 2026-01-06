@@ -59,47 +59,11 @@ WHERE id BETWEEN 100 AND 200 AND is_sps_visit
 | `is_mcs_visit` | BOOLEAN | MCS露出があるか | `mcs_exposure.pfs_visit_id IS NOT NULL` | mcs_exposure |
 | `is_agc_visit` | BOOLEAN | AGC露出があるか | `agc_exposure.pfs_visit_id IS NOT NULL` | agc_exposure |
 
-### FITSヘッダー
-
-| カラム名 | 型 | 説明 | マッピング先 | 必要なJOIN |
-|----------|------|------|-------------|-----------|
-| `fits_header` | JSONB | FITSヘッダー（配列アクセス用） | `obslog_fits_header.cards_dict` | obslog_fits_header |
-
-**使用例:**
-```sql
--- FITSヘッダーの OBSERVER フィールドを検索
-WHERE fits_header['OBSERVER'] LIKE '%Tamura%'
-```
-
 ### プロポーザル
 
 | カラム名 | 型 | 説明 | マッピング先 | 必要なJOIN |
 |----------|------|------|-------------|-----------|
 | `proposal_id` | TEXT | プロポーザルID | `pfs_design_fiber.proposal_id` | pfs_design_fiber |
-
-### 全文検索
-
-| カラム名 | 型 | 説明 | 必要なJOIN |
-|----------|------|------|-----------|
-| `any_column` | 特殊 | 複数カラムを対象としたテキスト検索 | 多数（下記参照） |
-
-**`any_column` の検索対象カラム:**
-- `pfs_visit.pfs_visit_id`（文字列にキャスト）
-- `pfs_visit.pfs_visit_description`
-- `obslog_visit_note.body`
-- `obslog_visit_set_note.body`
-- `iic_sequence.name`
-- `iic_sequence.sequence_type`
-- `iic_sequence_status.cmd_output`
-- `sps_annotation.notes`
-- `obslog_mcs_exposure_note.body`
-- `pfs_design_fiber.proposal_id`
-
-**使用例:**
-```sql
--- 複数カラムから 'test' を検索
-WHERE any_column LIKE '%test%'
-```
 
 ### 集約カラム
 
@@ -191,16 +155,8 @@ WHERE visit_note IS NOT NULL
 | キャスト | 説明 | 例 |
 |---------|------|-----|
 | `::date` | DATE型にキャスト | `issued_at::date = '2024-01-01'` |
-| `::float`, `::float8` | FLOAT型にキャスト | `fits_header['EXPTIME']::float > 30` |
-| `::int`, `::integer` | INTEGER型にキャスト | `fits_header['VISIT']::int = 100` |
-
-### 配列/JSONBアクセス
-
-```sql
--- FITSヘッダーのキーにアクセス
-WHERE fits_header['OBSERVER'] LIKE '%Tamura%'
-WHERE fits_header['EXPTIME']::float > 30.0
-```
+| `::float`, `::float8` | FLOAT型にキャスト | `sps_avg_exptime::float > 30` |
+| `::int`, `::integer` | INTEGER型にキャスト | `sps_count::int > 5` |
 
 ### 許可される関数
 
@@ -238,8 +194,7 @@ pfs_visit (ベーステーブル)
 │   ├── obslog_mcs_exposure_note
 │   │   └── mcs_exposure_note_user (ObslogUser のエイリアス)
 ├── agc_exposure
-├── pfs_design_fiber
-└── obslog_fits_header
+└── pfs_design_fiber
 ```
 
 ---
@@ -311,26 +266,6 @@ WHERE visit_note_user = 'yamada'
 
 -- シーケンスメモの検索
 WHERE visit_set_note LIKE '%weather%'
-```
-
-### FITSヘッダーの検索
-
-```sql
--- 特定の観測者
-WHERE fits_header['OBSERVER'] LIKE '%Tamura%'
-
--- 露出時間が一定以上
-WHERE fits_header['EXPTIME']::float > 60.0
-
--- 特定のプログラムID
-WHERE fits_header['PROP-ID'] = 'S24A-001'
-```
-
-### 全文検索
-
-```sql
--- 複数のカラムから横断検索
-WHERE any_column LIKE '%calibration%'
 ```
 
 ### 複合条件

@@ -22,8 +22,6 @@ const columns = [
   { name: 'visit_set_note_user', opdb_column: 'obslog_user.account_name', doc: 'Username of the note of the visit set' },
   { name: 'sequence_group_id', opdb_column: 'sequence_group.group_id', doc: 'Sequence Group ID' },
   { name: 'sequence_group_name', opdb_column: 'sequence_group.group_name', doc: 'Sequence Group Name' },
-  { name: 'fits_header', opdb_column: 'N/A', doc: "FITS headers belonging to the visit.\nYou can access a card by fits_header['CARD_NAME']" },
-  { name: 'any_column', opdb_column: 'N/A', doc: 'Expands to multiple columns at evaluation time. Useful for broad searches.' },
   { name: 'proposal_id', opdb_column: 'pfs_design_fiber.proposal_id', doc: 'Proposal ID from the fiber design' },
 ]
 
@@ -55,19 +53,14 @@ const examples = [
     doc: 'Find visits with a specific sequence type.',
   },
   {
-    title: "Visits whose any column contains 'science'",
-    sql: "where any_column like '%science%'",
-    doc: 'Broad search across multiple columns.',
+    title: "Visits with note containing 'calibration'",
+    sql: "where visit_note like '%calibration%'",
+    doc: 'Search for visits with specific text in their notes.',
   },
   {
     title: "Visits whose visit set has a note by a specific user",
     sql: "where visit_set_note_user = 'moritani@stn'",
     doc: 'Filter by the user who created a visit set note.',
-  },
-  {
-    title: "Visits whose FITS card OBSERVER contains a name",
-    sql: "where fits_header['OBSERVER'] like '%tamura%'",
-    doc: 'Access specific FITS header cards.',
   },
   {
     title: 'Visits with completed status',

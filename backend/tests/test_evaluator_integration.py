@@ -300,70 +300,51 @@ class TestTypeCast:
 
 
 class TestFitsHeader:
-    """fits_headerアクセスのテスト"""
+    """fits_headerアクセスのテスト
 
-    def test_fits_header_access(self, db_session_readonly):
-        """fits_header['KEY']アクセス"""
+    fits_headerはパフォーマンス問題のため無効化されています。
+    """
+
+    def test_fits_header_disabled(self):
+        """fits_header['KEY']アクセスが無効化されていることを確認"""
         ast = parse_where_clause("where fits_header['OBSERVER'] = 'test'")
         evaluator, join_builder = _create_evaluator_with_join_builder()
-        where_clause = evaluator.evaluate(ast)
+        with pytest.raises(QueryParseError, match="fits_header is disabled"):
+            evaluator.evaluate(ast)
 
-        assert "obslog_fits_header" in evaluator.required_joins
-
-        query = select(M.PfsVisit.pfs_visit_id)
-        query = join_builder.apply_joins(query, evaluator.required_joins)
-        query = query.where(where_clause).limit(10)
-        result = db_session_readonly.execute(query).fetchall()
-
-    def test_fits_header_like(self, db_session_readonly):
-        """fits_header LIKEパターン"""
+    def test_fits_header_like_disabled(self):
+        """fits_header LIKEパターンが無効化されていることを確認"""
         ast = parse_where_clause("where fits_header['OBSERVER'] like '%test%'")
         evaluator, join_builder = _create_evaluator_with_join_builder()
-        where_clause = evaluator.evaluate(ast)
-
-        query = select(M.PfsVisit.pfs_visit_id)
-        query = join_builder.apply_joins(query, evaluator.required_joins)
-        query = query.where(where_clause).limit(10)
-        result = db_session_readonly.execute(query).fetchall()
+        with pytest.raises(QueryParseError, match="fits_header is disabled"):
+            evaluator.evaluate(ast)
 
 
 class TestAnyColumn:
-    """any_columnのテスト"""
+    """any_columnのテスト
 
-    def test_any_column_equal(self, db_session_readonly):
-        """any_column = value（式の生成のみテスト）"""
+    any_columnはパフォーマンス問題のため無効化されています。
+    """
+
+    def test_any_column_disabled(self):
+        """any_column = valueが無効化されていることを確認"""
         ast = parse_where_clause("where any_column = 'test'")
         evaluator = QueryEvaluator(M)
-        where_clause = evaluator.evaluate(ast)
+        with pytest.raises(QueryParseError, match="any_column is disabled"):
+            evaluator.evaluate(ast)
 
-        # any_columnは多くのテーブルをJOINする
-        assert len(evaluator.required_joins) > 0
-        # 式が生成されることを確認（実際のクエリ実行はJOINが複雑なためスキップ）
-        assert where_clause is not None
-
-    def test_any_column_like(self, db_session_readonly):
-        """any_column LIKE pattern（式の生成のみテスト）"""
+    def test_any_column_like_disabled(self):
+        """any_column LIKEが無効化されていることを確認"""
         ast = parse_where_clause("where any_column like '%test%'")
         evaluator = QueryEvaluator(M)
-        where_clause = evaluator.evaluate(ast)
+        with pytest.raises(QueryParseError, match="any_column is disabled"):
+            evaluator.evaluate(ast)
 
-        assert len(evaluator.required_joins) > 0
-        assert where_clause is not None
-
-    def test_any_column_ilike(self, db_session_readonly):
-        """any_column ILIKE pattern（式の生成のみテスト）"""
+    def test_any_column_ilike_disabled(self):
+        """any_column ILIKEが無効化されていることを確認"""
         ast = parse_where_clause("where any_column ilike '%TEST%'")
         evaluator = QueryEvaluator(M)
-        where_clause = evaluator.evaluate(ast)
-
-        assert len(evaluator.required_joins) > 0
-        assert where_clause is not None
-
-    def test_any_column_unsupported_operator(self):
-        """any_columnに対するサポートされていない演算子"""
-        ast = parse_where_clause("where any_column > 100")
-        evaluator = QueryEvaluator(M)
-        with pytest.raises(QueryParseError, match="not supported for any_column"):
+        with pytest.raises(QueryParseError, match="any_column is disabled"):
             evaluator.evaluate(ast)
 
 
@@ -434,17 +415,17 @@ class TestErrorCases:
             evaluator.evaluate(ast)
 
     def test_fits_header_invalid_key(self):
-        """fits_headerに数値キーを指定"""
+        """fits_headerに数値キーを指定（fits_headerは無効化されているのでdisabledエラーが先に出る）"""
         ast = parse_where_clause("where fits_header[123] = 'test'")
         evaluator = QueryEvaluator(M)
-        with pytest.raises(QueryParseError, match="fits_header key must be a string"):
+        with pytest.raises(QueryParseError, match="fits_header is disabled"):
             evaluator.evaluate(ast)
 
     def test_any_column_like_non_string(self):
-        """any_column LIKEで文字列でないパターン"""
+        """any_column LIKEで文字列でないパターン（any_columnは無効化されている）"""
         ast = parse_where_clause("where any_column like id")
         evaluator = QueryEvaluator(M)
-        with pytest.raises(QueryParseError, match="LIKE pattern must be a string"):
+        with pytest.raises(QueryParseError, match="any_column is disabled"):
             evaluator.evaluate(ast)
 
 
@@ -490,15 +471,21 @@ class TestJoinBuilder:
         result = db_session_readonly.execute(query).fetchall()
 
     def test_all_join_types(self, db_session_readonly):
-        """全てのJOINタイプをテスト（式の生成のみ）"""
-        # any_columnは多くのJOINを必要とする
-        ast = parse_where_clause("where any_column like '%test%'")
-        evaluator = QueryEvaluator(M)
+        """全てのJOINタイプをテスト（式の生成とクエリ実行）"""
+        # 複数のJOINを必要とするクエリ
+        ast = parse_where_clause("where visit_note like '%test%' and sequence_type = 'test'")
+        evaluator, join_builder = _create_evaluator_with_join_builder()
         where_clause = evaluator.evaluate(ast)
 
-        # JOINが必要であることを確認（実際のクエリ実行はJOINが複雑なためスキップ）
+        # JOINが必要であることを確認
         assert len(evaluator.required_joins) > 0
-        assert where_clause is not None
+        assert "obslog_visit_note" in evaluator.required_joins
+        assert "iic_sequence" in evaluator.required_joins
+
+        query = select(M.PfsVisit.pfs_visit_id)
+        query = join_builder.apply_joins(query, evaluator.required_joins)
+        query = query.where(where_clause).limit(10)
+        result = db_session_readonly.execute(query).fetchall()
 
 class TestAggregateColumns:
     """集約カラムのテスト"""
