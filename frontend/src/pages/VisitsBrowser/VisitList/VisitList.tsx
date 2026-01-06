@@ -28,17 +28,6 @@ import styles from './VisitList.module.scss'
 
 const PER_PAGE = 200
 
-// Check if an element is visible within its scroll container
-const isElementInView = (element: Element, container: Element): boolean => {
-  const elementRect = element.getBoundingClientRect()
-  const containerRect = container.getBoundingClientRect()
-  
-  return (
-    elementRect.top >= containerRect.top &&
-    elementRect.bottom <= containerRect.bottom
-  )
-}
-
 // =============================================================================
 // Column definitions
 // =============================================================================
@@ -640,13 +629,11 @@ export function VisitList() {
   
   // Refs
   const contentRef = useRef<HTMLDivElement>(null)
-  const scrollHeightBeforeLoadRef = useRef<number | null>(null)
 
   const [offset, setOffset] = useState(0)
   const [limit, setLimit] = useState(PER_PAGE)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [searchError, setSearchError] = useState<string | null>(null)
-  const [shouldScrollToTop, setShouldScrollToTop] = useState(false)
 
   // Helper to update URL params
   const updateUrlParams = useCallback((updates: {
@@ -711,7 +698,8 @@ export function VisitList() {
   const setAppliedSql = useCallback((sql: string | null) => {
     updateUrlParams({ sql })
     setOffset(0)
-    setShouldScrollToTop(true)
+    // Scroll to top after state update
+    requestAnimationFrame(() => contentRef.current?.scrollTo(0, 0))
   }, [updateUrlParams])
   
   const setDateRange = useCallback((range: DateRange) => {
@@ -720,7 +708,8 @@ export function VisitList() {
       endDate: range[1] ?? null 
     })
     setOffset(0)
-    setShouldScrollToTop(true)
+    // Scroll to top after state update
+    requestAnimationFrame(() => contentRef.current?.scrollTo(0, 0))
   }, [updateUrlParams])
   
   const setExposureFilters = useCallback((partialFilters: Partial<ExposureFilters>) => {
@@ -732,7 +721,8 @@ export function VisitList() {
       agc: newFilters.agc 
     })
     setOffset(0)
-    setShouldScrollToTop(true)
+    // Scroll to top after state update
+    requestAnimationFrame(() => contentRef.current?.scrollTo(0, 0))
   }, [updateUrlParams, exposureFilters])
 
   // Column visibility state with localStorage persistence
@@ -813,19 +803,19 @@ export function VisitList() {
   const handleFirstPage = useCallback(() => {
     setOffset(0)
     setLimit(PER_PAGE)
-    setShouldScrollToTop(true)
+    requestAnimationFrame(() => contentRef.current?.scrollTo(0, 0))
   }, [])
 
   const handlePrevPage = useCallback(() => {
     setOffset((prev) => Math.max(0, prev - PER_PAGE))
     setLimit(PER_PAGE)
-    setShouldScrollToTop(true)
+    requestAnimationFrame(() => contentRef.current?.scrollTo(0, 0))
   }, [])
 
   const handleNextPage = useCallback(() => {
     setOffset((prev) => prev + PER_PAGE)
     setLimit(PER_PAGE)
-    setShouldScrollToTop(true)
+    requestAnimationFrame(() => contentRef.current?.scrollTo(0, 0))
   }, [])
 
   const handleLastPage = useCallback(() => {
@@ -833,7 +823,7 @@ export function VisitList() {
       const lastPageOffset = Math.floor((totalCount - 1) / PER_PAGE) * PER_PAGE
       setOffset(lastPageOffset)
       setLimit(PER_PAGE)
-      setShouldScrollToTop(true)
+      requestAnimationFrame(() => contentRef.current?.scrollTo(0, 0))
     }
   }, [totalCount])
 
@@ -843,10 +833,6 @@ export function VisitList() {
     const increase = offset - newOffset
     if (increase === 0) return
     
-    // Save current scroll height before loading
-    if (contentRef.current) {
-      scrollHeightBeforeLoadRef.current = contentRef.current.scrollHeight
-    }
     setIsLoadingMore(true)
     setOffset(newOffset)
     setLimit((prev) => prev + increase)
@@ -858,32 +844,18 @@ export function VisitList() {
     setLimit((prev) => prev + (PER_PAGE >> 1))
   }, [])
 
-  // Adjust scroll position after loading more newer visits
+  // Reset loading more state when fetch completes
   useEffect(() => {
     if (!isFetching && isLoadingMore) {
       setIsLoadingMore(false)
-      if (scrollHeightBeforeLoadRef.current !== null && contentRef.current) {
-        const newScrollHeight = contentRef.current.scrollHeight
-        const scrollDiff = newScrollHeight - scrollHeightBeforeLoadRef.current
-        contentRef.current.scrollTop += scrollDiff
-        scrollHeightBeforeLoadRef.current = null
-      }
     }
   }, [isFetching, isLoadingMore])
-
-  // Scroll to top after data load completes (for pagination/search)
-  useEffect(() => {
-    if (!isFetching && shouldScrollToTop) {
-      setShouldScrollToTop(false)
-      contentRef.current?.scrollTo(0, 0)
-    }
-  }, [isFetching, shouldScrollToTop])
 
   // Go to latest visits
   const handleGoToLatest = useCallback(() => {
     setOffset(0)
     setLimit(PER_PAGE)
-    setShouldScrollToTop(true)
+    requestAnimationFrame(() => contentRef.current?.scrollTo(0, 0))
   }, [])
 
   // Refresh
@@ -1001,9 +973,7 @@ export function VisitList() {
   const scrollToVisit = useCallback((visitId: number) => {
     requestAnimationFrame(() => {
       const element = document.querySelector(`[data-visit-id="${visitId}"]`)
-      if (element && contentRef.current && !isElementInView(element, contentRef.current)) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-      }
+      element?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     })
   }, [])
 
@@ -1049,16 +1019,6 @@ export function VisitList() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [data, selectedVisitId, setSelectedVisitId, scrollToVisit, isFirstPage, isLastPage, handleLoadMoreNewer, handleLoadMoreOlder])
-
-  // リストが更新されたとき、選択中のvisitがリストに含まれていればスクロール
-  useEffect(() => {
-    if (!selectedVisitId || !data) return
-    // 選択中のvisitがリストに含まれているか確認
-    const isInList = data.visits.some((v) => v.id === selectedVisitId)
-    if (!isInList) return
-
-    scrollToVisit(selectedVisitId)
-  }, [data, selectedVisitId, scrollToVisit])
 
   if (isLoading) {
     return (

@@ -12,6 +12,16 @@
   background-color: rgba($block-background-color, 0.3);
   z-index: 100;
   animation: fadeIn 0.3s ease-out;
+
+  // スクロール中でもビューポート内で中央に表示
+  // position: sticky で実現
+  &.stickyCenter {
+    position: sticky;
+    top: 0;
+    height: 100%;
+    margin-bottom: -100%;
+    pointer-events: all;
+  }
 }
 
 @keyframes fadeIn {

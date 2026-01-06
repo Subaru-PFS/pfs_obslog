@@ -10,6 +10,11 @@ interface LoadingOverlayProps {
   showText?: boolean
   /** Whether to cover the full viewport (default: false, covers parent container) */
   fullScreen?: boolean
+  /** 
+   * Whether to use sticky positioning to stay centered in viewport while scrolling.
+   * Useful for scrollable containers. (default: false)
+   */
+  stickyCenter?: boolean
 }
 
 /**
@@ -26,17 +31,31 @@ interface LoadingOverlayProps {
  * @example
  * // Full screen overlay
  * <LoadingOverlay isLoading={isLoading} fullScreen />
+ * 
+ * @example
+ * // Sticky centered in scrollable container
+ * <div style={{ overflow: 'auto' }}>
+ *   <LoadingOverlay isLoading={isFetching} stickyCenter />
+ *   <YourScrollableContent />
+ * </div>
  */
 export function LoadingOverlay({
   isLoading,
   size = 64,
   showText = false,
   fullScreen = false,
+  stickyCenter = false,
 }: LoadingOverlayProps) {
   if (!isLoading) return null
 
+  const classNames = [
+    styles.overlay,
+    fullScreen ? styles.fullScreen : '',
+    stickyCenter ? styles.stickyCenter : '',
+  ].filter(Boolean).join(' ')
+
   return (
-    <div className={`${styles.overlay} ${fullScreen ? styles.fullScreen : ''}`}>
+    <div className={classNames}>
       <LoadingSpinner size={size} showText={showText} />
     </div>
   )
