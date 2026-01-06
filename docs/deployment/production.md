@@ -204,8 +204,14 @@ systemdサービスファイル（`pfs-obslog2.service`）で以下の環境変�
 | `BIND_ADDRESS` | `0.0.0.0:5000` | バインドするアドレスとポート |
 | `PFS_OBSLOG_app_env` | `production` | 環境（development/production） |
 | `PFS_OBSLOG_database_url` | - | PostgreSQL接続URL |
+| `PFS_OBSLOG_qadb_url` | - | QAデータベース接続URL（seeing, transparency等） |
 | `PFS_OBSLOG_session_secret_key` | 自動生成 | セッション暗号化キー |
 | `PFS_OBSLOG_root_path` | `""` (空文字列) | アプリケーションのURLプレフィックス |
+
+**QAデータベースについて:**
+
+`make production` 実行時、`~/.pgpass` から qadb の接続情報を読み取り、自動的に `PFS_OBSLOG_qadb_url` を設定します。
+開発環境では、デフォルトでローカルの qadb（`postgresql://pfs@localhost:15432/qadb`）に接続します。
 
 **URLプレフィックスについて:**
 
