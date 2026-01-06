@@ -6,8 +6,9 @@ Environment=BIND_ADDRESS=0.0.0.0:5000
 Environment=PFS_OBSLOG_app_env=production
 Environment=PFS_OBSLOG_database_url=postgresql://pfs@133.40.164.48/opdb
 Environment=PFS_OBSLOG_qadb_url=postgresql://pfs:pfs_hilo_opdb@pfsa-db.subaru.nao.ac.jp:5436/qadb
-ExecStart=/usr/bin/make -C %h/pfs-obslog2/backend production
-WorkingDirectory=%h/pfs-obslog2/backend
+Environment="PATH=%h/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+ExecStart=/usr/bin/make -C %h/devel/pfs-obslog2/backend production
+WorkingDirectory=%h/devel/pfs-obslog2/backend
 Type=simple
 Restart=always
 
