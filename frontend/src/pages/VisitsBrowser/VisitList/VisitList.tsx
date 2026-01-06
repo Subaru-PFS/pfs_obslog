@@ -942,8 +942,10 @@ export function VisitList() {
       // Direct SQL query
       setAppliedSql(query)
     } else {
-      // Simple text search - use visit_note LIKE (any_column is disabled for performance)
-      setAppliedSql(`where visit_note like '%${query}%'`)
+      // Simple text search - convert to visit_note LIKE and update the input field
+      const convertedQuery = `where visit_note like '%${query}%'`
+      setSearchQuery(convertedQuery)
+      setAppliedSql(convertedQuery)
     }
     
     // Reset pagination (setAppliedSql already handles offset reset and scroll)
