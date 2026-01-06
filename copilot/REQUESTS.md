@@ -32,4 +32,5 @@
   * [x] On the design viewer, guide stars used to be marked with triangles (but circles are used now).
     * 対応済み: ガイド星マーカーを三角形に変更
 
-* [ ] 指示者に追加の依頼がないか確認（ask_for_instructionsを使い）
+* [x] 指示者に追加の依頼がないか確認（ask_for_instructionsを使い）
+  * 完了: 追加依頼なし
