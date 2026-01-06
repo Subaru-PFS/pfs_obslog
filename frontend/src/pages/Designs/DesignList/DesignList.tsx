@@ -83,8 +83,7 @@ export function DesignList() {
     setDateRange,
     selectedDesign,
     setSelectedDesignWithoutScroll,
-    skipDesignScroll,
-    resetSkipDesignScroll,
+    consumeSkipDesignScroll,
     focusedDesign,
     setFocusedDesign,
     jumpTo,
@@ -173,8 +172,7 @@ export function DesignList() {
   // 選択されたDesignへスクロール（SkyViewerからの選択時など、表示外の場合のみ）
   useEffect(() => {
     // ユーザーがリストから直接クリックした場合はスキップ
-    if (skipDesignScroll) {
-      resetSkipDesignScroll()
+    if (consumeSkipDesignScroll()) {
       return
     }
     
@@ -192,7 +190,7 @@ export function DesignList() {
       })
     }
     // リスト内にない場合は何もしない（検索条件に合わないDesignは表示されない）
-  }, [selectedDesign, designs, skipDesignScroll, resetSkipDesignScroll])
+  }, [selectedDesign, designs, consumeSkipDesignScroll])
 
   // エントリクリックハンドラ
   const handleEntryClick = useCallback(

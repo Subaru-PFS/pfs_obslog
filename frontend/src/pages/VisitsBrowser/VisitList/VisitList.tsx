@@ -623,7 +623,7 @@ function parseUrlParams(searchParams: URLSearchParams) {
 }
 
 export function VisitList() {
-  const { selectedVisitId, setSelectedVisitId, skipScroll, resetSkipScroll } = useVisitsBrowserContext()
+  const { selectedVisitId, setSelectedVisitId, consumeSkipScroll } = useVisitsBrowserContext()
   const [searchParams, setSearchParams] = useSearchParams()
   
   // Parse URL params once on mount and when they change externally
@@ -1036,9 +1036,8 @@ export function VisitList() {
 
   // Scroll to selected visit (only if not already visible and not user-clicked)
   useEffect(() => {
-    // Skip if this selection was made by user clicking directly
-    if (skipScroll) {
-      resetSkipScroll()
+    // Check and consume the skip flag
+    if (consumeSkipScroll()) {
       return
     }
     
@@ -1048,7 +1047,7 @@ export function VisitList() {
         element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       }
     }
-  }, [selectedVisitId, skipScroll, resetSkipScroll])
+  }, [selectedVisitId, consumeSkipScroll])
 
   if (isLoading) {
     return (

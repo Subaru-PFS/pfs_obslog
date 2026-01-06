@@ -11,14 +11,14 @@
 // =============================================================================
 // Toolbar
 // =============================================================================
-$toolbar-input-height: 32px;
+$toolbar-input-height: 26px;
 
 .toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
+  gap: 6px;
+  padding: 6px 8px;
   background-color: $background-color;
   box-shadow: $medium-shadow;
   z-index: 2;
@@ -41,8 +41,8 @@ $toolbar-input-height: 32px;
   @include rounded-text-input;
   flex: 1;
   height: $toolbar-input-height;
-  padding: 0 12px;
-  font-size: 0.875rem;
+  padding: 0 8px;
+  font-size: 0.8125rem;
   box-shadow: 0 0 4px inset rgba($shadow-color, 0.5);
 
   &.sqlInput {
@@ -59,11 +59,11 @@ $toolbar-input-height: 32px;
 .searchError {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: 4px;
+  padding: 4px 8px;
   background-color: rgba($error-color, 0.1);
   color: $error-color;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   border-bottom: 1px solid rgba($error-color, 0.3);
 }
 
@@ -90,8 +90,8 @@ $toolbar-input-height: 32px;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 6px 8px;
+  gap: 6px;
+  padding: 4px 8px;
   background-color: $background-color;
   border-bottom: 1px solid $border-color;
   color: $hint-text-color;
@@ -101,7 +101,7 @@ $toolbar-input-height: 32px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .filterRowRight {
@@ -121,7 +121,7 @@ $toolbar-input-height: 32px;
 .exposureTypeSelector {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .exposureTypeSelect {
@@ -131,17 +131,17 @@ $toolbar-input-height: 32px;
 }
 
 .exposureTypeLabel {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 500;
   color: $text-color;
 }
 
 .exposureTypeDropdown {
   @include rounded-text-input;
-  font-size: 0.7rem;
-  padding: 2px 4px;
-  height: 24px;
-  min-width: 40px;
+  font-size: 0.6875rem;
+  padding: 1px 3px;
+  height: 20px;
+  min-width: 36px;
   cursor: pointer;
   background-color: $input-background;
   border: none;
@@ -160,15 +160,15 @@ $toolbar-input-height: 32px;
 .dateRangePicker {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 
   // Override global input styles with higher specificity
   input[type="text"] {
     @include rounded-text-input;
-    width: 90px;
-    height: 26px;
-    padding: 0 4px;
-    font-size: 0.7rem;
+    width: 80px;
+    height: 20px;
+    padding: 0 3px;
+    font-size: 0.6875rem;
     text-align: center;
     cursor: pointer;
     background-color: $input-background;
@@ -176,7 +176,7 @@ $toolbar-input-height: 32px;
 
     &::placeholder {
       color: $hint-text-color;
-      font-size: 0.6rem;
+      font-size: 0.5625rem;
     }
 
     &:hover {
@@ -192,7 +192,7 @@ $toolbar-input-height: 32px;
 
 .dateRangeSeparator {
   color: $hint-text-color;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
 }
 
 .clearDateButton {
@@ -213,7 +213,7 @@ $toolbar-input-height: 32px;
 // =============================================================================
 .columnsRow {
   display: flex;
-  padding: 4px 8px;
+  padding: 3px 8px;
   background-color: $background-color;
   border-bottom: 1px solid $border-color;
 }
@@ -221,11 +221,11 @@ $toolbar-input-height: 32px;
 .columnSelector {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px 8px;
+  gap: 1px 6px;
   list-style: none;
   margin: 0;
   padding: 0;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
 
   li {
     display: flex;
@@ -562,11 +562,11 @@ $pagination-border-radius: 12px;
   width: 100%;
   min-width: max-content; // Prevent columns from shrinking; enable horizontal scroll
   border-collapse: collapse;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
 
   th,
   td {
-    padding: 1px 2px;
+    padding: 1px 4px;
     text-align: left;
     border-bottom: 1px solid $ruled-line-color;
   }
@@ -574,7 +574,7 @@ $pagination-border-radius: 12px;
   th {
     background-color: $header-background-color;
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     color: $hint-text-color;
     position: sticky;
     top: 0;
@@ -603,85 +603,85 @@ $pagination-border-radius: 12px;
 
   // Column widths
   .colId {
-    width: 70px;
+    width: 60px;
     font-family: monospace;
     text-align: right;
   }
 
   .colDescription {
-    max-width: 120px;
+    max-width: 100px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .colDate {
-    width: 90px;
+    width: 80px;
     white-space: nowrap;
   }
 
   .colTime {
-    width: 60px;
+    width: 50px;
     white-space: nowrap;
   }
 
   .colExposures {
-    width: 80px;
+    width: 70px;
     text-align: center;
     font-family: monospace;
   }
 
   .colExptime {
-    width: 60px;
+    width: 50px;
     text-align: right;
     font-family: monospace;
   }
 
   .colEet {
-    width: 55px;
+    width: 45px;
     text-align: right;
-    font-family: monospace;
-    font-size: 0.8rem;
-  }
-
-  .colSeeing {
-    width: 55px;
-    text-align: right;
-    font-family: monospace;
-    font-size: 0.8rem;
-  }
-
-  .colTransparency {
-    width: 55px;
-    text-align: right;
-    font-family: monospace;
-    font-size: 0.8rem;
-  }
-
-  .colDesign {
-    max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     font-family: monospace;
     font-size: 0.7rem;
   }
 
-  .colCoord {
-    width: 70px;
+  .colSeeing {
+    width: 45px;
     text-align: right;
     font-family: monospace;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  .colTransparency {
+    width: 45px;
+    text-align: right;
+    font-family: monospace;
+    font-size: 0.7rem;
+  }
+
+  .colDesign {
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: monospace;
+    font-size: 0.65rem;
+  }
+
+  .colCoord {
+    width: 60px;
+    text-align: right;
+    font-family: monospace;
+    font-size: 0.7rem;
   }
 
   .colNotesCount {
-    width: 40px;
+    width: 35px;
     text-align: center;
   }
 
   .colNotesContent {
-    min-width: 200px;
-    max-width: 400px;
+    min-width: 180px;
+    max-width: 350px;
     vertical-align: top;
   }
 }

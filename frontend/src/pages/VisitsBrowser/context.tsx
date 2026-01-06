@@ -8,10 +8,8 @@ interface VisitsBrowserContextValue {
   setSelectedVisitId: (id: number | null) => void
   /** Visit IDを選択（スクロールをスキップ） */
   setSelectedVisitIdWithoutScroll: (id: number | null) => void
-  /** スクロールをスキップするかどうかのフラグ */
-  skipScroll: boolean
-  /** スクロールスキップフラグをリセット */
-  resetSkipScroll: () => void
+  /** スクロールをスキップするかどうかを確認して消費する（一度呼ぶとfalseに戻る） */
+  consumeSkipScroll: () => boolean
   /** 一覧をリフレッシュするためのトリガー */
   refreshKey: number
   /** リフレッシュを実行 */
@@ -37,7 +35,6 @@ export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) 
   
   // Ref to track whether to skip scroll on selection change
   const skipScrollRef = useRef(false)
-  const [skipScroll, setSkipScroll] = useState(false)
 
   // URLパラメータの変更を監視してstateを更新
   useEffect(() => {
@@ -60,14 +57,14 @@ export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) 
   // visitIdを設定（スクロールをスキップ）
   const setSelectedVisitIdWithoutScroll = useCallback((id: number | null) => {
     skipScrollRef.current = true
-    setSkipScroll(true)
     setSelectedVisitId(id)
   }, [setSelectedVisitId])
   
-  // スクロールスキップフラグをリセット
-  const resetSkipScroll = useCallback(() => {
+  // スクロールをスキップするかどうかを確認して消費する
+  const consumeSkipScroll = useCallback(() => {
+    const shouldSkip = skipScrollRef.current
     skipScrollRef.current = false
-    setSkipScroll(false)
+    return shouldSkip
   }, [])
 
   const refresh = useCallback(() => {
@@ -80,8 +77,7 @@ export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) 
         selectedVisitId,
         setSelectedVisitId,
         setSelectedVisitIdWithoutScroll,
-        skipScroll,
-        resetSkipScroll,
+        consumeSkipScroll,
         refreshKey,
         refresh,
       }}
