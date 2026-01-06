@@ -37,6 +37,12 @@ class Settings(BaseSettings):
     # 本番用: 環境変数 PFS_OBSLOG_database_url で設定
     database_url: str = "postgresql://pfs@localhost:15432/opdb"
 
+    # QAデータベース接続設定（seeing, transparency, effective_exposure_time用）
+    # 開発用: postgresql://pfs@localhost:15432/qadb
+    # 本番用: 環境変数 PFS_OBSLOG_qadb_url で設定
+    # 空文字列の場合はQAデータを取得しない
+    qadb_url: str = "postgresql://pfs@localhost:15432/qadb"
+
     # SQLログ出力（開発用）
     database_echo: bool = False
 

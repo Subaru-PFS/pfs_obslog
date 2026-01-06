@@ -1,0 +1,8 @@
+[project]
+name = "make_test_qadb"
+version = "0.1.0"
+description = "QADB テスト用DB作成スクリプト"
+requires-python = ">=3.10"
+dependencies = [
+    "psycopg2-binary>=2.9",
+]
