@@ -76,15 +76,33 @@ function getSpsFitsDownloadUrl(visitId: number, cameraId: number, imageType: Sps
   return `${API_BASE_URL}/api/fits/visits/${visitId}/sps/${cameraId}.fits?${params}`
 }
 
+/**
+ * 複数のファイルを順番にダウンロード
+ * iframeを使用してブラウザのポップアップブロックを回避
+ */
+function downloadMultipleFiles(urls: string[]): void {
+  urls.forEach((url, index) => {
+    // 各ファイルを時間差でダウンロード（ブラウザの制限回避）
+    setTimeout(() => {
+      const iframe = document.createElement('iframe')
+      iframe.style.display = 'none'
+      iframe.src = url
+      document.body.appendChild(iframe)
+      // iframeをクリーンアップ（ダウンロードが開始された後）
+      setTimeout(() => {
+        document.body.removeChild(iframe)
+      }, 5000)
+    }, index * 500) // 500ms間隔でダウンロード開始
+  })
+}
+
 function downloadAllSpsExposures(
   visitId: number,
   exposures: SpsExposure[],
   imageType: SpsImageType
 ): void {
-  for (const exp of exposures) {
-    const url = getSpsFitsDownloadUrl(visitId, exp.camera_id, imageType)
-    window.open(url)
-  }
+  const urls = exposures.map(exp => getSpsFitsDownloadUrl(visitId, exp.camera_id, imageType))
+  downloadMultipleFiles(urls)
 }
 
 export function SpsInspector({ sps }: SpsInspectorProps) {
