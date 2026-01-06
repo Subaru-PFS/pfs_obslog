@@ -771,11 +771,19 @@ export function VisitList() {
     return `where ${conditions.join(' and ')}`
   }, [appliedSql, dateRange, exposureFilters])
 
+  // 自動リフレッシュ：検索条件なし&1ページ目の場合は30秒ごとに更新
+  const shouldAutoRefresh = useMemo(() => {
+    return effectiveSql === undefined && offset === 0
+  }, [effectiveSql, offset])
+
   // RTK Query API - include sql parameter when set
+  // pollingIntervalで30秒ごとの自動リフレッシュを実現
   const { data, isLoading, isFetching, isError, error, refetch } = useListVisitsApiVisitsGetQuery({
     offset,
     limit,
     sql: effectiveSql,
+  }, {
+    pollingInterval: shouldAutoRefresh ? 30000 : 0,  // 30秒 = 30000ms
   })
 
   // Lazy query for Go to Visit feature
@@ -1206,7 +1214,8 @@ export function VisitList() {
       </div>
 
       <div className={styles.content} ref={contentRef}>
-        <LoadingOverlay isLoading={isFetching || isLoadingMore} stickyCenter />
+        {/* 自動リフレッシュ時（データ取得済み&ポーリング中）はLoading Overlayを非表示 */}
+        <LoadingOverlay isLoading={(isFetching || isLoadingMore) && !(shouldAutoRefresh && data)} stickyCenter />
 
         {/* Navigation at top - scrolls with content */}
         <div className={styles.paginationTop}>
