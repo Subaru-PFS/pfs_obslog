@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useLocalStorage } from 'react-use'
 import type { MaterialSymbol } from 'material-symbols'
 import {
@@ -613,6 +613,7 @@ function parseUrlParams(searchParams: URLSearchParams) {
 }
 
 export function VisitList() {
+  const navigate = useNavigate()
   const { selectedVisitId, setSelectedVisitId } = useVisitsBrowserContext()
   const [searchParams, setSearchParams] = useSearchParams()
   
@@ -1091,7 +1092,7 @@ export function VisitList() {
           <Tooltip content="Syntax Docs">
             <button
               className={styles.toolbarButton}
-              onClick={() => window.open('/#/sql-syntax-help', '_blank')}
+              onClick={() => navigate('/sql-syntax-help')}
             >
               <Icon name="help" size={18} />
             </button>
