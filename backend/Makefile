@@ -13,7 +13,6 @@ production: setup
 	PORT=$$(echo "$$BIND_ADDRESS" | cut -d: -f2); \
 	export PFS_OBSLOG_app_env=production; \
 	export PFS_OBSLOG_session_secret_key=$$(cat secrets/session_secret_key); \
-	export PFS_OBSLOG_qadb_url=$$(grep qadb ~/.pgpass | awk -F: '{printf "postgresql://%s:%s@%s:%s/%s", $$4, $$5, $$1, $$2, $$3}'); \
 	uv run gunicorn pfs_obslog.main:app \
 		--workers 8 \
 		--worker-class uvicorn.workers.UvicornWorker \

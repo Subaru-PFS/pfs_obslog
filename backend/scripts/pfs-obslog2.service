@@ -5,11 +5,10 @@ Description=PFS Obslog 2
 Environment=BIND_ADDRESS=0.0.0.0:5000
 Environment=PFS_OBSLOG_app_env=production
 Environment=PFS_OBSLOG_database_url=postgresql://pfs@133.40.164.48/opdb
-WorkingDirectory=%h/devel/pfs-obslog2/backend
-ExecStartPre=/bin/sh -c 'if [ ! -f secrets/session_secret_key ]; then mkdir -p secrets && openssl rand -hex 64 > secrets/session_secret_key && chmod 600 secrets/session_secret_key; fi'
-ExecStartPre=/bin/sh -c 'mkdir -p ../logs'
-ExecStart=/bin/sh -c 'export PFS_OBSLOG_session_secret_key=$(cat secrets/session_secret_key) && %h/devel/pfs-obslog2/backend/.venv/bin/gunicorn pfs_obslog.main:app --workers 8 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:5000 --access-logfile ../logs/access.log --error-logfile ../logs/error.log'
-Type=notify
+Environment=PFS_OBSLOG_qadb_url=postgresql://pfs:pfs_hilo_opdb@pfsa-db.subaru.nao.ac.jp:5436/qadb
+ExecStart=/usr/bin/make -C %h/pfs-obslog2/backend production
+WorkingDirectory=%h/pfs-obslog2/backend
+Type=simple
 Restart=always
 
 [Install]
