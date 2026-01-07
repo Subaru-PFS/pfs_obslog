@@ -35,4 +35,5 @@
 * [x] designページに移動後初回にdesignを選択した時、sky viewerの移動アニメーションが発動しない問題
   * 対応済み: カメラ制御をシンプルに書き直し（jumpToSignal状態→関数参照方式に変更）
 
-* [ ] 指示者に追加の依頼がないか確認（ask_for_instructionsを使い）
+* [x] 指示者に追加の依頼がないか確認（ask_for_instructionsを使い）
+  * 完了: 追加依頼なし
