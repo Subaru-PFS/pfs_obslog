@@ -123,8 +123,9 @@ interface DesignsContextValue {
   isLoadingDetail: boolean
 
   // 天球ビュー制御
-  jumpToSignal: JumpToOptions | null
+  // jumpTo: SkyViewerが登録する関数。Globeが初期化されるまではno-op
   jumpTo: (options: JumpToOptions) => void
+  registerJumpTo: (fn: (options: JumpToOptions) => void) => void
   showFibers: boolean
   setShowFibers: (show: boolean) => void
 
@@ -360,7 +361,18 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   )
 
   // 天球ビュー制御
-  const [jumpToSignal, setJumpToSignal] = useState<JumpToOptions | null>(null)
+  // jumpToRef: SkyViewerが登録する関数への参照
+  const jumpToRef = useRef<(options: JumpToOptions) => void>(() => {
+    // Globeが初期化されるまでは何もしない
+  })
+  // jumpTo: 外部から呼び出す関数（常に最新のjumpToRefを使用）
+  const jumpTo = useCallback((options: JumpToOptions) => {
+    jumpToRef.current(options)
+  }, [])
+  // registerJumpTo: SkyViewerがGlobe初期化後に呼び出す
+  const registerJumpTo = useCallback((fn: (options: JumpToOptions) => void) => {
+    jumpToRef.current = fn
+  }, [])
   const [showFibers, setShowFibers] = useState(true)
 
   // Design詳細取得
@@ -406,11 +418,6 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     }
   }, [rankData, isSelectedDesignInList, limit, offset, setOffset, selectedDesign])
 
-  // カメラジャンプ
-  const jumpTo = useCallback((options: JumpToOptions) => {
-    setJumpToSignal(options)
-  }, [])
-
   // 選択状態の設定とURL更新
   const setSelectedDesign = useCallback(
     (design: PfsDesignEntry | undefined) => {
@@ -420,13 +427,12 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     [navigate]
   )
 
-  // 初期ジャンプが完了したかを追跡
-  const initialJumpDoneRef = useRef(false)
-
-  // URL paramsからDesignを選択（初回ロード時のみ）
+  // URL paramsからDesignを選択（初回ロード時）
+  // 注意: ジャンプはSkyViewerで行う（Globe初期化後に実行するため）
+  const initialSelectionDoneRef = useRef(false)
   useEffect(() => {
-    // 初期ジャンプが既に行われている場合はスキップ
-    if (initialJumpDoneRef.current) {
+    // 初期選択が既に行われている場合はスキップ
+    if (initialSelectionDoneRef.current) {
       return
     }
 
@@ -434,22 +440,16 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
       // 位置情報からDesignを検索
       const position = allPositions.find((p) => p.id === designId)
       if (position) {
-        // 一覧にあればそれを選択
+        // 一覧にあればそれを選択状態にする（URLは更新しない）
         const design = designs.find((d) => d.id === designId)
         if (design) {
           setSelectedDesignState(design)
         }
-        // 初期ジャンプ（位置情報から）- Design視野(~1.4度)より少し広めに
-        jumpTo({
-          fovy: (1.6 * Math.PI) / 180,
-          coord: { ra: position.ra, dec: position.dec },
-          duration: 0,
-        })
-        // 初期ジャンプ完了をマーク
-        initialJumpDoneRef.current = true
+        // 初期選択完了をマーク
+        initialSelectionDoneRef.current = true
       }
     }
-  }, [designId, allPositions, designs, jumpTo])
+  }, [designId, allPositions, designs])
 
   const value: DesignsContextValue = {
     designs,
@@ -479,8 +479,8 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     setFocusedFiber,
     designDetail,
     isLoadingDetail,
-    jumpToSignal,
     jumpTo,
+    registerJumpTo,
     showFibers,
     setShowFibers,
     now,

@@ -60,10 +60,12 @@ function EquatorialGrid() {
 export function SkyViewer() {
   const globeRef = useRef<GlobeHandle | null>(null)
   const altAzGridRef = useRef<GridLayer | null>(null)
-  // Globe初期化完了フラグ（状態として管理してuseEffectの依存配列に使用）
+  // Globe初期化完了フラグ
   const [isGlobeReady, setIsGlobeReady] = useState(false)
   const {
-    jumpToSignal,
+    registerJumpTo,
+    selectedDesign,
+    allPositions,
     setNow,
     hst,
     zenithSkyCoord,
@@ -77,37 +79,10 @@ export function SkyViewer() {
   const zenithZaZdRef = useRef(zenithZaZd)
   zenithZaZdRef.current = zenithZaZd
 
-  // ジャンプを実行する関数（useEffectとhandleGlobeInitで共通利用）
-  const executeJump = useCallback((signal: typeof jumpToSignal, globe: Globe) => {
-    if (!signal) return
+  // 初期ジャンプが完了したかを追跡
+  const initialJumpDoneRef = useRef(false)
 
-    // za, zd, zp が指定されている場合は天頂パラメータを更新
-    const params: Record<string, number> = {}
-    if (signal.fovy !== undefined) params.fovy = signal.fovy
-    if (signal.za !== undefined) params.za = signal.za
-    if (signal.zd !== undefined) params.zd = signal.zd
-    if (signal.zp !== undefined) params.zp = signal.zp
-
-    if (signal.coord) {
-      const coord = SkyCoord.fromDeg(signal.coord.ra, signal.coord.dec)
-      globe.camera.jumpTo(
-        { ...params, fovy: params.fovy ?? globe.camera.fovy },
-        { coord, duration: signal.duration, easingFunction: easing.slowStartStop4 }
-      )
-    } else if (Object.keys(params).length > 0) {
-      globe.camera.jumpTo(params, { duration: signal.duration ?? 0 })
-    }
-  }, [])
-
-  // ジャンプシグナルを監視（Globe初期化完了後のみ実行）
-  useEffect(() => {
-    if (jumpToSignal && isGlobeReady && globeRef.current) {
-      const globe = globeRef.current()
-      executeJump(jumpToSignal, globe)
-    }
-  }, [jumpToSignal, isGlobeReady, executeJump])
-
-  // Globe初期化時のコールバック - AltAzグリッドを追加
+  // Globe初期化時のコールバック - AltAzグリッドを追加し、jumpTo関数を登録
   const handleGlobeInit = useCallback((globe: Globe) => {
     // AltAzグリッドを追加
     // 既存プロジェクトと同様に、カメラのza, zdを参照してモデル行列を計算
@@ -125,15 +100,34 @@ export function SkyViewer() {
     altAzGridRef.current = altAzGrid
     
     // 初期カメラ位置を設定（zenithZaZd.zd + TILTで天頂から90度傾いた位置＝地平線付近を向く）
-    // useRefを使って最新の値を取得
     const { za, zd, zp } = zenithZaZdRef.current
     globe.camera.jumpTo(
       { za, zd: zd + TILT, zp },
       { duration: 0 }
     )
-    // Globe初期化完了をマーク（これによりuseEffectが再実行される）
+
+    // jumpTo関数をContextに登録（これ以降、他のコンポーネントからカメラを操作可能）
+    registerJumpTo((options) => {
+      const params: Record<string, number> = {}
+      if (options.fovy !== undefined) params.fovy = options.fovy
+      if (options.za !== undefined) params.za = options.za
+      if (options.zd !== undefined) params.zd = options.zd
+      if (options.zp !== undefined) params.zp = options.zp
+
+      if (options.coord) {
+        const coord = SkyCoord.fromDeg(options.coord.ra, options.coord.dec)
+        globe.camera.jumpTo(
+          { ...params, fovy: params.fovy ?? globe.camera.fovy },
+          { coord, duration: options.duration, easingFunction: easing.slowStartStop4 }
+        )
+      } else if (Object.keys(params).length > 0) {
+        globe.camera.jumpTo(params, { duration: options.duration ?? 0 })
+      }
+    })
+
+    // Globe初期化完了をマーク
     setIsGlobeReady(true)
-  }, [])
+  }, [registerJumpTo])
 
   // Globe解放時のコールバック
   const handleGlobeRelease = useCallback(() => {
@@ -141,8 +135,31 @@ export function SkyViewer() {
       altAzGridRef.current.release()
       altAzGridRef.current = null
     }
+    // jumpTo関数をno-opに戻す
+    registerJumpTo(() => {})
     setIsGlobeReady(false)
-  }, [])
+  }, [registerJumpTo])
+
+  // 初期ジャンプ：Globe初期化後、URLパラメータで指定されたDesignにジャンプ
+  useEffect(() => {
+    if (!isGlobeReady || !globeRef.current || initialJumpDoneRef.current) {
+      return
+    }
+
+    // selectedDesignがあれば、その位置にジャンプ（アニメーションなし）
+    if (selectedDesign) {
+      const position = allPositions.find((p) => p.id === selectedDesign.id)
+      if (position) {
+        const globe = globeRef.current()
+        const coord = SkyCoord.fromDeg(position.ra, position.dec)
+        globe.camera.jumpTo(
+          { fovy: (1.6 * Math.PI) / 180 },
+          { coord, duration: 0 }
+        )
+      }
+    }
+    initialJumpDoneRef.current = true
+  }, [isGlobeReady, selectedDesign, allPositions])
 
   // 時刻変更時にカメラの天頂パラメータを更新
   // 既存プロジェクトと同様に、za, zd を更新（theta, phi は維持される）
