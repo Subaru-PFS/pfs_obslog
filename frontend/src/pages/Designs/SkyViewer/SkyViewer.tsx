@@ -1,7 +1,7 @@
 /**
  * SkyViewer - WebGLベースの天球表示コンポーネント
  */
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 import {
   Globe$,
   HipparcosCatalogLayer$,
@@ -60,7 +60,8 @@ function EquatorialGrid() {
 export function SkyViewer() {
   const globeRef = useRef<GlobeHandle | null>(null)
   const altAzGridRef = useRef<GridLayer | null>(null)
-  const isInitializedRef = useRef(false)
+  // Globe初期化完了フラグ（状態として管理してuseEffectの依存配列に使用）
+  const [isGlobeReady, setIsGlobeReady] = useState(false)
   const {
     jumpToSignal,
     setNow,
@@ -75,10 +76,6 @@ export function SkyViewer() {
   // 最新のzenithZaZdをRefで保持（初期化コールバック内から参照するため）
   const zenithZaZdRef = useRef(zenithZaZd)
   zenithZaZdRef.current = zenithZaZd
-
-  // 最新のjumpToSignalをRefで保持（初期化コールバック内から参照するため）
-  const jumpToSignalRef = useRef(jumpToSignal)
-  jumpToSignalRef.current = jumpToSignal
 
   // ジャンプを実行する関数（useEffectとhandleGlobeInitで共通利用）
   const executeJump = useCallback((signal: typeof jumpToSignal, globe: Globe) => {
@@ -102,13 +99,13 @@ export function SkyViewer() {
     }
   }, [])
 
-  // ジャンプシグナルを監視
+  // ジャンプシグナルを監視（Globe初期化完了後のみ実行）
   useEffect(() => {
-    if (jumpToSignal && globeRef.current) {
+    if (jumpToSignal && isGlobeReady && globeRef.current) {
       const globe = globeRef.current()
       executeJump(jumpToSignal, globe)
     }
-  }, [jumpToSignal, executeJump])
+  }, [jumpToSignal, isGlobeReady, executeJump])
 
   // Globe初期化時のコールバック - AltAzグリッドを追加
   const handleGlobeInit = useCallback((globe: Globe) => {
@@ -134,17 +131,9 @@ export function SkyViewer() {
       { za, zd: zd + TILT, zp },
       { duration: 0 }
     )
-    isInitializedRef.current = true
-
-    // 初期化前に保留されていたジャンプシグナルがあれば実行
-    // これにより初回のDesign選択でもアニメーションが発動する
-    if (jumpToSignalRef.current) {
-      // 初期カメラ位置設定後に実行するため次フレームで
-      requestAnimationFrame(() => {
-        executeJump(jumpToSignalRef.current, globe)
-      })
-    }
-  }, [executeJump])
+    // Globe初期化完了をマーク（これによりuseEffectが再実行される）
+    setIsGlobeReady(true)
+  }, [])
 
   // Globe解放時のコールバック
   const handleGlobeRelease = useCallback(() => {
@@ -152,7 +141,7 @@ export function SkyViewer() {
       altAzGridRef.current.release()
       altAzGridRef.current = null
     }
-    isInitializedRef.current = false
+    setIsGlobeReady(false)
   }, [])
 
   // 時刻変更時にカメラの天頂パラメータを更新
@@ -160,7 +149,7 @@ export function SkyViewer() {
   // これにより、カメラの仰角・方位角は固定され、星空が動く（青グリッドは固定）
   useEffect(() => {
     // 初期化前は何もしない
-    if (!isInitializedRef.current || !globeRef.current) return
+    if (!isGlobeReady || !globeRef.current) return
     
     const globe = globeRef.current()
     // カメラの天頂パラメータを更新（zd + TILTで地平線付近を基準に）
@@ -169,7 +158,7 @@ export function SkyViewer() {
       { za: zenithZaZd.za, zd: zenithZaZd.zd + TILT, zp: zenithZaZd.zp },
       { duration: 300 }
     )
-  }, [zenithZaZd])
+  }, [zenithZaZd, isGlobeReady])
 
   // 天頂を中心に表示
   // coordオプションで天頂の赤道座標を指定し、カメラがその方向を向く
