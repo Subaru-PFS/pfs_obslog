@@ -142,23 +142,28 @@ export function SkyViewer() {
 
   // 初期ジャンプ：Globe初期化後、URLパラメータで指定されたDesignにジャンプ
   useEffect(() => {
+    // Globe が初期化されていない、または既にジャンプ済みならスキップ
     if (!isGlobeReady || !globeRef.current || initialJumpDoneRef.current) {
       return
     }
 
-    // selectedDesignがあれば、その位置にジャンプ（アニメーションなし）
-    if (selectedDesign) {
-      const position = allPositions.find((p) => p.id === selectedDesign.id)
-      if (position) {
-        const globe = globeRef.current()
-        const coord = SkyCoord.fromDeg(position.ra, position.dec)
-        globe.camera.jumpTo(
-          { fovy: (1.6 * Math.PI) / 180 },
-          { coord, duration: 0 }
-        )
-      }
+    // selectedDesign がなければ（まだロード中等）、何もせずに待つ
+    if (!selectedDesign) {
+      return
     }
-    initialJumpDoneRef.current = true
+
+    // selectedDesignがあれば、その位置にジャンプ（アニメーションなし）
+    const position = allPositions.find((p) => p.id === selectedDesign.id)
+    if (position) {
+      const globe = globeRef.current()
+      const coord = SkyCoord.fromDeg(position.ra, position.dec)
+      globe.camera.jumpTo(
+        { fovy: (1.6 * Math.PI) / 180 },
+        { coord, duration: 0 }
+      )
+      // ジャンプ完了をマーク（以降はユーザー操作に任せる）
+      initialJumpDoneRef.current = true
+    }
   }, [isGlobeReady, selectedDesign, allPositions])
 
   // 時刻変更時にカメラの天頂パラメータを更新

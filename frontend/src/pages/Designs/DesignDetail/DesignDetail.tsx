@@ -110,12 +110,13 @@ export function DesignDetail() {
     const ra = designDetail.design_data.ra[index]
     const dec = designDetail.design_data.dec[index]
     
-    if (ra !== undefined && dec !== undefined) {
-      jumpTo({
-        coord: { ra, dec },
-        duration: 500,
-      })
-    }
+    // 座標がnullまたはundefinedの場合はカメラ移動をスキップ
+    if (ra == null || dec == null) return
+    
+    jumpTo({
+      coord: { ra, dec },
+      duration: 500,
+    })
   }, [designDetail, id2index, jumpTo])
 
   // SkyViewerからのホバーでFocalPlane上のCobraを取得

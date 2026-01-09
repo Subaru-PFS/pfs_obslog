@@ -391,10 +391,21 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     [selectedDesign, designs]
   )
 
-  // 選択されたDesignのランクを取得（リスト内にない場合のみ）
+  // URLパラメータのdesignIdがリスト内にあるか確認（初回ロード用）
+  const isDesignIdInList = useMemo(
+    () => Boolean(designId && designs.some((d) => d.id === designId)),
+    [designId, designs]
+  )
+
+  // 選択されたDesign（またはURL指定のdesignId）のランクを取得（リスト内にない場合のみ）
+  // selectedDesign があればそれを使い、なければ designId を使う（初回ロード用）
+  const rankQueryDesignId = selectedDesign?.id ?? designId ?? ''
+  const shouldSkipRankQuery = !rankQueryDesignId || 
+    (selectedDesign ? isSelectedDesignInList : isDesignIdInList)
+  
   const { data: rankData } = useGetDesignRankApiPfsDesignsRankDesignIdGetQuery(
     {
-      designId: selectedDesign?.id ?? '',
+      designId: rankQueryDesignId,
       search: search || undefined,
       sortBy,
       sortOrder,
@@ -403,20 +414,23 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
       dateFrom: dateRange[0] || undefined,
       dateTo: dateRange[1] || undefined,
     },
-    { skip: !selectedDesign || isSelectedDesignInList }
+    { skip: shouldSkipRankQuery }
   )
 
-  // ランクが取得できたらページ遷移（リスト内にないDesignが選択された時）
+  // ランクが取得できたらページ遷移（リスト内にないDesignが選択/指定された時）
   useEffect(() => {
-    if (rankData?.rank != null && !isSelectedDesignInList && selectedDesign) {
+    const targetDesignId = selectedDesign?.id ?? designId
+    const isInList = selectedDesign ? isSelectedDesignInList : isDesignIdInList
+    
+    if (rankData?.rank != null && !isInList && targetDesignId) {
       const targetOffset = Math.floor(rankData.rank / limit) * limit
       if (targetOffset !== offset) {
         setOffset(targetOffset)
         // ロード完了後にスクロールするようにIDを保存
-        setPendingScrollDesignId(selectedDesign.id)
+        setPendingScrollDesignId(targetDesignId)
       }
     }
-  }, [rankData, isSelectedDesignInList, limit, offset, setOffset, selectedDesign])
+  }, [rankData, isSelectedDesignInList, isDesignIdInList, limit, offset, setOffset, selectedDesign, designId])
 
   // 選択状態の設定とURL更新
   const setSelectedDesign = useCallback(
