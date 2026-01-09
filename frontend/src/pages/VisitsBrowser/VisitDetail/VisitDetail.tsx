@@ -59,6 +59,7 @@ interface SummaryProps {
 
 function Summary({ visit }: SummaryProps) {
   const { scrollToVisit } = useVisitsBrowserContext()
+  const [isScrolling, setIsScrolling] = useState(false)
   const spsCount = visit.sps?.exposures?.length ?? 0
   const mcsCount = visit.mcs?.exposures?.length ?? 0
   const agcCount = visit.agc?.exposures?.length ?? 0
@@ -83,14 +84,20 @@ function Summary({ visit }: SummaryProps) {
     await deleteNote({ visitId: visit.id, noteId }).unwrap()
   }
 
-  const handleShowInList = () => {
+  const handleShowInList = async () => {
     if (scrollToVisit) {
-      scrollToVisit(visit.id)
+      setIsScrolling(true)
+      try {
+        await scrollToVisit(visit.id)
+      } finally {
+        setIsScrolling(false)
+      }
     }
   }
 
   return (
     <div className={styles.summary}>
+      <LoadingOverlay isLoading={isScrolling} />
       <div className={styles.summaryContent}>
         <Tooltip content="Show this visit in the left list">
           <button
