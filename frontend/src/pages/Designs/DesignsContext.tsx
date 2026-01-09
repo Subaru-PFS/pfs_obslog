@@ -111,7 +111,7 @@ interface DesignsContextValue {
   selectedDesign: PfsDesignEntry | undefined
   setSelectedDesign: (design: PfsDesignEntry | undefined) => void
   // 明示的にDesignを選択してカメラ移動とスクロールを行う（リスト外のDesignも対応）
-  selectDesignAndJump: (designId: string, options?: { animate?: boolean }) => Promise<void>
+  selectDesignAndJump: (designId: string, options?: { animate?: boolean; skipCameraJump?: boolean }) => Promise<void>
   focusedDesign: PfsDesignEntry | undefined
   setFocusedDesign: (design: PfsDesignEntry | undefined) => void
 
@@ -395,7 +395,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   // 明示的にDesignを選択してカメラ移動とスクロールを行う
   // リスト外のDesignの場合はランクを取得してページ遷移する
   const selectDesignAndJump = useCallback(
-    async (designIdToSelect: string, options?: { animate?: boolean }) => {
+    async (designIdToSelect: string, options?: { animate?: boolean; skipCameraJump?: boolean }) => {
       // 位置情報からDesignを検索
       let position = allPositions.find((p) => p.id === designIdToSelect)
       
@@ -428,12 +428,14 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
         setSelectedDesignState(designInList)
         navigate(`/designs/${designInList.id}`, { replace: true })
         
-        // カメラ移動
-        jumpToRef.current({
-          fovy: (1.6 * Math.PI) / 180,
-          coord: { ra: position.ra, dec: position.dec },
-          duration: options?.animate ? 1000 : 0,
-        })
+        // カメラ移動（skipCameraJumpが指定されている場合はスキップ）
+        if (!options?.skipCameraJump) {
+          jumpToRef.current({
+            fovy: (1.6 * Math.PI) / 180,
+            coord: { ra: position.ra, dec: position.dec },
+            duration: options?.animate ? 1000 : 0,
+          })
+        }
         
         // スクロール要求を設定（DesignListで処理される）
         setScrollToDesignId(designIdToSelect)
@@ -467,12 +469,14 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
             // 実際のDesignEntryはリスト更新後に設定される
             // ここでは位置情報だけでカメラ移動を行い、スクロール要求を設定する
             
-            // カメラ移動（即座に行う）
-            jumpToRef.current({
-              fovy: (1.6 * Math.PI) / 180,
-              coord: { ra: position.ra, dec: position.dec },
-              duration: options?.animate ? 1000 : 0,
-            })
+            // カメラ移動（skipCameraJumpが指定されている場合はスキップ）
+            if (!options?.skipCameraJump) {
+              jumpToRef.current({
+                fovy: (1.6 * Math.PI) / 180,
+                coord: { ra: position.ra, dec: position.dec },
+                duration: options?.animate ? 1000 : 0,
+              })
+            }
             
             // スクロール要求を設定（リスト更新後にDesignListで処理される）
             setScrollToDesignId(designIdToSelect)

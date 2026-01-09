@@ -167,8 +167,7 @@ export function DesignMarkers() {
     focusedDesign,
     selectedDesign,
     setFocusedDesign,
-    setSelectedDesign,
-    jumpTo,
+    selectDesignAndJump,
     showFibers,
     designDetail,
     focusedFiber,
@@ -209,21 +208,21 @@ export function DesignMarkers() {
     (e: { index: number }) => {
       const position = allPositions[e.index]
       if (position) {
-        const entry = positionEntryMap.get(position.id)
-        if (entry) {
-          setSelectedDesign(entry)
-        }
         const globe = getGlobe()
-        if (globe.camera.fovy >= angle.deg2rad(4)) {
-          jumpTo({
-            fovy: angle.deg2rad(1.6),  // Design視野(~1.4度)より少し広めに
-            coord: { ra: position.ra, dec: position.dec },
-            duration: 1000,
-          })
+        const shouldZoom = globe.camera.fovy >= angle.deg2rad(4)
+        
+        // selectDesignAndJumpを使用してリスト内でのスクロールも行う
+        // カメラが既にズームインしている場合はカメラ移動をスキップ
+        if (shouldZoom) {
+          // ズームイン＋アニメーション＋リストスクロール
+          selectDesignAndJump(position.id, { animate: true })
+        } else {
+          // カメラはそのまま、リストスクロールのみ
+          selectDesignAndJump(position.id, { skipCameraJump: true })
         }
       }
     },
-    [allPositions, positionEntryMap, setSelectedDesign, getGlobe, jumpTo]
+    [allPositions, getGlobe, selectDesignAndJump]
   )
 
   // ホバーハンドラ - キャッシュされたエントリを使用して不要な再レンダリングを防ぐ
