@@ -74,7 +74,44 @@ async_engine = create_async_engine(
 
 新プロジェクトでは、FITSファイルの画像変換などを行う際に`ProcessPoolExecutor`やforkベースの並列処理を**一切使用していません**。
 
-重いFITS処理は同期的に処理するか、あるいは完全に非同期なアプローチを採用しています。これにより、fork時の接続プール継承問題が根本的に解消されました。
+具体的には、以下のように`async def`エンドポイント内で同期的な処理関数を直接呼び出す実装に変更されています：
+
+**FITSプレビュー画像生成** ([backend/src/pfs_obslog/routers/fits.py](../backend/src/pfs_obslog/routers/fits.py)):
+```python
+# 既存プロジェクト: forkで別プロセス実行
+png = await background_process(Fits2PngTask(filepath, SizeHint(...)))
+
+# 新プロジェクト: 同期関数を直接呼び出し
+png = _fits2png(filepath, max_width=width, max_height=height)
+```
+
+**MCSチャート生成** ([backend/src/pfs_obslog/routers/plot.py](../backend/src/pfs_obslog/routers/plot.py)):
+```python
+# 既存プロジェクト: forkで別プロセス実行
+png = await background_process(ColorScatterPlotPngTask(x, y, peakvalue, width, height))
+
+# 新プロジェクト: 同期関数を直接呼び出し
+png_bytes = _create_color_scatter_plot(x, y, peakvalue, width, height)
+```
+
+**PFS Design一覧取得** ([backend/src/pfs_obslog/routers/pfs_designs.py](../backend/src/pfs_obslog/routers/pfs_designs.py)):
+```python
+# 既存プロジェクト: ThreadPoolExecutorで並列読み込み
+design_list = list(await asyncio.gather(*(
+    background_thread(DesignEntryTask(p)) for p in paths
+)))
+
+# 新プロジェクト: キャッシュ付き同期関数
+cache = get_pfs_design_cache()
+entries = [cache.get_entry(p) for p in paths]
+```
+
+これらの処理は元々CPU負荷の高い処理（画像変換、FITSファイル読み込み）でしたが、新プロジェクトでは以下の理由から同期処理で問題なく動作しています：
+
+1. **FastAPIの非同期ワーカー**: `async def`で定義されたエンドポイント内の同期処理は、FastAPIが自動的にスレッドプールで実行するため、他のリクエストをブロックしません
+2. **キャッシュの活用**: PFS Design一覧など頻繁にアクセスされるデータはキャッシュ化されており、重い処理の実行頻度が低下しています
+
+この設計変更により、fork時の接続プール継承問題が根本的に解消されました。
 
 #### 3. リクエストスコープのセッション管理
 
