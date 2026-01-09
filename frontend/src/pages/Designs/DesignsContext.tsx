@@ -396,9 +396,26 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   const selectDesignAndJump = useCallback(
     async (designIdToSelect: string, options?: { animate?: boolean }) => {
       // 位置情報からDesignを検索
-      const position = allPositions.find((p) => p.id === designIdToSelect)
+      let position = allPositions.find((p) => p.id === designIdToSelect)
+      
+      // allPositionsに含まれていない場合（検索条件でフィルターアウトされた等）
+      // designDetailから座標を取得する（designDetailが同じIDの場合）
+      if (!position && designDetail && designIdToSelect === (selectedDesign?.id ?? designId)) {
+        // designDetailのfits_metaからRA/DECを取得
+        const header0 = designDetail.fits_meta.hdul[0]?.header
+        const raCard = header0?.cards.find((c) => c.key === 'RA')
+        const decCard = header0?.cards.find((c) => c.key === 'DEC')
+        if (raCard?.value != null && decCard?.value != null) {
+          position = {
+            id: designIdToSelect,
+            ra: Number(raCard.value),
+            dec: Number(decCard.value),
+          }
+        }
+      }
+      
       if (!position) {
-        // 位置情報がなければ何もしない
+        // 位置情報がなければ何もしない（designDetailもまだロード中等）
         return
       }
 
@@ -464,7 +481,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
         }
       }
     },
-    [allPositions, designs, navigate, search, sortBy, sortOrder, committedZenith, dateRange, limit, setOffset]
+    [allPositions, designs, designDetail, selectedDesign, designId, navigate, search, sortBy, sortOrder, committedZenith, dateRange, limit, setOffset]
   )
 
   // 初回ロード処理: URLにdesignIdがあり、データがロードされた時に一度だけ実行
@@ -479,21 +496,28 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
       return
     }
     
-    // データがまだロード中ならスキップ
+    // 基本データがまだロード中ならスキップ
     if (isLoading || isLoadingPositions) return
     
     // 位置情報からDesignを検索
     const position = allPositions.find((p) => p.id === designId)
+    
+    // allPositionsに含まれていない場合、designDetailからの取得を試みる
+    // designDetailがまだロード中の場合は待つ
     if (!position) {
-      // 見つからなければ処理完了とマーク
-      initialLoadHandledRef.current = true
-      return
+      if (isLoadingDetail) return  // designDetailのロードを待つ
+      
+      // designDetailもなければ処理完了（該当するdesignが存在しない）
+      if (!designDetail) {
+        initialLoadHandledRef.current = true
+        return
+      }
     }
     
     // 初回ロード処理を実行（アニメーションなし）
     selectDesignAndJump(designId, { animate: false })
     initialLoadHandledRef.current = true
-  }, [designId, isLoading, isLoadingPositions, allPositions, selectDesignAndJump])
+  }, [designId, isLoading, isLoadingPositions, isLoadingDetail, allPositions, designDetail, selectDesignAndJump])
 
   // リスト更新後に選択状態を同期（ページ遷移後にDesignEntryを設定）
   useEffect(() => {
