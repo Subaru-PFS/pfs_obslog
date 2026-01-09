@@ -63,7 +63,7 @@ function createColorFunc(
 }
 
 export function DesignDetail() {
-  const { designDetail, isLoadingDetail, selectedDesign, focusedFiber, setFocusedFiber } = useDesignsContext()
+  const { designDetail, isLoadingDetail, selectedDesign, focusedFiber, setFocusedFiber, jumpTo } = useDesignsContext()
   const [focusedCobra, setFocusedCobra] = useState<Cobra | undefined>()
   const [colorMode, setColorMode] = useState<ColorMode>('targetType')
 
@@ -99,6 +99,25 @@ export function DesignDetail() {
     }
   }, [setFocusedFiber])
 
+  // Cobraのクリックハンドラ（FocalPlane → SkyViewerカメラジャンプ）
+  const handleCobraClick = useCallback((cobra: Cobra) => {
+    if (!designDetail) return
+    
+    const indices = id2index.get(cobra.fiberId)
+    if (!indices || indices.length === 0) return
+    
+    const index = indices[0]
+    const ra = designDetail.design_data.ra[index]
+    const dec = designDetail.design_data.dec[index]
+    
+    if (ra !== undefined && dec !== undefined) {
+      jumpTo({
+        coord: { ra, dec },
+        duration: 500,
+      })
+    }
+  }, [designDetail, id2index, jumpTo])
+
   // SkyViewerからのホバーでFocalPlane上のCobraを取得
   const externalFocusCobra = useMemo(() => {
     if (externalFocusFiberId === undefined) return undefined
@@ -123,6 +142,7 @@ export function DesignDetail() {
           size={250}
           colorFunc={colorFunc}
           onPointerEnter={handlePointerEnter}
+          onClick={handleCobraClick}
           externalFocusCobra={externalFocusCobra}
           refreshDeps={[colorMode, designDetail, highlightFiberId]}
         />

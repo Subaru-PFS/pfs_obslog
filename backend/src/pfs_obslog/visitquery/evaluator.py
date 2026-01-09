@@ -148,7 +148,12 @@ class QueryEvaluator:
         if isinstance(val, ast.Integer):
             return val.ival
         elif isinstance(val, ast.Float):
-            return float(val.fval)  # type: ignore[arg-type]
+            # pglast parses hex values like 0x... as Float with fval as string
+            fval_str = str(val.fval)
+            if fval_str.lower().startswith("0x"):
+                # Convert hex string to integer
+                return int(fval_str, 16)
+            return float(fval_str)
         elif isinstance(val, ast.String):
             return val.sval
         else:

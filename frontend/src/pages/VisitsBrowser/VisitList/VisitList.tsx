@@ -527,6 +527,7 @@ function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGrou
                           href={`/designs/${visit.pfs_design_id.replace(/^0x/, '')}`}
                           onClick={(e) => {
                             e.preventDefault()
+                            e.stopPropagation()
                             navigate(`/designs/${visit.pfs_design_id!.replace(/^0x/, '')}`)
                           }}
                           className={styles.designLink}
