@@ -64,8 +64,6 @@ export function SkyViewer() {
   const [isGlobeReady, setIsGlobeReady] = useState(false)
   const {
     registerJumpTo,
-    selectedDesign,
-    allPositions,
     setNow,
     hst,
     zenithSkyCoord,
@@ -78,9 +76,6 @@ export function SkyViewer() {
   // 最新のzenithZaZdをRefで保持（初期化コールバック内から参照するため）
   const zenithZaZdRef = useRef(zenithZaZd)
   zenithZaZdRef.current = zenithZaZd
-
-  // 初期ジャンプが完了したかを追跡
-  const initialJumpDoneRef = useRef(false)
 
   // Globe初期化時のコールバック - AltAzグリッドを追加し、jumpTo関数を登録
   const handleGlobeInit = useCallback((globe: Globe) => {
@@ -139,32 +134,6 @@ export function SkyViewer() {
     registerJumpTo(() => {})
     setIsGlobeReady(false)
   }, [registerJumpTo])
-
-  // 初期ジャンプ：Globe初期化後、URLパラメータで指定されたDesignにジャンプ
-  useEffect(() => {
-    // Globe が初期化されていない、または既にジャンプ済みならスキップ
-    if (!isGlobeReady || !globeRef.current || initialJumpDoneRef.current) {
-      return
-    }
-
-    // selectedDesign がなければ（まだロード中等）、何もせずに待つ
-    if (!selectedDesign) {
-      return
-    }
-
-    // selectedDesignがあれば、その位置にジャンプ（アニメーションなし）
-    const position = allPositions.find((p) => p.id === selectedDesign.id)
-    if (position) {
-      const globe = globeRef.current()
-      const coord = SkyCoord.fromDeg(position.ra, position.dec)
-      globe.camera.jumpTo(
-        { fovy: (1.6 * Math.PI) / 180 },
-        { coord, duration: 0 }
-      )
-      // ジャンプ完了をマーク（以降はユーザー操作に任せる）
-      initialJumpDoneRef.current = true
-    }
-  }, [isGlobeReady, selectedDesign, allPositions])
 
   // 時刻変更時にカメラの天頂パラメータを更新
   // 既存プロジェクトと同様に、za, zd を更新（theta, phi は維持される）

@@ -1,7 +1,7 @@
 /**
  * DesignList - PFS Design一覧サイドパネル
  */
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useLocalStorage } from 'react-use'
 import { Icon, IconButton } from '../../../components/Icon'
 import { Tooltip } from '../../../components/Tooltip'
@@ -72,13 +72,12 @@ export function DesignList() {
     setDateRange,
     selectedDesign,
     setSelectedDesign,
+    selectDesignAndJump,
     focusedDesign,
     setFocusedDesign,
-    jumpTo,
     zenithSkyCoord,
     isDraggingClock,
-    pendingScrollDesignId,
-    clearPendingScrollDesignId,
+    scrollToDesignIdRef,
   } = useDesignsContext()
 
   const [idFormat, setIdFormat] = useLocalStorage<IdFormat>(ID_FORMAT_KEY, 'hex')
@@ -116,6 +115,25 @@ export function DesignList() {
     sortedDesignsRef.current = designs
     return designs
   }, [designs, sortBy, isDraggingClock])
+
+  // スクロール要求の処理（リスト更新後にスクロールを実行）
+  useEffect(() => {
+    const targetId = scrollToDesignIdRef.current
+    if (!targetId || isFetching || !listContainerRef.current) return
+    
+    // リスト内にターゲットがあればスクロール
+    const isInList = designs.some((d) => d.id === targetId)
+    if (isInList) {
+      const element = listContainerRef.current.querySelector(
+        `[data-design-id="${targetId}"]`
+      )
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }
+      // スクロール要求をクリア
+      scrollToDesignIdRef.current = null
+    }
+  }, [designs, isFetching, scrollToDesignIdRef])
 
   // グループ化（同一座標付近のDesignをまとめる）
   const groupedDesigns = useMemo(() => {
@@ -167,14 +185,10 @@ export function DesignList() {
   // エントリクリックハンドラ
   const handleEntryClick = useCallback(
     (entry: PfsDesignEntry) => {
-      setSelectedDesign(entry)
-      jumpTo({
-        fovy: (1.6 * Math.PI) / 180,  // 2倍に拡大
-        coord: { ra: entry.ra, dec: entry.dec },
-        duration: 1000,
-      })
+      // 明示的にDesignを選択してカメラ移動を行う
+      selectDesignAndJump(entry.id, { animate: true })
     },
-    [setSelectedDesign, jumpTo]
+    [selectDesignAndJump]
   )
 
   // FITSダウンロード
@@ -189,24 +203,6 @@ export function DesignList() {
     },
     [idFormat]
   )
-
-  // ロード完了後に保留中のスクロールを実行
-  useEffect(() => {
-    if (!isFetching && pendingScrollDesignId && listContainerRef.current) {
-      // デザインがリスト内にあるか確認
-      const isInList = designs.some((d) => d.id === pendingScrollDesignId)
-      if (isInList) {
-        // 要素を探してスクロール
-        const element = listContainerRef.current.querySelector(
-          `[data-design-id="${pendingScrollDesignId}"]`
-        )
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-        }
-      }
-      clearPendingScrollDesignId()
-    }
-  }, [isFetching, pendingScrollDesignId, designs, clearPendingScrollDesignId])
 
   return (
     <div className={styles.listContainer}>

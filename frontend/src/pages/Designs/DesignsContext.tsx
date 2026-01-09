@@ -17,7 +17,6 @@ import {
   useListPfsDesignsApiPfsDesignsGetQuery,
   useListDesignPositionsApiPfsDesignsPositionsGetQuery,
   useGetDesignApiPfsDesignsIdHexGetQuery,
-  useGetDesignRankApiPfsDesignsRankDesignIdGetQuery,
 } from '../../store/api/generatedApi'
 import type { PfsDesignEntry, PfsDesignDetail, PfsDesignPosition } from './types'
 import { SUBARU_TELESCOPE_LOCATION, HST_TZ_OFFSET } from './types'
@@ -111,6 +110,8 @@ interface DesignsContextValue {
   // 選択・フォーカス
   selectedDesign: PfsDesignEntry | undefined
   setSelectedDesign: (design: PfsDesignEntry | undefined) => void
+  // 明示的にDesignを選択してカメラ移動とスクロールを行う（リスト外のDesignも対応）
+  selectDesignAndJump: (designId: string, options?: { animate?: boolean }) => Promise<void>
   focusedDesign: PfsDesignEntry | undefined
   setFocusedDesign: (design: PfsDesignEntry | undefined) => void
 
@@ -141,9 +142,8 @@ interface DesignsContextValue {
   isDraggingClock: boolean
   setDraggingClock: (dragging: boolean) => void
 
-  // 保留中のスクロール対象（ロード完了後にDesignListでスクロール）
-  pendingScrollDesignId: string | null
-  clearPendingScrollDesignId: () => void
+  // スクロール要求（DesignListで処理される）
+  scrollToDesignIdRef: React.MutableRefObject<string | null>
 }
 
 const DesignsContext = createContext<DesignsContextValue | null>(null)
@@ -328,12 +328,6 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     FocusedFiber | undefined
   >()
 
-  // 保留中のスクロール対象（ロード完了後にDesignListでスクロール）
-  const [pendingScrollDesignId, setPendingScrollDesignId] = useState<string | null>(null)
-  const clearPendingScrollDesignId = useCallback(() => {
-    setPendingScrollDesignId(null)
-  }, [])
-
   // フォーカス状態の設定（同じIDなら更新をスキップして不要な再レンダリングを防ぐ）
   const setFocusedDesign = useCallback(
     (design: PfsDesignEntry | undefined) => {
@@ -385,53 +379,6 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
       { skip: !designIdForDetail }
     )
 
-  // 選択されたDesignがリスト内にあるか確認
-  const isSelectedDesignInList = useMemo(
-    () => selectedDesign && designs.some((d) => d.id === selectedDesign.id),
-    [selectedDesign, designs]
-  )
-
-  // URLパラメータのdesignIdがリスト内にあるか確認（初回ロード用）
-  const isDesignIdInList = useMemo(
-    () => Boolean(designId && designs.some((d) => d.id === designId)),
-    [designId, designs]
-  )
-
-  // 選択されたDesign（またはURL指定のdesignId）のランクを取得（リスト内にない場合のみ）
-  // selectedDesign があればそれを使い、なければ designId を使う（初回ロード用）
-  const rankQueryDesignId = selectedDesign?.id ?? designId ?? ''
-  const shouldSkipRankQuery = !rankQueryDesignId || 
-    (selectedDesign ? isSelectedDesignInList : isDesignIdInList)
-  
-  const { data: rankData } = useGetDesignRankApiPfsDesignsRankDesignIdGetQuery(
-    {
-      designId: rankQueryDesignId,
-      search: search || undefined,
-      sortBy,
-      sortOrder,
-      zenithRa: sortBy === 'altitude' ? committedZenith.ra : undefined,
-      zenithDec: sortBy === 'altitude' ? committedZenith.dec : undefined,
-      dateFrom: dateRange[0] || undefined,
-      dateTo: dateRange[1] || undefined,
-    },
-    { skip: shouldSkipRankQuery }
-  )
-
-  // ランクが取得できたらページ遷移（リスト内にないDesignが選択/指定された時）
-  useEffect(() => {
-    const targetDesignId = selectedDesign?.id ?? designId
-    const isInList = selectedDesign ? isSelectedDesignInList : isDesignIdInList
-    
-    if (rankData?.rank != null && !isInList && targetDesignId) {
-      const targetOffset = Math.floor(rankData.rank / limit) * limit
-      if (targetOffset !== offset) {
-        setOffset(targetOffset)
-        // ロード完了後にスクロールするようにIDを保存
-        setPendingScrollDesignId(targetDesignId)
-      }
-    }
-  }, [rankData, isSelectedDesignInList, isDesignIdInList, limit, offset, setOffset, selectedDesign, designId])
-
   // 選択状態の設定とURL更新
   const setSelectedDesign = useCallback(
     (design: PfsDesignEntry | undefined) => {
@@ -441,29 +388,125 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     [navigate]
   )
 
-  // URL paramsからDesignを選択（初回ロード時）
-  // 注意: ジャンプはSkyViewerで行う（Globe初期化後に実行するため）
-  const initialSelectionDoneRef = useRef(false)
+  // スクロール要求用のRef（DesignListで処理される）
+  const scrollToDesignIdRef = useRef<string | null>(null)
+  
+  // 明示的にDesignを選択してカメラ移動とスクロールを行う
+  // リスト外のDesignの場合はランクを取得してページ遷移する
+  const selectDesignAndJump = useCallback(
+    async (designIdToSelect: string, options?: { animate?: boolean }) => {
+      // 位置情報からDesignを検索
+      const position = allPositions.find((p) => p.id === designIdToSelect)
+      if (!position) {
+        // 位置情報がなければ何もしない
+        return
+      }
+
+      // リスト内にあるか確認
+      const designInList = designs.find((d) => d.id === designIdToSelect)
+      
+      if (designInList) {
+        // リスト内にある場合: 選択状態を設定し、カメラ移動とスクロールを行う
+        setSelectedDesignState(designInList)
+        navigate(`/designs/${designInList.id}`, { replace: true })
+        
+        // カメラ移動
+        jumpToRef.current({
+          fovy: (1.6 * Math.PI) / 180,
+          coord: { ra: position.ra, dec: position.dec },
+          duration: options?.animate ? 1000 : 0,
+        })
+        
+        // スクロール要求を設定（DesignListで処理される）
+        scrollToDesignIdRef.current = designIdToSelect
+      } else {
+        // リスト外の場合: ランクを取得してページ遷移する
+        try {
+          const params = new URLSearchParams()
+          if (search) params.set('search', search)
+          params.set('sort_by', sortBy)
+          params.set('sort_order', sortOrder)
+          if (sortBy === 'altitude') {
+            params.set('zenith_ra', String(committedZenith.ra))
+            params.set('zenith_dec', String(committedZenith.dec))
+          }
+          if (dateRange[0]) params.set('date_from', dateRange[0])
+          if (dateRange[1]) params.set('date_to', dateRange[1])
+          
+          const response = await fetch(`/api/pfs_designs/rank/${designIdToSelect}?${params}`)
+          if (!response.ok) {
+            console.error('Failed to fetch rank:', response.status)
+            return
+          }
+          
+          const rankData = await response.json()
+          if (rankData.rank != null) {
+            // ページ遷移
+            const targetOffset = Math.floor(rankData.rank / limit) * limit
+            setOffset(targetOffset)
+            
+            // 選択状態を設定（designsが更新されるまではPfsDesignEntryがないのでpositionから作る）
+            // 実際のDesignEntryはリスト更新後に設定される
+            // ここでは位置情報だけでカメラ移動を行い、スクロール要求を設定する
+            
+            // カメラ移動（即座に行う）
+            jumpToRef.current({
+              fovy: (1.6 * Math.PI) / 180,
+              coord: { ra: position.ra, dec: position.dec },
+              duration: options?.animate ? 1000 : 0,
+            })
+            
+            // スクロール要求を設定（リスト更新後にDesignListで処理される）
+            scrollToDesignIdRef.current = designIdToSelect
+          }
+        } catch (error) {
+          console.error('Failed to fetch rank:', error)
+        }
+      }
+    },
+    [allPositions, designs, navigate, search, sortBy, sortOrder, committedZenith, dateRange, limit, setOffset]
+  )
+
+  // 初回ロード処理: URLにdesignIdがあり、データがロードされた時に一度だけ実行
+  const initialLoadHandledRef = useRef(false)
   useEffect(() => {
-    // 初期選択が既に行われている場合はスキップ
-    if (initialSelectionDoneRef.current) {
+    // 既に処理済みならスキップ
+    if (initialLoadHandledRef.current) return
+    
+    // URLにdesignIdがなければスキップ
+    if (!designId) {
+      initialLoadHandledRef.current = true
       return
     }
-
-    if (designId && allPositions.length > 0) {
-      // 位置情報からDesignを検索
-      const position = allPositions.find((p) => p.id === designId)
-      if (position) {
-        // 一覧にあればそれを選択状態にする（URLは更新しない）
-        const design = designs.find((d) => d.id === designId)
-        if (design) {
-          setSelectedDesignState(design)
-        }
-        // 初期選択完了をマーク
-        initialSelectionDoneRef.current = true
-      }
+    
+    // データがまだロード中ならスキップ
+    if (isLoading || isLoadingPositions) return
+    
+    // 位置情報からDesignを検索
+    const position = allPositions.find((p) => p.id === designId)
+    if (!position) {
+      // 見つからなければ処理完了とマーク
+      initialLoadHandledRef.current = true
+      return
     }
-  }, [designId, allPositions, designs])
+    
+    // 初回ロード処理を実行（アニメーションなし）
+    selectDesignAndJump(designId, { animate: false })
+    initialLoadHandledRef.current = true
+  }, [designId, isLoading, isLoadingPositions, allPositions, selectDesignAndJump])
+
+  // リスト更新後に選択状態を同期（ページ遷移後にDesignEntryを設定）
+  useEffect(() => {
+    const targetId = scrollToDesignIdRef.current
+    if (!targetId) return
+    
+    // リストにターゲットがあれば選択状態を更新
+    const designInList = designs.find((d) => d.id === targetId)
+    if (designInList && (!selectedDesign || selectedDesign.id !== targetId)) {
+      setSelectedDesignState(designInList)
+      navigate(`/designs/${designInList.id}`, { replace: true })
+    }
+  }, [designs, selectedDesign, navigate])
 
   const value: DesignsContextValue = {
     designs,
@@ -487,6 +530,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     isLoadingPositions,
     selectedDesign,
     setSelectedDesign,
+    selectDesignAndJump,
     focusedDesign,
     setFocusedDesign,
     focusedFiber,
@@ -505,8 +549,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     zenithZaZd,
     isDraggingClock,
     setDraggingClock,
-    pendingScrollDesignId,
-    clearPendingScrollDesignId,
+    scrollToDesignIdRef,
   }
 
   return (

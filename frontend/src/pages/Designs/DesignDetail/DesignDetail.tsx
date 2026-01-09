@@ -125,16 +125,7 @@ export function DesignDetail() {
     return getCobraByFiberId(externalFocusFiberId)
   }, [externalFocusFiberId])
 
-  if (!selectedDesign) {
-    return (
-      <div className={styles.designDetailContainer}>
-        <div style={{ color: '#888', fontStyle: 'italic' }}>
-          Select a design from the list to view details
-        </div>
-      </div>
-    )
-  }
-
+  // 常にFocalPlane、select、凡例を表示（Designが選択されていなくても）
   return (
     <div className={styles.designDetailContainer}>
       <LoadingOverlay isLoading={isLoadingDetail} />
@@ -142,25 +133,23 @@ export function DesignDetail() {
         <FocalPlane
           size={250}
           colorFunc={colorFunc}
-          onPointerEnter={handlePointerEnter}
-          onClick={handleCobraClick}
+          onPointerEnter={selectedDesign ? handlePointerEnter : undefined}
+          onClick={selectedDesign ? handleCobraClick : undefined}
           externalFocusCobra={externalFocusCobra}
           refreshDeps={[colorMode, designDetail, highlightFiberId]}
         />
-        <div>
-          <select
-            className={styles.colorModeSelect}
-            value={colorMode}
-            onChange={(e) => setColorMode(e.target.value as ColorMode)}
-          >
-            <option value="targetType">Target Type</option>
-            <option value="fiberStatus">Fiber Status</option>
-          </select>
-        </div>
+        <select
+          className={styles.colorModeSelect}
+          value={colorMode}
+          onChange={(e) => setColorMode(e.target.value as ColorMode)}
+        >
+          <option value="targetType">Target Type</option>
+          <option value="fiberStatus">Fiber Status</option>
+        </select>
         <Legend colorMode={colorMode} />
       </div>
 
-      {/* 3カラムレイアウト: Design詳細 + Fiber詳細 */}
+      {/* Design詳細 + Fiber詳細（Designが選択されている場合のみ） */}
       {designDetail && selectedDesign && (
         <FiberDetail
           design={designDetail}
