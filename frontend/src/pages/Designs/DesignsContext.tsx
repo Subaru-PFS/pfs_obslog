@@ -18,6 +18,7 @@ import {
   useListDesignPositionsApiPfsDesignsPositionsGetQuery,
   useGetDesignApiPfsDesignsIdHexGetQuery,
 } from '../../store/api/generatedApi'
+import { API_BASE_URL } from '../../config'
 import type { PfsDesignEntry, PfsDesignDetail, PfsDesignPosition } from './types'
 import { SUBARU_TELESCOPE_LOCATION, HST_TZ_OFFSET } from './types'
 
@@ -453,7 +454,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
           if (dateRange[0]) params.set('date_from', dateRange[0])
           if (dateRange[1]) params.set('date_to', dateRange[1])
           
-          const response = await fetch(`/api/pfs_designs/rank/${designIdToSelect}?${params}`)
+          const response = await fetch(`${API_BASE_URL}/api/pfs_designs/rank/${designIdToSelect}?${params}`)
           if (!response.ok) {
             console.error('Failed to fetch rank:', response.status)
             return
