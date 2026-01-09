@@ -143,7 +143,8 @@ interface DesignsContextValue {
   setDraggingClock: (dragging: boolean) => void
 
   // スクロール要求（DesignListで処理される）
-  scrollToDesignIdRef: React.MutableRefObject<string | null>
+  scrollToDesignId: string | null
+  setScrollToDesignId: (id: string | null) => void
 }
 
 const DesignsContext = createContext<DesignsContextValue | null>(null)
@@ -388,8 +389,8 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     [navigate]
   )
 
-  // スクロール要求用のRef（DesignListで処理される）
-  const scrollToDesignIdRef = useRef<string | null>(null)
+  // スクロール要求用のstate（DesignListで処理される）
+  const [scrollToDesignId, setScrollToDesignId] = useState<string | null>(null)
   
   // 明示的にDesignを選択してカメラ移動とスクロールを行う
   // リスト外のDesignの場合はランクを取得してページ遷移する
@@ -435,7 +436,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
         })
         
         // スクロール要求を設定（DesignListで処理される）
-        scrollToDesignIdRef.current = designIdToSelect
+        setScrollToDesignId(designIdToSelect)
       } else {
         // リスト外の場合: ランクを取得してページ遷移する
         try {
@@ -474,7 +475,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
             })
             
             // スクロール要求を設定（リスト更新後にDesignListで処理される）
-            scrollToDesignIdRef.current = designIdToSelect
+            setScrollToDesignId(designIdToSelect)
           }
         } catch (error) {
           console.error('Failed to fetch rank:', error)
@@ -521,16 +522,15 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
 
   // リスト更新後に選択状態を同期（ページ遷移後にDesignEntryを設定）
   useEffect(() => {
-    const targetId = scrollToDesignIdRef.current
-    if (!targetId) return
+    if (!scrollToDesignId) return
     
     // リストにターゲットがあれば選択状態を更新
-    const designInList = designs.find((d) => d.id === targetId)
-    if (designInList && (!selectedDesign || selectedDesign.id !== targetId)) {
+    const designInList = designs.find((d) => d.id === scrollToDesignId)
+    if (designInList && (!selectedDesign || selectedDesign.id !== scrollToDesignId)) {
       setSelectedDesignState(designInList)
       navigate(`/designs/${designInList.id}`, { replace: true })
     }
-  }, [designs, selectedDesign, navigate])
+  }, [designs, selectedDesign, navigate, scrollToDesignId])
 
   const value: DesignsContextValue = {
     designs,
@@ -573,7 +573,8 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     zenithZaZd,
     isDraggingClock,
     setDraggingClock,
-    scrollToDesignIdRef,
+    scrollToDesignId,
+    setScrollToDesignId,
   }
 
   return (

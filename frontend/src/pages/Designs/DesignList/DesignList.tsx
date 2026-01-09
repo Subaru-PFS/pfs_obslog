@@ -77,7 +77,8 @@ export function DesignList() {
     setFocusedDesign,
     zenithSkyCoord,
     isDraggingClock,
-    scrollToDesignIdRef,
+    scrollToDesignId,
+    setScrollToDesignId,
   } = useDesignsContext()
 
   const [idFormat, setIdFormat] = useLocalStorage<IdFormat>(ID_FORMAT_KEY, 'hex')
@@ -118,22 +119,21 @@ export function DesignList() {
 
   // スクロール要求の処理（リスト更新後にスクロールを実行）
   useEffect(() => {
-    const targetId = scrollToDesignIdRef.current
-    if (!targetId || isFetching || !listContainerRef.current) return
+    if (!scrollToDesignId || isFetching || !listContainerRef.current) return
     
     // リスト内にターゲットがあればスクロール
-    const isInList = designs.some((d) => d.id === targetId)
+    const isInList = designs.some((d) => d.id === scrollToDesignId)
     if (isInList) {
       const element = listContainerRef.current.querySelector(
-        `[data-design-id="${targetId}"]`
+        `[data-design-id="${scrollToDesignId}"]`
       )
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       }
       // スクロール要求をクリア
-      scrollToDesignIdRef.current = null
+      setScrollToDesignId(null)
     }
-  }, [designs, isFetching, scrollToDesignIdRef])
+  }, [designs, isFetching, scrollToDesignId, setScrollToDesignId])
 
   // グループ化（同一座標付近のDesignをまとめる）
   const groupedDesigns = useMemo(() => {
