@@ -629,7 +629,7 @@ function parseUrlParams(searchParams: URLSearchParams) {
 
 export function VisitList() {
   const navigate = useNavigate()
-  const { selectedVisitId, setSelectedVisitId, setScrollToVisitCallback } = useVisitsBrowserContext()
+  const { selectedVisitId, setSelectedVisitId, setScrollToVisitCallback, isScrollingToVisit } = useVisitsBrowserContext()
   const [searchParams, setSearchParams] = useSearchParams()
   
   // Parse URL params once on mount and when they change externally
@@ -1078,6 +1078,7 @@ export function VisitList() {
 
   return (
     <div className={styles.visitList}>
+      <LoadingOverlay isLoading={isScrollingToVisit} />
       <div className={styles.toolbar}>
         <div className={styles.searchBox}>
           <form onSubmit={(e) => { e.preventDefault(); handleSearch() }}>

@@ -14,6 +14,10 @@ interface VisitsBrowserContextValue {
   scrollToVisit: ((visitId: number) => Promise<void>) | null
   /** scrollToVisit コールバックを設定 */
   setScrollToVisitCallback: (callback: ((visitId: number) => Promise<void>) | null) => void
+  /** スクロール中のローディング状態 */
+  isScrollingToVisit: boolean
+  /** スクロール中のローディング状態を設定 */
+  setIsScrollingToVisit: (value: boolean) => void
 }
 
 const VisitsBrowserContext = createContext<VisitsBrowserContextValue | null>(null)
@@ -34,6 +38,7 @@ export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) 
   )
   const [refreshKey, setRefreshKey] = useState(0)
   const [scrollToVisitCallback, setScrollToVisitCallbackState] = useState<((visitId: number) => Promise<void>) | null>(null)
+  const [isScrollingToVisit, setIsScrollingToVisit] = useState(false)
 
   // URLパラメータの変更を監視してstateを更新
   useEffect(() => {
@@ -72,6 +77,8 @@ export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) 
         refresh,
         scrollToVisit: scrollToVisitCallback,
         setScrollToVisitCallback,
+        isScrollingToVisit,
+        setIsScrollingToVisit,
       }}
     >
       {children}

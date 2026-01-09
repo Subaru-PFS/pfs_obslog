@@ -58,8 +58,7 @@ interface SummaryProps {
 }
 
 function Summary({ visit }: SummaryProps) {
-  const { scrollToVisit } = useVisitsBrowserContext()
-  const [isScrolling, setIsScrolling] = useState(false)
+  const { scrollToVisit, setIsScrollingToVisit } = useVisitsBrowserContext()
   const spsCount = visit.sps?.exposures?.length ?? 0
   const mcsCount = visit.mcs?.exposures?.length ?? 0
   const agcCount = visit.agc?.exposures?.length ?? 0
@@ -86,18 +85,17 @@ function Summary({ visit }: SummaryProps) {
 
   const handleShowInList = async () => {
     if (scrollToVisit) {
-      setIsScrolling(true)
+      setIsScrollingToVisit(true)
       try {
         await scrollToVisit(visit.id)
       } finally {
-        setIsScrolling(false)
+        setIsScrollingToVisit(false)
       }
     }
   }
 
   return (
     <div className={styles.summary}>
-      <LoadingOverlay isLoading={isScrolling} />
       <div className={styles.summaryContent}>
         <Tooltip content="Show this visit in the left list">
           <button
