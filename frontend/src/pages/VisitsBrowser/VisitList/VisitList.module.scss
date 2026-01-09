@@ -673,6 +673,17 @@ $pagination-border-radius: 12px;
     font-size: 0.65rem;
   }
 
+  .designLink {
+    color: $link-color;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+      color: $accent;
+    }
+  }
+
   .colCoord {
     width: 60px;
     text-align: right;

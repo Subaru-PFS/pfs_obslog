@@ -10,6 +10,10 @@ interface VisitsBrowserContextValue {
   refreshKey: number
   /** リフレッシュを実行 */
   refresh: () => void
+  /** visitをリスト内に表示するためのコールバック（VisitListから設定） */
+  scrollToVisit: ((visitId: number) => void) | null
+  /** scrollToVisit コールバックを設定 */
+  setScrollToVisitCallback: (callback: ((visitId: number) => void) | null) => void
 }
 
 const VisitsBrowserContext = createContext<VisitsBrowserContextValue | null>(null)
@@ -29,6 +33,7 @@ export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) 
     initialVisitId && !isNaN(initialVisitId) ? initialVisitId : null
   )
   const [refreshKey, setRefreshKey] = useState(0)
+  const [scrollToVisitCallback, setScrollToVisitCallbackState] = useState<((visitId: number) => void) | null>(null)
 
   // URLパラメータの変更を監視してstateを更新
   useEffect(() => {
@@ -54,6 +59,10 @@ export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) 
     setRefreshKey((prev) => prev + 1)
   }, [])
 
+  const setScrollToVisitCallback = useCallback((callback: ((visitId: number) => void) | null) => {
+    setScrollToVisitCallbackState(() => callback)
+  }, [])
+
   return (
     <VisitsBrowserContext.Provider
       value={{
@@ -61,6 +70,8 @@ export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) 
         setSelectedVisitId,
         refreshKey,
         refresh,
+        scrollToVisit: scrollToVisitCallback,
+        setScrollToVisitCallback,
       }}
     >
       {children}

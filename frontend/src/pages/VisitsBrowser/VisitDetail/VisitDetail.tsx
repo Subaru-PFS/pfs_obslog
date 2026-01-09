@@ -11,9 +11,11 @@ import {
 import { useVisitsBrowserContext } from '../context'
 import { VisitDetailProvider, useVisitDetailContext, type TabName } from './context'
 import { Tabs, TabPanel, type TabItem } from '../../../components/Tabs'
+import { Icon } from '../../../components/Icon'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
 import { NoteList } from '../../../components/NoteList'
+import { Tooltip } from '../../../components/Tooltip'
 import { SpsInspector } from './SpsInspector'
 import { McsInspector } from './McsInspector'
 import { AgcInspector } from './AgcInspector'
@@ -56,6 +58,7 @@ interface SummaryProps {
 }
 
 function Summary({ visit }: SummaryProps) {
+  const { scrollToVisit } = useVisitsBrowserContext()
   const spsCount = visit.sps?.exposures?.length ?? 0
   const mcsCount = visit.mcs?.exposures?.length ?? 0
   const agcCount = visit.agc?.exposures?.length ?? 0
@@ -80,30 +83,48 @@ function Summary({ visit }: SummaryProps) {
     await deleteNote({ visitId: visit.id, noteId }).unwrap()
   }
 
+  const handleShowInList = () => {
+    if (scrollToVisit) {
+      scrollToVisit(visit.id)
+    }
+  }
+
   return (
     <div className={styles.summary}>
-      <table className={styles.summaryTable}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Description</th>
-            <th>Issued at</th>
-            <th>Exposures (S/M/A)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{visit.id}</td>
-            <td>{visit.description || '-'}</td>
-            <td>{formatDateTime(visit.issued_at)}</td>
-            <td>
-              <span style={getExposureCountStyle(spsCount, mcsCount, agcCount)}>
-                {spsCount}/{mcsCount}/{agcCount}
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className={styles.summaryContent}>
+        <Tooltip content="Show this visit in the left list">
+          <button
+            className={styles.showInListButton}
+            onClick={handleShowInList}
+          >
+            <span style={{ display: 'inline-flex', transform: 'scale(-1, 1)' }}>
+              <Icon name="switch_access_shortcut" size={16} />
+            </span>
+          </button>
+        </Tooltip>
+        <table className={styles.summaryTable}>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Description</th>
+              <th>Issued at</th>
+              <th>Exposures (S/M/A)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{visit.id}</td>
+              <td>{visit.description || '-'}</td>
+              <td>{formatDateTime(visit.issued_at)}</td>
+              <td>
+                <span style={getExposureCountStyle(spsCount, mcsCount, agcCount)}>
+                  {spsCount}/{mcsCount}/{agcCount}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div className={styles.notesSection}>
         <NoteList
           notes={visit.notes ?? []}

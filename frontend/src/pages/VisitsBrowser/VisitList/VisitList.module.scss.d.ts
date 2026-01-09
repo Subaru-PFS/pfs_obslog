@@ -20,6 +20,7 @@ export type Styles = {
   content: string;
   dateRangePicker: string;
   dateRangeSeparator: string;
+  designLink: string;
   empty: string;
   error: string;
   errorInput: string;

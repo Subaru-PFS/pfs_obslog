@@ -397,6 +397,7 @@ interface VisitGroupComponentProps {
 }
 
 function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGroupComponentProps) {
+  const navigate = useNavigate()
   const { selectedVisitId, setSelectedVisitId } = useVisitsBrowserContext()
   
   // Check if any visit in this group is selected
@@ -519,9 +520,22 @@ function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGrou
                   </TruncatedCell>
                 )}
                 {columns.pfs_design_id && (
-                  <TruncatedCell content={visit.pfs_design_id ? `0x${visit.pfs_design_id}` : ''} className={styles.colDesign}>
-                    {visit.pfs_design_id ? `0x${visit.pfs_design_id}` : '-'}
-                  </TruncatedCell>
+                  <td className={styles.colDesign}>
+                    {visit.pfs_design_id ? (
+                      <Tooltip content={visit.pfs_design_id}>
+                        <a
+                          href={`/designs/${visit.pfs_design_id.replace(/^0x/, '')}`}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            navigate(`/designs/${visit.pfs_design_id!.replace(/^0x/, '')}`)
+                          }}
+                          className={styles.designLink}
+                        >
+                          {visit.pfs_design_id.slice(0, 6)}...
+                        </a>
+                      </Tooltip>
+                    ) : '-'}
+                  </td>
                 )}
                 {columns.ra && (
                   <TruncatedCell content={visit.avg_ra !== null && visit.avg_ra !== undefined ? `RA: ${visit.avg_ra.toFixed(6)}°` : ''} className={styles.colCoord}>
@@ -614,7 +628,7 @@ function parseUrlParams(searchParams: URLSearchParams) {
 
 export function VisitList() {
   const navigate = useNavigate()
-  const { selectedVisitId, setSelectedVisitId } = useVisitsBrowserContext()
+  const { selectedVisitId, setSelectedVisitId, setScrollToVisitCallback } = useVisitsBrowserContext()
   const [searchParams, setSearchParams] = useSearchParams()
   
   // Parse URL params once on mount and when they change externally
@@ -889,17 +903,8 @@ export function VisitList() {
     window.location.href = url
   }, [appliedSql])
 
-  // Go to Visit by ID
-  const handleGoToVisit = useCallback(async () => {
-    const input = window.prompt('Enter Visit ID:')
-    if (!input) return
-
-    const visitId = parseInt(input.trim(), 10)
-    if (isNaN(visitId)) {
-      alert('Invalid Visit ID. Please enter a number.')
-      return
-    }
-
+  // Scroll to visit in list (used by VisitDetail)
+  const scrollToVisitInList = useCallback(async (visitId: number) => {
     try {
       const result = await getVisitRank({ visitId, sql: effectiveSql ?? undefined }).unwrap()
       if (result.rank === null || result.rank === undefined) {
@@ -924,6 +929,26 @@ export function VisitList() {
       alert('Failed to find visit. Please try again.')
     }
   }, [effectiveSql, getVisitRank, setSelectedVisitId])
+
+  // Register scrollToVisitInList callback in context
+  useEffect(() => {
+    setScrollToVisitCallback(scrollToVisitInList)
+    return () => setScrollToVisitCallback(null)
+  }, [scrollToVisitInList, setScrollToVisitCallback])
+
+  // Go to Visit by ID
+  const handleGoToVisit = useCallback(async () => {
+    const input = window.prompt('Enter Visit ID:')
+    if (!input) return
+
+    const visitId = parseInt(input.trim(), 10)
+    if (isNaN(visitId)) {
+      alert('Invalid Visit ID. Please enter a number.')
+      return
+    }
+
+    await scrollToVisitInList(visitId)
+  }, [scrollToVisitInList])
 
   // Check if the query looks like SQL WHERE clause
   const isSqlQuery = useCallback((query: string) => {

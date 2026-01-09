@@ -11,8 +11,10 @@ export type Styles = {
   notesSection: string;
   noteUser: string;
   placeholder: string;
+  showInListButton: string;
   splitContainer: string;
   summary: string;
+  summaryContent: string;
   summaryTable: string;
   topPane: string;
   visitDetail: string;

@@ -2,9 +2,11 @@
  * DesignDetail - 焦点面ビューとファイバー詳細パネル
  */
 import { useState, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { FocalPlane, type Cobra, getCobraByFiberId } from '../../../components/FocalPlane'
 import { LoadingOverlay } from '../../../components/LoadingOverlay'
 import { Tooltip } from '../../../components/Tooltip'
+import { Icon } from '../../../components/Icon'
 import { useDesignsContext } from '../DesignsContext'
 import { targetTypeColors, fiberStatusColors } from '../legend'
 import type { ColorMode, PfsDesignDetail } from '../types'
@@ -138,9 +140,10 @@ export function DesignDetail() {
       </div>
 
       {/* 3カラムレイアウト: Design詳細 + Fiber詳細 */}
-      {designDetail && (
+      {designDetail && selectedDesign && (
         <FiberDetail
           design={designDetail}
+          designIdHex={selectedDesign.id}
           fiberId={focusedFiber?.fiberId ?? null}
           cobra={focusedCobra}
         />
@@ -174,11 +177,13 @@ function Legend({ colorMode }: LegendProps) {
 
 interface FiberDetailProps {
   design: PfsDesignDetail
+  designIdHex: string  // hex形式のdesign ID（0x無し）
   fiberId: number | null
   cobra: Cobra | undefined  // FocalPlaneからのホバーでのみ設定される
 }
 
-function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
+function FiberDetail({ design, designIdHex, fiberId, cobra }: FiberDetailProps) {
+  const navigate = useNavigate()
   const id2designIndex = useMemo(
     () => makeId2IndexMap(design.design_data.fiberId),
     [design]
@@ -246,8 +251,22 @@ function FiberDetail({ design, fiberId, cobra }: FiberDetailProps) {
     { key: 'obCode', value: String(pickDesign(design.design_data.obCode)) },
   ]
 
+  const handleShowVisits = () => {
+    // pfs_design_idでフィルターしてvisitsページに遷移
+    const sql = `where pfs_design_id = 0x${designIdHex}`
+    navigate(`/visits?sql=${encodeURIComponent(sql)}`)
+  }
+
   return (
     <div className={styles.detailArea}>
+      <div className={styles.showVisitsButtonContainer}>
+        <Tooltip content="Show visits using this design">
+          <button className={styles.showVisitsButton} onClick={handleShowVisits}>
+            <Icon name="visibility" size={14} />
+            Show Visits
+          </button>
+        </Tooltip>
+      </div>
       {items.map((item, index) => {
         if (item.isHeader) {
           return <h3 key={index} className={styles.groupHeader}>{item.key}</h3>

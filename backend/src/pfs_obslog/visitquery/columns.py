@@ -149,6 +149,12 @@ VIRTUAL_COLUMNS: dict[str, VirtualColumn] = {
         description="プロポーザルID",
         required_joins={"pfs_design_fiber"},
     ),
+    # PFS Design
+    "pfs_design_id": VirtualColumn(
+        name="pfs_design_id",
+        description="PFS Design ID",
+        required_joins=set(),
+    ),
     # 全文検索用
     "any_column": VirtualColumn(
         name="any_column",

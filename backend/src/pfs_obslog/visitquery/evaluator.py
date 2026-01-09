@@ -91,6 +91,7 @@ class QueryEvaluator:
             "sequence_group_name": M.SequenceGroup.group_name,
             "fits_header": M.ObslogFitsHeader.cards_dict,
             "proposal_id": M.t_pfs_design_fiber.c.proposal_id,
+            "pfs_design_id": M.PfsVisit.pfs_design_id,
         }
 
     def _get_computed_column(self, name: str) -> ColumnElement[Any]:

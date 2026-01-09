@@ -8,6 +8,8 @@ export type Styles = {
   keyValuePair: string;
   legendEntries: string;
   legendEntry: string;
+  showVisitsButton: string;
+  showVisitsButtonContainer: string;
   value: string;
 };
 

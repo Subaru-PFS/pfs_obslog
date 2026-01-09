@@ -16,6 +16,37 @@
   flex-shrink: 0;
 }
 
+.summaryContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.showInListButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: none;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  margin-top: 18px; // Align with table content
+
+  &:hover {
+    background-color: #e0e0e0;
+    color: #333;
+    border-color: #999;
+  }
+
+  &:active {
+    background-color: #d0d0d0;
+  }
+}
+
 .summaryTable {
   width: 100%;
   border-collapse: collapse;
@@ -41,7 +72,6 @@
 .notesSection {
   margin-top: 6px;
   padding-top: 6px;
-  border-top: 1px solid $border-color;
 }
 
 .note {

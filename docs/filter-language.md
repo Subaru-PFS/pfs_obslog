@@ -65,6 +65,12 @@ These columns are not actual table columns but are implemented as expressions th
 |-------------|------|-------------|---------|----------------|
 | `proposal_id` | TEXT | Proposal ID | `pfs_design_fiber.proposal_id` | pfs_design_fiber |
 
+### PFS Design
+
+| Column Name | Type | Description | Maps To | Required JOINs |
+|-------------|------|-------------|---------|----------------|
+| `pfs_design_id` | BIGINT | PFS Design ID | `pfs_visit.pfs_design_id` | None |
+
 ### Aggregate Columns
 
 These columns calculate counts or averages of records related to each Visit.
@@ -266,6 +272,16 @@ WHERE visit_note_user = 'yamada'
 
 -- Sequence note search
 WHERE visit_set_note LIKE '%weather%'
+```
+
+### Filter by PFS Design
+
+```sql
+-- Visits using specific PFS design (use hex format with 0x prefix)
+WHERE pfs_design_id = 0x0523d0db7b9645c3
+
+-- Visits with any PFS design assigned
+WHERE pfs_design_id IS NOT NULL
 ```
 
 ### Complex Conditions
