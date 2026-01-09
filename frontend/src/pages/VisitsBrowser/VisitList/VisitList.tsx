@@ -15,7 +15,7 @@ import {
   useDeleteVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdDeleteMutation,
 } from '../../../store/api/enhancedApi'
 
-const { useLazyGetVisitRankApiVisitsVisitIdRankGetQuery } = generatedApi
+const { useLazyGetVisitRankApiVisitsVisitIdRankGetQuery, useLazyListVisitsApiVisitsGetQuery } = generatedApi
 import { useVisitsBrowserContext } from '../context'
 import { Icon } from '../../../components/Icon'
 import { LoadingSpinner } from '../../../components/LoadingSpinner'
@@ -805,6 +805,8 @@ export function VisitList() {
 
   // Lazy query for Go to Visit feature
   const [getVisitRank] = useLazyGetVisitRankApiVisitsVisitIdRankGetQuery()
+  // Lazy query for scrollToVisit (explicit fetch with specific offset)
+  const [fetchVisits] = useLazyListVisitsApiVisitsGetQuery()
 
   // Handle API error for search
   useEffect(() => {
@@ -917,19 +919,23 @@ export function VisitList() {
       // rank is 1-based, so visit at rank 1 should be at offset 0
       const targetOffset = Math.max(0, result.rank - 1 - Math.floor(PER_PAGE / 2))
       
+      // Fetch the visits with the new offset to ensure data is loaded
+      await fetchVisits({ offset: targetOffset, limit: PER_PAGE, sql: effectiveSql }).unwrap()
+      
+      // Update state to match the fetched data
       setOffset(targetOffset)
       setLimit(PER_PAGE)
       setSelectedVisitId(visitId)
       
-      // Scroll to the visit after data loads
-      setTimeout(() => {
+      // Scroll to the visit after DOM update
+      requestAnimationFrame(() => {
         const element = document.querySelector(`[data-visit-id="${visitId}"]`)
         element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }, 500)
+      })
     } catch {
       alert('Failed to find visit. Please try again.')
     }
-  }, [effectiveSql, getVisitRank, setSelectedVisitId])
+  }, [effectiveSql, getVisitRank, setSelectedVisitId, fetchVisits])
 
   // Register scrollToVisitInList callback in context
   useEffect(() => {
