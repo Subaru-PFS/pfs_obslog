@@ -908,6 +908,20 @@ export function VisitList() {
 
   // Scroll to visit in list (used by VisitDetail)
   const scrollToVisitInList = useCallback(async (visitId: number) => {
+    // First, check if the visit is already in the current list
+    const isInCurrentList = data?.visits.some(v => v.id === visitId) ?? false
+    
+    if (isInCurrentList) {
+      // Visit is already in the current list, just scroll to it
+      setSelectedVisitId(visitId)
+      requestAnimationFrame(() => {
+        const element = document.querySelector(`[data-visit-id="${visitId}"]`)
+        element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
+      return
+    }
+    
+    // Visit is not in current list, fetch rank and navigate to the correct page
     try {
       const result = await getVisitRank({ visitId, sql: effectiveSql ?? undefined }).unwrap()
       if (result.rank === null || result.rank === undefined) {
@@ -935,7 +949,7 @@ export function VisitList() {
     } catch {
       alert('Failed to find visit. Please try again.')
     }
-  }, [effectiveSql, getVisitRank, setSelectedVisitId, fetchVisits])
+  }, [data?.visits, effectiveSql, getVisitRank, setSelectedVisitId, fetchVisits])
 
   // Register scrollToVisitInList callback in context
   useEffect(() => {

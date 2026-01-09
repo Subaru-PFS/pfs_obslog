@@ -8,6 +8,7 @@
 .designDetailContainer {
   position: relative;
   display: flex;
+  align-items: stretch;  // 子要素の高さをfocalPlaneSectionに合わせる
   padding: 8px;
   gap: 16px;
   background: #f0f0f0;
@@ -52,7 +53,7 @@
   overflow-y: auto;
   padding: 8px;
   font-size: 10px;
-  max-height: 266px;  // FocalPlane(250px) + gap(8px) + select(約24px) - padding
+  // 高さはfocalPlaneSectionに合わせる（align-items: stretchで自動調整）
   
   // CSS multi-column layout
   columns: 200px auto;  // 最小カラム幅200px、自動でカラム数を調整
