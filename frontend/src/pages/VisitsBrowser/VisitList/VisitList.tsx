@@ -1092,19 +1092,10 @@ export function VisitList() {
     )
   }
 
-  if (isError) {
-    // Extract error message from API response
-    const errorMessage = (error && 'data' in error && (error as { data?: { detail?: string } }).data?.detail)
-      || 'Failed to load visits'
-    return (
-      <div className={styles.visitList}>
-        <div className={styles.error}>
-          <Icon name="error" size={20} />
-          <span>{errorMessage}</span>
-        </div>
-      </div>
-    )
-  }
+  // Extract error message from API response for display in content area
+  const errorMessage = isError && error && 'data' in error
+    ? (error as { data?: { detail?: string } }).data?.detail || 'Failed to load visits'
+    : null
 
   return (
     <div className={styles.visitList}>
@@ -1309,7 +1300,12 @@ export function VisitList() {
         {/* Loading overlay - positioned after paginationTop to avoid gap */}
         <LoadingOverlay isLoading={(isFetching || isLoadingMore) && !(shouldAutoRefresh && data)} />
 
-        {visitGroups.length === 0 ? (
+        {errorMessage ? (
+          <div className={styles.error}>
+            <Icon name="error" size={20} />
+            <span>{errorMessage}</span>
+          </div>
+        ) : visitGroups.length === 0 ? (
           <div className={styles.empty}>No visits found</div>
         ) : (
           visitGroups.map((group, index) => (
