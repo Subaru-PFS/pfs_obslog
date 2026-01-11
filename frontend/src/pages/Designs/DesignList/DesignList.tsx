@@ -137,6 +137,28 @@ export function DesignList() {
     }
   }, [designs, isFetching, scrollToDesignId, setScrollToDesignId])
 
+  // リスト更新完了時に、選択されているデザインがリスト内にあればスクロール
+  // （scrollToDesignIdが設定されていない場合でも、リスト更新後に自動スクロール）
+  useEffect(() => {
+    // フェッチ中は何もしない
+    if (isFetching || !listContainerRef.current) return
+    // 選択されたデザインがなければ何もしない
+    if (!selectedDesign) return
+    // scrollToDesignIdが設定されている場合は上のuseEffectが処理するのでスキップ
+    if (scrollToDesignId) return
+    
+    // リスト内に選択されたデザインがあればスクロール
+    const isInList = designs.some((d) => d.id === selectedDesign.id)
+    if (isInList) {
+      const element = listContainerRef.current.querySelector(
+        `[data-design-id="${selectedDesign.id}"]`
+      )
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }
+    }
+  }, [designs, isFetching, selectedDesign, scrollToDesignId])
+
   // グループ化（同一座標付近のDesignをまとめる）
   const groupedDesigns = useMemo(() => {
     const groups: PfsDesignEntry[][] = []
