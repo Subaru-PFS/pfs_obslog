@@ -77,3 +77,32 @@ $button-background: rgba(black, 0.75);
     cursor: grabbing;
   }
 }
+
+.hscSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(white, 0.2);
+}
+
+.subOption {
+  margin-left: 12px;
+  font-size: 12px;
+}
+
+.settingsButton {
+  background-color: $button-background;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 12px;
+  font-size: 18px;
+
+  &:hover {
+    background-color: rgba(#033, 0.75);
+  }
+}

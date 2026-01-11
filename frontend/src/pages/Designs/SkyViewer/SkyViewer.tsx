@@ -11,13 +11,16 @@ import {
   PanLayer$,
   ZoomLayer$,
   TouchLayer$,
+  TractTileLayer$,
   type GlobeHandle,
 } from '@stellar-globe/react-stellar-globe'
-import { easing, GridLayer, matrixUtils, SkyCoord, type Globe } from '@stellar-globe/stellar-globe'
+import { easing, GridLayer, matrixUtils, SkyCoord, TractTileLayer, type Globe } from '@stellar-globe/stellar-globe'
 import { useDesignsContext, inTimeZone } from '../DesignsContext'
 import { HST_TZ_OFFSET } from '../types'
 import { Clock } from './Clock'
 import { DesignMarkers } from './DesignMarkers'
+import { HscColorParamsPopover, type SdssTrueColorParams } from './HscColorParamsPopover'
+import { IconButton } from '../../../components/Icon'
 import styles from './SkyViewer.module.scss'
 
 // カメラ初期パラメータ（オブジェクト参照を安定させるためコンポーネント外で定義）
@@ -62,6 +65,12 @@ export function SkyViewer() {
   const altAzGridRef = useRef<GridLayer | null>(null)
   // Globe初期化完了フラグ
   const [isGlobeReady, setIsGlobeReady] = useState(false)
+  // HSC PDR3 wide表示設定
+  const [showHscPdr3Wide, setShowHscPdr3Wide] = useState(false)
+  const [showHscPdr3Outline, setShowHscPdr3Outline] = useState(true)
+  const [hscColorParams, setHscColorParams] = useState<SdssTrueColorParams>(
+    () => TractTileLayer.defaultParams({ type: 'sdssTrueColor' }) as SdssTrueColorParams
+  )
   const {
     registerJumpTo,
     setNow,
@@ -167,10 +176,8 @@ export function SkyViewer() {
   // 現在時刻に設定
   const setToNow = useCallback(() => {
     setNow(new Date())
-    // 次のフレームで天頂を中心に表示
-    // 時刻が変わるとzenithZaZdが更新され、その後centerZenithが実行される
-    setTimeout(() => centerZenith(), 400)  // zenithZaZd更新のアニメーション(300ms)より少し後
-  }, [setNow, centerZenith])
+    // カメラの移動は行わない（時刻変更のみ）
+  }, [setNow])
 
   // 時計のドラッグで時刻変更
   const handleClockScrew = useCallback(
@@ -221,6 +228,12 @@ export function SkyViewer() {
             baseUrl="//alasky.cds.unistra.fr/Pan-STARRS/DR1/color-i-r-g"
             animationLod={-0.25}
           />
+          <TractTileLayer$
+            baseUrl="//hscmap.mtk.nao.ac.jp/hscMap4/data/pdr3_wide"
+            outline={showHscPdr3Outline}
+            colorParams={hscColorParams}
+            visible={showHscPdr3Wide}
+          />
           <EquatorialGrid />
           <DesignMarkers />
         </Globe$>
@@ -250,6 +263,38 @@ export function SkyViewer() {
           />
           Fiber Markers
         </label>
+        <div className={styles.hscSection}>
+          <label>
+            <input
+              type="checkbox"
+              checked={showHscPdr3Wide}
+              onChange={(e) => setShowHscPdr3Wide(e.target.checked)}
+            />
+            HSC PDR3 Wide
+          </label>
+          {showHscPdr3Wide && (
+            <>
+              <label className={styles.subOption}>
+                <input
+                  type="checkbox"
+                  checked={showHscPdr3Outline}
+                  onChange={(e) => setShowHscPdr3Outline(e.target.checked)}
+                />
+                Outline
+              </label>
+              <HscColorParamsPopover
+                colorParams={hscColorParams}
+                onColorParamsChange={setHscColorParams}
+              >
+                <IconButton
+                  icon="tune"
+                  className={styles.settingsButton}
+                  aria-label="Color Settings"
+                />
+              </HscColorParamsPopover>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )
