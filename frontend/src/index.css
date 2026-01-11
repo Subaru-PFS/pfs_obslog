@@ -147,7 +147,7 @@
   --code-background-color: rgba(0, 64, 0, 0.05);
 
   /* Loading overlay */
-  --loading-overlay-background: rgba(255, 255, 255, 0.3);
+  --loading-overlay-background: rgba(0, 0, 0, 0.3);
 
   /* Error colors */
   --error-color: #e53935;
@@ -325,8 +325,8 @@
   --code-text-color: #80ff80;
   --code-background-color: rgba(0, 128, 0, 0.15);
 
-  /* Loading overlay (dark mode - lighter for visibility) */
-  --loading-overlay-background: rgba(255, 255, 255, 0.15);
+  /* Loading overlay (dark mode - same as light mode) */
+  --loading-overlay-background: rgba(0, 0, 0, 0.3);
 
   /* Error colors */
   --error-color: #ef5350;
