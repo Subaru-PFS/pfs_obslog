@@ -2,6 +2,8 @@
  * Exposure count colors - shared between VisitList and VisitDetail
  * Based on old-project colors.ts int2color() using HSV color wheel
  * bit pattern: (SPS > 0) << 2 | (MCS > 0) << 1 | (AGC > 0) << 0
+ *
+ * Colors are defined as CSS variables in index.css for dark mode support.
  */
 
 export interface ExposureColorStyle {
@@ -10,32 +12,42 @@ export interface ExposureColorStyle {
 }
 
 /**
- * Exposure color definitions
+ * Get CSS variable value from computed style
  */
-export const exposureColors = {
-  // No exposures (000): gray
-  none: { backgroundColor: '#dddddd', color: '#3c3c3c' },
-  // AGC only (001): HSV(150, 100, 100) = cyan-green
-  agc: { backgroundColor: '#bfffdf', color: '#107040' },
-  // MCS only (010): HSV(300, 100, 100) = magenta
-  mcs: { backgroundColor: '#ffbfff', color: '#701070' },
-  // MCS + AGC (011): HSV(90, 100, 100) = chartreuse
-  mcsAgc: { backgroundColor: '#dfffbf', color: '#407010' },
-  // SPS only (100): HSV(240, 100, 100) = blue
-  sps: { backgroundColor: '#bfbfff', color: '#101070' },
-  // SPS + AGC (101): HSV(30, 100, 100) = orange
-  spsAgc: { backgroundColor: '#ffdfbf', color: '#704010' },
-  // SPS + MCS (110): HSV(180, 100, 100) = cyan
-  spsMcs: { backgroundColor: '#bfffff', color: '#107070' },
-  // All three (111): HSV(330, 100, 100) = pink-magenta
-  mixed: { backgroundColor: '#ffbfdf', color: '#701040' },
-} as const
+function getCssVar(name: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+}
+
+/**
+ * Exposure color definitions using CSS variables
+ */
+function getExposureColors() {
+  return {
+    // No exposures (000): gray
+    none: { backgroundColor: getCssVar('--exp-none-bg'), color: getCssVar('--exp-none-text') },
+    // AGC only (001): HSV(150, 100, 100) = cyan-green
+    agc: { backgroundColor: getCssVar('--exp-agc-bg'), color: getCssVar('--exp-agc-text') },
+    // MCS only (010): HSV(300, 100, 100) = magenta
+    mcs: { backgroundColor: getCssVar('--exp-mcs-bg'), color: getCssVar('--exp-mcs-text') },
+    // MCS + AGC (011): HSV(90, 100, 100) = chartreuse
+    mcsAgc: { backgroundColor: getCssVar('--exp-mcs-agc-bg'), color: getCssVar('--exp-mcs-agc-text') },
+    // SPS only (100): HSV(240, 100, 100) = blue
+    sps: { backgroundColor: getCssVar('--exp-sps-bg'), color: getCssVar('--exp-sps-text') },
+    // SPS + AGC (101): HSV(30, 100, 100) = orange
+    spsAgc: { backgroundColor: getCssVar('--exp-sps-agc-bg'), color: getCssVar('--exp-sps-agc-text') },
+    // SPS + MCS (110): HSV(180, 100, 100) = cyan
+    spsMcs: { backgroundColor: getCssVar('--exp-sps-mcs-bg'), color: getCssVar('--exp-sps-mcs-text') },
+    // All three (111): HSV(330, 100, 100) = pink-magenta
+    mixed: { backgroundColor: getCssVar('--exp-mixed-bg'), color: getCssVar('--exp-mixed-text') },
+  }
+}
 
 /**
  * 露出数のスタイルを取得
  */
 export function getExposureColorStyle(sps: number, mcs: number, agc: number): ExposureColorStyle {
   const bits = (sps > 0 ? 4 : 0) | (mcs > 0 ? 2 : 0) | (agc > 0 ? 1 : 0)
+  const exposureColors = getExposureColors()
   const colorMap: { [key: number]: ExposureColorStyle } = {
     0: exposureColors.none,
     1: exposureColors.agc,
@@ -49,9 +61,18 @@ export function getExposureColorStyle(sps: number, mcs: number, agc: number): Ex
   return colorMap[bits] || exposureColors.none
 }
 
-/**
- * 選択状態用の暗めの露出色を取得
- */
+// Export for backwards compatibility (deprecated, use getExposureColorStyle instead)
+export const exposureColors = {
+  none: { backgroundColor: '#dddddd', color: '#3c3c3c' },
+  agc: { backgroundColor: '#bfffdf', color: '#107040' },
+  mcs: { backgroundColor: '#ffbfff', color: '#701070' },
+  mcsAgc: { backgroundColor: '#dfffbf', color: '#407010' },
+  sps: { backgroundColor: '#bfbfff', color: '#101070' },
+  spsAgc: { backgroundColor: '#ffdfbf', color: '#704010' },
+  spsMcs: { backgroundColor: '#bfffff', color: '#107070' },
+  mixed: { backgroundColor: '#ffbfdf', color: '#701040' },
+} as const
+
 export const exposureColorsSelected = {
   none: { backgroundColor: '#c5c5c5', color: '#3c3c3c' },
   agc: { backgroundColor: '#9fe0c2', color: '#107040' },
