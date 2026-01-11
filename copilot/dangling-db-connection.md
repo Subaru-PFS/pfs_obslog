@@ -1,0 +1,8 @@
+既存プロジェクトではidle状態のDBへのconnectionがずっと残ってしまう問題があり、原因がわかりませんでした。
+しかし、今回のリファクタリングでその問題は解消されたようです。
+
+既存コードと見比べてidle状態のDBへのconnectionが残っていた原因を調べてください。
+
+おそらくmultiprocessingやthreadingを使った並列処理(特にforkを含むもの)が関係していると思います。
+
+結果は`./dangling-db-connections.md`にまとめてください。
