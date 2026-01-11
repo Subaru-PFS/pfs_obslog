@@ -1,11 +1,12 @@
 /**
  * DesignMarkers - Design位置マーカーとファイバーマーカーを表示するコンポーネント
  */
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import {
   PathLayer$,
   ClickableMarkerLayer$,
   MarkerLayer$,
+  GlobeEventLayer$,
   useGetGlobe,
 } from '@stellar-globe/react-stellar-globe'
 import { angle, path, SkyCoord } from '@stellar-globe/stellar-globe'
@@ -19,8 +20,9 @@ const FOCUS_COLOR: [number, number, number, number] = [1, 0, 1, 0.75]
 const SELECTED_COLOR: [number, number, number, number] = [0, 1, 1, 1]
 const DEFAULT_FIBER_COLOR: [number, number, number, number] = [0.5, 0.5, 0.5, 1]
 
-// マーカーサイズ（ピクセル単位）
-const MARKER_SIZE_PX = 24
+// マーカーサイズの最小・最大制限（ピクセル単位）
+const MARKER_SIZE_MIN_PX = 8
+const MARKER_SIZE_MAX_PX = 64
 
 // ファイバーマーカーのホバー時以外の透明度（0.8 = 80%）
 const FIBER_MARKER_DIMM_ALPHA = 0.5
@@ -174,6 +176,25 @@ export function DesignMarkers() {
     setFocusedFiber,
   } = useDesignsContext()
   const getGlobe = useGetGlobe()
+
+  // マーカーの当たり判定サイズ（ピクセル単位、fovyに応じて動的に計算）
+  // hitRadius = fovy * markerSize / h を MARKER_FOV/2 に等しくするためには:
+  // markerSize = (MARKER_FOV / 2) * h / fovy
+  // 初期値はデフォルト値（最初のカメライベントで更新される）
+  const [markerSizePx, setMarkerSizePx] = useState(24)
+
+  // カメラ移動時にマーカーサイズを更新
+  const handleCameraMove = useCallback(() => {
+    try {
+      const globe = getGlobe()
+      const h = globe.canvas.domElement.height
+      const fovy = globe.camera.fovy
+      const computed = (MARKER_FOV / 2) * h / fovy
+      setMarkerSizePx(Math.max(MARKER_SIZE_MIN_PX, Math.min(MARKER_SIZE_MAX_PX, computed)))
+    } catch {
+      // エラー時は前の値を維持
+    }
+  }, [getGlobe])
 
   // allPositionsからエントリのマップを作成（オブジェクトの参照を安定させる）
   const positionEntryMap = useMemo(() => {
@@ -364,6 +385,8 @@ export function DesignMarkers() {
 
   return (
     <>
+      {/* カメラ移動イベント監視（マーカーサイズ動的計算用） */}
+      <GlobeEventLayer$ onCameraMove={handleCameraMove} />
       {/* 全デザインマーカー（円） */}
       <PathLayer$
         paths={markerPaths}
@@ -374,7 +397,7 @@ export function DesignMarkers() {
       {/* クリック/ホバー検出用レイヤー（透明） */}
       <ClickableMarkerLayer$
         markers={markers}
-        markerSize={MARKER_SIZE_PX}
+        markerSize={markerSizePx}
         defaultColor={[0, 0, 0, 0]}
         defaultType="circle"
         dimmAlpha={0}
