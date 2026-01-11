@@ -107,6 +107,16 @@
   --comment-bg: floralwhite;
   --comment-text: #662222;
 
+  /* Design list entry gradient colors (for bump effect) */
+  --entry-bg-top: #f0f0f0;
+  --entry-bg-bottom: #c0c0c0;
+  --entry-hover-bg-top: #e8e8e8;
+  --entry-hover-bg-bottom: #b0b0b0;
+  --entry-selected-bg-top: #4ff;
+  --entry-selected-bg-bottom: #0aa;
+  --entry-selected-hover-bg-top: hsl(180, 30%, 80%);
+  --entry-selected-hover-bg-bottom: hsl(180, 30%, 55%);
+
   /* Borders & lines */
   --border-color: #ccc;
   --ruled-line-color: #ccc;
@@ -258,6 +268,16 @@
   /* Comment box colors (dark mode) */
   --comment-bg: #3a2a20;
   --comment-text: #d0a080;
+
+  /* Design list entry gradient colors (dark mode - much darker) */
+  --entry-bg-top: #3a3a3a;
+  --entry-bg-bottom: #1a1a1a;
+  --entry-hover-bg-top: #454545;
+  --entry-hover-bg-bottom: #252525;
+  --entry-selected-bg-top: #0aa;
+  --entry-selected-bg-bottom: #055;
+  --entry-selected-hover-bg-top: hsl(180, 35%, 40%);
+  --entry-selected-hover-bg-bottom: hsl(180, 35%, 20%);
 
   /* Borders & lines */
   --border-color: #404040;

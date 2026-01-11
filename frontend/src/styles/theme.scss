@@ -10,7 +10,7 @@
 $theme: #0ff;
 $sql-color: #00f;
 $code-color: #0f0;
-$error-color: #e53935;
+$error-color: var(--error-color);
 
 // =============================================================================
 // CSS Variable References
@@ -19,6 +19,8 @@ $error-color: #e53935;
 // =============================================================================
 $text-color: var(--text-color);
 $text-color-secondary: var(--text-color-secondary);
+$text-color-hint: var(--text-color-hint);
+$secondary-text-color: var(--text-color-secondary);
 $background-color: var(--background-color);
 $active-background-color: var(--background-color-active);
 $hover-background-color: var(--background-color-hover);
@@ -28,6 +30,14 @@ $header-background-color: var(--background-color-header);
 $input-background: var(--background-color-input);
 $link-color: var(--link-color);
 $accent: var(--accent-color);
+
+// Error/Status colors
+$error-background: var(--error-background);
+$error-border: var(--error-border);
+$success-background: var(--success-background);
+$success-text: var(--success-text);
+$warning-background: var(--warning-background);
+$warning-text: var(--warning-text);
 
 // UI component surfaces
 $surface-background: var(--background-color-surface);

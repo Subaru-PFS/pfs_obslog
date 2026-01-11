@@ -1,4 +1,3 @@
-@use "sass:color";
 @use "../../../styles/theme" as *;
 
 .listContainer {
@@ -103,17 +102,16 @@
 
 .list {
   position: relative;
-  background-color: $near-background-color;
+  background-color: $near-background;
   width: 24em;
   flex-grow: 1;
   height: 0;
   overflow-y: auto;
 }
 
-@mixin bump($baseColor) {
-  $top: color.adjust($baseColor, $lightness: 15%);
-  $bottom: color.adjust($baseColor, $lightness: -15%);
-  background: linear-gradient(to bottom, $top, $bottom);
+// Bump gradient mixin using CSS variables for dark mode support
+@mixin bump-gradient($top-var, $bottom-var) {
+  background: linear-gradient(to bottom, $top-var, $bottom-var);
 }
 
 .entryGroup {
@@ -130,31 +128,31 @@
   overflow-x: hidden;
   cursor: pointer;
 
-  @include bump($hover-background-color);
+  @include bump-gradient(var(--entry-bg-top), var(--entry-bg-bottom));
 
   &:hover {
-    @include bump($active-background-color);
+    @include bump-gradient(var(--entry-hover-bg-top), var(--entry-hover-bg-bottom));
   }
 }
 
 .entrySelected {
   &,
   &:hover {
-    @include bump($theme);
+    @include bump-gradient(var(--entry-selected-bg-top), var(--entry-selected-bg-bottom));
   }
 }
 
 .entryHover {
   &,
   &:hover {
-    @include bump($selected-hover-background);
+    @include bump-gradient(var(--entry-selected-hover-bg-top), var(--entry-selected-hover-bg-bottom));
   }
 }
 
 .entrySelectedHover {
   &,
   &:hover {
-    @include bump($selected-active-background);
+    @include bump-gradient(var(--entry-selected-bg-top), var(--entry-selected-bg-bottom));
   }
 }
 
