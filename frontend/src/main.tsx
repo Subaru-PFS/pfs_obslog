@@ -5,6 +5,7 @@ import { RouterProvider } from 'react-router-dom'
 import { store } from './store'
 import { router } from './router'
 import { ThemeProvider } from './components/Theme'
+import './preloadTheme'
 import 'material-symbols/outlined.css'
 import './index.css'
 

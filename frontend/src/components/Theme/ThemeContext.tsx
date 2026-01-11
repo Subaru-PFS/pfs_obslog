@@ -7,42 +7,33 @@ import {
   type ReactNode,
 } from 'react'
 
-export type Theme = 'light' | 'dark'
+import {
+  applyThemeToDom,
+  getInitialTheme,
+  persistThemePreference,
+  type Theme as ThemeType,
+} from './themePreference'
+export type { Theme } from './themePreference'
 
 interface ThemeContextValue {
-  theme: Theme
+  theme: ThemeType
   toggleTheme: () => void
-  setTheme: (theme: Theme) => void
+  setTheme: (theme: ThemeType) => void
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
-
-const STORAGE_KEY = 'pfs-obslog-theme'
-
-function getInitialTheme(): Theme {
-  // Check localStorage first
-  const stored = localStorage.getItem(STORAGE_KEY)
-  if (stored === 'light' || stored === 'dark') {
-    return stored
-  }
-  // Check system preference
-  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    return 'dark'
-  }
-  return 'light'
-}
 
 interface ThemeProviderProps {
   children: ReactNode
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(getInitialTheme)
+  const [theme, setThemeState] = useState<ThemeType>(getInitialTheme)
 
-  const setTheme = useCallback((newTheme: Theme) => {
+  const setTheme = useCallback((newTheme: ThemeType) => {
     setThemeState(newTheme)
-    localStorage.setItem(STORAGE_KEY, newTheme)
-    document.documentElement.dataset.theme = newTheme
+    persistThemePreference(newTheme)
+    applyThemeToDom(newTheme)
   }, [])
 
   const toggleTheme = useCallback(() => {
@@ -51,21 +42,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   // Apply theme on mount and changes
   useEffect(() => {
-    document.documentElement.dataset.theme = theme
+    applyThemeToDom(theme)
   }, [theme])
-
-  // Listen for system preference changes
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleChange = (e: MediaQueryListEvent) => {
-      // Only apply if user hasn't set a preference
-      if (!localStorage.getItem(STORAGE_KEY)) {
-        setTheme(e.matches ? 'dark' : 'light')
-      }
-    }
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [setTheme])
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>

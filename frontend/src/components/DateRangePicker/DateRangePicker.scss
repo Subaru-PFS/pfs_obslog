@@ -1,64 +1,51 @@
 // SCSS for DateRangePicker component
 // The pre-built CSS is imported in DateRangePicker.tsx
-// This file contains theme customizations for both light and dark mode
+// This file customizes the third-party datepicker using the global theme tokens.
+// (Theme differences are handled via CSS custom properties in src/index.css)
 
-@use "sass:color";
-
-// Theme variables
-$accent: #4a90d9;
-$shadow-color: rgba(0, 0, 0, 0.2);
-
-// Light theme defaults
-$background-color: #ffffff;
-$foreground-color: #333333;
-$border-color: #cccccc;
-$disabled-cell-color: #aaaaaa;
-$hover-background: #f0f0f0;
-
-// Light theme customization
 .datepicker {
   font-size: 12px;
-  background-color: $background-color;
-  color: $foreground-color;
-  border: 1px solid $border-color;
+  background-color: var(--background-color-card);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  box-shadow: 0 8px 16px $shadow-color;
+  box-shadow: var(--shadow-card);
 
   .datepicker-picker {
-    background-color: $background-color;
+    background-color: var(--background-color-card);
   }
 
   .datepicker-header {
     .datepicker-controls {
       .button {
         background-color: transparent;
-        border: 1px solid $border-color;
-        color: $foreground-color;
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
 
         &:hover,
         &:focus {
-          background-color: $hover-background;
+          background-color: var(--background-color-hover);
         }
       }
 
       .view-switch {
-        color: $foreground-color;
+        color: var(--text-color);
         
         &:hover {
-          background-color: $hover-background;
+          background-color: var(--background-color-hover);
         }
       }
 
       .prev-button,
       .next-button {
-        color: $foreground-color;
+        color: var(--text-color);
         
         &:hover {
-          background-color: $hover-background;
+          background-color: var(--background-color-hover);
         }
         
         &.disabled {
-          color: $disabled-cell-color;
+          color: var(--text-color-disabled);
         }
       }
     }
@@ -67,155 +54,72 @@ $hover-background: #f0f0f0;
   .datepicker-main {
     .days-of-week {
       .dow {
-        color: $foreground-color;
+        color: var(--text-color);
       }
     }
   }
 
   .datepicker-cell {
-    color: $foreground-color;
+    color: var(--text-color);
 
     &:not(.disabled):not(.selected):hover {
-      background-color: rgba($accent, 0.15);
+      background-color: var(--selected-background-hover);
     }
 
     &.focused:not(.selected) {
-      background-color: rgba($accent, 0.15);
+      background-color: var(--selected-background-hover);
     }
 
     &.today:not(.selected) {
-      background-color: rgba($accent, 0.1);
+      background-color: var(--selected-background);
     }
 
     &.selected,
     &.selected:hover {
-      background-color: $accent;
-      color: white;
+      background-color: var(--selected-background-active);
+      color: var(--text-color);
     }
 
     &.range {
-      background-color: rgba($accent, 0.2);
+      background-color: var(--selected-background);
     }
 
     &.range-start,
     &.range-end {
-      background-color: $accent;
-      color: white;
+      background-color: var(--selected-background-active);
+      color: var(--text-color);
     }
 
     &.disabled {
-      color: $disabled-cell-color;
+      color: var(--text-color-disabled);
     }
 
     &.prev,
     &.next {
-      color: $disabled-cell-color;
+      color: var(--text-color-disabled);
     }
   }
 
   .datepicker-footer {
     .datepicker-controls {
       .button {
-        background-color: $accent;
+        background-color: var(--accent-color);
         border: none;
-        color: white;
+        color: var(--text-color);
 
         &:hover {
-          background-color: color.adjust($accent, $lightness: -10%);
+          filter: brightness(0.9);
         }
       }
 
       .today-button,
       .clear-button {
         background-color: transparent;
-        border: 1px solid $border-color;
-        color: $foreground-color;
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
 
         &:hover {
-          background-color: $hover-background;
-        }
-      }
-    }
-  }
-}
-
-// Dark theme customization
-:root[data-theme="dark"] {
-  .datepicker {
-    background-color: #2a2a2a;
-    color: #e0e0e0;
-    border-color: #404040;
-
-    .datepicker-picker {
-      background-color: #2a2a2a;
-    }
-
-    .datepicker-header {
-      .datepicker-controls {
-        .button {
-          border-color: #404040;
-          color: #e0e0e0;
-
-          &:hover,
-          &:focus {
-            background-color: #3a3a3a;
-          }
-        }
-
-        .view-switch {
-          color: #e0e0e0;
-          
-          &:hover {
-            background-color: #3a3a3a;
-          }
-        }
-
-        .prev-button,
-        .next-button {
-          color: #e0e0e0;
-          
-          &:hover {
-            background-color: #3a3a3a;
-          }
-          
-          &.disabled {
-            color: #606060;
-          }
-        }
-      }
-    }
-
-    .datepicker-main {
-      .days-of-week {
-        .dow {
-          color: #e0e0e0;
-        }
-      }
-    }
-
-    .datepicker-cell {
-      color: #e0e0e0;
-
-      &.disabled {
-        color: #606060;
-      }
-
-      &.prev,
-      &.next {
-        color: #606060;
-      }
-    }
-
-    .datepicker-footer {
-      .datepicker-controls {
-        .today-button,
-        .clear-button {
-          border-color: #404040;
-          color: #e0e0e0;
-
-          &:hover {
-            background-color: #3a3a3a;
-          }
+          background-color: var(--background-color-hover);
         }
       }
     }
