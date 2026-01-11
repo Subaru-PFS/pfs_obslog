@@ -238,32 +238,24 @@ export function DesignList() {
           </label>
         </div>
         <div className={styles.sortCondition}>
-          Sort by:&nbsp;
           <label>
-            <input
-              type="radio"
-              checked={sortBy === 'altitude'}
-              onChange={() => {
-                setSortBy('altitude')
+            Sort by:&nbsp;
+            <select
+              value={sortBy}
+              onChange={(e) => {
+                const newSortBy = e.target.value as SortBy
+                setSortBy(newSortBy)
                 setSortOrder('desc')
-                setStoredSortBy('altitude')
+                setStoredSortBy(newSortBy)
                 setOffset(0)
               }}
-            />
-            Altitude
-          </label>
-          <label>
-            <input
-              type="radio"
-              checked={sortBy === 'date_modified'}
-              onChange={() => {
-                setSortBy('date_modified')
-                setSortOrder('desc')
-                setStoredSortBy('date_modified')
-                setOffset(0)
-              }}
-            />
-            Date Modified
+            >
+              <option value="altitude">Altitude</option>
+              <option value="distance">Distance from Center</option>
+              <option value="date_modified">Date Modified</option>
+              <option value="name">Name</option>
+              <option value="id">ID</option>
+            </select>
           </label>
         </div>
         <div className={styles.dateFilter}>

@@ -77,7 +77,7 @@ export type FocusedFiber = {
 }
 
 // ソートオプション
-export type SortBy = 'date_modified' | 'name' | 'id' | 'altitude'
+export type SortBy = 'date_modified' | 'name' | 'id' | 'altitude' | 'distance'
 export type SortOrder = 'asc' | 'desc'
 
 interface DesignsContextValue {
@@ -143,6 +143,10 @@ interface DesignsContextValue {
   // 時計ドラッグ中フラグ（高度ソート更新抑制用）
   isDraggingClock: boolean
   setDraggingClock: (dragging: boolean) => void
+
+  // カメラ中心座標（distanceソート用）
+  cameraCenter: { ra: number; dec: number } | null
+  setCameraCenter: (center: { ra: number; dec: number } | null) => void
 
   // スクロール要求（DesignListで処理される）
   scrollToDesignId: string | null
@@ -275,6 +279,12 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     [updateSearchParams]
   )
 
+  // カメラ中心座標（distanceソート用）
+  const [cameraCenter, setCameraCenterState] = useState<{ ra: number; dec: number } | null>(null)
+  const setCameraCenter = useCallback((center: { ra: number; dec: number } | null) => {
+    setCameraCenterState(center)
+  }, [])
+
   // 高度ソート時に天頂座標が変わったらページをリセット
   const prevCommittedZenithRef = useRef(committedZenith)
   useEffect(() => {
@@ -288,8 +298,34 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     prevCommittedZenithRef.current = committedZenith
   }, [sortBy, committedZenith])
 
+  // distanceソート時にカメラ中心座標が変わったらページをリセット
+  const prevCameraCenterRef = useRef(cameraCenter)
+  useEffect(() => {
+    if (
+      sortBy === 'distance' &&
+      cameraCenter &&
+      (prevCameraCenterRef.current?.ra !== cameraCenter.ra ||
+        prevCameraCenterRef.current?.dec !== cameraCenter.dec)
+    ) {
+      setOffset(0)
+    }
+    prevCameraCenterRef.current = cameraCenter
+  }, [sortBy, cameraCenter])
+
   // Design一覧取得（ページネーション付き）
   // sortBy が 'altitude' の場合は確定された天頂座標を渡す
+  // sortBy が 'distance' の場合はカメラ中心座標を渡す（距離ソートとして処理）
+  const getZenithCoords = () => {
+    if (sortBy === 'altitude') {
+      return { zenithRa: committedZenith.ra, zenithDec: committedZenith.dec }
+    }
+    if (sortBy === 'distance' && cameraCenter) {
+      return { zenithRa: cameraCenter.ra, zenithDec: cameraCenter.dec }
+    }
+    return { zenithRa: undefined, zenithDec: undefined }
+  }
+  const zenithCoords = getZenithCoords()
+  
   const {
     data: listResponse,
     isLoading,
@@ -297,12 +333,13 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     refetch,
   } = useListPfsDesignsApiPfsDesignsGetQuery({
     search: search || undefined,
-    sortBy,
+    // distanceソートはAPIではaltitudeソートとして扱う（同じ処理: 指定座標からの距離でソート）
+    sortBy: sortBy === 'distance' ? 'altitude' : sortBy,
     sortOrder,
     offset,
     limit,
-    zenithRa: sortBy === 'altitude' ? committedZenith.ra : undefined,
-    zenithDec: sortBy === 'altitude' ? committedZenith.dec : undefined,
+    zenithRa: zenithCoords.zenithRa,
+    zenithDec: zenithCoords.zenithDec,
     dateFrom: dateRange[0] || undefined,
     dateTo: dateRange[1] || undefined,
   })
@@ -578,6 +615,8 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     zenithZaZd,
     isDraggingClock,
     setDraggingClock,
+    cameraCenter,
+    setCameraCenter,
     scrollToDesignId,
     setScrollToDesignId,
   }

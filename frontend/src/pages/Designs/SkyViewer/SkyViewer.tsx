@@ -11,31 +11,16 @@ import {
   PanLayer$,
   ZoomLayer$,
   TouchLayer$,
-  TractTileLayer$,
-  LogScaleRange,
+  GlobeEventLayer$,
   type GlobeHandle,
 } from '@stellar-globe/react-stellar-globe'
-import { easing, GridLayer, matrixUtils, SkyCoord, TractTileLayer, type Globe } from '@stellar-globe/stellar-globe'
+import { angle, easing, GridLayer, matrixUtils, SkyCoord, type Globe } from '@stellar-globe/stellar-globe'
 import { useDesignsContext, inTimeZone } from '../DesignsContext'
 import { HST_TZ_OFFSET } from '../types'
 import { Clock } from './Clock'
 import { DesignMarkers } from './DesignMarkers'
+import { HscPdr3Section } from './HscPdr3Layer'
 import styles from './SkyViewer.module.scss'
-
-// HSC PDR3 のフィルター候補
-const HSC_FILTERS = ['g', 'r', 'i', 'z', 'y', 'N816', 'N921']
-
-// SdssTrueColor パラメータ型
-interface SdssTrueColorParams {
-  type: 'sdssTrueColor'
-  filters: string[]
-  sdssTrueColor: {
-    beta: number
-    a: number
-    bias: number
-    b0: number
-  }
-}
 
 // カメラ初期パラメータ（オブジェクト参照を安定させるためコンポーネント外で定義）
 const INITIAL_CAMERA_PARAMS = {
@@ -79,13 +64,7 @@ export function SkyViewer() {
   const altAzGridRef = useRef<GridLayer | null>(null)
   // Globe初期化完了フラグ
   const [isGlobeReady, setIsGlobeReady] = useState(false)
-  // HSC PDR3 wide表示設定
-  const [showHscPdr3Wide, setShowHscPdr3Wide] = useState(false)
-  const [showHscPdr3Outline, setShowHscPdr3Outline] = useState(true)
-  const [showHscSliders, setShowHscSliders] = useState(false)
-  const [hscColorParams, setHscColorParams] = useState<SdssTrueColorParams>(
-    () => TractTileLayer.defaultParams({ type: 'sdssTrueColor' }) as SdssTrueColorParams
-  )
+
   const {
     registerJumpTo,
     setNow,
@@ -95,6 +74,7 @@ export function SkyViewer() {
     showFibers,
     setShowFibers,
     setDraggingClock,
+    setCameraCenter,
   } = useDesignsContext()
   
   // 最新のzenithZaZdをRefで保持（初期化コールバック内から参照するため）
@@ -177,6 +157,18 @@ export function SkyViewer() {
     )
   }, [zenithZaZd, isGlobeReady])
 
+  // カメラ移動終了時のハンドラ - カメラ中心座標を更新（distanceソート用）
+  const handleCameraMoveEnd = useCallback(() => {
+    if (!globeRef.current) return
+    const globe = globeRef.current()
+    const { theta, phi } = globe.camera
+    // カメラの向き（theta, phi）を赤道座標に変換
+    // theta: 赤経（ラジアン）, phi: 赤緯+π/2（ラジアン）
+    const ra = angle.rad2deg(theta)
+    const dec = angle.rad2deg(phi - Math.PI / 2)
+    setCameraCenter({ ra, dec })
+  }, [setCameraCenter])
+
   // 天頂を中心に表示
   // coordオプションで天頂の赤道座標を指定し、カメラがその方向を向く
   const centerZenith = useCallback(() => {
@@ -227,219 +219,59 @@ export function SkyViewer() {
   )
 
   return (
-    <div className={styles.skyViewerContainer}>
-      <div className={styles.globeWrapper}>
-        <Globe$
-          ref={globeRef}
-          retina
-          cameraParams={INITIAL_CAMERA_PARAMS}
-          onInit={handleGlobeInit}
-          onRelease={handleGlobeRelease}
-        >
-          <PanLayer$ />
-          <ZoomLayer$ />
-          <TouchLayer$ />
-          <HipparcosCatalogLayer$ />
-          <ConstellationLayer$ />
-          <HipsSimpleLayer$
-            baseUrl="//alasky.cds.unistra.fr/Pan-STARRS/DR1/color-i-r-g"
-            animationLod={-0.25}
-          />
-          <TractTileLayer$
-            baseUrl="//hscmap.mtk.nao.ac.jp/hscMap4/data/pdr3_wide"
-            outline={showHscPdr3Outline}
-            colorParams={hscColorParams}
-            visible={showHscPdr3Wide}
-          />
-          <EquatorialGrid />
-          <DesignMarkers />
-        </Globe$>
-      </div>
+    <HscPdr3Section.Provider>
+      <div className={styles.skyViewerContainer}>
+        <div className={styles.globeWrapper}>
+          <Globe$
+            ref={globeRef}
+            retina
+            cameraParams={INITIAL_CAMERA_PARAMS}
+            onInit={handleGlobeInit}
+            onRelease={handleGlobeRelease}
+          >
+            <PanLayer$ />
+            <ZoomLayer$ />
+            <TouchLayer$ />
+            <GlobeEventLayer$ onCameraMoveEnd={handleCameraMoveEnd} />
+            <HipparcosCatalogLayer$ />
+            <ConstellationLayer$ />
+            <HipsSimpleLayer$
+              baseUrl="//alasky.cds.unistra.fr/Pan-STARRS/DR1/color-i-r-g"
+              animationLod={-0.25}
+            />
+            <HscPdr3Section.Layer />
+            <EquatorialGrid />
+            <DesignMarkers />
+          </Globe$>
+        </div>
 
-      <div className={styles.timeSection}>
-        <input
-          type="date"
-          className={styles.datepicker}
-          value={formatDate(hst)}
-          onChange={handleDateChange}
-        />
-        <Clock
-          hour={hst.getHours()}
-          minute={hst.getMinutes()}
-          second={hst.getSeconds()}
-          onScrew={handleClockScrew}
-          onScrewEnd={handleClockScrewEnd}
-        />
-        <button onClick={setToNow}>Set time to now</button>
-        <button onClick={centerZenith}>Center Zenith</button>
-        <label>
+        <div className={styles.timeSection}>
           <input
-            type="checkbox"
-            checked={showFibers}
-            onChange={(e) => setShowFibers(e.target.checked)}
+            type="date"
+            className={styles.datepicker}
+            value={formatDate(hst)}
+            onChange={handleDateChange}
           />
-          Fiber Markers
-        </label>
-        <div className={styles.hscSection}>
+          <Clock
+            hour={hst.getHours()}
+            minute={hst.getMinutes()}
+            second={hst.getSeconds()}
+            onScrew={handleClockScrew}
+            onScrewEnd={handleClockScrewEnd}
+          />
+          <button onClick={setToNow}>Set time to now</button>
+          <button onClick={centerZenith}>Center Zenith</button>
           <label>
             <input
               type="checkbox"
-              checked={showHscPdr3Wide}
-              onChange={(e) => setShowHscPdr3Wide(e.target.checked)}
+              checked={showFibers}
+              onChange={(e) => setShowFibers(e.target.checked)}
             />
-            HSC PDR3 Wide
+            Fiber Markers
           </label>
-          {showHscPdr3Wide && (
-            <div className={styles.hscHeader}>
-              <label className={styles.inlineOption}>
-                <input
-                  type="checkbox"
-                  checked={showHscPdr3Outline}
-                  onChange={(e) => setShowHscPdr3Outline(e.target.checked)}
-                />
-                Outline
-              </label>
-              <label className={styles.inlineOption}>
-                <input
-                  type="checkbox"
-                  checked={showHscSliders}
-                  onChange={(e) => setShowHscSliders(e.target.checked)}
-                />
-                Sliders
-              </label>
-            </div>
-          )}
-          {showHscPdr3Wide && showHscSliders && (
-            <div className={styles.hscControls}>
-              <div className={styles.filterSection}>
-                <table className={styles.filterSelector}>
-                  <tbody>
-                    <tr>
-                      <th />
-                      {HSC_FILTERS.map((f) => (
-                        <td key={f}>
-                          <button
-                            className={styles.filterSwitch}
-                            onClick={() =>
-                              setHscColorParams((prev) => ({
-                                ...prev,
-                                filters: [f, f, f],
-                              }))
-                            }
-                          >
-                            {f}
-                          </button>
-                        </td>
-                      ))}
-                    </tr>
-                    {(['r', 'g', 'b'] as const).map((channel, i) => {
-                      const channelColors = { r: '#f66', g: '#6f6', b: '#66f' } as const
-                      return (
-                        <tr key={channel}>
-                          <th style={{ color: channelColors[channel], fontWeight: 'bold' }}>{channel}</th>
-                          {HSC_FILTERS.map((f) => (
-                            <td key={f}>
-                              <input
-                                type="radio"
-                                name={`hsc-filter-${channel}`}
-                                checked={f === hscColorParams.filters[i]}
-                                onChange={() =>
-                                  setHscColorParams((prev) => {
-                                    const newFilters = [...prev.filters]
-                                    newFilters[i] = f
-                                    return { ...prev, filters: newFilters }
-                                  })
-                                }
-                              />
-                            </td>
-                          ))}
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              <div className={styles.sliderSection}>
-                <div className={styles.paramRow}>
-                  <label>β</label>
-                  <LogScaleRange
-                    value={hscColorParams.sdssTrueColor.beta}
-                    min={0}
-                    max={2e8}
-                    onInput={(beta) =>
-                      setHscColorParams((prev) => ({
-                        ...prev,
-                        sdssTrueColor: { ...prev.sdssTrueColor, beta },
-                      }))
-                    }
-                    className={styles.slider}
-                  />
-                  <span className={styles.value}>
-                    {hscColorParams.sdssTrueColor.beta.toExponential(2)}
-                  </span>
-                </div>
-                <div className={styles.paramRow}>
-                  <label>
-                    b<sub>0</sub>
-                  </label>
-                  <LogScaleRange
-                    value={hscColorParams.sdssTrueColor.b0}
-                    min={0}
-                    max={5e-5}
-                    onInput={(b0) =>
-                      setHscColorParams((prev) => ({
-                        ...prev,
-                        sdssTrueColor: { ...prev.sdssTrueColor, b0 },
-                      }))
-                    }
-                    className={styles.slider}
-                  />
-                  <span className={styles.value}>
-                    {hscColorParams.sdssTrueColor.b0.toExponential(2)}
-                  </span>
-                </div>
-                <div className={styles.paramRow}>
-                  <label>A</label>
-                  <LogScaleRange
-                    value={hscColorParams.sdssTrueColor.a}
-                    min={0}
-                    max={1e4}
-                    onInput={(a) =>
-                      setHscColorParams((prev) => ({
-                        ...prev,
-                        sdssTrueColor: { ...prev.sdssTrueColor, a },
-                      }))
-                    }
-                    className={styles.slider}
-                  />
-                  <span className={styles.value}>
-                    {hscColorParams.sdssTrueColor.a.toExponential(2)}
-                  </span>
-                </div>
-                <div className={styles.paramRow}>
-                  <label>bias</label>
-                  <LogScaleRange
-                    value={hscColorParams.sdssTrueColor.bias}
-                    min={-0.5}
-                    max={0.5}
-                    a={1e-8}
-                    onInput={(bias) =>
-                      setHscColorParams((prev) => ({
-                        ...prev,
-                        sdssTrueColor: { ...prev.sdssTrueColor, bias },
-                      }))
-                    }
-                    className={styles.slider}
-                  />
-                  <span className={styles.value}>
-                    {hscColorParams.sdssTrueColor.bias.toFixed(3)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
+          <HscPdr3Section.Control />
         </div>
       </div>
-    </div>
+    </HscPdr3Section.Provider>
   )
 }
