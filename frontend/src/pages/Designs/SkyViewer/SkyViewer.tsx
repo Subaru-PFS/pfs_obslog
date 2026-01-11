@@ -1,7 +1,7 @@
 /**
  * SkyViewer - WebGLベースの天球表示コンポーネント
  */
-import { useRef, useEffect, useCallback, useState } from 'react'
+import { useRef, useEffect, useCallback, useState, useMemo } from 'react'
 import {
   Globe$,
   HipparcosCatalogLayer$,
@@ -12,6 +12,7 @@ import {
   ZoomLayer$,
   TouchLayer$,
   GlobeEventLayer$,
+  MarkerLayer$,
   type GlobeHandle,
 } from '@stellar-globe/react-stellar-globe'
 import { angle, easing, GridLayer, matrixUtils, SkyCoord, type Globe } from '@stellar-globe/stellar-globe'
@@ -75,7 +76,22 @@ export function SkyViewer() {
     setShowFibers,
     setDraggingClock,
     setCameraCenter,
+    cameraCenter,
+    sortBy,
   } = useDesignsContext()
+
+  // sortBy === 'distance' の場合にcameraCenterを天球上に表示するマーカー
+  const cameraCenterMarkers = useMemo(() => {
+    if (sortBy !== 'distance' || !cameraCenter) {
+      return []
+    }
+    const coord = SkyCoord.fromDeg(cameraCenter.ra, cameraCenter.dec)
+    return [{
+      position: coord.xyz as [number, number, number],
+      color: [1, 1, 0, 1] as [number, number, number, number], // Yellow
+      type: 'cross' as const,
+    }]
+  }, [sortBy, cameraCenter])
   
   // 最新のzenithZaZdをRefで保持（初期化コールバック内から参照するため）
   const zenithZaZdRef = useRef(zenithZaZd)
@@ -222,8 +238,6 @@ export function SkyViewer() {
     <HscPdr3Section.Provider>
       <div className={styles.skyViewerContainer}>
         <div className={styles.globeWrapper}>
-          {/* Debug: Center marker for distance sort */}
-          <div className={styles.centerMarker} />
           <Globe$
             ref={globeRef}
             retina
@@ -244,6 +258,15 @@ export function SkyViewer() {
             <HscPdr3Section.Layer />
             <EquatorialGrid />
             <DesignMarkers />
+            {/* Debug: カメラ中心マーカー（distanceソート時のみ表示） */}
+            {cameraCenterMarkers.length > 0 && (
+              <MarkerLayer$
+                markers={cameraCenterMarkers}
+                defaultColor={[1, 1, 0, 1]}
+                defaultType="cross"
+                markerSize={48}
+              />
+            )}
           </Globe$>
         </div>
 

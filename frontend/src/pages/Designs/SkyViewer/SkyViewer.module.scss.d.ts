@@ -1,5 +1,4 @@
 export type Styles = {
-  centerMarker: string;
   clock: string;
   colorBox: string;
   colorInput: string;

@@ -16,39 +16,6 @@ $button-background: rgba(black, 0.75);
   right: 0;
 }
 
-// Debug: Center marker for distance sort debugging
-.centerMarker {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 5;
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    background-color: rgba(255, 255, 0, 0.8);
-  }
-
-  // Horizontal line
-  &::before {
-    width: 20px;
-    height: 2px;
-    left: -10px;
-    top: -1px;
-  }
-
-  // Vertical line
-  &::after {
-    width: 2px;
-    height: 20px;
-    left: -1px;
-    top: -10px;
-  }
-}
-
 .timeSection {
   display: flex;
   flex-direction: column;
