@@ -99,6 +99,7 @@ export function LazyImage({
   // Start loading when element becomes visible
   useEffect(() => {
     if (isVisible && state === 'standby') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: trigger loading on visibility change
       loadImage()
     }
   }, [isVisible, state, loadImage])
@@ -106,6 +107,7 @@ export function LazyImage({
   // Reload when src changes
   useEffect(() => {
     if (isVisible) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: reload image on src change
       loadImage()
     } else {
       setState('standby')

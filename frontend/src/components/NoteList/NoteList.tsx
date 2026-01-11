@@ -99,6 +99,7 @@ function NoteItem({ note, onUpdate, onDelete }: NoteItemProps) {
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleCancel is stable within this component
   }, [isEditing])
 
   const currentUserId = authStatus?.user?.id

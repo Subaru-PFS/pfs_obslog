@@ -54,7 +54,7 @@ function getMcsFitsDownloadUrl(visitId: number, frameId: number): string {
 export function McsInspector({ mcs }: McsInspectorProps) {
   const { selectedVisitId } = useVisitsBrowserContext()
   const { selectedFitsId, setSelectedFitsId } = useVisitDetailContext()
-  const exposures = mcs.exposures ?? []
+  const exposures = useMemo(() => mcs.exposures ?? [], [mcs.exposures])
   const avgExptime = useMemo(() => calculateAverageExptime(exposures), [exposures])
 
   const [showPlot, setShowPlot] = useState(true)

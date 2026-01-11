@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+/* eslint-disable react-hooks/set-state-in-effect -- URL sync requires setState in effect */
+import { createContext, useContext, useState, useCallback, useEffect, useMemo, type ReactNode } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
 interface VisitsBrowserContextValue {
@@ -41,12 +42,17 @@ export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) 
   const [isScrollingToVisit, setIsScrollingToVisit] = useState(false)
 
   // URLパラメータの変更を監視してstateを更新
+  // useMemoで新しい値を計算し、異なる場合のみuseEffectで更新
+  const newVisitIdFromUrl = useMemo(() => {
+    const parsed = visitIdParam ? parseInt(visitIdParam, 10) : null
+    return parsed !== null && !isNaN(parsed) ? parsed : null
+  }, [visitIdParam])
+
   useEffect(() => {
-    const newVisitId = visitIdParam ? parseInt(visitIdParam, 10) : null
-    if (newVisitId !== selectedVisitId && (newVisitId === null || !isNaN(newVisitId))) {
-      setSelectedVisitIdState(newVisitId)
+    if (newVisitIdFromUrl !== selectedVisitId) {
+      setSelectedVisitIdState(newVisitIdFromUrl)
     }
-  }, [visitIdParam, selectedVisitId])
+  }, [newVisitIdFromUrl, selectedVisitId])
 
   // visitIdを設定すると同時にURLも更新する（検索パラメータを保持）
   const setSelectedVisitId = useCallback((id: number | null) => {
@@ -86,6 +92,7 @@ export function VisitsBrowserProvider({ children }: VisitsBrowserProviderProps) 
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- Context hook pattern
 export function useVisitsBrowserContext() {
   const context = useContext(VisitsBrowserContext)
   if (!context) {

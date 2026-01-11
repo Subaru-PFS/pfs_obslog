@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+/* eslint-disable react-hooks/set-state-in-effect -- Tab sync requires setState in effect */
+import { useState, useEffect, useRef, useMemo } from 'react'
 import {
   useGetVisitApiVisitsVisitIdGetQuery,
   type VisitDetail as VisitDetailType,
@@ -163,19 +164,25 @@ function VisitInspector({ visit }: VisitInspectorProps) {
   const hasIicSequence = !!visit.iic_sequence
   const hasSequenceGroup = !!visit.iic_sequence?.group
 
-  const tabAvailability = [hasSps, hasMcs, hasAgc, hasIicSequence, hasSequenceGroup]
+  const tabAvailability = useMemo(
+    () => [hasSps, hasMcs, hasAgc, hasIicSequence, hasSequenceGroup],
+    [hasSps, hasMcs, hasAgc, hasIicSequence, hasSequenceGroup]
+  )
 
   // 選択されたタブが利用不可の場合、最初の利用可能なタブに切り替え
   // すべてのタブが利用不可の場合は-1（選択なし）にする
-  useEffect(() => {
+  const targetTabIndex = useMemo(() => {
     if (activeTabIndex < 0 || !tabAvailability[activeTabIndex]) {
-      const firstAvailable = tabAvailability.findIndex((available) => available)
-      // firstAvailable is -1 if no tabs are available, which means no tab is selected
-      if (firstAvailable !== activeTabIndex) {
-        setActiveTabIndex(firstAvailable)
-      }
+      return tabAvailability.findIndex((available) => available)
     }
-  }, [visit, activeTabIndex, tabAvailability])
+    return activeTabIndex
+  }, [activeTabIndex, tabAvailability])
+
+  useEffect(() => {
+    if (targetTabIndex !== activeTabIndex) {
+      setActiveTabIndex(targetTabIndex)
+    }
+  }, [targetTabIndex, activeTabIndex])
 
   // visit IDが変わった時、またはタブが変わった時に最初のExposureを選択
   useEffect(() => {

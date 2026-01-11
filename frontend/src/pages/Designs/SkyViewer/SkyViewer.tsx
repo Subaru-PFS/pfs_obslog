@@ -12,6 +12,7 @@ import {
   ZoomLayer$,
   TouchLayer$,
   TractTileLayer$,
+  LogScaleRange,
   type GlobeHandle,
 } from '@stellar-globe/react-stellar-globe'
 import { easing, GridLayer, matrixUtils, SkyCoord, TractTileLayer, type Globe } from '@stellar-globe/stellar-globe'
@@ -19,9 +20,22 @@ import { useDesignsContext, inTimeZone } from '../DesignsContext'
 import { HST_TZ_OFFSET } from '../types'
 import { Clock } from './Clock'
 import { DesignMarkers } from './DesignMarkers'
-import { HscColorParamsPopover, type SdssTrueColorParams } from './HscColorParamsPopover'
-import { IconButton } from '../../../components/Icon'
 import styles from './SkyViewer.module.scss'
+
+// HSC PDR3 のフィルター候補
+const HSC_FILTERS = ['g', 'r', 'i', 'z', 'y', 'N816', 'N921']
+
+// SdssTrueColor パラメータ型
+interface SdssTrueColorParams {
+  type: 'sdssTrueColor'
+  filters: string[]
+  sdssTrueColor: {
+    beta: number
+    a: number
+    bias: number
+    b0: number
+  }
+}
 
 // カメラ初期パラメータ（オブジェクト参照を安定させるためコンポーネント外で定義）
 const INITIAL_CAMERA_PARAMS = {
@@ -68,6 +82,7 @@ export function SkyViewer() {
   // HSC PDR3 wide表示設定
   const [showHscPdr3Wide, setShowHscPdr3Wide] = useState(false)
   const [showHscPdr3Outline, setShowHscPdr3Outline] = useState(true)
+  const [showHscSliders, setShowHscSliders] = useState(false)
   const [hscColorParams, setHscColorParams] = useState<SdssTrueColorParams>(
     () => TractTileLayer.defaultParams({ type: 'sdssTrueColor' }) as SdssTrueColorParams
   )
@@ -84,7 +99,9 @@ export function SkyViewer() {
   
   // 最新のzenithZaZdをRefで保持（初期化コールバック内から参照するため）
   const zenithZaZdRef = useRef(zenithZaZd)
-  zenithZaZdRef.current = zenithZaZd
+  useEffect(() => {
+    zenithZaZdRef.current = zenithZaZd
+  }, [zenithZaZd])
 
   // Globe初期化時のコールバック - AltAzグリッドを追加し、jumpTo関数を登録
   const handleGlobeInit = useCallback((globe: Globe) => {
@@ -273,8 +290,8 @@ export function SkyViewer() {
             HSC PDR3 Wide
           </label>
           {showHscPdr3Wide && (
-            <>
-              <label className={styles.subOption}>
+            <div className={styles.hscHeader}>
+              <label className={styles.inlineOption}>
                 <input
                   type="checkbox"
                   checked={showHscPdr3Outline}
@@ -282,17 +299,144 @@ export function SkyViewer() {
                 />
                 Outline
               </label>
-              <HscColorParamsPopover
-                colorParams={hscColorParams}
-                onColorParamsChange={setHscColorParams}
-              >
-                <IconButton
-                  icon="tune"
-                  className={styles.settingsButton}
-                  aria-label="Color Settings"
+              <label className={styles.inlineOption}>
+                <input
+                  type="checkbox"
+                  checked={showHscSliders}
+                  onChange={(e) => setShowHscSliders(e.target.checked)}
                 />
-              </HscColorParamsPopover>
-            </>
+                Sliders
+              </label>
+            </div>
+          )}
+          {showHscPdr3Wide && showHscSliders && (
+            <div className={styles.hscControls}>
+              <div className={styles.filterSection}>
+                <table className={styles.filterSelector}>
+                  <tbody>
+                    <tr>
+                      <th />
+                      {HSC_FILTERS.map((f) => (
+                        <td key={f}>
+                          <button
+                            className={styles.filterSwitch}
+                            onClick={() =>
+                              setHscColorParams((prev) => ({
+                                ...prev,
+                                filters: [f, f, f],
+                              }))
+                            }
+                          >
+                            {f}
+                          </button>
+                        </td>
+                      ))}
+                    </tr>
+                    {(['r', 'g', 'b'] as const).map((channel, i) => {
+                      const channelColors = { r: '#f66', g: '#6f6', b: '#66f' } as const
+                      return (
+                        <tr key={channel}>
+                          <th style={{ color: channelColors[channel], fontWeight: 'bold' }}>{channel}</th>
+                          {HSC_FILTERS.map((f) => (
+                            <td key={f}>
+                              <input
+                                type="radio"
+                                name={`hsc-filter-${channel}`}
+                                checked={f === hscColorParams.filters[i]}
+                                onChange={() =>
+                                  setHscColorParams((prev) => {
+                                    const newFilters = [...prev.filters]
+                                    newFilters[i] = f
+                                    return { ...prev, filters: newFilters }
+                                  })
+                                }
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <div className={styles.sliderSection}>
+                <div className={styles.paramRow}>
+                  <label>β</label>
+                  <LogScaleRange
+                    value={hscColorParams.sdssTrueColor.beta}
+                    min={0}
+                    max={2e8}
+                    onInput={(beta) =>
+                      setHscColorParams((prev) => ({
+                        ...prev,
+                        sdssTrueColor: { ...prev.sdssTrueColor, beta },
+                      }))
+                    }
+                    className={styles.slider}
+                  />
+                  <span className={styles.value}>
+                    {hscColorParams.sdssTrueColor.beta.toExponential(2)}
+                  </span>
+                </div>
+                <div className={styles.paramRow}>
+                  <label>
+                    b<sub>0</sub>
+                  </label>
+                  <LogScaleRange
+                    value={hscColorParams.sdssTrueColor.b0}
+                    min={0}
+                    max={5e-5}
+                    onInput={(b0) =>
+                      setHscColorParams((prev) => ({
+                        ...prev,
+                        sdssTrueColor: { ...prev.sdssTrueColor, b0 },
+                      }))
+                    }
+                    className={styles.slider}
+                  />
+                  <span className={styles.value}>
+                    {hscColorParams.sdssTrueColor.b0.toExponential(2)}
+                  </span>
+                </div>
+                <div className={styles.paramRow}>
+                  <label>A</label>
+                  <LogScaleRange
+                    value={hscColorParams.sdssTrueColor.a}
+                    min={0}
+                    max={1e4}
+                    onInput={(a) =>
+                      setHscColorParams((prev) => ({
+                        ...prev,
+                        sdssTrueColor: { ...prev.sdssTrueColor, a },
+                      }))
+                    }
+                    className={styles.slider}
+                  />
+                  <span className={styles.value}>
+                    {hscColorParams.sdssTrueColor.a.toExponential(2)}
+                  </span>
+                </div>
+                <div className={styles.paramRow}>
+                  <label>bias</label>
+                  <LogScaleRange
+                    value={hscColorParams.sdssTrueColor.bias}
+                    min={-0.5}
+                    max={0.5}
+                    a={1e-8}
+                    onInput={(bias) =>
+                      setHscColorParams((prev) => ({
+                        ...prev,
+                        sdssTrueColor: { ...prev.sdssTrueColor, bias },
+                      }))
+                    }
+                    className={styles.slider}
+                  />
+                  <span className={styles.value}>
+                    {hscColorParams.sdssTrueColor.bias.toFixed(3)}
+                  </span>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>

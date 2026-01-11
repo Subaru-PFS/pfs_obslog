@@ -110,9 +110,11 @@ export function DesignList() {
   const sortedDesigns = useMemo(() => {
     // 時計ドラッグ中は前のソート結果を維持（高度ソート時のみ）
     if (isDraggingClock && sortBy === 'altitude') {
+      // eslint-disable-next-line react-hooks/refs -- Intentional: cache previous result during drag
       return sortedDesignsRef.current
     }
     // サーバーサイドでソート済み
+    // eslint-disable-next-line react-hooks/refs -- Intentional: update cache with new data
     sortedDesignsRef.current = designs
     return designs
   }, [designs, sortBy, isDraggingClock])

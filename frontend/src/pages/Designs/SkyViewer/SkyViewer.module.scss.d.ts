@@ -1,12 +1,21 @@
 export type Styles = {
   clock: string;
   datepicker: string;
+  filterSection: string;
+  filterSelector: string;
+  filterSwitch: string;
   globeWrapper: string;
+  hscControls: string;
+  hscHeader: string;
   hscSection: string;
-  settingsButton: string;
+  inlineOption: string;
+  paramRow: string;
   skyViewerContainer: string;
-  subOption: string;
+  slider: string;
+  sliderPopup: string;
+  sliderSection: string;
   timeSection: string;
+  value: string;
 };
 
 export type ClassNames = keyof Styles;

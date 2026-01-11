@@ -72,6 +72,7 @@ export function VisitDetailProvider({ children }: VisitDetailProviderProps) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- Context hook pattern
 export function useVisitDetailContext() {
   const context = useContext(VisitDetailContext)
   if (!context) {

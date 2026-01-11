@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect -- Syncing state from RTK Query is intentional */
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useLocalStorage } from 'react-use'
@@ -1007,13 +1008,16 @@ export function VisitList() {
   }, [setAppliedSql])
 
   // Handle sequence group filter
-  const handleSequenceGroupFilter = useCallback((groupId: number, _groupName: string) => {
-    const sql = `where sequence_group_id = ${groupId}`
-    setSearchQuery(sql)
-    setAppliedSql(sql)
-    setSearchError(null)
-    setLimit(PER_PAGE)
-  }, [setAppliedSql])
+  const handleSequenceGroupFilter = useCallback(
+    (groupId: number, _groupName: string) => {
+      const sql = `where sequence_group_id = ${groupId}`
+      setSearchQuery(sql)
+      setAppliedSql(sql)
+      setSearchError(null)
+      setLimit(PER_PAGE)
+    },
+    [setAppliedSql]
+  )
 
   // Handle date range change (setDateRange already handles offset reset and scroll)
   const handleDateRangeChange = useCallback((newRange: DateRange) => {

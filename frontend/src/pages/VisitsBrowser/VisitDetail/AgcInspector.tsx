@@ -45,7 +45,7 @@ function getAgcFitsDownloadUrl(visitId: number, exposureId: number): string {
 
 export function AgcInspector({ agc }: AgcInspectorProps) {
   const { selectedVisitId } = useVisitsBrowserContext()
-  const exposures = agc.exposures ?? []
+  const exposures = useMemo(() => agc.exposures ?? [], [agc.exposures])
   const avgExptime = useMemo(() => calculateAverageExptime(exposures), [exposures])
   const [page, setPage] = useState(0)
   const [imageScale, setImageScale] = useState<ImageScale>(0.67)

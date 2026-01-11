@@ -108,7 +108,7 @@ function downloadAllSpsExposures(
 export function SpsInspector({ sps }: SpsInspectorProps) {
   const { selectedVisitId } = useVisitsBrowserContext()
   const { selectedFitsId, setSelectedFitsId } = useVisitDetailContext()
-  const exposures = sps.exposures ?? []
+  const exposures = useMemo(() => sps.exposures ?? [], [sps.exposures])
   const avgExptime = useMemo(() => calculateAverageExptime(exposures), [exposures])
   const [imageType, setImageType] = useState<SpsImageType>('raw')
   const [imageScale, setImageScale] = useState<ImageScale>(1)

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/refs -- floating-ui uses ref callbacks as recommended pattern */
 import { type ReactNode, useState, useRef, useCallback } from 'react'
 import {
   useFloating,

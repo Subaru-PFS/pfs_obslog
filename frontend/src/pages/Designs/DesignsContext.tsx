@@ -51,6 +51,7 @@ function calculateZenithZaZd(
 /**
  * タイムゾーン変換
  */
+// eslint-disable-next-line react-refresh/only-export-components -- utility function
 export function inTimeZone(d: Date, tzOffset: number, sign = 1): Date {
   const result = new Date(d)
   const offset = sign * (result.getTimezoneOffset() - tzOffset)
@@ -306,6 +307,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     dateTo: dateRange[1] || undefined,
   })
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- designs is from RTK Query and stable per fetch
   const designs = listResponse?.items ?? []
   const total = listResponse?.total ?? 0
 
@@ -585,6 +587,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- Context hook pattern
 export function useDesignsContext(): DesignsContextValue {
   const context = useContext(DesignsContext)
   if (!context) {

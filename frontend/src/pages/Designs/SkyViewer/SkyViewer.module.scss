@@ -85,24 +85,110 @@ $button-background: rgba(black, 0.75);
   margin-top: 8px;
   padding-top: 8px;
   border-top: 1px solid rgba(white, 0.2);
-}
-
-.subOption {
-  margin-left: 12px;
-  font-size: 12px;
-}
-
-.settingsButton {
   background-color: $button-background;
-  color: white;
-  border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 12px;
-  font-size: 18px;
+  border-radius: 8px;
+  padding: 8px;
+
+  > label {
+    background-color: transparent;
+    padding: 0;
+  }
+}
+
+.hscHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.inlineOption {
+  font-size: 12px;
+  background-color: transparent !important;
+  padding: 0 !important;
+  opacity: 0.8;
 
   &:hover {
-    background-color: rgba(#033, 0.75);
+    opacity: 1;
   }
+}
+
+.hscControls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(white, 0.1);
+}
+
+.filterSection {
+  overflow-x: auto;
+}
+
+.filterSelector {
+  border-collapse: collapse;
+  font-size: 11px;
+
+  th,
+  td {
+    padding: 2px 4px;
+    text-align: center;
+  }
+
+  th {
+    font-weight: bold;
+  }
+}
+
+.filterSwitch {
+  background: none;
+  border: none;
+  color: rgba(white, 0.8);
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 10px;
+
+  &:hover {
+    color: white;
+    text-decoration: underline;
+  }
+}
+
+.sliderSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sliderPopup {
+  background-color: rgba(black, 0.9);
+  border-radius: 8px;
+  padding: 12px;
+  z-index: 1000;
+  min-width: 280px;
+}
+
+.paramRow {
+  display: grid;
+  grid-template-columns: 40px 1fr 70px;
+  align-items: center;
+  gap: 4px;
+
+  label {
+    font-size: 11px;
+    color: rgba(white, 0.8);
+  }
+}
+
+.slider {
+  width: 100%;
+  cursor: pointer;
+}
+
+.value {
+  font-size: 10px;
+  color: rgba(white, 0.6);
+  text-align: right;
+  font-family: monospace;
 }
