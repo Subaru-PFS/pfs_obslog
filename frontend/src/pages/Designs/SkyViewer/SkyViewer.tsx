@@ -88,8 +88,6 @@ export function SkyViewer() {
     const coord = SkyCoord.fromDeg(cameraCenter.ra, cameraCenter.dec)
     return [{
       position: coord.xyz as [number, number, number],
-      color: [1, 1, 0, 1] as [number, number, number, number], // Yellow
-      type: 'cross' as const,
     }]
   }, [sortBy, cameraCenter])
   
@@ -263,7 +261,7 @@ export function SkyViewer() {
               <MarkerLayer$
                 markers={cameraCenterMarkers}
                 defaultColor={[1, 1, 0, 1]}
-                defaultType="cross"
+                defaultType="plus"
                 markerSize={48}
               />
             )}
