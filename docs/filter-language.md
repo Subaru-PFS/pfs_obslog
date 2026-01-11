@@ -14,6 +14,18 @@ This filtering feature is designed as if querying a virtual table `visits`.
 WHERE id BETWEEN 100 AND 200 AND is_sps_visit
 ```
 
+## Current Implementation Differences (Important)
+
+This document describes the intended specification. As of 2026-01-08, the `/api/visits` implementation differs in the following ways:
+
+- `any_column`: defined as a virtual column in code, but disabled for performance reasons (evaluation raises an error)
+- `fits_header['KEY']`: may be parseable, but disabled for performance reasons (evaluation raises an error)
+- Function calls (e.g. `lower(...)`): the spec lists “allowed functions”, but the evaluator does not implement `FuncCall`, so functions are not usable
+- `validate_expression()`: a validator exists (function whitelist, subquery prohibition, etc.), but `/api/visits` does not currently invoke it
+- `NOT LIKE` / `NOT ILIKE`: the current evaluator does not explicitly handle negated LIKE, so behavior may not match expectations; treat as unsupported
+
+For implementation details, see [docs/sql-filtering.md](sql-filtering.md).
+
 ## Virtual Column List
 
 ### Basic Information
@@ -30,6 +42,7 @@ WHERE id BETWEEN 100 AND 200 AND is_sps_visit
 |-------------|------|-------------|---------|----------------|
 | `sequence_type` | TEXT | Sequence type | `iic_sequence.sequence_type` | visit_set, iic_sequence |
 | `comments` | TEXT | Sequence comments | `iic_sequence.comments` | visit_set, iic_sequence |
+| `cmd_str` | TEXT | ICS command string | `iic_sequence.cmd_str` | visit_set, iic_sequence |
 | `visit_set_id` | INTEGER | Sequence ID | `iic_sequence.iic_sequence_id` | visit_set, iic_sequence |
 | `status` | TEXT | Sequence status | `iic_sequence_status.cmd_output` | visit_set, iic_sequence, iic_sequence_status |
 
@@ -128,6 +141,8 @@ WHERE id > 10000 AND sps_count >= 5
 | `NOT LIKE` | Negated pattern match | `visit_note NOT LIKE '%test%'` |
 | `ILIKE` | Pattern match (case-insensitive) | `status ILIKE '%success%'` |
 
+Note: `NOT LIKE` / `NOT ILIKE` may not behave as expected in the current `/api/visits` implementation; treat them as unsupported.
+
 **Wildcards:**
 - `%` - Any 0 or more characters
 - `_` - Any single character
@@ -175,6 +190,8 @@ For security, only the following functions are allowed:
 | `upper()` | Uppercase conversion | `upper(status) = 'SUCCESS'` |
 | `trim()` | Whitespace removal | `trim(comments) <> ''` |
 | `coalesce()` | NULL replacement | `coalesce(status, 'UNKNOWN') = 'SUCCESS'` |
+
+Note: functions are not currently usable in `/api/visits` because the evaluator does not implement `FuncCall`.
 
 ---
 
@@ -229,6 +246,9 @@ WHERE sequence_type = 'scienceTrace'
 
 -- Partial match search for sequence type
 WHERE sequence_type LIKE '%domeflat%'
+
+-- Search by ICS command string
+WHERE cmd_str LIKE '%halogen%'
 
 -- Specific status
 WHERE status = 'SUCCESS'

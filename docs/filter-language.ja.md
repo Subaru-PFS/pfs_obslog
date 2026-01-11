@@ -14,6 +14,18 @@ Visit一覧エンドポイント (`GET /api/visits`) では、`sql` パラメー
 WHERE id BETWEEN 100 AND 200 AND is_sps_visit
 ```
 
+## 現状の実装との差分（重要）
+
+このドキュメントは「仕様」として書かれているが、2026-01-08 時点の `/api/visits` 実装には次の差分がある。
+
+- `any_column`：コード側では仮想カラムとして定義されているが、性能上の理由で評価時にエラーになり使用できない
+- `fits_header['KEY']`：構文としてはパースされ得るが、性能上の理由で評価時にエラーになり使用できない
+- 関数呼び出し（`lower(...)` 等）：仕様では「許可される関数」を列挙しているが、評価器が `FuncCall` を実装しておらず現状は使用できない
+- `validate_expression()`：仕様上のセキュリティ制約（関数ホワイトリスト、サブクエリ禁止など）の検出器は存在するが、現状の `/api/visits` は呼び出していない
+- `NOT LIKE` / `NOT ILIKE`：現状の評価器は LIKE の否定を明示的に処理していないため、期待通りに動作しない可能性があり「未サポート扱い」とする
+
+詳細な実装フローは [docs/sql-filtering.ja.md](sql-filtering.ja.md) を参照。
+
 ## 仮想カラム一覧
 
 ### 基本情報
@@ -30,6 +42,7 @@ WHERE id BETWEEN 100 AND 200 AND is_sps_visit
 |----------|------|------|-------------|-----------|
 | `sequence_type` | TEXT | シーケンスタイプ | `iic_sequence.sequence_type` | visit_set, iic_sequence |
 | `comments` | TEXT | シーケンスのコメント | `iic_sequence.comments` | visit_set, iic_sequence |
+| `cmd_str` | TEXT | ICSコマンド文字列 | `iic_sequence.cmd_str` | visit_set, iic_sequence |
 | `visit_set_id` | INTEGER | シーケンスID | `iic_sequence.iic_sequence_id` | visit_set, iic_sequence |
 | `status` | TEXT | シーケンスステータス | `iic_sequence_status.cmd_output` | visit_set, iic_sequence, iic_sequence_status |
 
@@ -122,6 +135,8 @@ WHERE id > 10000 AND sps_count >= 5
 | `NOT LIKE` | パターンマッチの否定 | `visit_note NOT LIKE '%test%'` |
 | `ILIKE` | パターンマッチ（大文字小文字区別なし） | `status ILIKE '%success%'` |
 
+注：`NOT LIKE` / `NOT ILIKE` は現状の `/api/visits` 実装では期待通りに動作しない可能性があるため、実用上は未サポートとみなす。
+
 **ワイルドカード:**
 - `%` - 任意の0文字以上
 - `_` - 任意の1文字
@@ -169,6 +184,8 @@ WHERE visit_note IS NOT NULL
 | `upper()` | 大文字変換 | `upper(status) = 'SUCCESS'` |
 | `trim()` | 空白除去 | `trim(comments) <> ''` |
 | `coalesce()` | NULL置換 | `coalesce(status, 'UNKNOWN') = 'SUCCESS'` |
+
+注：現状の `/api/visits` 実装では、評価器が関数呼び出し（`FuncCall`）をサポートしていないため、上記の関数は利用できない。
 
 ---
 
@@ -223,6 +240,9 @@ WHERE sequence_type = 'scienceTrace'
 
 -- シーケンスタイプを部分一致で検索
 WHERE sequence_type LIKE '%domeflat%'
+
+-- ICSコマンド文字列で検索
+WHERE cmd_str LIKE '%halogen%'
 
 -- 特定のステータス
 WHERE status = 'SUCCESS'

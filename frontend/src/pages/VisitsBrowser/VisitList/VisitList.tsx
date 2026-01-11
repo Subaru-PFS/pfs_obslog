@@ -1093,9 +1093,15 @@ export function VisitList() {
   }
 
   if (isError) {
+    // Extract error message from API response
+    const errorMessage = (error && 'data' in error && (error as { data?: { detail?: string } }).data?.detail)
+      || 'Failed to load visits'
     return (
       <div className={styles.visitList}>
-        <div className={styles.error}>Failed to load visits</div>
+        <div className={styles.error}>
+          <Icon name="error" size={20} />
+          <span>{errorMessage}</span>
+        </div>
       </div>
     )
   }

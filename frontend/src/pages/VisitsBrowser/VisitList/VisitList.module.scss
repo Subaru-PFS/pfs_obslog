@@ -869,8 +869,12 @@ $pagination-border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   padding: 32px;
   color: $error-color;
+  font-family: monospace;
+  white-space: pre-wrap;
+  text-align: center;
 }
 
 // =============================================================================
