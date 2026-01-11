@@ -145,8 +145,8 @@
   }
 
   .armCell {
-    background-color: color.change($theme, $lightness: 90%, $saturation: 20%);
-    color: $accent;
+    background-color: var(--arm-cell-background);
+    color: var(--arm-cell-text);
     font-weight: 700;
     width: 32px;
     vertical-align: middle;
