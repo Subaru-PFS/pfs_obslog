@@ -155,6 +155,23 @@ export function SkyViewer() {
     setIsGlobeReady(false)
   }, [registerJumpTo])
 
+  // カメラ中心座標を更新する共通関数
+  const updateCameraCenter = useCallback(() => {
+    if (!globeRef.current) return
+    const globe = globeRef.current()
+    const center = globe.camera.center()
+    const ra = angle.rad2deg(center.raDec.ra)
+    const dec = angle.rad2deg(center.raDec.dec)
+    setCameraCenter({ ra, dec })
+  }, [setCameraCenter])
+
+  // Globe初期化完了時に初期カメラ中心座標を設定
+  useEffect(() => {
+    if (isGlobeReady) {
+      updateCameraCenter()
+    }
+  }, [isGlobeReady, updateCameraCenter])
+
   // 時刻変更時にカメラの天頂パラメータを更新
   // 既存プロジェクトと同様に、za, zd を更新（theta, phi は維持される）
   // これにより、カメラの仰角・方位角は固定され、星空が動く（青グリッドは固定）
@@ -169,18 +186,15 @@ export function SkyViewer() {
       { za: zenithZaZd.za, zd: zenithZaZd.zd + TILT, zp: zenithZaZd.zp },
       { duration: 300 }
     )
-  }, [zenithZaZd, isGlobeReady])
+    // 時刻変更後にカメラ中心座標を更新（distanceソートのリフレッシュ用）
+    // 天頂パラメータの変更により視野中心が変わるため
+    updateCameraCenter()
+  }, [zenithZaZd, isGlobeReady, updateCameraCenter])
 
   // カメラ移動終了時のハンドラ - カメラ中心座標を更新（distanceソート用）
   const handleCameraMoveEnd = useCallback(() => {
-    if (!globeRef.current) return
-    const globe = globeRef.current()
-    // カメラの視野中心座標を取得
-    const center = globe.camera.center()
-    const ra = angle.rad2deg(center.raDec.ra)
-    const dec = angle.rad2deg(center.raDec.dec)
-    setCameraCenter({ ra, dec })
-  }, [setCameraCenter])
+    updateCameraCenter()
+  }, [updateCameraCenter])
 
   // 天頂を中心に表示
   // coordオプションで天頂の赤道座標を指定し、カメラがその方向を向く
