@@ -414,7 +414,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   // selectedDesign がある場合はその ID を使う
   // ない場合でも URL パラメータの designId があればそれを使う（初回ロード時）
   const designIdForDetail = selectedDesign?.id ?? designId ?? ''
-  const { data: designDetail, isLoading: isLoadingDetail } =
+  const { data: designDetail, isFetching: isLoadingDetail } =
     useGetDesignApiPfsDesignsIdHexGetQuery(
       { idHex: designIdForDetail },
       { skip: !designIdForDetail }

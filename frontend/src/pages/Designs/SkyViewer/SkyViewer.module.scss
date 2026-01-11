@@ -16,6 +16,39 @@ $button-background: rgba(black, 0.75);
   right: 0;
 }
 
+// Debug: Center marker for distance sort debugging
+.centerMarker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 5;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    background-color: rgba(255, 255, 0, 0.8);
+  }
+
+  // Horizontal line
+  &::before {
+    width: 20px;
+    height: 2px;
+    left: -10px;
+    top: -1px;
+  }
+
+  // Vertical line
+  &::after {
+    width: 2px;
+    height: 20px;
+    left: -1px;
+    top: -10px;
+  }
+}
+
 .timeSection {
   display: flex;
   flex-direction: column;
@@ -102,6 +135,13 @@ $button-background: rgba(black, 0.75);
   flex-wrap: wrap;
 }
 
+.hscOptions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .inlineOption {
   font-size: 12px;
   background-color: transparent !important;
@@ -120,6 +160,41 @@ $button-background: rgba(black, 0.75);
   margin-top: 4px;
   padding-top: 8px;
   border-top: 1px solid rgba(white, 0.1);
+}
+
+.typeSection {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.typeSelect {
+  flex-grow: 1;
+  background-color: rgba(white, 0.1);
+  color: white;
+  border: 1px solid rgba(white, 0.3);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+
+  option {
+    background-color: #222;
+    color: white;
+  }
+}
+
+.resetButton {
+  background-color: rgba(white, 0.1);
+  color: white;
+  border: 1px solid rgba(white, 0.3);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(white, 0.2);
+  }
 }
 
 .filterSection {
@@ -159,6 +234,9 @@ $button-background: rgba(black, 0.75);
   display: flex;
   flex-direction: column;
   gap: 4px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(white, 0.2);
 }
 
 .sliderPopup {
@@ -167,6 +245,7 @@ $button-background: rgba(black, 0.75);
   padding: 12px;
   z-index: 1000;
   min-width: 280px;
+  color: white;
 }
 
 .paramRow {
@@ -191,4 +270,58 @@ $button-background: rgba(black, 0.75);
   color: rgba(white, 0.6);
   text-align: right;
   font-family: monospace;
+}
+
+// MatrixControl styles
+.matrixControl {
+  border-collapse: collapse;
+  font-size: 11px;
+
+  th,
+  td {
+    padding: 2px 4px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  th {
+    font-weight: bold;
+  }
+}
+
+.colorBox {
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(white, 0.3);
+  border-radius: 2px;
+  margin: 0 auto;
+}
+
+.colorText {
+  td {
+    vertical-align: top;
+  }
+}
+
+.colorInputs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.colorInput {
+  width: 3em;
+  font-size: 10px;
+  padding: 2px 4px;
+  background-color: rgba(white, 0.1);
+  border: 1px solid rgba(white, 0.3);
+  border-radius: 2px;
+  color: white;
+  text-align: center;
+
+  &:focus {
+    outline: none;
+    border-color: rgba(white, 0.6);
+  }
 }

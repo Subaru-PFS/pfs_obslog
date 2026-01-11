@@ -222,6 +222,8 @@ export function SkyViewer() {
     <HscPdr3Section.Provider>
       <div className={styles.skyViewerContainer}>
         <div className={styles.globeWrapper}>
+          {/* Debug: Center marker for distance sort */}
+          <div className={styles.centerMarker} />
           <Globe$
             ref={globeRef}
             retina
