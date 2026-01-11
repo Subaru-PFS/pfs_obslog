@@ -1,7 +1,7 @@
 /**
  * SkyViewer - WebGLベースの天球表示コンポーネント
  */
-import { useRef, useEffect, useCallback, useState, useMemo } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 import {
   Globe$,
   HipparcosCatalogLayer$,
@@ -12,10 +12,9 @@ import {
   ZoomLayer$,
   TouchLayer$,
   GlobeEventLayer$,
-  MarkerLayer$,
   type GlobeHandle,
 } from '@stellar-globe/react-stellar-globe'
-import { angle, easing, GridLayer, matrixUtils, SkyCoord, type Globe } from '@stellar-globe/stellar-globe'
+import { easing, GridLayer, matrixUtils, SkyCoord, type Globe } from '@stellar-globe/stellar-globe'
 import { useDesignsContext, inTimeZone } from '../DesignsContext'
 import { HST_TZ_OFFSET } from '../types'
 import { Clock } from './Clock'
@@ -76,20 +75,8 @@ export function SkyViewer() {
     setShowFibers,
     setDraggingClock,
     setCameraCenter,
-    cameraCenter,
-    sortBy,
+    isDraggingClock,
   } = useDesignsContext()
-
-  // sortBy === 'distance' の場合にcameraCenterを天球上に表示するマーカー
-  const cameraCenterMarkers = useMemo(() => {
-    if (sortBy !== 'distance' || !cameraCenter) {
-      return []
-    }
-    const coord = SkyCoord.fromDeg(cameraCenter.ra, cameraCenter.dec)
-    return [{
-      position: coord.xyz as [number, number, number],
-    }]
-  }, [sortBy, cameraCenter])
   
   // 最新のzenithZaZdをRefで保持（初期化コールバック内から参照するため）
   const zenithZaZdRef = useRef(zenithZaZd)
@@ -187,15 +174,24 @@ export function SkyViewer() {
       { za: zenithZaZd.za, zd: zenithZaZd.zd + TILT, zp: zenithZaZd.zp },
       { duration: 300 }
     )
-    // 時刻変更後にカメラ中心座標を更新（distanceソートのリフレッシュ用）
-    // 天頂パラメータの変更により視野中心が変わるため
-    updateCameraCenter()
-  }, [zenithZaZd, isGlobeReady, updateCameraCenter])
+  }, [zenithZaZd, isGlobeReady])
+
+  // 時計のドラッグ終了時にカメラ中心座標を更新（distanceソートのリフレッシュ用）
+  // altitudeソートと同様に、ドラッグ中は更新しない
+  useEffect(() => {
+    if (!isDraggingClock && isGlobeReady) {
+      updateCameraCenter()
+    }
+  }, [isDraggingClock, isGlobeReady, updateCameraCenter])
 
   // カメラ移動終了時のハンドラ - カメラ中心座標を更新（distanceソート用）
+  // ユーザーがパン/ズームした場合のみ
   const handleCameraMoveEnd = useCallback(() => {
-    updateCameraCenter()
-  }, [updateCameraCenter])
+    // ドラッグ中は更新しない（時刻ドラッグによるカメラ移動は除外）
+    if (!isDraggingClock) {
+      updateCameraCenter()
+    }
+  }, [updateCameraCenter, isDraggingClock])
 
   // 天頂を中心に表示
   // coordオプションで天頂の赤道座標を指定し、カメラがその方向を向く
@@ -270,15 +266,6 @@ export function SkyViewer() {
             <HscPdr3Section.Layer />
             <EquatorialGrid />
             <DesignMarkers />
-            {/* Debug: カメラ中心マーカー（distanceソート時のみ表示） */}
-            {cameraCenterMarkers.length > 0 && (
-              <MarkerLayer$
-                markers={cameraCenterMarkers}
-                defaultColor={[1, 1, 0, 1]}
-                defaultType="plus"
-                markerSize={48}
-              />
-            )}
           </Globe$>
         </div>
 
