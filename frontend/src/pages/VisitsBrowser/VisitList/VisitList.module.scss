@@ -67,6 +67,17 @@ $toolbar-input-height: 26px;
   border-bottom: 1px solid rgba($error-color, 0.3);
 }
 
+.helpLink {
+  margin-left: auto;
+  color: inherit;
+  text-decoration: underline;
+  opacity: 0.8;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
 .toolbarButton {
   @include button-standard;
   height: $toolbar-input-height;

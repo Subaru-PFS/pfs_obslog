@@ -80,6 +80,16 @@ VIRTUAL_COLUMNS: dict[str, VirtualColumn] = {
         description="シーケンスID (iic_sequence_id)",
         required_joins={"visit_set", "iic_sequence"},
     ),
+    "cmd_str": VirtualColumn(
+        name="cmd_str",
+        description="ICSコマンド文字列",
+        required_joins={"visit_set", "iic_sequence"},
+    ),
+    "sequence_name": VirtualColumn(
+        name="sequence_name",
+        description="シーケンス名",
+        required_joins={"visit_set", "iic_sequence"},
+    ),
     # メモ関連
     "visit_note": VirtualColumn(
         name="visit_note",

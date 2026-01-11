@@ -40,6 +40,7 @@ export type Styles = {
   filterRowLeft: string;
   filterRowRight: string;
   filterSeparator: string;
+  helpLink: string;
   iicSequence: string;
   info: string;
   loading: string;

@@ -40,8 +40,7 @@ WHERE id BETWEEN 100 AND 200 AND is_sps_visit
 
 | カラム名 | 型 | 説明 | マッピング先 | 必要なJOIN |
 |----------|------|------|-------------|-----------|
-| `sequence_type` | TEXT | シーケンスタイプ | `iic_sequence.sequence_type` | visit_set, iic_sequence |
-| `comments` | TEXT | シーケンスのコメント | `iic_sequence.comments` | visit_set, iic_sequence |
+| `sequence_type` | TEXT | シーケンスタイプ | `iic_sequence.sequence_type` | visit_set, iic_sequence || `sequence_name` | TEXT | シーケンス名 | `iic_sequence.name` | visit_set, iic_sequence || `comments` | TEXT | シーケンスのコメント | `iic_sequence.comments` | visit_set, iic_sequence |
 | `cmd_str` | TEXT | ICSコマンド文字列 | `iic_sequence.cmd_str` | visit_set, iic_sequence |
 | `visit_set_id` | INTEGER | シーケンスID | `iic_sequence.iic_sequence_id` | visit_set, iic_sequence |
 | `status` | TEXT | シーケンスステータス | `iic_sequence_status.cmd_output` | visit_set, iic_sequence, iic_sequence_status |
@@ -240,6 +239,9 @@ WHERE sequence_type = 'scienceTrace'
 
 -- シーケンスタイプを部分一致で検索
 WHERE sequence_type LIKE '%domeflat%'
+
+-- シーケンス名で検索
+WHERE sequence_name LIKE '%theta260_phi_scan_angle150%'
 
 -- ICSコマンド文字列で検索
 WHERE cmd_str LIKE '%halogen%'

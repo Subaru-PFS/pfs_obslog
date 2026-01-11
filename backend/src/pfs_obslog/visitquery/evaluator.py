@@ -82,6 +82,8 @@ class QueryEvaluator:
             "sequence_type": M.IicSequence.sequence_type,
             "comments": M.IicSequence.comments,
             "visit_set_id": M.IicSequence.iic_sequence_id,
+            "cmd_str": M.IicSequence.cmd_str,
+            "sequence_name": M.IicSequence.name,
             "visit_note": M.ObslogVisitNote.body,
             "visit_note_user": visit_note_user.account_name,
             "visit_set_note": M.ObslogVisitSetNote.body,

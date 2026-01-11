@@ -12,6 +12,8 @@ const columns = [
   { name: 'issued_at', opdb_column: 'pfs_visit.issued_at', doc: 'Time when the visit was issued' },
   { name: 'sequence_type', opdb_column: 'iic_sequence.sequence_type', doc: 'Sequence Type' },
   { name: 'comments', opdb_column: 'iic_sequence.comments', doc: 'Comments of Visit Set' },
+  { name: 'cmd_str', opdb_column: 'iic_sequence.cmd_str', doc: 'ICS command string that generates exposures' },
+  { name: 'sequence_name', opdb_column: 'iic_sequence.name', doc: 'Unique name assigned to the sequence' },
   { name: 'is_sps_visit', opdb_column: 'N/A', doc: 'Whether the visit has any SpS exposure' },
   { name: 'is_mcs_visit', opdb_column: 'N/A', doc: 'Whether the visit has any MCS exposure' },
   { name: 'is_agc_visit', opdb_column: 'N/A', doc: 'Whether the visit has any AGC exposure' },
@@ -76,6 +78,16 @@ const examples = [
     title: 'Visits with long average exposure time',
     sql: 'where sps_avg_exptime >= 30',
     doc: 'Filter by average SPS exposure time.',
+  },
+  {
+    title: 'Visits with specific command string',
+    sql: "where cmd_str like '%halogen%'",
+    doc: 'Search for visits by ICS command string.',
+  },
+  {
+    title: 'Visits with specific sequence name',
+    sql: "where sequence_name like '%theta260_phi_scan_angle150%'",
+    doc: 'Search for visits by the unique sequence name.',
   },
 ]
 

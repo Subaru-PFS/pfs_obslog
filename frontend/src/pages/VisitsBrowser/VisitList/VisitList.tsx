@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect -- Syncing state from RTK Query is intentional */
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import { useLocalStorage } from 'react-use'
 import type { MaterialSymbol } from 'material-symbols'
 import {
@@ -1191,6 +1191,7 @@ export function VisitList() {
         <div className={styles.searchError}>
           <Icon name="error" size={16} />
           <span>{searchError}</span>
+          <Link to="/sql-syntax-help" className={styles.helpLink}>See syntax help</Link>
         </div>
       )}
 

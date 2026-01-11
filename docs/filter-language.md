@@ -41,6 +41,7 @@ For implementation details, see [docs/sql-filtering.md](sql-filtering.md).
 | Column Name | Type | Description | Maps To | Required JOINs |
 |-------------|------|-------------|---------|----------------|
 | `sequence_type` | TEXT | Sequence type | `iic_sequence.sequence_type` | visit_set, iic_sequence |
+| `sequence_name` | TEXT | Sequence name | `iic_sequence.name` | visit_set, iic_sequence |
 | `comments` | TEXT | Sequence comments | `iic_sequence.comments` | visit_set, iic_sequence |
 | `cmd_str` | TEXT | ICS command string | `iic_sequence.cmd_str` | visit_set, iic_sequence |
 | `visit_set_id` | INTEGER | Sequence ID | `iic_sequence.iic_sequence_id` | visit_set, iic_sequence |
@@ -246,6 +247,9 @@ WHERE sequence_type = 'scienceTrace'
 
 -- Partial match search for sequence type
 WHERE sequence_type LIKE '%domeflat%'
+
+-- Search by sequence name
+WHERE sequence_name LIKE '%theta260_phi_scan_angle150%'
 
 -- Search by ICS command string
 WHERE cmd_str LIKE '%halogen%'
