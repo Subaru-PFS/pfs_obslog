@@ -25,10 +25,87 @@
   --background-color-near: #ccc;
   --background-color-distant: #aaa;
 
+  /* UI component backgrounds (cards, panels, etc.) */
+  --background-color-surface: #f5f5f5;
+  --background-color-surface-hover: #fafafa;
+  --background-color-surface-alt: #f0f0f0;
+  --background-color-disabled: #e8e8e8;
+
   /* Selection colors */
   --selected-background: hsl(180, 25%, 75%);
   --selected-background-active: hsl(180, 25%, 60%);
   --selected-background-hover: hsl(180, 25%, 70%);
+
+  /* Highlight colors (for tags, badges, etc.) */
+  --highlight-cyan: #aaddff;
+  --highlight-blue: #bfbfff;
+  --highlight-green: #aaffaa;
+  --highlight-yellow: #ffffaa;
+  --highlight-note: #fff9c4;
+
+  /* Status colors */
+  --status-success-bg: #c8e6c9;
+  --status-success-text: #2e7d32;
+  --status-error-bg: #ffcdd2;
+  --status-error-text: #c62828;
+
+  /* Sequence type badge colors (background + text) */
+  --seq-science-bg: #aaddff;
+  --seq-science-text: #003366;
+  --seq-trace-bg: #bfbfff;
+  --seq-trace-text: #101070;
+  --seq-arc-bg: #aaffaa;
+  --seq-arc-text: #006600;
+  --seq-flat-bg: #ffffaa;
+  --seq-flat-text: #666600;
+
+  /* Sequence type colors (for row grouping) */
+  --seq-default: #dddddd;
+  --seq-default-hover: #c5c5c5;
+  --seq-calibration: #bfffdf;
+  --seq-calibration-hover: #9fe0c2;
+  --seq-engineering: #ffbfff;
+  --seq-engineering-hover: #e09fe0;
+  --seq-science: #dfffbf;
+  --seq-science-hover: #c2e09f;
+  --seq-focus: #bfbfff;
+  --seq-focus-hover: #9f9fe0;
+  --seq-acquisition: #ffdfbf;
+  --seq-acquisition-hover: #e0c29f;
+  --seq-sky: #bfffff;
+  --seq-sky-hover: #9fe0e0;
+  --seq-guide: #ffbfdf;
+  --seq-guide-hover: #e09fc2;
+
+  /* Exposure count badge colors (background/text/selected-bg) */
+  --exp-none-bg: #dddddd;
+  --exp-none-text: #3c3c3c;
+  --exp-none-selected: #c5c5c5;
+  --exp-agc-bg: #bfffdf;
+  --exp-agc-text: #107040;
+  --exp-agc-selected: #9fe0c2;
+  --exp-mcs-bg: #ffbfff;
+  --exp-mcs-text: #701070;
+  --exp-mcs-selected: #e09fe0;
+  --exp-mcs-agc-bg: #dfffbf;
+  --exp-mcs-agc-text: #407010;
+  --exp-mcs-agc-selected: #c2e09f;
+  --exp-sps-bg: #bfbfff;
+  --exp-sps-text: #101070;
+  --exp-sps-selected: #9f9fe0;
+  --exp-sps-agc-bg: #ffdfbf;
+  --exp-sps-agc-text: #704010;
+  --exp-sps-agc-selected: #e0c29f;
+  --exp-sps-mcs-bg: #bfffff;
+  --exp-sps-mcs-text: #107070;
+  --exp-sps-mcs-selected: #9fe0e0;
+  --exp-mixed-bg: #ffbfdf;
+  --exp-mixed-text: #701040;
+  --exp-mixed-selected: #e09fc2;
+
+  /* Comment box colors */
+  --comment-bg: floralwhite;
+  --comment-text: #662222;
 
   /* Borders & lines */
   --border-color: #ccc;
@@ -40,6 +117,10 @@
   --shadow-medium: 0 0 8px rgba(0, 0, 0, 0.5);
   --shadow-light: 0 0 4px rgba(0, 0, 0, 0.25);
   --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+  /* Terminal colors (code blocks) */
+  --terminal-background: #263238;
+  --terminal-text: #b2ff59;
 
   /* Error colors */
   --error-color: #e53935;
@@ -96,10 +177,87 @@
   --background-color-near: #303030;
   --background-color-distant: #404040;
 
+  /* UI component backgrounds (cards, panels, etc.) */
+  --background-color-surface: #2a2a2a;
+  --background-color-surface-hover: #353535;
+  --background-color-surface-alt: #252525;
+  --background-color-disabled: #333333;
+
   /* Selection colors */
   --selected-background: hsl(180, 30%, 25%);
   --selected-background-active: hsl(180, 30%, 35%);
   --selected-background-hover: hsl(180, 30%, 30%);
+
+  /* Highlight colors (for tags, badges, etc.) - darker versions */
+  --highlight-cyan: #1a4455;
+  --highlight-blue: #2a2a55;
+  --highlight-green: #1a4430;
+  --highlight-yellow: #44441a;
+  --highlight-note: #4a4420;
+
+  /* Status colors - darker versions */
+  --status-success-bg: #1b3d1c;
+  --status-success-text: #81c784;
+  --status-error-bg: #3d1b1b;
+  --status-error-text: #ef5350;
+
+  /* Sequence type badge colors (dark mode) */
+  --seq-science-bg: #1a3045;
+  --seq-science-text: #8ecae6;
+  --seq-trace-bg: #25254a;
+  --seq-trace-text: #a5a5e0;
+  --seq-arc-bg: #1a3520;
+  --seq-arc-text: #90c090;
+  --seq-flat-bg: #3a3a1a;
+  --seq-flat-text: #c0c080;
+
+  /* Sequence type colors - darker versions for dark mode */
+  --seq-default: #404040;
+  --seq-default-hover: #505050;
+  --seq-calibration: #1a4030;
+  --seq-calibration-hover: #2a5040;
+  --seq-engineering: #401a40;
+  --seq-engineering-hover: #502a50;
+  --seq-science: #304020;
+  --seq-science-hover: #405030;
+  --seq-focus: #2a2a50;
+  --seq-focus-hover: #3a3a60;
+  --seq-acquisition: #403020;
+  --seq-acquisition-hover: #504030;
+  --seq-sky: #1a4040;
+  --seq-sky-hover: #2a5050;
+  --seq-guide: #401a30;
+  --seq-guide-hover: #502a40;
+
+  /* Exposure count badge colors (dark mode) */
+  --exp-none-bg: #404040;
+  --exp-none-text: #b0b0b0;
+  --exp-none-selected: #505050;
+  --exp-agc-bg: #1a4030;
+  --exp-agc-text: #90d0a0;
+  --exp-agc-selected: #2a5040;
+  --exp-mcs-bg: #401a40;
+  --exp-mcs-text: #d090d0;
+  --exp-mcs-selected: #502a50;
+  --exp-mcs-agc-bg: #304020;
+  --exp-mcs-agc-text: #b0d090;
+  --exp-mcs-agc-selected: #405030;
+  --exp-sps-bg: #2a2a50;
+  --exp-sps-text: #a0a0e0;
+  --exp-sps-selected: #3a3a60;
+  --exp-sps-agc-bg: #403020;
+  --exp-sps-agc-text: #d0b090;
+  --exp-sps-agc-selected: #504030;
+  --exp-sps-mcs-bg: #1a4040;
+  --exp-sps-mcs-text: #90d0d0;
+  --exp-sps-mcs-selected: #2a5050;
+  --exp-mixed-bg: #401a30;
+  --exp-mixed-text: #d090b0;
+  --exp-mixed-selected: #502a40;
+
+  /* Comment box colors (dark mode) */
+  --comment-bg: #3a2a20;
+  --comment-text: #d0a080;
 
   /* Borders & lines */
   --border-color: #404040;
@@ -111,6 +269,10 @@
   --shadow-medium: 0 0 8px rgba(0, 0, 0, 0.8);
   --shadow-light: 0 0 4px rgba(0, 0, 0, 0.5);
   --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.4);
+
+  /* Terminal colors (code blocks) - stays dark in dark mode */
+  --terminal-background: #1e272c;
+  --terminal-text: #a5d6a7;
 
   /* Error colors */
   --error-color: #ef5350;

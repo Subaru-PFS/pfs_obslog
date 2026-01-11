@@ -9,7 +9,7 @@
 }
 
 .listHeader {
-  border-bottom: #777 2px solid;
+  border-bottom: $border-color 2px solid;
   padding: 8px;
 }
 
@@ -69,7 +69,7 @@
 
 .dateRangeSeparator {
   margin: 0 2px;
-  color: #888;
+  color: $hint-text-color;
 }
 
 .clearDateButton {
@@ -80,10 +80,10 @@
   border: none;
   padding: 2px;
   cursor: pointer;
-  color: #888;
+  color: $hint-text-color;
 
   &:hover {
-    color: #fff;
+    color: $text-color;
   }
 }
 
@@ -97,13 +97,13 @@
 
   span {
     margin-right: auto;
-    color: #666;
+    color: $hint-text-color;
   }
 }
 
 .list {
   position: relative;
-  background-color: #777;
+  background-color: $near-background-color;
   width: 24em;
   flex-grow: 1;
   height: 0;
@@ -130,31 +130,31 @@
   overflow-x: hidden;
   cursor: pointer;
 
-  @include bump(#eee);
+  @include bump($hover-background-color);
 
   &:hover {
-    @include bump(#ddd);
+    @include bump($active-background-color);
   }
 }
 
 .entrySelected {
   &,
   &:hover {
-    @include bump(#0ff);
+    @include bump($theme);
   }
 }
 
 .entryHover {
   &,
   &:hover {
-    @include bump(#cac);
+    @include bump($selected-hover-background);
   }
 }
 
 .entrySelectedHover {
   &,
   &:hover {
-    @include bump(#aff);
+    @include bump($selected-active-background);
   }
 }
 
@@ -165,7 +165,7 @@
 }
 
 .entryName {
-  color: #007;
+  color: $link-color;
   font-weight: bold;
   overflow: hidden;
   text-overflow: ellipsis;

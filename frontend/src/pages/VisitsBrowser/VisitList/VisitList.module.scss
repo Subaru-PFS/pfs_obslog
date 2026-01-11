@@ -443,26 +443,26 @@ $pagination-border-radius: 12px;
 
     // scienceObject: baseColor = #07f (blue)
     &.sequenceTypeScience {
-      background-color: #aaddff; // #07f lightened
-      color: #003366; // #07f darkened & desaturated
+      background-color: var(--seq-science-bg);
+      color: var(--seq-science-text);
     }
 
     // scienceTrace: baseColor = #00f (pure blue)
     &.sequenceTypeTrace {
-      background-color: #BFBFFF; // #00f lightened
-      color: #101070; // #00f darkened & desaturated
+      background-color: var(--seq-trace-bg);
+      color: var(--seq-trace-text);
     }
 
     // scienceArc/ditheredArcs: baseColor = #0f0 (green)
     &.sequenceTypeArc {
-      background-color: #aaffaa; // #0f0 lightened
-      color: #006600; // #0f0 darkened & desaturated
+      background-color: var(--seq-arc-bg);
+      color: var(--seq-arc-text);
     }
 
     // flat: no base color defined in old-project, using yellow
     &.sequenceTypeFlat {
-      background-color: #ffffaa; // yellow lightened
-      color: #666600; // yellow darkened
+      background-color: var(--seq-flat-bg);
+      color: var(--seq-flat-text);
     }
   }
 
@@ -511,13 +511,13 @@ $pagination-border-radius: 12px;
     font-size: 0.75rem;
 
     &.statusOk {
-      background-color: #c8e6c9;
-      color: #2e7d32;
+      background-color: $status-success-bg;
+      color: var(--status-success-text);
     }
 
     &.statusError {
-      background-color: #ffcdd2;
-      color: #c62828;
+      background-color: $status-error-bg;
+      color: var(--status-error-text);
     }
   }
 
@@ -541,8 +541,8 @@ $pagination-border-radius: 12px;
     padding: 4px 8px;
     border-radius: 4px;
     font-size: 0.75rem;
-    color: #662222; // darkened brown
-    background-color: floralwhite;
+    color: var(--comment-text);
+    background-color: var(--comment-bg);
     box-shadow: 0 0 4px rgba(165, 42, 42, 0.5);
     max-width: 100%; // Prevent from expanding parent width
     overflow: hidden;
@@ -767,81 +767,81 @@ $pagination-border-radius: 12px;
 // =============================================================================
 // No exposures (000): gray #777
 .exposureNone {
-  background-color: #dddddd;
-  color: #3c3c3c;
+  background-color: var(--exp-none-bg);
+  color: var(--exp-none-text);
 
   tr.selected & {
-    background-color: #c5c5c5;
+    background-color: var(--exp-none-selected);
   }
 }
 
 // AGC only (001): HSV(150, 100, 100) = cyan-green
 .exposureAgc {
-  background-color: #bfffdf;
-  color: #107040;
+  background-color: var(--exp-agc-bg);
+  color: var(--exp-agc-text);
 
   tr.selected & {
-    background-color: #9fe0c2;
+    background-color: var(--exp-agc-selected);
   }
 }
 
 // MCS only (010): HSV(300, 100, 100) = magenta
 .exposureMcs {
-  background-color: #ffbfff;
-  color: #701070;
+  background-color: var(--exp-mcs-bg);
+  color: var(--exp-mcs-text);
 
   tr.selected & {
-    background-color: #e09fe0;
+    background-color: var(--exp-mcs-selected);
   }
 }
 
 // MCS + AGC (011): HSV(450 mod 360 = 90, 100, 100) = chartreuse
 .exposureMcsAgc {
-  background-color: #dfffbf;
-  color: #407010;
+  background-color: var(--exp-mcs-agc-bg);
+  color: var(--exp-mcs-agc-text);
 
   tr.selected & {
-    background-color: #c2e09f;
+    background-color: var(--exp-mcs-agc-selected);
   }
 }
 
 // SPS only (100): HSV(600 mod 360 = 240, 100, 100) = blue
 .exposureSps {
-  background-color: #bfbfff;
-  color: #101070;
+  background-color: var(--exp-sps-bg);
+  color: var(--exp-sps-text);
 
   tr.selected & {
-    background-color: #9f9fe0;
+    background-color: var(--exp-sps-selected);
   }
 }
 
 // SPS + AGC (101): HSV(750 mod 360 = 30, 100, 100) = orange
 .exposureSpsAgc {
-  background-color: #ffdfbf;
-  color: #704010;
+  background-color: var(--exp-sps-agc-bg);
+  color: var(--exp-sps-agc-text);
 
   tr.selected & {
-    background-color: #e0c29f;
+    background-color: var(--exp-sps-agc-selected);
   }
 }
 
 // SPS + MCS (110): HSV(900 mod 360 = 180, 100, 100) = cyan
 .exposureSpsMcs {
-  background-color: #bfffff;
-  color: #107070;
+  background-color: var(--exp-sps-mcs-bg);
+  color: var(--exp-sps-mcs-text);
 
   tr.selected & {
-    background-color: #9fe0e0;
+    background-color: var(--exp-sps-mcs-selected);
   }
 }
 
 // All three (111): HSV(1050 mod 360 = 330, 100, 100) = pink-magenta
 .exposureMixed {
-  background-color: #ffbfdf;
-  color: #701040;
+  background-color: var(--exp-mixed-bg);
+  color: var(--exp-mixed-text);
 
   tr.selected & {
-    background-color: #e09fc2;
+    background-color: var(--exp-mixed-selected);
   }
 }
 
@@ -870,7 +870,7 @@ $pagination-border-radius: 12px;
   align-items: center;
   justify-content: center;
   padding: 32px;
-  color: #c62828;
+  color: $error-color;
 }
 
 // =============================================================================

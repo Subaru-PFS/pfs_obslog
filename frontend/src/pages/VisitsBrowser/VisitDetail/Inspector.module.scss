@@ -16,7 +16,7 @@
   align-items: center;
   margin-bottom: 8px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid $border-color;
 }
 
 .headerItem {
@@ -27,12 +27,12 @@
 
 .headerLabel {
   font-weight: 600;
-  color: #666;
+  color: $hint-text-color;
   font-size: 0.75rem;
 }
 
 .headerValue {
-  color: #333;
+  color: $text-color;
   font-size: 0.75rem;
 }
 
@@ -42,7 +42,7 @@
   gap: 10px;
   margin-bottom: 8px;
   padding: 6px 8px;
-  background-color: #f5f5f5;
+  background-color: $surface-background;
   border-radius: 4px;
 }
 
@@ -62,20 +62,21 @@
 
 .settingsLabel {
   font-weight: 600;
-  color: #666;
+  color: $hint-text-color;
   font-size: 0.75rem;
 }
 
 .downloadButton {
   padding: 2px 8px;
-  border: 1px solid #ccc;
-  background: white;
+  border: 1px solid $border-color;
+  background: $input-background;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.7rem;
+  color: $text-color;
 
   &:hover:not(:disabled) {
-    background: #f5f5f5;
+    background: $surface-background;
   }
 
   &:disabled {
@@ -92,14 +93,15 @@
 
   button {
     padding: 2px 6px;
-    border: 1px solid #ccc;
-    background: white;
+    border: 1px solid $border-color;
+    background: $input-background;
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.7rem;
+    color: $text-color;
 
     &:hover:not(:disabled) {
-      background: #f5f5f5;
+      background: $surface-background;
     }
 
     &:disabled {
@@ -110,7 +112,7 @@
 
   span {
     font-size: 0.7rem;
-    color: #666;
+    color: $hint-text-color;
   }
 }
 
@@ -130,16 +132,16 @@
   font-size: 0.75rem;
 
   th, td {
-    border: 1px solid #e0e0e0;
+    border: 1px solid $border-color;
     padding: 4px;
     text-align: center;
     vertical-align: top;
   }
 
   th {
-    background-color: #f5f5f5;
+    background-color: $surface-background;
     font-weight: 600;
-    color: #333;
+    color: $text-color;
   }
 
   .armCell {
@@ -152,12 +154,12 @@
 
   .previewCell {
     padding: 2px;
-    background-color: #fafafa;
+    background-color: $surface-hover-background;
   }
 
   .emptyCell {
-    background-color: #fafafa;
-    color: #999;
+    background-color: $surface-hover-background;
+    color: $disabled-text-color;
     min-width: 100px;
   }
 }
@@ -173,7 +175,7 @@
   display: flex;
   gap: 6px;
   font-size: 0.65rem;
-  color: #666;
+  color: $hint-text-color;
 }
 
 .previewActions {
@@ -189,7 +191,7 @@
 
 .cameraId {
   font-size: 0.65rem;
-  color: #666;
+  color: $hint-text-color;
 }
 
 .exptime {
@@ -204,25 +206,25 @@
   font-size: 0.75rem;
 
   th, td {
-    border: 1px solid #e0e0e0;
+    border: 1px solid $border-color;
     padding: 4px 6px;
     text-align: left;
   }
 
   th {
-    background-color: #f5f5f5;
+    background-color: $surface-background;
     font-weight: 600;
-    color: #333;
+    color: $text-color;
     position: sticky;
     top: 0;
   }
 
   tbody tr:hover {
-    background-color: #f5f5f5;
+    background-color: $surface-background;
   }
 
   tbody tr:nth-child(even) {
-    background-color: #fafafa;
+    background-color: $surface-hover-background;
   }
 }
 
@@ -242,13 +244,13 @@
 
 .infoLabel {
   font-weight: 600;
-  color: #666;
+  color: $hint-text-color;
   min-width: 80px;
   font-size: 0.75rem;
 }
 
 .infoValue {
-  color: #333;
+  color: $text-color;
   font-size: 0.75rem;
 }
 
@@ -267,7 +269,7 @@
 
 .commandLabel {
   font-weight: 600;
-  color: #666;
+  color: $hint-text-color;
   margin-bottom: 4px;
   font-size: 0.75rem;
 }
@@ -275,8 +277,8 @@
 .commandCode {
   display: block;
   padding: 8px;
-  background-color: #263238;
-  color: #b2ff59;
+  background-color: var(--terminal-background);
+  color: var(--terminal-text);
   border-radius: 4px;
   font-family: 'Consolas', 'Monaco', monospace;
   font-size: 0.7rem;
@@ -292,16 +294,16 @@
 
 .commentsLabel {
   font-weight: 600;
-  color: #666;
+  color: $hint-text-color;
   margin-bottom: 4px;
   font-size: 0.75rem;
 }
 
 .commentsText {
   padding: 8px;
-  background-color: #f5f5f5;
+  background-color: $surface-background;
   border-radius: 4px;
-  color: #333;
+  color: $text-color;
   line-height: 1.4;
   font-size: 0.75rem;
 }
@@ -313,14 +315,14 @@
 
 .notesLabel {
   font-weight: 600;
-  color: #666;
+  color: $hint-text-color;
   margin-bottom: 4px;
   font-size: 0.75rem;
 }
 
 .noteItem {
   padding: 6px 8px;
-  background-color: #fff9c4;
+  background-color: $highlight-note;
   border-radius: 4px;
   margin-bottom: 6px;
   font-size: 0.75rem;
@@ -332,12 +334,12 @@
 
 .noteUser {
   font-weight: 600;
-  color: #5d4037;
+  color: var(--theme-color);
   margin-right: 6px;
 }
 
 .noteBody {
-  color: #333;
+  color: $text-color;
 }
 
 // Exposure リスト（MCS/AGC用）
@@ -350,8 +352,8 @@
 
 .exposureCard {
   padding: 8px;
-  background-color: #fafafa;
-  border: 1px solid #e0e0e0;
+  background-color: $surface-hover-background;
+  border: 1px solid $border-color;
   border-radius: 4px;
   // 幅を100%にして、親要素の幅いっぱいに表示（カメラ画像のwrapを有効にする）
   width: 100%;
@@ -360,7 +362,7 @@
 
 .exposureCardHeader {
   font-weight: 600;
-  color: #333;
+  color: $text-color;
   margin-bottom: 6px;
   font-size: 0.75rem;
 }
@@ -378,7 +380,7 @@
   flex-wrap: wrap;
   gap: 12px;
   font-size: 0.7rem;
-  color: #666;
+  color: $hint-text-color;
 }
 
 .exposureCardActions {
@@ -423,10 +425,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 6px 10px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
+  background-color: $surface-background;
+  border-bottom: 1px solid $border-color;
   font-weight: 600;
-  color: #333;
+  color: $text-color;
   font-size: 0.8rem;
 }
 
@@ -449,7 +451,7 @@
   justify-content: center;
   height: 100%;
   padding: 20px;
-  color: #d32f2f;
+  color: $error-color;
   font-size: 0.8rem;
 }
 
@@ -460,7 +462,7 @@
   justify-content: center;
   height: 100%;
   padding: 20px;
-  color: #666;
+  color: $hint-text-color;
   text-align: center;
   font-size: 0.8rem;
 }
@@ -468,7 +470,7 @@
 .headerHint {
   margin-top: 6px;
   font-size: 0.7rem;
-  color: #999;
+  color: $secondary-text-color;
 }
 
 .headerIcon {
@@ -498,7 +500,7 @@
   height: 100%;
   min-height: 200px;
   padding: 20px;
-  color: #666;
+  color: $hint-text-color;
   text-align: center;
   line-height: 1.5;
   font-size: 0.8rem;
@@ -506,6 +508,6 @@
   small {
     margin-top: 6px;
     font-size: 0.7rem;
-    color: #999;
+    color: $secondary-text-color;
   }
 }

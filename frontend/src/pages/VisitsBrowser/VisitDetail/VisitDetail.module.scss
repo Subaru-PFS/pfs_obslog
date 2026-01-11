@@ -31,19 +31,19 @@
   border: 1px solid $border-color;
   border-radius: 4px;
   cursor: pointer;
-  color: #666;
+  color: $text-color-hint;
   transition: all 0.15s ease;
   flex-shrink: 0;
   margin-top: 18px; // Align with table content
 
   &:hover {
-    background-color: #e0e0e0;
-    color: #333;
-    border-color: #999;
+    background-color: $hover-background-color;
+    color: $text-color;
+    border-color: $text-color-secondary;
   }
 
   &:active {
-    background-color: #d0d0d0;
+    background-color: $active-background-color;
   }
 }
 
@@ -58,9 +58,9 @@
   }
 
   th {
-    background-color: #f5f5f5;
+    background-color: $surface-background;
     font-weight: 600;
-    color: #666;
+    color: $text-color-hint;
     border-bottom: 1px solid $border-color;
   }
 
@@ -77,7 +77,7 @@
 .note {
   margin-bottom: 4px;
   padding: 4px 8px;
-  background-color: #fff9c4;
+  background-color: $highlight-note;
   border-radius: 4px;
 
   &:last-child {
@@ -88,11 +88,11 @@
 .noteUser {
   font-weight: 600;
   margin-right: 8px;
-  color: #5d4037;
+  color: var(--theme-color);
 }
 
 .noteBody {
-  color: #333;
+  color: $text-color;
 }
 
 .inspector {
@@ -112,12 +112,12 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #888;
+  color: $text-color-hint;
   font-style: italic;
 }
 
 .error {
-  color: #d32f2f;
+  color: $error-color;
 }
 
 // スプリットパネル
@@ -137,7 +137,7 @@
 
 .gutter {
   height: 6px;
-  background-color: #e0e0e0;
+  background-color: $hover-background-color;
   cursor: row-resize;
   flex-shrink: 0;
   transition: background-color 0.2s;

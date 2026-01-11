@@ -29,10 +29,45 @@ $input-background: var(--background-color-input);
 $link-color: var(--link-color);
 $accent: var(--accent-color);
 
-// Static fallbacks for disabled state
-$disabled-background-color: #e8e8e8;
+// UI component surfaces
+$surface-background: var(--background-color-surface);
+$surface-hover-background: var(--background-color-surface-hover);
+$surface-alt-background: var(--background-color-surface-alt);
+$disabled-background-color: var(--background-color-disabled);
+$card-background: var(--background-color-card);
+
+// Static fallback colors (not theme-dependent)
 $comment-color: #577;
 $active-text-color: white;
+
+// Highlight colors
+$highlight-cyan: var(--highlight-cyan);
+$highlight-blue: var(--highlight-blue);
+$highlight-green: var(--highlight-green);
+$highlight-yellow: var(--highlight-yellow);
+$highlight-note: var(--highlight-note);
+
+// Status colors
+$status-success-bg: var(--status-success-bg);
+$status-error-bg: var(--status-error-bg);
+
+// Sequence type colors
+$seq-default: var(--seq-default);
+$seq-default-hover: var(--seq-default-hover);
+$seq-calibration: var(--seq-calibration);
+$seq-calibration-hover: var(--seq-calibration-hover);
+$seq-engineering: var(--seq-engineering);
+$seq-engineering-hover: var(--seq-engineering-hover);
+$seq-science: var(--seq-science);
+$seq-science-hover: var(--seq-science-hover);
+$seq-focus: var(--seq-focus);
+$seq-focus-hover: var(--seq-focus-hover);
+$seq-acquisition: var(--seq-acquisition);
+$seq-acquisition-hover: var(--seq-acquisition-hover);
+$seq-sky: var(--seq-sky);
+$seq-sky-hover: var(--seq-sky-hover);
+$seq-guide: var(--seq-guide);
+$seq-guide-hover: var(--seq-guide-hover);
 
 // =============================================================================
 // Selection Colors

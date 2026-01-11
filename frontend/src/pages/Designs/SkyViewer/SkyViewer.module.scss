@@ -34,7 +34,7 @@ $button-background: rgba(black, 0.75);
     cursor: pointer;
 
     &:hover {
-      background-color: rgba(#033, 0.75);
+      background-color: rgba(#055, 0.75);
     }
 
     &:active {
@@ -145,8 +145,8 @@ $button-background: rgba(black, 0.75);
   font-size: 12px;
 
   option {
-    background-color: #222;
-    color: white;
+    background-color: var(--background-color-card);
+    color: var(--text-color);
   }
 }
 

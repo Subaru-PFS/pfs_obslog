@@ -68,16 +68,16 @@
 .error {
   padding: 0.75rem;
   margin-bottom: $spacing-md;
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
+  background: $error-background;
+  border: 1px solid $error-border;
   border-radius: $border-radius-sm;
-  color: #721c24;
+  color: $error-color;
   text-align: center;
 }
 
 .fieldError {
   display: block;
   margin-top: $spacing-xs;
-  color: #dc3545;
+  color: $error-color;
   font-size: $font-size-sm;
 }

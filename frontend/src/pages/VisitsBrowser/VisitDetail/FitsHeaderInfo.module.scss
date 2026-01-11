@@ -19,7 +19,7 @@
   max-width: 900px;
   height: 80%;
   max-height: 700px;
-  background-color: white;
+  background-color: $card-background;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   display: flex;
@@ -32,14 +32,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
+  background-color: $surface-background;
+  border-bottom: 1px solid $border-color;
 }
 
 .dialogTitle {
   font-weight: 600;
   font-size: 16px;
-  color: #333;
+  color: $text-color;
 }
 
 .closeButton {
@@ -51,11 +51,11 @@
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  color: #666;
+  color: $hint-text-color;
 
   &:hover {
-    background-color: #e0e0e0;
-    color: #333;
+    background-color: $hover-background-color;
+    color: $text-color;
   }
 }
 
@@ -71,7 +71,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #666;
+  color: $hint-text-color;
   font-size: 14px;
 }
 
@@ -87,7 +87,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #d32f2f;
+  color: var(--error-color);
 }
 
 .viewer {
@@ -101,20 +101,20 @@
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
+  background-color: $surface-background;
+  border-bottom: 1px solid $border-color;
 }
 
 .filename {
   font-family: 'Consolas', 'Monaco', monospace;
   font-weight: bold;
   font-size: 12px;
-  color: #333;
+  color: $text-color;
 }
 
 .hduLabel {
   font-size: 12px;
-  color: #666;
+  color: $hint-text-color;
   margin-left: auto;
 }
 
@@ -155,11 +155,12 @@ table.cards {
     z-index: 1;
 
     th {
-      background-color: #f5f5f5;
-      border-bottom: 1px solid #e0e0e0;
+      background-color: $surface-background;
+      border-bottom: 1px solid $border-color;
       padding: 4px 8px;
       text-align: left;
       font-weight: 600;
+      color: $text-color;
 
       &:nth-child(1) {
         width: 100px;
@@ -176,10 +177,12 @@ table.cards {
       input {
         width: 100%;
         padding: 2px 4px;
-        border: 1px solid #ccc;
+        border: 1px solid $border-color;
         border-radius: 2px;
         font-size: 11px;
         font-family: inherit;
+        background-color: $input-background;
+        color: $text-color;
 
         &:focus {
           outline: none;
@@ -192,14 +195,14 @@ table.cards {
   tbody {
     tr {
       &:hover {
-        background-color: #f5f5f5;
+        background-color: $surface-background;
       }
 
       &:nth-child(even) {
-        background-color: #fafafa;
+        background-color: $surface-hover-background;
 
         &:hover {
-          background-color: #f0f0f0;
+          background-color: $surface-alt-background;
         }
       }
     }
@@ -210,27 +213,27 @@ table.cards {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid $ruled-line-color;
     }
 
     th {
       font-weight: 600;
-      color: #006666;
+      color: var(--theme-color);
     }
   }
 
   .comment {
-    color: #666;
+    color: $hint-text-color;
     font-style: italic;
   }
 
   .commentKey {
     font-weight: 600;
-    color: #666;
+    color: $hint-text-color;
   }
 
   .commentValue {
-    color: #666;
+    color: $hint-text-color;
     font-style: italic;
   }
 }
@@ -240,8 +243,8 @@ table.cards {
   display: flex;
   flex-direction: column;
   height: 100%;
-  border-top: 1px solid #e0e0e0;
-  background-color: #fff;
+  border-top: 1px solid $border-color;
+  background-color: $card-background;
 }
 
 .panelHeader {
@@ -249,27 +252,27 @@ table.cards {
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
+  background-color: $surface-background;
+  border-bottom: 1px solid $border-color;
 }
 
 .panelTitle {
   font-weight: 600;
   font-size: 14px;
-  color: #333;
+  color: $text-color;
   flex-shrink: 0;
 }
 
 .panelInfo {
   font-size: 12px;
-  color: #666;
+  color: $hint-text-color;
   font-family: 'Consolas', 'Monaco', monospace;
   flex-shrink: 0;
 }
 
 .panelFilename {
   font-size: 12px;
-  color: #333;
+  color: $text-color;
   font-family: 'Consolas', 'Monaco', monospace;
   font-weight: bold;
   flex: 1;
@@ -288,11 +291,11 @@ table.cards {
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  color: #666;
+  color: $hint-text-color;
 
   &:hover {
-    background-color: #e0e0e0;
-    color: #333;
+    background-color: $hover-background-color;
+    color: $text-color;
   }
 }
 

@@ -10,8 +10,8 @@
   display: flex;
   padding: 8px;
   gap: 16px;
-  background: #f0f0f0;
-  border-top: 1px solid #ccc;
+  background: $surface-background;
+  border-top: 1px solid $border-color;
   flex-shrink: 0;  // 高さをコンテンツに合わせる（伸縮しない）
   overflow: hidden;
 }
@@ -34,7 +34,7 @@
 .colorModeSelect {
   padding: 4px 8px;
   border-radius: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid $border-color;
   width: 100%;  // 親コンテナの幅に合わせる
   box-sizing: border-box;
 }
@@ -67,7 +67,7 @@
   // CSS multi-column layout
   columns: 200px auto;  // 最小カラム幅200px、自動でカラム数を調整
   column-gap: 24px;
-  column-rule: 1px solid #ddd;
+  column-rule: 1px solid $border-color;
   column-fill: auto;  // 上下方向にフルに使う（高さいっぱいまで埋める）
 }
 
@@ -106,10 +106,10 @@
 .groupHeader {
   font-size: 11px;
   font-weight: bold;
-  color: #333;
+  color: $text-color;
   margin: 0 0 8px 0;
   padding: 4px 0;
-  border-bottom: 1px solid #999;
+  border-bottom: 1px solid $text-color-secondary;
   break-after: avoid;    // ヘッダー直後では改カラムしない
   break-inside: avoid;   // ヘッダー自体は分割されない
 }
@@ -122,7 +122,7 @@
   break-inside: avoid;  // カラムの途中で分割されないようにする
   
   .key {
-    color: #666;
+    color: $hint-text-color;
     font-weight: normal;
     white-space: nowrap;
     min-width: 120px;
@@ -132,7 +132,7 @@
   
   .value {
     font-family: monospace;
-    color: #000;
+    color: $text-color;
     word-break: break-word;
   }
 }

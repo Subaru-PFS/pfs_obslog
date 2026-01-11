@@ -1,12 +1,14 @@
 // SCSS for DateRangePicker component
 // The pre-built CSS is imported in DateRangePicker.tsx
-// This file contains light theme customizations only
+// This file contains theme customizations for both light and dark mode
 
 @use "sass:color";
 
-// Theme variables (light theme to match app theme)
+// Theme variables
 $accent: #4a90d9;
 $shadow-color: rgba(0, 0, 0, 0.2);
+
+// Light theme defaults
 $background-color: #ffffff;
 $foreground-color: #333333;
 $border-color: #cccccc;
@@ -131,6 +133,89 @@ $hover-background: #f0f0f0;
 
         &:hover {
           background-color: $hover-background;
+        }
+      }
+    }
+  }
+}
+
+// Dark theme customization
+:root[data-theme="dark"] {
+  .datepicker {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    border-color: #404040;
+
+    .datepicker-picker {
+      background-color: #2a2a2a;
+    }
+
+    .datepicker-header {
+      .datepicker-controls {
+        .button {
+          border-color: #404040;
+          color: #e0e0e0;
+
+          &:hover,
+          &:focus {
+            background-color: #3a3a3a;
+          }
+        }
+
+        .view-switch {
+          color: #e0e0e0;
+          
+          &:hover {
+            background-color: #3a3a3a;
+          }
+        }
+
+        .prev-button,
+        .next-button {
+          color: #e0e0e0;
+          
+          &:hover {
+            background-color: #3a3a3a;
+          }
+          
+          &.disabled {
+            color: #606060;
+          }
+        }
+      }
+    }
+
+    .datepicker-main {
+      .days-of-week {
+        .dow {
+          color: #e0e0e0;
+        }
+      }
+    }
+
+    .datepicker-cell {
+      color: #e0e0e0;
+
+      &.disabled {
+        color: #606060;
+      }
+
+      &.prev,
+      &.next {
+        color: #606060;
+      }
+    }
+
+    .datepicker-footer {
+      .datepicker-controls {
+        .today-button,
+        .clear-button {
+          border-color: #404040;
+          color: #e0e0e0;
+
+          &:hover {
+            background-color: #3a3a3a;
+          }
         }
       }
     }
