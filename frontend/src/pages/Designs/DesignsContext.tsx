@@ -441,7 +441,18 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
         // スクロール要求を設定（DesignListで処理される）
         setScrollToDesignId(designIdToSelect)
       } else {
-        // リスト外の場合: ランクを取得してページ遷移する
+        // リスト外の場合: カメラ移動を先に開始し、ランク取得を並行して行う
+        
+        // カメラ移動を先に開始（skipCameraJumpが指定されている場合はスキップ）
+        if (!options?.skipCameraJump) {
+          jumpToRef.current({
+            fovy: (1.6 * Math.PI) / 180,
+            coord: { ra: position.ra, dec: position.dec },
+            duration: options?.animate ? 1000 : 0,
+          })
+        }
+        
+        // ランク取得を並行して実行（カメラ移動をブロックしない）
         try {
           const params = new URLSearchParams()
           if (search) params.set('search', search)
@@ -465,19 +476,6 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
             // ページ遷移
             const targetOffset = Math.floor(rankData.rank / limit) * limit
             setOffset(targetOffset)
-            
-            // 選択状態を設定（designsが更新されるまではPfsDesignEntryがないのでpositionから作る）
-            // 実際のDesignEntryはリスト更新後に設定される
-            // ここでは位置情報だけでカメラ移動を行い、スクロール要求を設定する
-            
-            // カメラ移動（skipCameraJumpが指定されている場合はスキップ）
-            if (!options?.skipCameraJump) {
-              jumpToRef.current({
-                fovy: (1.6 * Math.PI) / 180,
-                coord: { ra: position.ra, dec: position.dec },
-                duration: options?.animate ? 1000 : 0,
-              })
-            }
             
             // スクロール要求を設定（リスト更新後にDesignListで処理される）
             setScrollToDesignId(designIdToSelect)
