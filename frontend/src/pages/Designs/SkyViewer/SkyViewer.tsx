@@ -175,11 +175,10 @@ export function SkyViewer() {
   const handleCameraMoveEnd = useCallback(() => {
     if (!globeRef.current) return
     const globe = globeRef.current()
-    const { theta, phi } = globe.camera
-    // カメラの向き（theta, phi）を赤道座標に変換
-    // theta: 赤経（ラジアン）, phi: 赤緯+π/2（ラジアン）
-    const ra = angle.rad2deg(theta)
-    const dec = angle.rad2deg(phi - Math.PI / 2)
+    // カメラの視野中心座標を取得
+    const center = globe.camera.center()
+    const ra = angle.rad2deg(center.raDec.ra)
+    const dec = angle.rad2deg(center.raDec.dec)
     setCameraCenter({ ra, dec })
   }, [setCameraCenter])
 
