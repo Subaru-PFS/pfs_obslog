@@ -495,11 +495,15 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
         try {
           const params = new URLSearchParams()
           if (search) params.set('search', search)
-          params.set('sort_by', sortBy)
+          // distanceソートはAPIではaltitudeソートとして扱う
+          params.set('sort_by', sortBy === 'distance' ? 'altitude' : sortBy)
           params.set('sort_order', sortOrder)
           if (sortBy === 'altitude') {
             params.set('zenith_ra', String(committedZenith.ra))
             params.set('zenith_dec', String(committedZenith.dec))
+          } else if (sortBy === 'distance' && cameraCenter) {
+            params.set('zenith_ra', String(cameraCenter.ra))
+            params.set('zenith_dec', String(cameraCenter.dec))
           }
           if (dateRange[0]) params.set('date_from', dateRange[0])
           if (dateRange[1]) params.set('date_to', dateRange[1])
@@ -524,7 +528,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
         }
       }
     },
-    [allPositions, designs, designDetail, selectedDesign, designId, navigate, search, sortBy, sortOrder, committedZenith, dateRange, limit, setOffset]
+    [allPositions, designs, designDetail, selectedDesign, designId, navigate, search, sortBy, sortOrder, committedZenith, cameraCenter, dateRange, limit, setOffset]
   )
 
   // 初回ロード処理: URLにdesignIdがあり、データがロードされた時に一度だけ実行
