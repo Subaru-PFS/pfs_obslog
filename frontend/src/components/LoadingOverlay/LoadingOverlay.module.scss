@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba($block-background-color, 0.3);
+  background-color: $loading-overlay-background;
   z-index: 100;
   animation: fadeIn 0.3s ease-out;
 

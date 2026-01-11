@@ -132,6 +132,18 @@
   --terminal-background: #263238;
   --terminal-text: #b2ff59;
 
+  /* SQL highlighting */
+  --sql-text-color: #0000b3;
+  --sql-background-color: rgba(0, 0, 255, 0.05);
+  --sql-glow-color: #00f;
+
+  /* Code highlighting */
+  --code-text-color: #006600;
+  --code-background-color: rgba(0, 64, 0, 0.05);
+
+  /* Loading overlay */
+  --loading-overlay-background: rgba(255, 255, 255, 0.3);
+
   /* Error colors */
   --error-color: #e53935;
   --error-background: #fee;
@@ -293,6 +305,18 @@
   /* Terminal colors (code blocks) - stays dark in dark mode */
   --terminal-background: #1e272c;
   --terminal-text: #a5d6a7;
+
+  /* SQL highlighting (dark mode - brighter for readability) */
+  --sql-text-color: #8080ff;
+  --sql-background-color: rgba(80, 80, 255, 0.15);
+  --sql-glow-color: #6060ff;
+
+  /* Code highlighting (dark mode) */
+  --code-text-color: #80ff80;
+  --code-background-color: rgba(0, 128, 0, 0.15);
+
+  /* Loading overlay (dark mode - lighter for visibility) */
+  --loading-overlay-background: rgba(255, 255, 255, 0.15);
 
   /* Error colors */
   --error-color: #ef5350;

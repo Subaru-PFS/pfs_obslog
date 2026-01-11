@@ -95,7 +95,7 @@
     padding: $spacing-sm $spacing-md;
     background-color: $sql-background-color;
     color: $sql-text-color;
-    box-shadow: 0 0 4px $sql-color;
+    box-shadow: 0 0 4px $sql-glow-color;
     cursor: pointer;
     font-family: $font-family-mono;
     font-size: $font-size-sm;
@@ -104,7 +104,7 @@
 
     &:hover {
       transform: translateY(-1px);
-      box-shadow: 0 2px 8px $sql-color;
+      box-shadow: 0 2px 8px $sql-glow-color;
     }
 
     &:active {

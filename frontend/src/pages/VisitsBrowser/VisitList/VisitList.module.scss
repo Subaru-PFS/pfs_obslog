@@ -48,7 +48,7 @@ $toolbar-input-height: 26px;
   &.sqlInput {
     color: $sql-text-color;
     font-family: $font-family-mono;
-    box-shadow: 0 0 4px inset rgba($sql-color, 1);
+    box-shadow: 0 0 4px inset $sql-glow-color;
   }
 
   &.errorInput {

@@ -89,7 +89,7 @@ $selected-hover-background: var(--selected-background-hover);
 // =============================================================================
 // Loading & Overlay
 // =============================================================================
-$block-background-color: black;
+$loading-overlay-background: var(--loading-overlay-background);
 
 // =============================================================================
 // Depth Background
@@ -204,14 +204,15 @@ $light-shadow: var(--shadow-light);
 // =============================================================================
 // SQL Highlighting
 // =============================================================================
-$sql-text-color: color.adjust($sql-color, $lightness: -25%);
-$sql-background-color: rgba($sql-color, 0.05);
+$sql-text-color: var(--sql-text-color);
+$sql-background-color: var(--sql-background-color);
+$sql-glow-color: var(--sql-glow-color);
 
 // =============================================================================
 // Code Highlighting
 // =============================================================================
-$code-text-color: color.adjust($code-color, $lightness: -40%, $saturation: -25%);
-$code-background-color: rgba(color.adjust($code-color, $lightness: -75%), 0.05);
+$code-text-color: var(--code-text-color);
+$code-background-color: var(--code-background-color);
 
 // =============================================================================
 // Spacing
