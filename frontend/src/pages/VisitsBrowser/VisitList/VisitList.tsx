@@ -294,7 +294,7 @@ function IicSequenceHeader({ iicSequence, visitId, onSequenceGroupClick }: IicSe
   const [createNote] = useCreateVisitSetNoteApiVisitSetsVisitSetIdNotesPostMutation()
   const [updateNote] = useUpdateVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdPutMutation()
   const [deleteNote] = useDeleteVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdDeleteMutation()
-  
+
   const handleClick = () => {
     if (visitId !== undefined) {
       setSelectedVisitId(visitId)
@@ -400,10 +400,10 @@ interface VisitGroupComponentProps {
 function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGroupComponentProps) {
   const navigate = useNavigate()
   const { selectedVisitId, setSelectedVisitId } = useVisitsBrowserContext()
-  
+
   // Check if any visit in this group is selected
   const hasSelectedVisit = group.visits.some(v => v.id === selectedVisitId)
-  
+
   // Handle click on the group background (header area)
   const handleGroupClick = (e: React.MouseEvent) => {
     // Only handle clicks on the group container itself, not on child elements
@@ -413,7 +413,7 @@ function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGrou
   }
 
   return (
-    <div 
+    <div
       className={`${styles.visitGroup} ${hasSelectedVisit ? styles.visitGroupSelected : ''}`}
       onClick={handleGroupClick}
     >
@@ -453,155 +453,155 @@ function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGrou
               {columns.notes_content && <Tooltip content="Notes Content" as="th" className={styles.colNotesContent}><Icon name="notes" size={14} /></Tooltip>}
             </tr>
           </thead>
-        <tbody>
-          {group.visits.map((visit) => {
-            const { date, time } = formatDate(visit.issued_at ?? undefined)
-            const isSelected = selectedVisitId === visit.id
+          <tbody>
+            {group.visits.map((visit) => {
+              const { date, time } = formatDate(visit.issued_at ?? undefined)
+              const isSelected = selectedVisitId === visit.id
 
-            return (
-              <tr
-                key={visit.id}
-                data-visit-id={visit.id}
-                className={isSelected ? styles.selected : ''}
-                onClick={() => setSelectedVisitId(visit.id)}
-              >
-                {columns.id && <td className={styles.colId}>{visit.id}</td>}
-                {columns.description && (
-                  <TruncatedCell content={visit.description || ''} className={styles.colDescription}>
-                    {visit.description || '-'}
-                  </TruncatedCell>
-                )}
-                {columns.date && <TruncatedCell content={date} className={styles.colDate}>{date}</TruncatedCell>}
-                {columns.time && <TruncatedCell content={time} className={styles.colTime}>{time}</TruncatedCell>}
-                {columns.exposures && (
-                  <TruncatedCell
-                    className={`${styles.colExposures} ${getExposureClass(
-                      visit.n_sps_exposures ?? 0,
-                      visit.n_mcs_exposures ?? 0,
-                      visit.n_agc_exposures ?? 0
-                    )}`}
-                    content={`SPS: ${visit.n_sps_exposures ?? 0}, MCS: ${visit.n_mcs_exposures ?? 0}, AGC: ${visit.n_agc_exposures ?? 0}`}
-                  >
-                    {visit.n_sps_exposures ?? 0}/{visit.n_mcs_exposures ?? 0}/{visit.n_agc_exposures ?? 0}
-                  </TruncatedCell>
-                )}
-                {columns.exptime && (
-                  <TruncatedCell content={visit.avg_exptime ? `${visit.avg_exptime.toFixed(3)} s` : ''} className={styles.colExptime}>
-                    {visit.avg_exptime ? visit.avg_exptime.toFixed(1) : '-'}
-                  </TruncatedCell>
-                )}
-                {columns.eet_b && (
-                  <TruncatedCell content={visit.effective_exposure_time_b ? `${visit.effective_exposure_time_b.toFixed(3)} s` : ''} className={styles.colEet}>
-                    {visit.effective_exposure_time_b?.toFixed(1) ?? '-'}
-                  </TruncatedCell>
-                )}
-                {columns.eet_r && (
-                  <TruncatedCell content={visit.effective_exposure_time_r ? `${visit.effective_exposure_time_r.toFixed(3)} s` : ''} className={styles.colEet}>
-                    {visit.effective_exposure_time_r?.toFixed(1) ?? '-'}
-                  </TruncatedCell>
-                )}
-                {columns.eet_n && (
-                  <TruncatedCell content={visit.effective_exposure_time_n ? `${visit.effective_exposure_time_n.toFixed(3)} s` : ''} className={styles.colEet}>
-                    {visit.effective_exposure_time_n?.toFixed(1) ?? '-'}
-                  </TruncatedCell>
-                )}
-                {columns.eet_m && (
-                  <TruncatedCell content={visit.effective_exposure_time_m ? `${visit.effective_exposure_time_m.toFixed(3)} s` : ''} className={styles.colEet}>
-                    {visit.effective_exposure_time_m?.toFixed(1) ?? '-'}
-                  </TruncatedCell>
-                )}
-                {columns.seeing && (
-                  <TruncatedCell content={visit.seeing_median ? `${visit.seeing_median.toFixed(4)} arcsec` : ''} className={styles.colSeeing}>
-                    {visit.seeing_median?.toFixed(2) ?? '-'}
-                  </TruncatedCell>
-                )}
-                {columns.transparency && (
-                  <TruncatedCell content={visit.transparency_median ? `${visit.transparency_median.toFixed(4)}` : ''} className={styles.colTransparency}>
-                    {visit.transparency_median?.toFixed(2) ?? '-'}
-                  </TruncatedCell>
-                )}
-                {columns.pfs_design_id && (
-                  <td className={styles.colDesign}>
-                    {visit.pfs_design_id ? (
-                      <Tooltip content={visit.pfs_design_id}>
-                        <a
-                          href={`/designs/${visit.pfs_design_id.replace(/^0x/, '')}`}
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            navigate(`/designs/${visit.pfs_design_id!.replace(/^0x/, '')}`)
-                          }}
-                          className={styles.designLink}
+              return (
+                <tr
+                  key={visit.id}
+                  data-visit-id={visit.id}
+                  className={isSelected ? styles.selected : ''}
+                  onClick={() => setSelectedVisitId(visit.id)}
+                >
+                  {columns.id && <td className={styles.colId}>{visit.id}</td>}
+                  {columns.description && (
+                    <TruncatedCell content={visit.description || ''} className={styles.colDescription}>
+                      {visit.description || '-'}
+                    </TruncatedCell>
+                  )}
+                  {columns.date && <TruncatedCell content={date} className={styles.colDate}>{date}</TruncatedCell>}
+                  {columns.time && <TruncatedCell content={time} className={styles.colTime}>{time}</TruncatedCell>}
+                  {columns.exposures && (
+                    <TruncatedCell
+                      className={`${styles.colExposures} ${getExposureClass(
+                        visit.n_sps_exposures ?? 0,
+                        visit.n_mcs_exposures ?? 0,
+                        visit.n_agc_exposures ?? 0
+                      )}`}
+                      content={`SPS: ${visit.n_sps_exposures ?? 0}, MCS: ${visit.n_mcs_exposures ?? 0}, AGC: ${visit.n_agc_exposures ?? 0}`}
+                    >
+                      {visit.n_sps_exposures ?? 0}/{visit.n_mcs_exposures ?? 0}/{visit.n_agc_exposures ?? 0}
+                    </TruncatedCell>
+                  )}
+                  {columns.exptime && (
+                    <TruncatedCell content={visit.avg_exptime ? `${visit.avg_exptime.toFixed(3)} s` : ''} className={styles.colExptime}>
+                      {visit.avg_exptime ? visit.avg_exptime.toFixed(1) : '-'}
+                    </TruncatedCell>
+                  )}
+                  {columns.eet_b && (
+                    <TruncatedCell content={visit.effective_exposure_time_b ? `${visit.effective_exposure_time_b.toFixed(3)} s` : ''} className={styles.colEet}>
+                      {visit.effective_exposure_time_b?.toFixed(1) ?? '-'}
+                    </TruncatedCell>
+                  )}
+                  {columns.eet_r && (
+                    <TruncatedCell content={visit.effective_exposure_time_r ? `${visit.effective_exposure_time_r.toFixed(3)} s` : ''} className={styles.colEet}>
+                      {visit.effective_exposure_time_r?.toFixed(1) ?? '-'}
+                    </TruncatedCell>
+                  )}
+                  {columns.eet_n && (
+                    <TruncatedCell content={visit.effective_exposure_time_n ? `${visit.effective_exposure_time_n.toFixed(3)} s` : ''} className={styles.colEet}>
+                      {visit.effective_exposure_time_n?.toFixed(1) ?? '-'}
+                    </TruncatedCell>
+                  )}
+                  {columns.eet_m && (
+                    <TruncatedCell content={visit.effective_exposure_time_m ? `${visit.effective_exposure_time_m.toFixed(3)} s` : ''} className={styles.colEet}>
+                      {visit.effective_exposure_time_m?.toFixed(1) ?? '-'}
+                    </TruncatedCell>
+                  )}
+                  {columns.seeing && (
+                    <TruncatedCell content={visit.seeing_median ? `${visit.seeing_median.toFixed(4)} arcsec` : ''} className={styles.colSeeing}>
+                      {visit.seeing_median?.toFixed(2) ?? '-'}
+                    </TruncatedCell>
+                  )}
+                  {columns.transparency && (
+                    <TruncatedCell content={visit.transparency_median ? `${visit.transparency_median.toFixed(4)}` : ''} className={styles.colTransparency}>
+                      {visit.transparency_median?.toFixed(2) ?? '-'}
+                    </TruncatedCell>
+                  )}
+                  {columns.pfs_design_id && (
+                    <td className={styles.colDesign}>
+                      {visit.pfs_design_id ? (
+                        <Tooltip content={visit.pfs_design_id}>
+                          <a
+                            href={`/designs/${visit.pfs_design_id.replace(/^0x/, '')}`}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              navigate(`/designs/${visit.pfs_design_id!.replace(/^0x/, '')}`)
+                            }}
+                            className={styles.designLink}
+                          >
+                            {visit.pfs_design_id.slice(0, 6)}...
+                          </a>
+                        </Tooltip>
+                      ) : '-'}
+                    </td>
+                  )}
+                  {columns.ra && (
+                    <TruncatedCell content={visit.avg_ra !== null && visit.avg_ra !== undefined ? `RA: ${visit.avg_ra.toFixed(6)}°` : ''} className={styles.colCoord}>
+                      {visit.avg_ra !== null && visit.avg_ra !== undefined ? visit.avg_ra.toFixed(1) : '-'}
+                    </TruncatedCell>
+                  )}
+                  {columns.dec && (
+                    <TruncatedCell content={visit.avg_dec !== null && visit.avg_dec !== undefined ? `Dec: ${visit.avg_dec.toFixed(6)}°` : ''} className={styles.colCoord}>
+                      {visit.avg_dec !== null && visit.avg_dec !== undefined ? visit.avg_dec.toFixed(1) : '-'}
+                    </TruncatedCell>
+                  )}
+                  {columns.azimuth && (
+                    <TruncatedCell content={visit.avg_azimuth !== null && visit.avg_azimuth !== undefined ? `Az: ${visit.avg_azimuth.toFixed(4)}°` : ''} className={styles.colCoord}>
+                      {visit.avg_azimuth !== null && visit.avg_azimuth !== undefined ? visit.avg_azimuth.toFixed(2) : '-'}
+                    </TruncatedCell>
+                  )}
+                  {columns.altitude && (
+                    <TruncatedCell content={visit.avg_altitude !== null && visit.avg_altitude !== undefined ? `Alt: ${visit.avg_altitude.toFixed(4)}°` : ''} className={styles.colCoord}>
+                      {visit.avg_altitude !== null && visit.avg_altitude !== undefined ? visit.avg_altitude.toFixed(2) : '-'}
+                    </TruncatedCell>
+                  )}
+                  {columns.insrot && (
+                    <TruncatedCell content={visit.avg_insrot !== null && visit.avg_insrot !== undefined ? `InsRot: ${visit.avg_insrot.toFixed(4)}°` : ''} className={styles.colCoord}>
+                      {visit.avg_insrot !== null && visit.avg_insrot !== undefined ? visit.avg_insrot.toFixed(2) : '-'}
+                    </TruncatedCell>
+                  )}
+                  {columns.notes_count && (
+                    <td className={styles.colNotesCount}>
+                      {(visit.notes?.length ?? 0) > 0 ? (
+                        <Tooltip
+                          content={
+                            <ul className={styles.noteTooltipList}>
+                              {visit.notes?.map((note, idx) => (
+                                <li key={idx}>
+                                  <span className={styles.noteTooltipBody}>{note.body}</span>
+                                  <span className={styles.noteTooltipUser}>({note.user.account_name})</span>
+                                </li>
+                              ))}
+                            </ul>
+                          }
                         >
-                          {visit.pfs_design_id.slice(0, 6)}...
-                        </a>
-                      </Tooltip>
-                    ) : '-'}
-                  </td>
-                )}
-                {columns.ra && (
-                  <TruncatedCell content={visit.avg_ra !== null && visit.avg_ra !== undefined ? `RA: ${visit.avg_ra.toFixed(6)}°` : ''} className={styles.colCoord}>
-                    {visit.avg_ra !== null && visit.avg_ra !== undefined ? visit.avg_ra.toFixed(1) : '-'}
-                  </TruncatedCell>
-                )}
-                {columns.dec && (
-                  <TruncatedCell content={visit.avg_dec !== null && visit.avg_dec !== undefined ? `Dec: ${visit.avg_dec.toFixed(6)}°` : ''} className={styles.colCoord}>
-                    {visit.avg_dec !== null && visit.avg_dec !== undefined ? visit.avg_dec.toFixed(1) : '-'}
-                  </TruncatedCell>
-                )}
-                {columns.azimuth && (
-                  <TruncatedCell content={visit.avg_azimuth !== null && visit.avg_azimuth !== undefined ? `Az: ${visit.avg_azimuth.toFixed(4)}°` : ''} className={styles.colCoord}>
-                    {visit.avg_azimuth !== null && visit.avg_azimuth !== undefined ? visit.avg_azimuth.toFixed(2) : '-'}
-                  </TruncatedCell>
-                )}
-                {columns.altitude && (
-                  <TruncatedCell content={visit.avg_altitude !== null && visit.avg_altitude !== undefined ? `Alt: ${visit.avg_altitude.toFixed(4)}°` : ''} className={styles.colCoord}>
-                    {visit.avg_altitude !== null && visit.avg_altitude !== undefined ? visit.avg_altitude.toFixed(2) : '-'}
-                  </TruncatedCell>
-                )}
-                {columns.insrot && (
-                  <TruncatedCell content={visit.avg_insrot !== null && visit.avg_insrot !== undefined ? `InsRot: ${visit.avg_insrot.toFixed(4)}°` : ''} className={styles.colCoord}>
-                    {visit.avg_insrot !== null && visit.avg_insrot !== undefined ? visit.avg_insrot.toFixed(2) : '-'}
-                  </TruncatedCell>
-                )}
-                {columns.notes_count && (
-                  <td className={styles.colNotesCount}>
-                    {(visit.notes?.length ?? 0) > 0 ? (
-                      <Tooltip
-                        content={
-                          <ul className={styles.noteTooltipList}>
-                            {visit.notes?.map((note, idx) => (
-                              <li key={idx}>
-                                <span className={styles.noteTooltipBody}>{note.body}</span>
-                                <span className={styles.noteTooltipUser}>({note.user.account_name})</span>
-                              </li>
-                            ))}
-                          </ul>
-                        }
-                      >
-                        <span className={styles.notesBadge}>{visit.notes?.length}</span>
-                      </Tooltip>
-                    ) : '-'}
-                  </td>
-                )}
-                {columns.notes_content && (
-                  <td className={styles.colNotesContent}>
-                    {(visit.notes?.length ?? 0) > 0 ? (
-                      <ul className={styles.noteContentList}>
-                        {visit.notes?.map((note, idx) => (
-                          <li key={idx} className={styles.noteContentItem}>
-                            <span className={styles.noteContentBody}>{note.body}</span>
-                            <span className={styles.noteContentUser}>({note.user.account_name})</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : '-'}
-                  </td>
-                )}
-              </tr>
-            )
-          })}
-        </tbody>
+                          <span className={styles.notesBadge}>{visit.notes?.length}</span>
+                        </Tooltip>
+                      ) : '-'}
+                    </td>
+                  )}
+                  {columns.notes_content && (
+                    <td className={styles.colNotesContent}>
+                      {(visit.notes?.length ?? 0) > 0 ? (
+                        <ul className={styles.noteContentList}>
+                          {visit.notes?.map((note, idx) => (
+                            <li key={idx} className={styles.noteContentItem}>
+                              <span className={styles.noteContentBody}>{note.body}</span>
+                              <span className={styles.noteContentUser}>({note.user.account_name})</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : '-'}
+                    </td>
+                  )}
+                </tr>
+              )
+            })}
+          </tbody>
         </table>
       </div>
     </div>
@@ -616,7 +616,7 @@ function parseUrlParams(searchParams: URLSearchParams) {
   const sps = (searchParams.get('sps') ?? '>=0') as ExposureCondition
   const mcs = (searchParams.get('mcs') ?? '>=0') as ExposureCondition
   const agc = (searchParams.get('agc') ?? '>=0') as ExposureCondition
-  
+
   return {
     sql,
     dateRange: [startDate, endDate] as DateRange,
@@ -632,10 +632,10 @@ export function VisitList() {
   const navigate = useNavigate()
   const { selectedVisitId, setSelectedVisitId, setScrollToVisitCallback, isScrollingToVisit } = useVisitsBrowserContext()
   const [searchParams, setSearchParams] = useSearchParams()
-  
+
   // Parse URL params once on mount and when they change externally
   const urlParams = useMemo(() => parseUrlParams(searchParams), [searchParams])
-  
+
   // Local state for the search text box (may differ from applied SQL)
   const [searchQuery, setSearchQuery] = useState(urlParams.sql)
   // Applied SQL (synced with URL)
@@ -644,7 +644,7 @@ export function VisitList() {
   const dateRange = urlParams.dateRange
   // Exposure filters (synced with URL)
   const exposureFilters = urlParams.exposureFilters
-  
+
   // Refs
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -664,7 +664,7 @@ export function VisitList() {
   }) => {
     setSearchParams((prev) => {
       const newParams = new URLSearchParams(prev)
-      
+
       if ('sql' in updates) {
         if (updates.sql) {
           newParams.set('sql', updates.sql)
@@ -707,7 +707,7 @@ export function VisitList() {
           newParams.delete('agc')
         }
       }
-      
+
       return newParams
     }, { replace: true })
   }, [setSearchParams])
@@ -719,24 +719,24 @@ export function VisitList() {
     // Scroll to top after state update
     requestAnimationFrame(() => contentRef.current?.scrollTo(0, 0))
   }, [updateUrlParams])
-  
+
   const setDateRange = useCallback((range: DateRange) => {
-    updateUrlParams({ 
-      startDate: range[0] ?? null, 
-      endDate: range[1] ?? null 
+    updateUrlParams({
+      startDate: range[0] ?? null,
+      endDate: range[1] ?? null
     })
     setOffset(0)
     // Scroll to top after state update
     requestAnimationFrame(() => contentRef.current?.scrollTo(0, 0))
   }, [updateUrlParams])
-  
+
   const setExposureFilters = useCallback((partialFilters: Partial<ExposureFilters>) => {
     // Merge with current filters to get full filters
     const newFilters = { ...exposureFilters, ...partialFilters }
-    updateUrlParams({ 
-      sps: newFilters.sps, 
-      mcs: newFilters.mcs, 
-      agc: newFilters.agc 
+    updateUrlParams({
+      sps: newFilters.sps,
+      mcs: newFilters.mcs,
+      agc: newFilters.agc
     })
     setOffset(0)
     // Scroll to top after state update
@@ -749,7 +749,7 @@ export function VisitList() {
   // Build effective SQL combining search query, date range, and exposure filters
   const effectiveSql = useMemo(() => {
     const conditions: string[] = []
-    
+
     // Add search query condition
     if (appliedSql) {
       // Extract condition from "where ..." clause
@@ -758,7 +758,7 @@ export function VisitList() {
         conditions.push(`(${match[1]})`)
       }
     }
-    
+
     // Add date range condition
     const [start, end] = dateRange
     if (start && end) {
@@ -784,7 +784,7 @@ export function VisitList() {
     if (exposureFilters.agc !== '>=0') {
       conditions.push(`agc_count${exposureConditionMap[exposureFilters.agc]}`)
     }
-    
+
     if (conditions.length === 0) return undefined
     return `where ${conditions.join(' and ')}`
   }, [appliedSql, dateRange, exposureFilters])
@@ -860,7 +860,7 @@ export function VisitList() {
     const newOffset = Math.max(0, offset - (PER_PAGE >> 1))
     const increase = offset - newOffset
     if (increase === 0) return
-    
+
     setIsLoadingMore(true)
     setOffset(newOffset)
     setLimit((prev) => prev + increase)
@@ -902,7 +902,7 @@ export function VisitList() {
     }
     // Set a reasonable limit for CSV export
     params.set('limit', '10000')
-    
+
     const url = `${API_BASE_URL}/api/visits.csv?${params}`
     window.location.href = url
   }, [appliedSql])
@@ -911,7 +911,7 @@ export function VisitList() {
   const scrollToVisitInList = useCallback(async (visitId: number) => {
     // First, check if the visit is already in the current list
     const isInCurrentList = data?.visits.some(v => v.id === visitId) ?? false
-    
+
     if (isInCurrentList) {
       // Visit is already in the current list, just scroll to it
       setSelectedVisitId(visitId)
@@ -921,7 +921,7 @@ export function VisitList() {
       })
       return
     }
-    
+
     // Visit is not in current list, fetch rank and navigate to the correct page
     try {
       const result = await getVisitRank({ visitId, sql: effectiveSql ?? undefined }).unwrap()
@@ -933,15 +933,15 @@ export function VisitList() {
       // Calculate offset to center the visit in the view
       // rank is 1-based, so visit at rank 1 should be at offset 0
       const targetOffset = Math.max(0, result.rank - 1 - Math.floor(PER_PAGE / 2))
-      
+
       // Fetch the visits with the new offset to ensure data is loaded
       await fetchVisits({ offset: targetOffset, limit: PER_PAGE, sql: effectiveSql }).unwrap()
-      
+
       // Update state to match the fetched data
       setOffset(targetOffset)
       setLimit(PER_PAGE)
       setSelectedVisitId(visitId)
-      
+
       // Scroll to the visit after DOM update
       requestAnimationFrame(() => {
         const element = document.querySelector(`[data-visit-id="${visitId}"]`)
@@ -981,7 +981,7 @@ export function VisitList() {
   const handleSearch = useCallback(() => {
     setSearchError(null)
     const query = searchQuery.trim()
-    
+
     if (query === '') {
       // Clear filter
       setAppliedSql(null)
@@ -994,7 +994,7 @@ export function VisitList() {
       setSearchQuery(convertedQuery)
       setAppliedSql(convertedQuery)
     }
-    
+
     // Reset pagination (setAppliedSql already handles offset reset and scroll)
     setLimit(PER_PAGE)
   }, [searchQuery, isSqlQuery, setAppliedSql])
@@ -1186,15 +1186,6 @@ export function VisitList() {
         </div>
       </div>
 
-      {/* Search error message */}
-      {searchError && (
-        <div className={styles.searchError}>
-          <Icon name="error" size={16} />
-          <span>{searchError}</span>
-          <Link to="/sql-syntax-help" className={styles.helpLink}>See syntax help</Link>
-        </div>
-      )}
-
       {/* Filter row: exposure types, date range, and pagination */}
       <div className={styles.filterRow}>
         <div className={styles.filterRowLeft}>
@@ -1301,23 +1292,31 @@ export function VisitList() {
         {/* Loading overlay - positioned after paginationTop to avoid gap */}
         <LoadingOverlay isLoading={(isFetching || isLoadingMore) && !(shouldAutoRefresh && data)} />
 
-        {errorMessage ? (
-          <div className={styles.error}>
-            <Icon name="error" size={20} />
-            <span>{errorMessage}</span>
-          </div>
-        ) : visitGroups.length === 0 ? (
-          <div className={styles.empty}>No visits found</div>
-        ) : (
-          visitGroups.map((group, index) => (
-            <VisitGroupComponent
-              key={group.iicSequence?.iic_sequence_id ?? `no-seq-${index}`}
-              group={group}
-              columns={columns}
-              onSequenceGroupClick={handleSequenceGroupFilter}
-            />
-          ))
-        )}
+        {/* List content wrapper - grows to fill space so paginationBottom stays at bottom */}
+        <div className={styles.listContent}>
+          {errorMessage ? (
+            <>
+              <div className={styles.error}>
+                <Icon name="error" size={20} />
+                <span>{errorMessage}</span>
+              </div>
+              <div className={styles.error}>
+                <Link to="/sql-syntax-help" className={styles.helpLink}>See syntax help</Link>
+              </div>
+            </>
+          ) : visitGroups.length === 0 ? (
+            <div className={styles.empty}>No visits found</div>
+          ) : (
+            visitGroups.map((group, index) => (
+              <VisitGroupComponent
+                key={group.iicSequence?.iic_sequence_id ?? `no-seq-${index}`}
+                group={group}
+                columns={columns}
+                onSequenceGroupClick={handleSequenceGroupFilter}
+              />
+            ))
+          )}
+        </div>
 
         {/* Navigation at bottom - scrolls with content */}
         <div className={styles.paginationBottom}>

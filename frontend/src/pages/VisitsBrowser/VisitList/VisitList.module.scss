@@ -68,7 +68,7 @@ $toolbar-input-height: 26px;
 }
 
 .helpLink {
-  margin-left: auto;
+  // margin-left: auto;
   color: inherit;
   text-decoration: underline;
   opacity: 0.8;
@@ -340,6 +340,13 @@ $pagination-border-radius: 12px;
   overflow: auto;
   padding: 0;
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+// List content wrapper - grows to fill available space
+.listContent {
+  flex: 1;
 }
 
 // =============================================================================
@@ -881,7 +888,7 @@ $pagination-border-radius: 12px;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 32px;
+  padding: 8px;
   color: $error-color;
   font-family: monospace;
   white-space: pre-wrap;

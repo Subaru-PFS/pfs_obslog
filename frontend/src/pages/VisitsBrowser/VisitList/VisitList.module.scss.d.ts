@@ -43,6 +43,7 @@ export type Styles = {
   helpLink: string;
   iicSequence: string;
   info: string;
+  listContent: string;
   loading: string;
   noSequence: string;
   noteContentBody: string;
