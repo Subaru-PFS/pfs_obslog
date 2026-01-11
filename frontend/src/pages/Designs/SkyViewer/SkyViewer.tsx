@@ -160,8 +160,9 @@ export function SkyViewer() {
     if (!globeRef.current) return
     const globe = globeRef.current()
     const center = globe.camera.center()
-    const ra = angle.rad2deg(center.raDec.ra)
-    const dec = angle.rad2deg(center.raDec.dec)
+    // SkyCoordのa, dはAngle型、.degで度数に変換
+    const ra = center.a.deg
+    const dec = center.d.deg
     setCameraCenter({ ra, dec })
   }, [setCameraCenter])
 
