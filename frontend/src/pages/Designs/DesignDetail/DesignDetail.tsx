@@ -151,12 +151,14 @@ export function DesignDetail() {
 
       {/* Design詳細 + Fiber詳細（Designが選択されている場合のみ） */}
       {designDetail && selectedDesign && (
-        <FiberDetail
-          design={designDetail}
-          designIdHex={selectedDesign.id}
-          fiberId={focusedFiber?.fiberId ?? null}
-          cobra={focusedCobra}
-        />
+        <div className={styles.detailAreaContainer}>
+          <FiberDetail
+            design={designDetail}
+            designIdHex={selectedDesign.id}
+            fiberId={focusedFiber?.fiberId ?? null}
+            cobra={focusedCobra}
+          />
+        </div>
       )}
     </div>
   )

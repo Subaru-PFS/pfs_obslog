@@ -2,6 +2,7 @@ export type Styles = {
   colorModeSelect: string;
   designDetailContainer: string;
   detailArea: string;
+  detailAreaContainer: string;
   focalPlaneSection: string;
   groupHeader: string;
   key: string;
