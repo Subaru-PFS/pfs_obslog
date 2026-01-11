@@ -24,10 +24,10 @@
 
 .error {
   padding: 1rem;
-  background-color: #fee;
-  border: 1px solid #f88;
+  background-color: var(--error-background);
+  border: 1px solid var(--error-border);
   border-radius: 8px;
-  color: #c00;
+  color: var(--error-color);
 }
 
 /* =============================================================================
@@ -46,16 +46,17 @@
 }
 
 .message--success {
-  background-color: #dfd;
-  color: #060;
+  background-color: var(--success-background);
+  color: var(--success-text);
 }
 
 .message--warning {
-  background-color: #ffd;
-  color: #660;
+  background-color: var(--warning-background);
+  color: var(--warning-text);
 }
 
 .message--error {
-  background-color: #fee;
-  color: #c00;
+  background-color: var(--error-background);
+  color: var(--error-color);
 }
+

@@ -4,6 +4,7 @@ import {
   useGetStatusApiAuthStatusGetQuery,
   useLogoutApiAuthLogoutPostMutation,
 } from '../../store/api/enhancedApi'
+import { useTheme } from '../Theme'
 import styles from './Header.module.scss'
 
 /**
@@ -13,6 +14,7 @@ import styles from './Header.module.scss'
  * - Logo/home link
  * - User account name display
  * - Navigation buttons (Visits, Designs)
+ * - Theme toggle button (dark/light mode)
  * - Logout button
  */
 export function Header() {
@@ -20,6 +22,7 @@ export function Header() {
   const location = useLocation()
   const { data: authStatus } = useGetStatusApiAuthStatusGetQuery()
   const [logout] = useLogoutApiAuthLogoutPostMutation()
+  const { theme, toggleTheme } = useTheme()
 
   const handleLogout = async () => {
     try {
@@ -57,6 +60,11 @@ export function Header() {
           onClick={() => navigate('/designs')}
           disabled={isDesignsActive}
           tooltip="PFS Designs"
+        />
+        <IconButton
+          icon={theme === 'dark' ? 'light_mode' : 'dark_mode'}
+          onClick={toggleTheme}
+          tooltip={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
         />
         <IconButton icon="logout" onClick={handleLogout} tooltip="Logout" />
       </div>

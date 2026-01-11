@@ -41,6 +41,19 @@
   --shadow-light: 0 0 4px rgba(0, 0, 0, 0.25);
   --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.1);
 
+  /* Error colors */
+  --error-color: #e53935;
+  --error-background: #fee;
+  --error-border: #f88;
+
+  /* Success colors */
+  --success-background: #dfd;
+  --success-text: #060;
+
+  /* Warning colors */
+  --warning-background: #ffd;
+  --warning-text: #660;
+
   /* Typography */
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.5;
@@ -55,6 +68,62 @@
   /* Apply theme */
   color: var(--text-color);
   background-color: var(--background-color);
+}
+
+/* =============================================================================
+   Dark Mode
+   ============================================================================= */
+
+:root[data-theme="dark"] {
+  /* Primary theme color - slightly adjusted for dark mode */
+  --theme-color: #0dd;
+  --accent-color: hsl(180, 40%, 45%);
+
+  /* Text colors */
+  --text-color: #e0e0e0;
+  --text-color-secondary: #b0b0b0;
+  --text-color-hint: #909090;
+  --text-color-disabled: #606060;
+  --link-color: #90caf9;
+
+  /* Background colors */
+  --background-color: #1a1a1a;
+  --background-color-active: #3a3a3a;
+  --background-color-hover: #2a2a2a;
+  --background-color-header: #252525;
+  --background-color-input: #2a2a2a;
+  --background-color-card: #252525;
+  --background-color-near: #303030;
+  --background-color-distant: #404040;
+
+  /* Selection colors */
+  --selected-background: hsl(180, 30%, 25%);
+  --selected-background-active: hsl(180, 30%, 35%);
+  --selected-background-hover: hsl(180, 30%, 30%);
+
+  /* Borders & lines */
+  --border-color: #404040;
+  --ruled-line-color: #404040;
+
+  /* Shadows - lighter in dark mode for visibility */
+  --shadow-color: black;
+  --shadow-small: 0 0 4px rgba(0, 0, 0, 0.8);
+  --shadow-medium: 0 0 8px rgba(0, 0, 0, 0.8);
+  --shadow-light: 0 0 4px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.4);
+
+  /* Error colors */
+  --error-color: #ef5350;
+  --error-background: #3d1a1a;
+  --error-border: #7f3333;
+
+  /* Success colors */
+  --success-background: #1a3d1a;
+  --success-text: #81c784;
+
+  /* Warning colors */
+  --warning-background: #3d3d1a;
+  --warning-text: #fff176;
 }
 
 /* =============================================================================

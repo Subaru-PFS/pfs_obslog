@@ -296,6 +296,7 @@ const injectedRtkApi = api.injectEndpoints({
         params: {
           width: queryArg.width,
           height: queryArg.height,
+          theme: queryArg.theme,
         },
       }),
     }),
@@ -523,6 +524,8 @@ export type ShowMcsDataChartApiMcsDataFrameIdPngGetApiArg = {
   width?: number;
   /** 画像高さ（px） */
   height?: number;
+  /** カラーテーマ（light/dark） */
+  theme?: "light" | "dark";
 };
 export type RootApiGetApiResponse = /** status 200 Successful Response */ any;
 export type RootApiGetApiArg = void;

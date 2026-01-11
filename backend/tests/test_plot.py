@@ -75,3 +75,20 @@ class TestMcsDataChart:
 
         response = authenticated_client.get("/api/mcs_data/1.png?height=9999")
         assert response.status_code == 422
+
+    def test_mcs_data_chart_with_dark_theme(self, authenticated_client: TestClient):
+        """ダークテーマでチャートを取得"""
+        response = authenticated_client.get("/api/mcs_data/1.png?theme=dark")
+        # データがなくても200か204のいずれか
+        assert response.status_code in [200, 204]
+
+    def test_mcs_data_chart_with_light_theme(self, authenticated_client: TestClient):
+        """ライトテーマでチャートを取得"""
+        response = authenticated_client.get("/api/mcs_data/1.png?theme=light")
+        # データがなくても200か204のいずれか
+        assert response.status_code in [200, 204]
+
+    def test_mcs_data_chart_with_invalid_theme(self, authenticated_client: TestClient):
+        """無効なテーマでは422を返す"""
+        response = authenticated_client.get("/api/mcs_data/1.png?theme=invalid")
+        assert response.status_code == 422

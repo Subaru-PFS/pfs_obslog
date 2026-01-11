@@ -3,36 +3,43 @@
 // =============================================================================
 // PFS Obslog Theme
 // Based on old-project theme with cyan accent
+// Uses CSS custom properties for dark mode support
 // =============================================================================
 
-// Primary theme color
+// Primary theme color (static values for SCSS calculations)
 $theme: #0ff;
 $sql-color: #00f;
 $code-color: #0f0;
 $error-color: #e53935;
 
 // =============================================================================
-// Text & Background Colors
+// CSS Variable References
+// These reference CSS custom properties defined in index.css
+// Use these in components for dark mode support
 // =============================================================================
-$text-color: black;
-$background-color: #eee;
-$active-background-color: #ccc;
-$active-text-color: white;
-$hover-background-color: #ddd;
-$disabled-text-color: #999;
+$text-color: var(--text-color);
+$text-color-secondary: var(--text-color-secondary);
+$background-color: var(--background-color);
+$active-background-color: var(--background-color-active);
+$hover-background-color: var(--background-color-hover);
+$hint-text-color: var(--text-color-hint);
+$disabled-text-color: var(--text-color-disabled);
+$header-background-color: var(--background-color-header);
+$input-background: var(--background-color-input);
+$link-color: var(--link-color);
+$accent: var(--accent-color);
+
+// Static fallbacks for disabled state
 $disabled-background-color: #e8e8e8;
-$hint-text-color: #777;
-$header-background-color: #ddd;
-$input-background: white;
-$link-color: #555;
 $comment-color: #577;
+$active-text-color: white;
 
 // =============================================================================
 // Selection Colors
 // =============================================================================
-$selected-background: color.change($theme, $lightness: 75%, $saturation: 25%);
-$selected-active-background: color.adjust($selected-background, $lightness: -15%);
-$selected-hover-background: color.adjust($selected-background, $lightness: -5%);
+$selected-background: var(--selected-background);
+$selected-active-background: var(--selected-background-active);
+$selected-hover-background: var(--selected-background-hover);
 
 // =============================================================================
 // Loading & Overlay
@@ -40,29 +47,24 @@ $selected-hover-background: color.adjust($selected-background, $lightness: -5%);
 $block-background-color: black;
 
 // =============================================================================
-// Accent Color
-// =============================================================================
-$accent: color.change($theme, $lightness: 50%, $saturation: 30%);
-
-// =============================================================================
 // Depth Background
 // =============================================================================
-$near-background: #ccc;
-$distant-background: #aaa;
+$near-background: var(--background-color-near);
+$distant-background: var(--background-color-distant);
 
 // =============================================================================
 // Ruled Lines & Borders
 // =============================================================================
-$ruled-line-color: #ccc;
-$border-color: #ccc;
+$ruled-line-color: var(--ruled-line-color);
+$border-color: var(--border-color);
 
 // =============================================================================
 // Shadows
 // =============================================================================
 $shadow-color: black;
-$small-shadow: 0 0 4px rgba($shadow-color, 0.5);
-$medium-shadow: 0 0 8px rgba($shadow-color, 0.5);
-$light-shadow: 0 0 4px rgba($shadow-color, 0.25);
+$small-shadow: var(--shadow-small);
+$medium-shadow: var(--shadow-medium);
+$light-shadow: var(--shadow-light);
 
 // =============================================================================
 // Mixins
@@ -73,12 +75,13 @@ $light-shadow: 0 0 4px rgba($shadow-color, 0.25);
   box-shadow: $light-shadow;
   padding: 4px;
   background-color: $input-background;
+  color: $text-color;
 }
 
 @mixin card {
-  background-color: $input-background;
+  background-color: var(--background-color-card);
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba($shadow-color, 0.1);
+  box-shadow: var(--shadow-card);
 }
 
 @mixin button-base {
@@ -94,7 +97,7 @@ $light-shadow: 0 0 4px rgba($shadow-color, 0.25);
   color: $text-color;
 
   &:hover:not(:disabled) {
-    background-color: color.adjust($accent, $lightness: -10%);
+    filter: brightness(0.9);
   }
 
   &:disabled {

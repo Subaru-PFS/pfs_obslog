@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { McsVisitDetail, McsExposure } from '../../../store/api/generatedApi'
 import { LazyImage } from '../../../components/LazyImage'
 import { IconButton } from '../../../components/Icon'
+import { useTheme, type Theme } from '../../../components/Theme'
 import { API_BASE_URL } from '../../../config'
 import { useVisitsBrowserContext } from '../context'
 import { useVisitDetailContext } from './context'
@@ -27,10 +28,11 @@ const PLOT_SIZE = { width: 300, height: 214 }
 /** MCS Raw画像のサイズ */
 const RAW_SIZE = { width: 332, height: 214 }
 
-function getMcsPlotUrl(frameId: number, scale: ImageScale): string {
+function getMcsPlotUrl(frameId: number, scale: ImageScale, theme: Theme): string {
   const params = new URLSearchParams({
     width: String(Math.floor(scale * PLOT_SIZE.width)),
     height: String(Math.floor(scale * PLOT_SIZE.height)),
+    theme,
   })
   return `${API_BASE_URL}/api/mcs_data/${frameId}.png?${params}`
 }
@@ -54,6 +56,7 @@ function getMcsFitsDownloadUrl(visitId: number, frameId: number): string {
 export function McsInspector({ mcs }: McsInspectorProps) {
   const { selectedVisitId } = useVisitsBrowserContext()
   const { selectedFitsId, setSelectedFitsId } = useVisitDetailContext()
+  const { theme } = useTheme()
   const exposures = useMemo(() => mcs.exposures ?? [], [mcs.exposures])
   const avgExptime = useMemo(() => calculateAverageExptime(exposures), [exposures])
 
@@ -150,6 +153,7 @@ export function McsInspector({ mcs }: McsInspectorProps) {
               plotSize={plotSize}
               rawSize={rawSize}
               scale={imageScale}
+              theme={theme}
               isSelected={selectedFitsId?.type === 'mcs' && selectedFitsId?.frameId === exp.frame_id}
               onShowHeader={() => setSelectedFitsId({
                 type: 'mcs',
@@ -172,6 +176,7 @@ interface McsExposureCardProps {
   plotSize: { width: number; height: number }
   rawSize: { width: number; height: number }
   scale: ImageScale
+  theme: Theme
   isSelected: boolean
   onShowHeader: () => void
 }
@@ -184,6 +189,7 @@ function McsExposureCard({
   plotSize,
   rawSize,
   scale,
+  theme,
   isSelected,
   onShowHeader,
 }: McsExposureCardProps) {
@@ -195,7 +201,7 @@ function McsExposureCard({
       <div className={styles.exposureCardImages}>
         {showPlot && (
           <LazyImage
-            src={getMcsPlotUrl(exposure.frame_id, scale)}
+            src={getMcsPlotUrl(exposure.frame_id, scale, theme)}
             alt={`MCS Plot ${exposure.frame_id}`}
             skeletonWidth={plotSize.width}
             skeletonHeight={plotSize.height}
