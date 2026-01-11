@@ -124,6 +124,7 @@ interface DesignsContextValue {
   // Design詳細
   designDetail: PfsDesignDetail | undefined
   isLoadingDetail: boolean
+  isFetchingRank: boolean  // ランク取得中フラグ
 
   // 天球ビュー制御
   // jumpTo: SkyViewerが登録する関数。Globeが初期化されるまではno-op
@@ -432,6 +433,9 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
   // スクロール要求用のstate（DesignListで処理される）
   const [scrollToDesignId, setScrollToDesignId] = useState<string | null>(null)
   
+  // ランク取得中フラグ
+  const [isFetchingRank, setIsFetchingRank] = useState(false)
+  
   // 明示的にDesignを選択してカメラ移動とスクロールを行う
   // リスト外のDesignの場合はランクを取得してページ遷移する
   const selectDesignAndJump = useCallback(
@@ -492,6 +496,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
         }
         
         // ランク取得を並行して実行（カメラ移動をブロックしない）
+        setIsFetchingRank(true)
         try {
           const params = new URLSearchParams()
           if (search) params.set('search', search)
@@ -525,6 +530,8 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
           }
         } catch (error) {
           console.error('Failed to fetch rank:', error)
+        } finally {
+          setIsFetchingRank(false)
         }
       }
     },
@@ -607,6 +614,7 @@ export function DesignsProvider({ children }: DesignsProviderProps) {
     setFocusedFiber,
     designDetail,
     isLoadingDetail,
+    isFetchingRank,
     jumpTo,
     registerJumpTo,
     showFibers,

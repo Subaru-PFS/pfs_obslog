@@ -63,7 +63,7 @@ function createColorFunc(
 }
 
 export function DesignDetail() {
-  const { designDetail, isLoadingDetail, selectedDesign, focusedFiber, setFocusedFiber, jumpTo } = useDesignsContext()
+  const { designDetail, isLoadingDetail, isFetchingRank, selectedDesign, focusedFiber, setFocusedFiber, jumpTo } = useDesignsContext()
   const [focusedCobra, setFocusedCobra] = useState<Cobra | undefined>()
   const [colorMode, setColorMode] = useState<ColorMode>('targetType')
 
@@ -128,7 +128,7 @@ export function DesignDetail() {
   // 常にFocalPlane、select、凡例を表示（Designが選択されていなくても）
   return (
     <div className={styles.designDetailContainer}>
-      <LoadingOverlay isLoading={isLoadingDetail} />
+      <LoadingOverlay isLoading={isLoadingDetail || isFetchingRank} />
       <div className={styles.focalPlaneSection}>
         <FocalPlane
           size={250}
