@@ -114,12 +114,15 @@
 
       .today-button,
       .clear-button {
-        background-color: transparent;
+        background-color: var(--background-color-surface);
         border: 1px solid var(--border-color);
         color: var(--text-color);
+        font-weight: 500;
+        padding: 0.4em 0.8em;
 
         &:hover {
-          background-color: var(--background-color-hover);
+          background-color: var(--selected-background);
+          border-color: var(--accent-color);
         }
       }
     }
