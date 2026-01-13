@@ -27,27 +27,26 @@ const MARKER_SIZE_MAX_PX = 64
 // ファイバーマーカーのホバー時以外の透明度（0.8 = 80%）
 const FIBER_MARKER_DIMM_ALPHA = 0.5
 
-// 以下は将来的にカスタムフェードアウトを実装する場合に使用する予定
-// // Design circleのズームでフェードアウトする際の最小アルファ値
-// const DESIGN_MARKER_MIN_ALPHA = 0.05
-// 
-// /**
-//  * Design circleのズームによるアルファ計算関数
-//  * - デザインの視野が画面いっぱい（fovy ≈ MARKER_FOV）→ alpha = 0.05
-//  * - デザインが視野の1/3ほど（fovy ≈ 3 * MARKER_FOV）→ alpha = 1
-//  * 線形補間を使用
-//  */
-// function calcDesignMarkerAlpha(fovy: number): number {
-//   const fovyMin = MARKER_FOV // alpha = 0.05
-//   const fovyMax = 3 * MARKER_FOV // alpha = 1
-//   
-//   if (fovy >= fovyMax) return 1
-//   if (fovy <= fovyMin) return DESIGN_MARKER_MIN_ALPHA
-//   
-//   // 線形補間: t=0 at fovyMin, t=1 at fovyMax
-//   const t = (fovy - fovyMin) / (fovyMax - fovyMin)
-//   return DESIGN_MARKER_MIN_ALPHA + t * (1 - DESIGN_MARKER_MIN_ALPHA)
-// }
+// Design circleのズームでフェードアウトする際の最小アルファ値
+const DESIGN_MARKER_MIN_ALPHA = 0.05
+
+/**
+ * Design circleのズームによるアルファ計算関数
+ * - デザインの視野が画面いっぱい（fovy ≈ MARKER_FOV）→ alpha = 0.05
+ * - デザインが視野の1/3ほど（fovy ≈ 3 * MARKER_FOV）→ alpha = 1
+ * 線形補間を使用
+ */
+function calcDesignMarkerAlpha(fovy: number): number {
+  const fovyMin = MARKER_FOV // alpha = 0.05
+  const fovyMax = 3 * MARKER_FOV // alpha = 1
+
+  if (fovy >= fovyMax) return 1
+  if (fovy <= fovyMin) return DESIGN_MARKER_MIN_ALPHA
+
+  // 線形補間: t=0 at fovyMin, t=1 at fovyMax
+  const t = (fovy - fovyMin) / (fovyMax - fovyMin)
+  return DESIGN_MARKER_MIN_ALPHA + t * (1 - DESIGN_MARKER_MIN_ALPHA)
+}
 
 
 // CSSカラー名からRGBA配列への変換マップ
@@ -394,7 +393,7 @@ export function DesignMarkers() {
         paths={markerPaths}
         blendMode="NORMAL"
         darkenNarrowLine={false}
-        dimOnZoom={true}
+        dimOnZoom={calcDesignMarkerAlpha}
       />
       {/* クリック/ホバー検出用レイヤー（透明） */}
       <ClickableMarkerLayer
