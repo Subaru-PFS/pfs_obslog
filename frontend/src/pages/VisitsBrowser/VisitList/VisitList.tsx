@@ -894,9 +894,9 @@ export function VisitList() {
   // Download CSV
   const handleDownloadCsv = useCallback(() => {
     const params = new URLSearchParams()
-    // Use current SQL filter (WHERE clause)
-    if (appliedSql) {
-      params.set('sql', `select * ${appliedSql}`)
+    // Use effectiveSql which includes search query, date range, and exposure filters
+    if (effectiveSql) {
+      params.set('sql', `select * ${effectiveSql}`)
     } else {
       params.set('sql', 'select *')
     }
@@ -905,7 +905,7 @@ export function VisitList() {
 
     const url = `${API_BASE_URL}/api/visits.csv?${params}`
     window.location.href = url
-  }, [appliedSql])
+  }, [effectiveSql])
 
   // Scroll to visit in list (used by VisitDetail)
   const scrollToVisitInList = useCallback(async (visitId: number) => {
