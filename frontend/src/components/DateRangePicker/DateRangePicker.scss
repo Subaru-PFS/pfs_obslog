@@ -101,6 +101,9 @@
   }
 
   .datepicker-footer {
+    background-color: var(--background-color-card);
+    border-top: 1px solid var(--border-color);
+
     .datepicker-controls {
       .button {
         background-color: var(--accent-color);
