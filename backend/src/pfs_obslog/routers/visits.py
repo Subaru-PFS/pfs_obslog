@@ -921,7 +921,9 @@ async def export_visits_csv(
         CSV形式のレスポンス
     """
     # limitが-1の場合は無制限
-    effective_limit: int | None = None if limit == -1 else limit
+    # 上限超過検出のため、limit+1件取得する
+    effective_limit: int | None = None if limit == -1 else limit + 1
+    requested_limit = limit
 
     # SQLフィルタリング条件をパース
     where_condition: ColumnElement | None = None
@@ -946,6 +948,11 @@ async def export_visits_csv(
         db, qadb, effective_limit, offset, where_condition, required_joins, join_builder, aggregate_conditions
     )
 
+    # 上限超過チェック
+    is_truncated = requested_limit != -1 and len(visits) > requested_limit
+    if is_truncated:
+        visits = visits[:requested_limit]
+
     # 関連するIicSequenceを取得
     iic_sequences = await _fetch_related_iic_sequences(db, visits)
     iic_sequence_map = {seq.iic_sequence_id: seq for seq in iic_sequences}
@@ -962,6 +969,10 @@ async def export_visits_csv(
             columns = [f"# {c}" if i_c == 0 else c for i_c, c in enumerate(row_dict.keys())]
             writer.writerow(columns)
         writer.writerow(row_dict.values())
+
+    # 上限超過時にメッセージを追加
+    if is_truncated:
+        writer.writerow([f"# Output truncated at {requested_limit} rows. Please narrow your search criteria."])
 
     csv_content = buf.getvalue()
     return Response(

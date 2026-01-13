@@ -892,7 +892,15 @@ export function VisitList() {
   }, [refetch])
 
   // Download CSV
+  const MAX_CSV_ENTRIES = 100000
   const handleDownloadCsv = useCallback(() => {
+    // Warn if no filter is specified
+    if (!effectiveSql) {
+      if (!confirm(`No filter specified. The output will be truncated at ${MAX_CSV_ENTRIES.toLocaleString()} entries.`)) {
+        return
+      }
+    }
+
     const params = new URLSearchParams()
     // Use effectiveSql which includes search query, date range, and exposure filters
     if (effectiveSql) {
@@ -900,8 +908,8 @@ export function VisitList() {
     } else {
       params.set('sql', 'select *')
     }
-    // Set a reasonable limit for CSV export
-    params.set('limit', '10000')
+    // Set limit for CSV export (backend will add +1 to detect truncation)
+    params.set('limit', String(MAX_CSV_ENTRIES))
 
     const url = `${API_BASE_URL}/api/visits.csv?${params}`
     window.location.href = url
