@@ -523,7 +523,7 @@ function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGrou
                   {columns.pfs_design_id && (
                     <td className={styles.colDesign}>
                       {visit.pfs_design_id ? (
-                        <Tooltip content={visit.pfs_design_id}>
+                        <Tooltip content={visit.pfs_design_id.replace(/^0x/, '')}>
                           <a
                             href={`/designs/${visit.pfs_design_id.replace(/^0x/, '')}`}
                             onClick={(e) => {
@@ -533,7 +533,7 @@ function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGrou
                             }}
                             className={styles.designLink}
                           >
-                            {visit.pfs_design_id.slice(0, 6)}...
+                            {visit.pfs_design_id.replace(/^0x/, '').slice(0, 6)}...
                           </a>
                         </Tooltip>
                       ) : '-'}
