@@ -3,10 +3,10 @@
  */
 import { useCallback, useMemo, useState } from 'react'
 import {
-  PathLayer$,
-  ClickableMarkerLayer$,
-  MarkerLayer$,
-  GlobeEventLayer$,
+  PathLayer,
+  ClickableMarkerLayer,
+  MarkerLayer,
+  GlobeEventLayer,
   useGetGlobe,
 } from '@stellar-globe/react-stellar-globe'
 import { angle, path, SkyCoord } from '@stellar-globe/stellar-globe'
@@ -27,26 +27,28 @@ const MARKER_SIZE_MAX_PX = 64
 // ファイバーマーカーのホバー時以外の透明度（0.8 = 80%）
 const FIBER_MARKER_DIMM_ALPHA = 0.5
 
-// Design circleのズームでフェードアウトする際の最小アルファ値
-const DESIGN_MARKER_MIN_ALPHA = 0.05
+// 以下は将来的にカスタムフェードアウトを実装する場合に使用する予定
+// // Design circleのズームでフェードアウトする際の最小アルファ値
+// const DESIGN_MARKER_MIN_ALPHA = 0.05
+// 
+// /**
+//  * Design circleのズームによるアルファ計算関数
+//  * - デザインの視野が画面いっぱい（fovy ≈ MARKER_FOV）→ alpha = 0.05
+//  * - デザインが視野の1/3ほど（fovy ≈ 3 * MARKER_FOV）→ alpha = 1
+//  * 線形補間を使用
+//  */
+// function calcDesignMarkerAlpha(fovy: number): number {
+//   const fovyMin = MARKER_FOV // alpha = 0.05
+//   const fovyMax = 3 * MARKER_FOV // alpha = 1
+//   
+//   if (fovy >= fovyMax) return 1
+//   if (fovy <= fovyMin) return DESIGN_MARKER_MIN_ALPHA
+//   
+//   // 線形補間: t=0 at fovyMin, t=1 at fovyMax
+//   const t = (fovy - fovyMin) / (fovyMax - fovyMin)
+//   return DESIGN_MARKER_MIN_ALPHA + t * (1 - DESIGN_MARKER_MIN_ALPHA)
+// }
 
-/**
- * Design circleのズームによるアルファ計算関数
- * - デザインの視野が画面いっぱい（fovy ≈ MARKER_FOV）→ alpha = 0.05
- * - デザインが視野の1/3ほど（fovy ≈ 3 * MARKER_FOV）→ alpha = 1
- * 線形補間を使用
- */
-function calcDesignMarkerAlpha(fovy: number): number {
-  const fovyMin = MARKER_FOV // alpha = 0.05
-  const fovyMax = 3 * MARKER_FOV // alpha = 1
-  
-  if (fovy >= fovyMax) return 1
-  if (fovy <= fovyMin) return DESIGN_MARKER_MIN_ALPHA
-  
-  // 線形補間: t=0 at fovyMin, t=1 at fovyMax
-  const t = (fovy - fovyMin) / (fovyMax - fovyMin)
-  return DESIGN_MARKER_MIN_ALPHA + t * (1 - DESIGN_MARKER_MIN_ALPHA)
-}
 
 // CSSカラー名からRGBA配列への変換マップ
 const COLOR_TO_RGBA: { [key: string]: [number, number, number, number] } = {
@@ -386,16 +388,16 @@ export function DesignMarkers() {
   return (
     <>
       {/* カメラ移動イベント監視（マーカーサイズ動的計算用） */}
-      <GlobeEventLayer$ onCameraMove={handleCameraMove} />
+      <GlobeEventLayer onCameraMove={handleCameraMove} />
       {/* 全デザインマーカー（円） */}
-      <PathLayer$
+      <PathLayer
         paths={markerPaths}
         blendMode="NORMAL"
         darkenNarrowLine={false}
-        dimOnZoom={calcDesignMarkerAlpha}
+        dimOnZoom={true}
       />
       {/* クリック/ホバー検出用レイヤー（透明） */}
-      <ClickableMarkerLayer$
+      <ClickableMarkerLayer
         markers={markers}
         markerSize={markerSizePx}
         defaultColor={[0, 0, 0, 0]}
@@ -406,7 +408,7 @@ export function DesignMarkers() {
       />
       {/* ファイバーマーカー（ポイント）- ホバー検出対応 */}
       {fiberMarkers.length > 0 && (
-        <ClickableMarkerLayer$
+        <ClickableMarkerLayer
           markers={fiberMarkers}
           defaultColor={DEFAULT_FIBER_COLOR}
           defaultType="circle"
@@ -416,7 +418,7 @@ export function DesignMarkers() {
       )}
       {/* focalPlaneからフォーカスされたファイバーのハイライト */}
       {highlightedFiberMarker && (
-        <MarkerLayer$
+        <MarkerLayer
           markers={[highlightedFiberMarker]}
           defaultColor={highlightedFiberMarker.color}
           defaultType="circle"
@@ -424,7 +426,7 @@ export function DesignMarkers() {
         />
       )}
       {/* フォーカス/選択マーカー */}
-      <PathLayer$
+      <PathLayer
         paths={focusPaths}
         blendMode="NORMAL"
         darkenNarrowLine={false}

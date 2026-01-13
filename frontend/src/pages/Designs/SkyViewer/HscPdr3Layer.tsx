@@ -3,12 +3,12 @@
  * 
  * 使用方法:
  * - HscPdr3Section.Provider で囲む
- * - Globe$ 内に HscPdr3Section.Layer を配置
+ * - Globe 内に HscPdr3Section.Layer を配置
  * - UI部分に HscPdr3Section.Control を配置
  */
 import { createContext, useContext, useState, useCallback, useMemo, Suspense, useEffect, type ReactNode } from 'react'
 import {
-  TractTileLayer$,
+  TractTileLayer as ReactTractTileLayer,
   LogScaleRange,
 } from '@stellar-globe/react-stellar-globe'
 import { TractTileLayer, type V3 } from '@stellar-globe/stellar-globe'
@@ -37,7 +37,7 @@ interface FilterDef {
 }
 
 // カラーパラメータの型（TractTileLayerのcolorParams）
-type ColorParams = NonNullable<Parameters<typeof TractTileLayer$>[0]['colorParams']>
+type ColorParams = NonNullable<Parameters<typeof ReactTractTileLayer>[0]['colorParams']>
 type MixerType = ColorParams['type']
 
 // ミキサーパラメータの型
@@ -404,17 +404,17 @@ function HscPdr3Provider({ children }: { children: ReactNode }) {
 /**
  * TractTileLayerをフィルター名辞書付きでラップ（内部コンポーネント）
  */
-function HscPdr3TractTileLayerInner(props: Omit<Parameters<typeof TractTileLayer$>[0], 'filterNameDictionary'>) {
+function HscPdr3TractTileLayerInner(props: Omit<Parameters<typeof ReactTractTileLayer>[0], 'filterNameDictionary'>) {
   const filterMap = useFilterMap(props.baseUrl ?? '')
   const filterNameDictionary = useMemo(
     () => Object.fromEntries(filterMap.map(({ commonName, intrinsicName }) => [commonName, intrinsicName])),
     [filterMap]
   )
-  return <TractTileLayer$ filterNameDictionary={filterNameDictionary} {...props} />
+  return <ReactTractTileLayer filterNameDictionary={filterNameDictionary} {...props} />
 }
 
 /**
- * Globe$内に配置するタイルレイヤー
+ * Globe内に配置するタイルレイヤー
  */
 function HscPdr3Layer() {
   const { show, showOutline, colorParams } = useHscPdr3Context()

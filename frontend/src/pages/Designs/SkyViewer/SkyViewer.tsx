@@ -3,18 +3,18 @@
  */
 import { useRef, useEffect, useCallback, useState } from 'react'
 import {
-  Globe$,
-  HipparcosCatalogLayer$,
-  ConstellationLayer$,
-  HipsSimpleLayer$,
-  GridLayer$,
-  PanLayer$,
-  ZoomLayer$,
-  TouchLayer$,
-  GlobeEventLayer$,
+  Globe,
+  HipparcosCatalogLayer,
+  ConstellationLayer,
+  HipsSimpleLayer,
+  GridLayer,
+  PanLayer,
+  ZoomLayer,
+  TouchLayer,
+  GlobeEventLayer,
   type GlobeHandle,
 } from '@stellar-globe/react-stellar-globe'
-import { easing, GridLayer, matrixUtils, SkyCoord, type Globe } from '@stellar-globe/stellar-globe'
+import { easing, GridLayer as CoreGridLayer, matrixUtils, SkyCoord, type Globe as CoreGlobe } from '@stellar-globe/stellar-globe'
 import { useDesignsContext, inTimeZone } from '../DesignsContext'
 import { HST_TZ_OFFSET } from '../types'
 import { Clock } from './Clock'
@@ -45,7 +45,7 @@ function formatDate(date: Date): string {
 }
 
 // 赤道座標グリッドのオプション設定（コンポーネント外で定義して参照を安定させる）
-const equatorialGridOptions = (draft: Parameters<NonNullable<Parameters<typeof GridLayer$>[0]['optionsManipulate']>>[0]) => {
+const equatorialGridOptions = (draft: Parameters<NonNullable<Parameters<typeof GridLayer>[0]['optionsManipulate']>>[0]) => {
   draft.defaultGridColor = [1, 1, 1, 0.125]
   draft.phiLine.gridColors = {}
 }
@@ -53,7 +53,7 @@ const equatorialGridOptions = (draft: Parameters<NonNullable<Parameters<typeof G
 // 赤道座標グリッドレイヤー
 function EquatorialGrid() {
   return (
-    <GridLayer$
+    <GridLayer
       optionsManipulate={equatorialGridOptions}
     />
   )
@@ -61,7 +61,7 @@ function EquatorialGrid() {
 
 export function SkyViewer() {
   const globeRef = useRef<GlobeHandle | null>(null)
-  const altAzGridRef = useRef<GridLayer | null>(null)
+  const altAzGridRef = useRef<CoreGridLayer | null>(null)
   // Globe初期化完了フラグ
   const [isGlobeReady, setIsGlobeReady] = useState(false)
 
@@ -85,11 +85,11 @@ export function SkyViewer() {
   }, [zenithZaZd])
 
   // Globe初期化時のコールバック - AltAzグリッドを追加し、jumpTo関数を登録
-  const handleGlobeInit = useCallback((globe: Globe) => {
+  const handleGlobeInit = useCallback((globe: CoreGlobe) => {
     // AltAzグリッドを追加
     // 既存プロジェクトと同様に、カメラのza, zdを参照してモデル行列を計算
     // これによりカメラの天頂パラメータが変わるとグリッドも追従する
-    const altAzGrid = new GridLayer(globe, (draft) => {
+    const altAzGrid = new CoreGridLayer(globe, (draft) => {
       draft.modelMatrix = () => {
         const { za, zd, zp } = globe.camera
         return matrixUtils.izenith4(za, zd - TILT, zp)
@@ -246,27 +246,27 @@ export function SkyViewer() {
     <HscPdr3Section.Provider>
       <div className={styles.skyViewerContainer}>
         <div className={styles.globeWrapper}>
-          <Globe$
+          <Globe
             ref={globeRef}
             retina
             cameraParams={INITIAL_CAMERA_PARAMS}
             onInit={handleGlobeInit}
             onRelease={handleGlobeRelease}
           >
-            <PanLayer$ />
-            <ZoomLayer$ />
-            <TouchLayer$ />
-            <GlobeEventLayer$ onCameraMoveEnd={handleCameraMoveEnd} />
-            <HipparcosCatalogLayer$ />
-            <ConstellationLayer$ />
-            <HipsSimpleLayer$
+            <PanLayer />
+            <ZoomLayer />
+            <TouchLayer />
+            <GlobeEventLayer onCameraMoveEnd={handleCameraMoveEnd} />
+            <HipparcosCatalogLayer />
+            <ConstellationLayer />
+            <HipsSimpleLayer
               baseUrl="//alasky.cds.unistra.fr/Pan-STARRS/DR1/color-i-r-g"
               animationLod={-0.25}
             />
             <HscPdr3Section.Layer />
             <EquatorialGrid />
             <DesignMarkers />
-          </Globe$>
+          </Globe>
         </div>
 
         <div className={styles.timeSection}>
