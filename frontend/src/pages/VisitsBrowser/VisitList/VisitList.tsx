@@ -436,7 +436,24 @@ function VisitGroupComponent({ group, columns, onSequenceGroupClick }: VisitGrou
               {columns.date && <Tooltip content="Date issued at" as="th" className={styles.colDate}><Icon name="event" size={14} /></Tooltip>}
               {columns.time && <Tooltip content="Time issued at" as="th" className={styles.colTime}><Icon name="schedule" size={14} /></Tooltip>}
               {columns.exposures && <Tooltip content="Number of {SpS | MCS | AGC} Exposures" as="th" className={styles.colExposures}><Icon name="tag" size={14} /></Tooltip>}
-              {columns.exptime && <Tooltip content="Exposure Time [s]" as="th" className={styles.colExptime}><Icon name="shutter_speed" size={14} /></Tooltip>}
+              {columns.exptime && (
+                <Tooltip
+                  content={
+                    <>
+                      <div><strong>Exposure Time [s]</strong></div>
+                      <div style={{ marginTop: '0.5em', whiteSpace: 'pre-line' }}>
+                        Average exposure time for the visit.{'\n'}
+                        Priority: SPS {'>'} MCS {'>'} AGC{'\n'}
+                        (Multiple types are not mixed)
+                      </div>
+                    </>
+                  }
+                  as="th"
+                  className={styles.colExptime}
+                >
+                  <Icon name="shutter_speed" size={14} />
+                </Tooltip>
+              )}
               {columns.eet_b && <Tooltip content="Effective Exposure Time b [s]" as="th" className={styles.colEet}>(b)</Tooltip>}
               {columns.eet_r && <Tooltip content="Effective Exposure Time r [s]" as="th" className={styles.colEet}>(r)</Tooltip>}
               {columns.eet_n && <Tooltip content="Effective Exposure Time n [s]" as="th" className={styles.colEet}>(n)</Tooltip>}
