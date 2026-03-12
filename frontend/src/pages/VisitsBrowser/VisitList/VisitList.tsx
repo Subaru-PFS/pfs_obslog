@@ -6,15 +6,14 @@ import type { MaterialSymbol } from 'material-symbols'
 import {
   useListVisitsApiVisitsGetQuery,
   generatedApi,
-  type VisitListEntry,
   type IicSequence,
-  type VisitList as VisitListType,
 } from '../../../store/api/generatedApi'
 import {
   useCreateVisitSetNoteApiVisitSetsVisitSetIdNotesPostMutation,
   useUpdateVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdPutMutation,
   useDeleteVisitSetNoteApiVisitSetsVisitSetIdNotesNoteIdDeleteMutation,
 } from '../../../store/api/enhancedApi'
+import { compileVisitGroups, type VisitGroup } from './visitGrouping'
 
 const { useLazyGetVisitRankApiVisitsVisitIdRankGetQuery, useLazyListVisitsApiVisitsGetQuery } = generatedApi
 import { useVisitsBrowserContext } from '../context'
@@ -202,37 +201,6 @@ function ExposureTypeSelect({ label, value, onChange, tooltip }: ExposureTypeSel
       </div>
     </Tooltip>
   )
-}
-
-/** VisitGroupの型定義 */
-interface VisitGroup {
-  iicSequence?: IicSequence
-  visits: VisitListEntry[]
-}
-
-/**
- * VisitListをIicSequenceでグループ化
- */
-function compileVisitGroups(data: VisitListType): VisitGroup[] {
-  const groups: VisitGroup[] = []
-  const iicSequences = Object.fromEntries(
-    data.iic_sequences.map((i) => [i.iic_sequence_id, i])
-  )
-
-  for (const v of data.visits) {
-    const iicSequence =
-      v.iic_sequence_id !== undefined && v.iic_sequence_id !== null
-        ? iicSequences[v.iic_sequence_id]
-        : undefined
-    const lastGroup = groups[groups.length - 1]
-
-    if (!lastGroup || lastGroup.iicSequence !== iicSequence) {
-      groups.push({ iicSequence, visits: [] })
-    }
-    groups[groups.length - 1].visits.push(v)
-  }
-
-  return groups
 }
 
 /**
@@ -1332,9 +1300,9 @@ export function VisitList() {
           ) : visitGroups.length === 0 ? (
             <div className={styles.empty}>No visits found</div>
           ) : (
-            visitGroups.map((group, index) => (
+            visitGroups.map((group) => (
               <VisitGroupComponent
-                key={group.iicSequence?.iic_sequence_id ?? `no-seq-${index}`}
+                key={group.key}
                 group={group}
                 columns={columns}
                 onSequenceGroupClick={handleSequenceGroupFilter}
