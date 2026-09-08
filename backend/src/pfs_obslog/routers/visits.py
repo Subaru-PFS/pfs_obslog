@@ -419,7 +419,7 @@ async def _build_visit_list_entries(
                 effective_exposure_time_r=qa.effective_exposure_time_r if qa else None,
                 effective_exposure_time_n=qa.effective_exposure_time_n if qa else None,
                 effective_exposure_time_m=qa.effective_exposure_time_m if qa else None,
-                pfs_design_id=hex(pfs_visit.pfs_design_id) if pfs_visit.pfs_design_id else None,
+                pfs_design_id=f"0x{pfs_visit.pfs_design_id:016x}" if pfs_visit.pfs_design_id else None,
             )
         )
 

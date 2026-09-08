@@ -34,6 +34,25 @@ psql -h 133.40.164.48 -U pfs opdb
 
 認証情報は `~/.pgpass` を参照してください。
 
+### 実環境DBに接続して開発用バックエンドを起動
+
+開発用バックエンド（`make dev`）の接続先は、デフォルトではローカルのテストDBです。実環境DBに接続して起動する場合は、起動時に接続URLを環境変数で指定します。
+
+```bash
+cd backend
+PFS_OBSLOG_database_url=postgresql://pfs@133.40.164.48/opdb make dev
+```
+
+`~/.pgpass` に実環境DBの認証情報を登録しておいてください。QAデータも実環境から取得する場合は、`PFS_OBSLOG_qadb_url` も指定します。
+
+```bash
+PFS_OBSLOG_database_url=postgresql://pfs@133.40.164.48/opdb \
+PFS_OBSLOG_qadb_url=postgresql://pfs@<実環境QADBホスト>:<ポート>/qadb \
+make dev
+```
+
+実環境DBに対して書き込みを行う可能性があるため、通常の開発・テストではローカルのテストDBを使用してください。
+
 ### テスト用DB（開発用）
 
 ```bash

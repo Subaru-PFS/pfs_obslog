@@ -34,6 +34,25 @@ psql -h 133.40.164.48 -U pfs opdb
 
 See `~/.pgpass` for authentication credentials.
 
+### Run the Development Backend Against the Production DB
+
+The development backend (`make dev`) uses the local test database by default. To run it against the production database, specify the database URL when starting it:
+
+```bash
+cd backend
+PFS_OBSLOG_database_url=postgresql://pfs@133.40.164.48/opdb make dev
+```
+
+Make sure the production database credentials are configured in `~/.pgpass`. To also retrieve QA data from the production environment, specify `PFS_OBSLOG_qadb_url` as well.
+
+```bash
+PFS_OBSLOG_database_url=postgresql://pfs@133.40.164.48/opdb \
+PFS_OBSLOG_qadb_url=postgresql://pfs@<production-QADB-host>:<port>/qadb \
+make dev
+```
+
+Because this may allow writes to the production database, use the local test database for normal development and testing.
+
 ### Test DB (Development)
 
 ```bash

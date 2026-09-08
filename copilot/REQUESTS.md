@@ -1,11 +1,11 @@
-* [x] copilot/dark-mode.ja.mdに基づきテーマの実装を整理
+* [ ] visit set listのExposure Timeの欄の実装の調査
 
-  案1に基づき実装を整理してください。
-  設定は初期値としてsystemの設定を使いその後はlocalStorageの値を使うことにしてください。
-  npmのスクリプトでビルドテストなどをして問題がないかチェックしてください。
+  これはどういう実装になっていますか？１のvisitにSpS, MCS, AGCのExposureがあるときはどういう計算になっているか調べてください。
 
-  おや、今回の変更でコード量が減るかと思ったけど、少し増えましたね。
-  css関係で整理できるところはありませんか？
-  なければないで良いですが、一応見てください。
+* [ ] avg_exptimeの仕様をフロントエンドのツールチップに表示
 
-* [x] 指示者に追加の依頼がないか確認（ask_for_instructionsを使い）
+  以下のavg_exptimeの仕様をフロントエンドのテーブルのTHにマウスオーバーした時のツールチップに表示してください。
+
+  1つのVisitにおける露出の平均時間を表示しています。\n\n計算ロジック（優先順位: SPS > MCS > AGC）:\n- SPSの露出がある場合: SPSの全露出のexptimeの平均値\n- SPSがなくMCSがある場合: MCSの全露出のmcs_exptimeの平均値  \n- SPS/MCSがなくAGCがある場合: AGCの全露出のagc_exptimeの平均値\n\n複数種類のExposureがあっても混合しません（例: SPS+MCSがあればSPSの平均のみ表示）。
+
+* [ ] 指示者に追加の依頼がないか確認（ask_for_instructionsを使い）

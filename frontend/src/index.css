@@ -6,6 +6,7 @@
 :root {
   /* Primary theme color */
   --theme-color: #0ff;
+  --theme-text-color: #006666;
   --accent-color: hsl(180, 30%, 50%);
 
   /* Text colors */
@@ -185,6 +186,7 @@
 :root[data-theme="dark"] {
   /* Primary theme color - slightly adjusted for dark mode */
   --theme-color: #0dd;
+  --theme-text-color: #0dd;
   --accent-color: hsl(180, 40%, 45%);
 
   /* Text colors */
