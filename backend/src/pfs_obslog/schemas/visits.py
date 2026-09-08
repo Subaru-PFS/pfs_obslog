@@ -77,6 +77,7 @@ class IicSequence(BaseModel):
     # リレーション（オプション）
     group: SequenceGroup | None = None
     notes: list[VisitSetNote] = []
+    status: IicSequenceStatus | None = None
 
 
 class VisitListEntry(BaseModel):

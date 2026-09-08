@@ -612,6 +612,11 @@ export type VisitSetNote = {
   body: string;
   user: ObslogUser;
 };
+export type IicSequenceStatus = {
+  iic_sequence_id: number;
+  status_flag?: number | null;
+  cmd_output?: string | null;
+};
 export type IicSequence = {
   iic_sequence_id: number;
   sequence_type?: string | null;
@@ -622,6 +627,7 @@ export type IicSequence = {
   created_at?: string | null;
   group?: SequenceGroup | null;
   notes?: VisitSetNote[];
+  status?: IicSequenceStatus | null;
 };
 export type VisitList = {
   visits: VisitListEntry[];
@@ -707,11 +713,6 @@ export type AgcExposure = {
 };
 export type AgcVisitDetail = {
   exposures?: AgcExposure[];
-};
-export type IicSequenceStatus = {
-  iic_sequence_id: number;
-  status_flag?: number | null;
-  cmd_output?: string | null;
 };
 export type IicSequenceDetail = {
   iic_sequence_id: number;

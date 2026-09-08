@@ -458,6 +458,11 @@ async def _fetch_related_iic_sequences(
     result = await db.scalars(query)
     results: Sequence[M.IicSequence] = result.all()
 
+    status_result = await db.scalars(
+        select(M.IicSequenceStatus).where(M.IicSequenceStatus.iic_sequence_id.in_(sequence_ids))
+    )
+    statuses = {status.iic_sequence_id: status for status in status_result.all()}
+
     # IicSequenceスキーマに変換
     sequences = []
     for seq in results:
@@ -495,6 +500,15 @@ async def _fetch_related_iic_sequences(
                 created_at=seq.created_at,
                 group=group,
                 notes=notes,
+                status=(
+                    IicSequenceStatus(
+                        iic_sequence_id=status.iic_sequence_id,
+                        status_flag=status.status_flag,
+                        cmd_output=status.cmd_output,
+                    )
+                    if (status := statuses.get(seq.iic_sequence_id))
+                    else None
+                ),
             )
         )
 

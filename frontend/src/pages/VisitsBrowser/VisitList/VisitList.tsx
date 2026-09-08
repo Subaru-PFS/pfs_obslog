@@ -303,6 +303,14 @@ function IicSequenceHeader({ iicSequence, visitId, onSequenceGroupClick }: IicSe
       <div className={styles.title}>
         <span className={styles.sequenceId}>{iicSequence.iic_sequence_id}</span>
         <span className={styles.sequenceName}>{iicSequence.name || '(unnamed)'}</span>
+        {iicSequence.status?.cmd_output && (
+          <span
+            className={styles.status}
+            style={getStatusStyle(iicSequence.status.cmd_output)}
+          >
+            {iicSequence.status.cmd_output}
+          </span>
+        )}
         {iicSequence.sequence_type && (
           <span className={getSequenceTypeClass(iicSequence.sequence_type)}>
             {iicSequence.sequence_type}
@@ -355,6 +363,26 @@ function getSequenceTypeClass(sequenceType: string): string {
       return `${baseClass} ${styles.sequenceTypeFlat}`
     default:
       return baseClass
+  }
+}
+
+/**
+ * シーケンスステータスに応じたスタイルを取得
+ * IicSequenceInfo と同じ配色を使用
+ */
+function getStatusStyle(cmdOutput: string | null | undefined): React.CSSProperties {
+  if (!cmdOutput) return {}
+
+  switch (cmdOutput.toLowerCase()) {
+    case 'finished':
+      return { backgroundColor: 'var(--status-success-bg)', color: 'var(--status-success-text)' }
+    case 'running':
+      return { backgroundColor: 'var(--status-running-bg)', color: 'var(--status-running-text)' }
+    case 'failed':
+    case 'error':
+      return { backgroundColor: 'var(--status-error-bg)', color: 'var(--status-error-text)' }
+    default:
+      return { backgroundColor: 'var(--status-default-bg)', color: 'var(--status-default-text)' }
   }
 }
 

@@ -49,6 +49,10 @@
   --status-success-text: #2e7d32;
   --status-error-bg: #ffcdd2;
   --status-error-text: #c62828;
+  --status-running-bg: #e3f2fd;
+  --status-running-text: #1565c0;
+  --status-default-bg: #f5f5f5;
+  --status-default-text: #616161;
 
   /* Sequence type badge colors (background + text) */
   --seq-science-bg: #aaddff;
@@ -229,6 +233,10 @@
   --status-success-text: #81c784;
   --status-error-bg: #3d1b1b;
   --status-error-text: #ef5350;
+  --status-running-bg: #1a3045;
+  --status-running-text: #8ecae6;
+  --status-default-bg: #303030;
+  --status-default-text: #bdbdbd;
 
   /* Sequence type badge colors (dark mode) */
   --seq-science-bg: #1a3045;

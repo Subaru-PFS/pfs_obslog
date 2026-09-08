@@ -2705,6 +2705,16 @@
             "type": "array",
             "title": "Notes",
             "default": []
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/IicSequenceStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",

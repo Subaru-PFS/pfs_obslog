@@ -19,15 +19,16 @@ function getSequenceTypeStyle(sequenceType: string | null | undefined): React.CS
 
   switch (sequenceType) {
     case 'scienceObject':
+      return { backgroundColor: 'var(--seq-science-bg)', color: 'var(--seq-science-text)' }
     case 'scienceTrace':
-      return { backgroundColor: '#e3f2fd', color: '#1565c0' }
+      return { backgroundColor: 'var(--seq-trace-bg)', color: 'var(--seq-trace-text)' }
     case 'scienceArc':
     case 'ditheredArcs':
-      return { backgroundColor: '#fff3e0', color: '#ef6c00' }
+      return { backgroundColor: 'var(--seq-arc-bg)', color: 'var(--seq-arc-text)' }
     case 'flat':
-      return { backgroundColor: '#e8f5e9', color: '#2e7d32' }
+      return { backgroundColor: 'var(--seq-flat-bg)', color: 'var(--seq-flat-text)' }
     default:
-      return { backgroundColor: '#f5f5f5', color: '#616161' }
+      return { backgroundColor: 'var(--status-default-bg)', color: 'var(--status-default-text)' }
   }
 }
 
@@ -39,14 +40,14 @@ function getStatusStyle(cmdOutput: string | null | undefined): React.CSSProperti
 
   switch (cmdOutput.toLowerCase()) {
     case 'finished':
-      return { backgroundColor: '#e8f5e9', color: '#2e7d32' }
+      return { backgroundColor: 'var(--status-success-bg)', color: 'var(--status-success-text)' }
     case 'running':
-      return { backgroundColor: '#e3f2fd', color: '#1565c0' }
+      return { backgroundColor: 'var(--status-running-bg)', color: 'var(--status-running-text)' }
     case 'failed':
     case 'error':
-      return { backgroundColor: '#ffebee', color: '#c62828' }
+      return { backgroundColor: 'var(--status-error-bg)', color: 'var(--status-error-text)' }
     default:
-      return { backgroundColor: '#f5f5f5', color: '#616161' }
+      return { backgroundColor: 'var(--status-default-bg)', color: 'var(--status-default-text)' }
   }
 }
 
